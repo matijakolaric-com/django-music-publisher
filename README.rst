@@ -14,10 +14,14 @@ one original publisher, publishing original musical works.
 Situations with multiple writers are covered, but other publishers are ignored.
 This still results in correct registrations.
 
-If you want to use it for exactly this purpose, then just follow the depoyment
-instructions below. 
+If you want to use it for exactly this purpose, just follow the deployment
+instructions below.
 
-
+If you are looking for a solution that covers much more territory, this may be 
+an educational proof of concept, maybe even a good starting point for a
+custom development. 
+`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
+covers basically all cases of CWR generation, validation and parsing.
 
 
 django-music-publisher
