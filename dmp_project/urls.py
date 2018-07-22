@@ -17,5 +17,6 @@ from django.contrib import admin
 from django.urls import path
 
 urlpatterns = [
+    # admin moved to root
     path('', admin.site.urls),
 ]
