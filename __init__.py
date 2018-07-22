@@ -1,0 +1,1 @@
+"""Django Music Publisher Repository"""
