@@ -21,6 +21,7 @@ If you are looking for a solution that covers much more territory, this may be
 an educational proof of concept, maybe even a good starting point for a
 custom development. It has very little dependecies and each model has an 
 abstract parent, so including it in your project, even an existing one, should
+be completely straightforward.
 
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
 covers basically all cases of CWR generation, validation and parsing. It is 
