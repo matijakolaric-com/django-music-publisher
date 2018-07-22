@@ -24,6 +24,8 @@ abstract parent, so including it in your project, even an existing one, should
 
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
 covers basically all cases of CWR generation, validation and parsing. It is 
-being constantly tested with most collecting societies and major publishers.
+being constantly tested with most collecting societies and major publishers. 
+But, one is free to make their own CWR generator, validator and parser, base
+classes are provided.
 
 django-music-publisher
