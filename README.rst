@@ -67,9 +67,10 @@ covers basically all cases of CWR generation, validation and parsing. It is
 being constantly tested with most collecting societies and major publishers. 
 There are various licencing packages.
 
-This particular software uses two of the tools, one for data validation and one
-for generation of CWR files. It will work without tthese tools, but data will
-not be validated as CWR-compliant, and there will be no way to create CWR.
+This particular software uses two of the tools from the toolset, one for data
+validation and one for generation of CWR files. It will work without these 
+tools, but data will not be validated as CWR-compliant, and there will be no 
+way to create CWR.
 
 Current Status
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
