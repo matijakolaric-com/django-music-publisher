@@ -31,6 +31,14 @@ SOCIETIES = (
 
 @deconstructible
 class CWRFieldValidator:
+    """Validate fields for CWR complance.
+
+    This validator that does not really validate, it just sets the correct
+    field type.
+
+    Fields are validate in batches in MusicPublisherBase.clean_fields().
+    """
+
     field = ''
 
     def __init__(self, field):
@@ -46,11 +54,14 @@ class CWRFieldValidator:
 
 
 class MusicPublisherBase(models.Model):
+    """Abstract class for all top-level classes."""
 
     class Meta:
         abstract = True
 
     def validate_fields(self, fields):
+        """Validate the fields with an external service."""
+
         keys = list(fields.keys())
         values = list(fields.values())
         data = {'fields': values}
@@ -67,7 +78,7 @@ class MusicPublisherBase(models.Model):
             field_name = keys[i]
             field_dict = rfields[i]
             if field_dict.get('conditionally_valid'):
-                print(field_dict)
+                pass  # maybe replace by a recommended value?
             else:
                 errors[field_name] = (
                     field_dict['error'] or 'Unknown Error')
@@ -75,6 +86,8 @@ class MusicPublisherBase(models.Model):
             raise ValidationError(errors)
 
     def clean_fields(self, *args, **kwargs):
+        """If external service is used, prepare the data for validation."""
+
         if VALIDATE:
             fields = {}
             for field in self._meta.fields:
@@ -91,6 +104,7 @@ class MusicPublisherBase(models.Model):
 
 
 class TitleBase(MusicPublisherBase):
+    """Abstract class for all classes that have a title."""
 
     class Meta:
         abstract = True
@@ -104,6 +118,7 @@ class TitleBase(MusicPublisherBase):
 
 
 class WorkBase(TitleBase):
+    """Abstract class for musical works, most important top-level class."""
 
     class Meta:
         abstract = True
@@ -113,12 +128,17 @@ class WorkBase(TitleBase):
         validators=(CWRFieldValidator('iswc'),))
 
     def clean_fields(self, *args, **kwargs):
+        """Deal with various ways ISWC is written."""
         if self.iswc:
             self.iswc = self.iswc.replace('-', '').replace('.', '')
         return super().clean_fields(*args, **kwargs)
 
 
 class AlbumCDBase(MusicPublisherBase):
+    """Abstract class that deals with albums and music liibrary data.
+
+    Note that label and library are set in the settings, so there can
+    be only a single instance."""
 
     class Meta:
         abstract = True
@@ -159,6 +179,12 @@ class AlbumCDBase(MusicPublisherBase):
             return SETTINGS.get('library')
 
     def clean(self):
+        """Make sure that either cd_identifier or album are used.
+
+        Also, enforce some common sense, although it is not strictly
+        required by CWR specs.
+        """
+
         if not self.cd_identifier and not self.album_title:
             raise ValidationError({
                 'cd_identifier': 'Required if Album Title is not set.',
@@ -169,6 +195,11 @@ class AlbumCDBase(MusicPublisherBase):
 
 
 class FirstRecordingBase(MusicPublisherBase):
+    """Holds data on first recording.
+
+    Note that the limitation of just one REC record per work has been
+    removed in the specs, but some societies still complain about it,
+    so only a single instance is allowed."""
 
     class Meta:
         abstract = True
@@ -191,6 +222,8 @@ class FirstRecordingBase(MusicPublisherBase):
 
 
 class PersonBase(MusicPublisherBase):
+    """Base class for all classes that contain people with first and last name.
+    """
 
     class Meta:
         abstract = True
@@ -209,6 +242,7 @@ class PersonBase(MusicPublisherBase):
 
 
 class WriterBase(PersonBase):
+    """Base class for writers, the second most important top-level class."""
 
     class Meta:
         abstract = True
@@ -238,7 +272,6 @@ class WriterBase(PersonBase):
             self.ipi_base = self.ipi_base.replace('.', '')
             self.ipi_base = re.sub(
                 r'(I).?(\d{9}).?(\d)', r'\1-\2-\3', self.ipi_base)
-            print(self.ipi_base)
         return super().clean_fields(*args, **kwargs)
 
     def clean(self):
@@ -263,11 +296,21 @@ class WriterBase(PersonBase):
 
 
 class Work(WorkBase):
+    """Concrete class, with references to foreign objects.
+    """
+
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
     writers = models.ManyToManyField('Writer', through='WriterInWork')
+    last_change = models.DateTimeField(editable=False, null=True)
+
 
     @property
     def json(self):
+        """Create data structure that can be serielized as JSON.db_index=
+
+        Note that serialization is not performed here.
+        """
+
         data = {
             'work_title': self.title,
             'iswc': self.iswc,
@@ -284,6 +327,7 @@ class Work(WorkBase):
 
 
 class AlternateTitle(TitleBase):
+    """Conrete class for alternate titles."""
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
 
@@ -293,10 +337,12 @@ class AlternateTitle(TitleBase):
 
 
 class AlbumCD(AlbumCDBase):
+    """Conrete class for album / CD."""
     pass
 
 
 class FirstRecording(FirstRecordingBase):
+    """Concrete class for first recording."""
 
     work = models.OneToOneField(Work, on_delete=models.CASCADE)
     album_cd = models.ForeignKey(
@@ -308,6 +354,9 @@ class FirstRecording(FirstRecordingBase):
 
     @property
     def json(self):
+        """Create serializable data structure, including album/cd data.
+        """
+
         return {
             'first_release_date': (
                 self.release_date.strftime('%Y-%m-%d') if self.release_date
@@ -328,6 +377,7 @@ class FirstRecording(FirstRecordingBase):
 
 
 class Artist(PersonBase):
+    """Concrete class for performing artists."""
     class Meta:
         verbose_name = 'Performing Artist'
         verbose_name_plural = 'Performing Artists'
@@ -340,6 +390,11 @@ class Artist(PersonBase):
 
 
 class ArtistInWork(models.Model):
+    """Intermediary class in M2M relationship.
+
+    It is always better to write them explicitely.
+    """
+
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
@@ -352,7 +407,12 @@ class ArtistInWork(models.Model):
 
 
 class Writer(WriterBase):
+    """Concrete class for writers."""
+
     def clean(self, *args, **kwargs):
+        """Controlled writer requires more data, so once a writer is in
+        that role, it is not allowed to remove required data."""
+
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
@@ -364,6 +424,11 @@ class Writer(WriterBase):
 
 
 class WriterInWork(models.Model):
+    """Intermediary class in M2M relationship with few additional fields.
+
+    Please note that in some societies, SAAN is a required field.
+    Capacity is limited to roles by original writers."""
+
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
         Writer, on_delete=models.PROTECT,
@@ -385,6 +450,7 @@ class WriterInWork(models.Model):
         return str(self.writer)
 
     def clean(self):
+        """Make sure that contrlled writers have all the required data."""
         if (self.writer and self.writer.generally_controlled and
                 not self.controlled):
             raise ValidationError({

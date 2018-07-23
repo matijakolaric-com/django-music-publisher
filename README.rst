@@ -6,8 +6,11 @@ Django Music Publisher
 This is a simple **Django app for original music publishers**. The app is 
 released under `MIT license <LICENSE>`_ and is basically free. However, it uses
 a paid external service for data validation and creation of CWR files, so using
-it is *not free*. Free 15-day demo licence for this service is available upon 
-request. 
+it *may not be free*. Free 15-day demo licence for this service is available 
+upon request. 
+
+Introduction
+===============================================================================
 
 Introduction for Music Publishers
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

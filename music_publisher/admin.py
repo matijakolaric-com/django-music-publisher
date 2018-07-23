@@ -4,6 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib import messages
 from django.utils.html import mark_safe
+from django.utils.timezone import now
 import json
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
@@ -14,6 +15,10 @@ SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
 
 class MusicPublisherAdmin(admin.ModelAdmin):
+    """Custom Admin class, easily extendable.
+
+    Should only be used for admin classes for top-level models."""
+
     def save_model(self, request, obj, *args, **kwargs):
         super().save_model(request, obj, *args, **kwargs)
         if not VALIDATE:
@@ -59,6 +64,12 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     search_fields = ('album_title', '^cd_identifier')
     actions = None
 
+    def save_model(self, request, obj, form, *args, **kwargs):
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(firstrecording__album_cd=obj)
+            qs.update(last_change=now())
+
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
@@ -71,6 +82,12 @@ class ArtistAdmin(MusicPublisherAdmin):
     last_or_band.admin_order_field = 'last_name'
 
     actions = None
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(artistinwork__artist=obj)
+            qs.update(last_change=now())
 
 
 @admin.register(Writer)
@@ -96,6 +113,12 @@ class WriterAdmin(MusicPublisherAdmin):
         }),
     )
     actions = None
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(writerinwork__writer=obj)
+            qs.update(last_change=now())
 
 
 class AlternateTitleInline(admin.TabularInline):
@@ -201,3 +224,8 @@ class WorkAdmin(MusicPublisherAdmin):
         (None, {
             'fields': (
                 ('title', 'iswc'),)}),)
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        if form.changed_data:
+            obj.last_change = now()
+        super().save_model(request, obj, form, *args, **kwargs)
