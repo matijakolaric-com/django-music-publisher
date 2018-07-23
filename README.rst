@@ -95,7 +95,7 @@ If you want to install the `music_publisher` Django app, just use pip::
 Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
 URLs need to be added, as everything goes through the Django Admin.
 
-You will have to add this to the settings::
+You will have to add this to the settings, replace with your data::
 
 	MUSIC_PUBLISHER_SETTINGS = {
 	    'token': '<your token>',
