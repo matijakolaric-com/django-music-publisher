@@ -114,6 +114,11 @@ You will have to add this to the settings, replace with your data::
         'label': 'FOO BAR MUSIC',  # Use only if you are also a label
     }
 
-If you choose to go without the licence, then all you may need is to set
-``library`` and/or ``label``, depending on your needs. 
+When you apply for a free 15-day demo licence, additional documentation will be
+provided, as well as ``token``, ``validator_url``, and ``creator_url`` values.
 
+Publisher data will be required if you choose to go with your own CWR creator,
+unless you change the structure significantly.
+
+If that is the case, then all you may need is to set ``library`` and/or 
+``label``, depending on your needs. 
