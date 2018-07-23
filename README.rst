@@ -91,7 +91,7 @@ If you want to install the `music_publisher` Django app, just use pip.
 
 ``pip install django_music_publisher``
 
-..  highlight:: python
+.. highlight:: python
 
 	MUSIC_PUBLISHER_SETTINGS = {
 	    'token': '<your token>',
