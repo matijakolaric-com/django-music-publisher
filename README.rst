@@ -91,6 +91,9 @@ If you want to install the `music_publisher` Django app, just use pip::
 
     pip install --upgrade django_music_publisher
 
+Add ``'music_publisher.apps.MusicPublisherConfig'`` to ``INSTALLED_APPS``, no 
+URLs need to be added, as everything goes through the Django Admin.
+
 You will have to add this to the settings::
 
 	MUSIC_PUBLISHER_SETTINGS = {
