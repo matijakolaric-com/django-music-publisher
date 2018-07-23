@@ -111,3 +111,5 @@ If you want to install the `music_publisher` Django app, just use pip.
 	    'library': 'THE FOO LIBRARY',
 	    'label': 'FOO BAR MUSIC',
 	}
+
+ASD
