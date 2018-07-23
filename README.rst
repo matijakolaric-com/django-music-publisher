@@ -27,7 +27,8 @@ client who is a music publisher, and particularily if it includes Common Works
 Registration (CWR) or even Electronic Batch Registration (EBR), and you have
 never worked in this industry before, then you need to learn that things in 
 this industry are purposfully made extremely complicated. For large publishers,
-complicated is financially much better than complex. And money talks.
+complicated is financially much better than complex, which is much better than
+simple. And money talks.
 
 Use Case
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -64,6 +65,19 @@ being constantly tested with most collecting societies and major publishers.
 There are various licencing packages.
 
 This particular software uses two of the tools, one for data validation and one
-for generation of CWR files. It will work without the licence, but data will
+for generation of CWR files. It will work without tthese tools, but data will
 not be validated as CWR-compliant, and there will be no way to create CWR.
+
+Current Status
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The goal for the first release, to be released around 2018-08-01, is to have
+all models required for CWR registrations of original works by one original
+publisher, complete administration interface, that includes simple CWR export
+and basic handling of acknowledgements. It will use external validation and CWR 
+generation. 
+
+Currently, models, admin interface and external validation for data on musical 
+works is done, CWR exporting is well under way, but nothing has been done 
+regarding acknowledgements. And, sadly, very little tests.
 
