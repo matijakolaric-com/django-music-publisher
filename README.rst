@@ -105,7 +105,7 @@ You will have to add this to the settings::
 
 	    'publisher_id': 'TOP',
 	    'publisher_name': 'THE ORIGINAL PUBLISHER',
-	    'publisher_ipi_name': '199',
+	    'publisher_ipi_name': '00000000199',
 	    'publisher_ipi_base': 'I0000000393',
 	    'publisher_pr_society': '052',
 	    'publisher_mr_society': '044',
