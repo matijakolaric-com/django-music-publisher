@@ -84,3 +84,9 @@ Currently, models, admin interface and external validation for data on musical
 works is done, CWR exporting is well under way, but nothing has been done 
 regarding acknowledgements. And, sadly, very little tests.
 
+Installing the app
+===============================================================================
+
+If you want to install the `music_publisher` Django app, just use pip.
+
+    pip install django_music_publisher
