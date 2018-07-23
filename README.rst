@@ -103,7 +103,7 @@ You will have to add this to the settings::
 	    'creator_url':
 	        'https://matijakolaric.com/api/v1/cwr/original/creator/',
 
-	    'publisher_id': 'TOP',  # THE 2-3 letter CWR code 
+	    'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
 	    'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
 	    'publisher_ipi_name': '00000000199',  # IPI name number
 	    'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
