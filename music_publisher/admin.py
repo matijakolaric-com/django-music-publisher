@@ -200,9 +200,4 @@ class WorkAdmin(MusicPublisherAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('title', 'iswc'),
-                'writer_last_names'), }),
-        ('JSON', {
-            'classes': ('wide', 'collapse'),
-            'fields': (
-                'json',), }))
+                ('title', 'iswc'),)}),)

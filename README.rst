@@ -26,7 +26,10 @@ be completely straightforward.
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
 covers basically all cases of CWR generation, validation and parsing. It is 
 being constantly tested with most collecting societies and major publishers. 
-But, one is free to make their own CWR generator, validator and parser, base
-classes are provided.
+There are various licencing packages.
+
+But, one is free to make their own CWR generator, validator and parser.
+
+TBC
 
 django-music-publisher
