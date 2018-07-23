@@ -98,9 +98,9 @@ URLs need to be added, as everything goes through the Django Admin.
 You will have to add this to the settings, replace with your data::
 
     MUSIC_PUBLISHER_SETTINGS = {
-        'token': '<your token>',
-        'validator_url': '<provided url 1>',
-        'creator_url': '<provided url 2>',
+        'token': None,
+        'validator_url': None,
+        'creator_url': None,
 
         'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
         'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
@@ -115,5 +115,5 @@ You will have to add this to the settings, replace with your data::
     }
 
 If you choose to go without the licence, then all you may need is to set
-``library`` and/or ``label``, depending on your needs.
+``library`` and/or ``label``, depending on your needs. 
 
