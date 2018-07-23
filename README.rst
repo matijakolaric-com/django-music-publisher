@@ -116,5 +116,5 @@ You will have to add this to the settings::
 	}
 
 If you choose to go without the licence, then all you may need is to set
-``library`` and ``label``, depending on your needs.
+``library`` and/or ``label``, depending on your needs.
 
