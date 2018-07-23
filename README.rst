@@ -91,7 +91,7 @@ If you want to install the `music_publisher` Django app, just use pip::
 
     pip install --upgrade django_music_publisher
 
-Add ``'music_publisher.apps.MusicPublisherConfig'`` to ``INSTALLED_APPS``, no 
+Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
 URLs need to be added, as everything goes through the Django Admin.
 
 You will have to add this to the settings::
@@ -114,4 +114,7 @@ You will have to add this to the settings::
 	    'library': 'THE FOO LIBRARY',
 	    'label': 'FOO BAR MUSIC',
 	}
+
+If you choose to go without the licence, then all you may need is to set
+``library`` and ``label``.
 
