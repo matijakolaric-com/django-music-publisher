@@ -127,4 +127,4 @@ Installing the project
 ===============================================================================
 
 Just ``git clone`` the project. Please note that ``SECRET_KEY`` and 
-``MUSIC_PUBLISHER_SETTINGS`` must be set.
+``MUSIC_PUBLISHER_SETTINGS`` must be set, then just do the usuall stuff.
