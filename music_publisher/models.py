@@ -1,14 +1,13 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.timezone import now
+from django.utils.deconstruct import deconstructible
 import re
 import requests
-from django.utils.deconstruct import deconstructible
 
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-
+VALIDATE = SETTINGS.get('validator_url') and SETTINGS.get('token')
 SOCIETIES = (
     ('101', 'SOCAN, Canada'),
     ('088', 'CMRRA, Canada'),
@@ -56,7 +55,7 @@ class MusicPublisherBase(models.Model):
         values = list(fields.values())
         data = {'fields': values}
         response = requests.post(
-            SETTINGS.get('multi_field_validator_url'),
+            SETTINGS.get('validator_url'),
             headers={'Authorization': 'Token {}'.format(
                 SETTINGS.get('token'))},
             json=data, timeout=10)
@@ -76,17 +75,18 @@ class MusicPublisherBase(models.Model):
             raise ValidationError(errors)
 
     def clean_fields(self, *args, **kwargs):
-        fields = {}
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if not value:
-                continue
-            for validator in field.validators:
-                if isinstance(validator, CWRFieldValidator):
-                    fields[field.name] = {
-                        'field': validator.field,
-                        'value': value}
-        self.validate_fields(fields)
+        if VALIDATE:
+            fields = {}
+            for field in self._meta.fields:
+                value = getattr(self, field.name)
+                if not value:
+                    continue
+                for validator in field.validators:
+                    if isinstance(validator, CWRFieldValidator):
+                        fields[field.name] = {
+                            'field': validator.field,
+                            'value': value}
+            self.validate_fields(fields)
         super().clean_fields(*args, **kwargs)
 
 

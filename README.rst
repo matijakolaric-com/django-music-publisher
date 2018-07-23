@@ -8,11 +8,11 @@ of CWR acknowledgement files, so using it is *not free*. Free 15-day demo
 licence for this service is available upon request. Please start 
 `here <https://matijakolaric.com/development/cwr-toolset/#demo-and-tool-preview>`_.
 
-It covers just a single use-case:
+This app covers just a single use-case:
 **one original publisher**, publishing **original musical works**.
 (Original work is one that is not a modification of existing work.)
 Situations with multiple writers are covered, but other publishers are ignored.
-This still results in correct CWR files.
+This still results in correct CWR files and enough data to acquire ISWC.
 
 If you want to use it for exactly this purpose, just follow the standalone 
 deployment instructions below. 

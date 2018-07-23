@@ -1,17 +1,33 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 from django.db import models
+from django.conf import settings
+from django.contrib import messages
+from django.utils.html import mark_safe
+import json
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork)
-from django.conf import settings
-import json
+    Writer, WriterInWork, VALIDATE)
+
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
 
+class MusicPublisherAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, *args, **kwargs):
+        super().save_model(request, obj, *args, **kwargs)
+        if not VALIDATE:
+            messages.add_message(
+                request, messages.WARNING,
+                mark_safe(
+                    'Validation was not performed. Your data may be corrupt. '
+                    'Please acquire a Validation and CWR generation licence '
+                    'from <a href="https://matijakolaric.com/z_'
+                    'contact/" target="_blank">matijakolaric.com</a>.'))
+
+
 @admin.register(AlbumCD)
-class AlbumCDAdmin(admin.ModelAdmin):
+class AlbumCDAdmin(MusicPublisherAdmin):
     readonly_fields = ('album_label', 'library', 'label_not_set')
 
     def get_fieldsets(self, request, obj=None):
@@ -45,7 +61,7 @@ class AlbumCDAdmin(admin.ModelAdmin):
 
 
 @admin.register(Artist)
-class ArtistAdmin(admin.ModelAdmin):
+class ArtistAdmin(MusicPublisherAdmin):
     list_display = ('last_or_band', 'first_name')
     search_fields = ('last_name',)
 
@@ -58,7 +74,7 @@ class ArtistAdmin(admin.ModelAdmin):
 
 
 @admin.register(Writer)
-class WriterAdmin(admin.ModelAdmin):
+class WriterAdmin(MusicPublisherAdmin):
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
                     '_can_be_controlled', 'generally_controlled')
     list_filter = ('_can_be_controlled', 'generally_controlled',
@@ -127,7 +143,7 @@ class FirstRecordingInline(admin.StackedInline):
 
 
 @admin.register(Work)
-class WorkAdmin(admin.ModelAdmin):
+class WorkAdmin(MusicPublisherAdmin):
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
         FirstRecordingInline, ArtistInWorkInline)
@@ -177,7 +193,7 @@ class WorkAdmin(admin.ModelAdmin):
             "works": obj.json,
         })
 
-    readonly_fields = ('writer_last_names', 'json')
+    readonly_fields = ('writer_last_names',)
     list_display = (
         'title', 'iswc', 'writer_last_names', 'percentage_controlled',
         'duration', 'isrc', 'album_cd')
