@@ -5,6 +5,7 @@ from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork)
 from django.conf import settings
+import json
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
@@ -161,7 +162,20 @@ class WorkAdmin(admin.ModelAdmin):
         return obj.firstrecording.duration.strftime('%H:%M:%S')
 
     def json(self, obj):
-        return obj.json
+        return json.dumps({
+            "publisher_id": SETTINGS.get('publisher_id'),
+            "publisher_name": SETTINGS.get('publisher_name'),
+            "publisher_ipi_name": SETTINGS.get('publisher_ipi_name'),
+            "publisher_ipi_base": SETTINGS.get('publisher_ipi_base'),
+            "publisher_pr_society": SETTINGS.get(
+                'publisher_pr_society'),
+            "publisher_mr_society": SETTINGS.get(
+                'publisher_mr_society'),
+            "publisher_sr_society": SETTINGS.get(
+                'publisher_pr_society'),
+            "revision": False,
+            "works": obj.json,
+        })
 
     readonly_fields = ('writer_last_names', 'json')
     list_display = (
