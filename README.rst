@@ -90,3 +90,24 @@ Installing the app
 If you want to install the `music_publisher` Django app, just use pip.
 
 ``pip install django_music_publisher``
+
+..  highlight:: python
+
+	MUSIC_PUBLISHER_SETTINGS = {
+	    'token': '<your token>',
+	    'validator_url':
+	        'https://matijakolaric.com/api/v1/cwr/original/field/multi/',
+	    'creator_url':
+	        'https://matijakolaric.com/api/v1/cwr/original/creator/',
+
+	    'publisher_id': 'TOP',
+	    'publisher_name': 'THE ORIGINAL PUBLISHER',
+	    'publisher_ipi_name': '199',
+	    'publisher_ipi_base': 'I0000000393',
+	    'publisher_pr_society': '052',
+	    'publisher_mr_society': '044',
+	    'publisher_sr_society': None,
+
+	    'library': 'THE FOO LIBRARY',
+	    'label': 'FOO BAR MUSIC',
+	}
