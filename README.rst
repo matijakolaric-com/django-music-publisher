@@ -87,11 +87,9 @@ regarding acknowledgements. And, sadly, very little tests.
 Installing the app
 ===============================================================================
 
-If you want to install the `music_publisher` Django app, just use pip.
+If you want to install the `music_publisher` Django app, just use pip.::
 
-``pip install django_music_publisher``
-
-.. highlight:: python
+    pip install django_music_publisher
 
 	MUSIC_PUBLISHER_SETTINGS = {
 	    'token': '<your token>',
@@ -112,4 +110,3 @@ If you want to install the `music_publisher` Django app, just use pip.
 	    'label': 'FOO BAR MUSIC',
 	}
 
-ASD
