@@ -97,24 +97,22 @@ URLs need to be added, as everything goes through the Django Admin.
 
 You will have to add this to the settings, replace with your data::
 
-	MUSIC_PUBLISHER_SETTINGS = {
-	    'token': '<your token>',
-	    'validator_url':
-	        'https://matijakolaric.com/api/v1/cwr/original/field/multi/',
-	    'creator_url':
-	        'https://matijakolaric.com/api/v1/cwr/original/creator/',
+    MUSIC_PUBLISHER_SETTINGS = {
+        'token': '<your token>',
+        'validator_url': '<provided url 1>',
+        'creator_url': '<provided url 2>',
 
-	    'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
-	    'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
-	    'publisher_ipi_name': '00000000199',  # IPI name number
-	    'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
-	    'publisher_pr_society': '052',  # Performing Rights Society Code
-	    'publisher_mr_society': '044',  # Mechanical Rights Society Code
-	    'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
+        'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
+        'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
+        'publisher_ipi_name': '00000000199',  # IPI name number
+        'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
+        'publisher_pr_society': '052',  # Performing Rights Society Code
+        'publisher_mr_society': '044',  # Mechanical Rights Society Code
+        'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
 
-	    'library': 'THE FOO LIBRARY',  # Use only if you are in library music
-	    'label': 'FOO BAR MUSIC',  # Use only if you are also a label
-	}
+        'library': 'THE FOO LIBRARY',  # Use only if you are in library music
+        'label': 'FOO BAR MUSIC',  # Use only if you are also a label
+    }
 
 If you choose to go without the licence, then all you may need is to set
 ``library`` and/or ``label``, depending on your needs.
