@@ -103,16 +103,16 @@ You will have to add this to the settings::
 	    'creator_url':
 	        'https://matijakolaric.com/api/v1/cwr/original/creator/',
 
-	    'publisher_id': 'TOP',
-	    'publisher_name': 'THE ORIGINAL PUBLISHER',
-	    'publisher_ipi_name': '00000000199',
-	    'publisher_ipi_base': 'I0000000393',
-	    'publisher_pr_society': '052',
-	    'publisher_mr_society': '044',
-	    'publisher_sr_society': None,
+	    'publisher_id': 'TOP',  # THE 2-3 letter CWR code 
+	    'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
+	    'publisher_ipi_name': '00000000199',  # IPI name number
+	    'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
+	    'publisher_pr_society': '052',  # Performing Rights Society Code
+	    'publisher_mr_society': '044',  # Mechanical Rights Society Code
+	    'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
 
-	    'library': 'THE FOO LIBRARY',
-	    'label': 'FOO BAR MUSIC',
+	    'library': 'THE FOO LIBRARY',  # Use only if you are in library music
+	    'label': 'FOO BAR MUSIC',  # Use only if you are also a label
 	}
 
 If you choose to go without the licence, then all you may need is to set
