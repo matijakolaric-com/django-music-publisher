@@ -19,8 +19,8 @@ If you are not a software developer, looking for a software solution for music
 publishers, then everything beyond this point may be too technical for you.
 
 This is a code repository. You may install this code on your computer or server
-and use, but it is not intended to be simple. It is intended to be customizable
-and extendable.
+and modify it to suit your needs, or use it as is. It is not intended to be 
+simple. It is intended to be customizable and extendable.
 
 Introduction for Software Developers
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -29,9 +29,8 @@ If you are looking for an open source code to make a custom software for a
 client who is a music publisher, and particularily if it includes Common Works
 Registration (CWR) or even Electronic Batch Registration (EBR), and you have
 never worked in this industry before, then you need to learn that things in 
-this industry are purposfully made extremely complicated. For large publishers,
-complicated is financially much better than complex, which is much better than
-simple. And money talks.
+this industry are extremely complicated. For large publishers, complicated is
+financially much better than complex, which is much better than simple.
 
 Use Case
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -123,7 +122,7 @@ unless you change the structure significantly.
 If that is the case, then all you may need is to set ``library`` and/or 
 ``label``, depending on your needs. 
 
-Installing the project
+Installing the project (standalone deployment)
 ===============================================================================
 
 Just ``git clone`` the project. Please note that ``SECRET_KEY`` and 
