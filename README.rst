@@ -1,6 +1,9 @@
 Django Music Publisher
 *******************************************************************************
 
+.. image:: https://travis-ci.org/matijakolaric/music-publisher.svg?branch=master
+    :target: https://travis-ci.org/matijakolaric/music-publisher
+    
 **NOT READY FOR DEPLOYMENT**
 
 This is a simple **Django app for original music publishers**. The app is 
