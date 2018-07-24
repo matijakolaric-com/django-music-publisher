@@ -1,12 +1,21 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from datetime import date
+from django.contrib.auth.models import User
+from django.urls import reverse
 from music_publisher.models import *
+from music_publisher.admin import *
 from django.core.exceptions import ValidationError
 import json
 
 
 class ModelsTest(TestCase):
     def setUp(self):
+        self.user = User(
+            username='superuser', is_superuser=True, is_staff=True)
+        self.user.save()
+        self.client = Client()
+        self.client.force_login(self.user)
+
         self.artist = Artist(last_name="FOO", first_name="")
         self.artist.save()
         self.thiswriter = Writer(
@@ -126,6 +135,45 @@ class ModelsTest(TestCase):
     def test_json(self):
         dump = json.dumps(self.work.json, indent=4)
         self.assertIn('"SAMOSAN"', dump)
+
+    def get(self, path, re_post=False):
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 200)
+        if not re_post:
+            return
+        try:
+            data = response.context_data.get('adminform').form.initial
+            for fs in response.context_data.get('inline_admin_formsets'):
+                for form in fs.forms:
+                    for key, value in form.initial.items():
+                        data['{}-{}'.format(form.prefix, key)] = value
+            if isinstance(re_post, dict):
+                data.update(re_post)
+            response = self.client.post(path, data)
+        except Exception:
+            pass
+
+    def test_admin(self):
+        self.get(reverse('admin:index'))
+        self.get(reverse('admin:app_list', args=('music_publisher',)))
+        self.get(reverse('admin:music_publisher_artist_changelist',))
+        self.get(reverse('admin:music_publisher_albumcd_changelist',))
+        self.get(reverse('admin:music_publisher_writer_changelist',))
+        self.get(reverse('admin:music_publisher_work_changelist',))
+        self.get(reverse('admin:music_publisher_artist_add',))
+        self.get(reverse('admin:music_publisher_albumcd_add',))
+        self.get(reverse('admin:music_publisher_writer_add',))
+        self.get(reverse('admin:music_publisher_work_add',))
+        self.get(reverse(
+            'admin:music_publisher_artist_change', args=(self.artist.id,)),
+            re_post={'last_name': 'BAR'})
+        print(Artist.objects.get(pk=self.artist.id))
+        self.get(reverse(
+            'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)))
+        self.get(reverse(
+            'admin:music_publisher_writer_change', args=(self.thiswriter.id,)))
+        self.get(reverse(
+            'admin:music_publisher_work_change', args=(self.work.id,)))
 
 
 FIELDS = {
