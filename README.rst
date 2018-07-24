@@ -83,7 +83,7 @@ generation.
 
 Currently, models, admin interface and external validation for data on musical 
 works is done, CWR exporting is well under way, but nothing has been done 
-regarding acknowledgements. And, sadly, very little tests.
+regarding acknowledgements. Test coverage is ~90%.
 
 Installing the app
 ===============================================================================
