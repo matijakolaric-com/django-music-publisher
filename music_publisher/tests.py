@@ -6,6 +6,7 @@ from music_publisher.models import *
 from music_publisher.admin import *
 from django.core.exceptions import ValidationError
 import json
+from collections import OrderedDict
 
 
 class ModelsTest(TestCase):
@@ -47,6 +48,11 @@ class ModelsTest(TestCase):
             work=self.work, isrc='US-123-18-10000')
         self.work.firstrecording.save()
         self.work.clean()
+        self.work2 = Work(title='Minimal')
+        self.work2.save()
+        WriterInWork(
+            writer=self.thiswriter, work=self.work2, saan='SAMOSAN',
+            controlled=True, relative_share=100, capacity='CA').save()
 
     def test_validation(self):
         self.assertTrue(VALIDATE)
@@ -139,19 +145,21 @@ class ModelsTest(TestCase):
     def get(self, path, re_post=False):
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
+        adminform = response.context_data.get('adminform')
+        if adminform is None:
+            return
+        data = adminform.form.initial
         if not re_post:
             return
-        try:
-            data = response.context_data.get('adminform').form.initial
-            for fs in response.context_data.get('inline_admin_formsets'):
-                for form in fs.forms:
-                    for key, value in form.initial.items():
-                        data['{}-{}'.format(form.prefix, key)] = value
-            if isinstance(re_post, dict):
-                data.update(re_post)
-            response = self.client.post(path, data)
-        except Exception:
-            pass
+        if isinstance(re_post, dict):
+            data.update(re_post)
+        for key, value in data.items():
+            if value is None:
+                data[key] = ''
+            else:
+                data[key] = value
+        response = self.client.post(path, data)
+        self.assertEqual(response.status_code, 302)
 
     def test_admin(self):
         self.get(reverse('admin:index'))
@@ -167,13 +175,18 @@ class ModelsTest(TestCase):
         self.get(reverse(
             'admin:music_publisher_artist_change', args=(self.artist.id,)),
             re_post={'last_name': 'BAR'})
-        print(Artist.objects.get(pk=self.artist.id))
+        self.assertEqual(str(Artist.objects.get(pk=self.artist.id)), 'BAR')
         self.get(reverse(
-            'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)))
+            'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
+            re_post={'album_title': None, 'release_date': None})
+        self.assertEqual(
+            str(AlbumCD.objects.get(pk=self.album_cd.id)), 'XXX 123')
         self.get(reverse(
-            'admin:music_publisher_writer_change', args=(self.thiswriter.id,)))
+            'admin:music_publisher_writer_change', args=(self.thiswriter.id,)),
+            re_post={'pr_society': '021'})
         self.get(reverse(
-            'admin:music_publisher_work_change', args=(self.work.id,)))
+            'admin:music_publisher_work_change', args=(self.work.id,)),
+            re_post=False)
 
 
 FIELDS = {
