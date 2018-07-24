@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = os.getenv('SECRET_KEY', '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -121,6 +121,22 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MUSIC_PUBLISHER_SETTINGS = {
+    'token': os.getenv('TOKEN', None),
+    'validator_url': os.getenv('VALIDATOR_URL', None),
+    'generator_url': os.getenv('GENERATOR_URL', None),
+
+    'publisher_id': 'XXX',
+    'publisher_name': 'THE SEXY PUBLISHER',
+    'publisher_ipi_name': '199',
+    'publisher_ipi_base': 'I0000000393',
+    'publisher_pr_society': '052',
+    'publisher_mr_society': '044',
+    'publisher_sr_society': None,
+
+    'library': 'THE FOO LIBRARY',
+    'label': 'FOO BAR MUSIC',
+}
 
 try:
     from .local_settings import *
