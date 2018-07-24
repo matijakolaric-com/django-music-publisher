@@ -1,8 +1,11 @@
+from decimal import Decimal
 from django import forms
-from django.contrib import admin
-from django.db import models
 from django.conf import settings
+from django.contrib import admin
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.forms.models import BaseInlineFormSet
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 import json
@@ -132,9 +135,23 @@ class ArtistInWorkInline(admin.TabularInline):
     extra = 0
 
 
+class WriterInWorkFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        total = 0
+        for form in self.forms:
+            if not form.is_valid():
+                return
+            if form.cleaned_data and not form.cleaned_data.get('DELETE'):
+                total += form.cleaned_data['relative_share']
+        if not(Decimal(99.98) <= total <= Decimal(100.02)):
+            raise ValidationError('Sum of relative shares must be 100%.')
+
+
 class WriterInWorkInline(admin.TabularInline):
     autocomplete_fields = ('writer', )
     model = WriterInWork
+    formset = WriterInWorkFormSet
     extra = 0
     min_num = 1
     fieldsets = (

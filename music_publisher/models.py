@@ -303,7 +303,6 @@ class Work(WorkBase):
     writers = models.ManyToManyField('Writer', through='WriterInWork')
     last_change = models.DateTimeField(editable=False, null=True)
 
-
     @property
     def json(self):
         """Create data structure that can be serielized as JSON.db_index=
