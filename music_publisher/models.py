@@ -65,11 +65,14 @@ class MusicPublisherBase(models.Model):
         keys = list(fields.keys())
         values = list(fields.values())
         data = {'fields': values}
-        response = requests.post(
-            SETTINGS.get('validator_url'),
-            headers={'Authorization': 'Token {}'.format(
-                SETTINGS.get('token'))},
-            json=data, timeout=10)
+        try:
+            response = requests.post(
+                SETTINGS.get('validator_url'),
+                headers={'Authorization': 'Token {}'.format(
+                    SETTINGS.get('token'))},
+                json=data, timeout=10)
+        except requests.exceptions.ConnectionError:
+            raise ValidationError('Network error', code='invalid')
         if response.status_code != 200:
             raise ValidationError('Validation failed', code='invalid')
         errors = {}
