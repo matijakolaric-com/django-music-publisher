@@ -3,8 +3,6 @@ chardet==3.0.4
 coverage==4.5.1
 Django==2.0.7
 idna==2.7
-pkg-resources==0.0.0
-pkginfo==1.4.2
 pytz==2018.5
 requests==2.19.1
 requests-toolbelt==0.8.0
