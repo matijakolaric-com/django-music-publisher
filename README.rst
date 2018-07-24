@@ -1,8 +1,8 @@
 Django Music Publisher
 *******************************************************************************
 
-.. image:: https://travis-ci.org/matijakolaric/music-publisher.svg?branch=master
-    :target: https://travis-ci.org/matijakolaric/music-publisher
+.. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
+    :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     
 **NOT READY FOR DEPLOYMENT**
 
