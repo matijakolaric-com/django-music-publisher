@@ -504,17 +504,18 @@ class WriterInWork(models.Model):
     @property
     def json(self):
         data = OrderedDict()
-        data.update({
-            'writer_id': (
+        if self.writer:
+            data['writer_id'] = (
                 self.writer.ipi_name.rjust(11, '0')[0:9]
-                if (self.writer and self.writer.ipi_name) else ''),
-            'writer_last_name': self.writer.last_name if self.writer else '',
-            'writer_first_name':
-                self.writer.first_name if self.writer else '',
-            'writer_ipi_name': self.writer.ipi_name if self.writer else '',
-            'writer_pr_society':
-                self.writer.pr_society if self.writer else '',
-        })
+                if self.writer.ipi_name else '')
+            data['writer_last_name'] = self.writer.last_name
+            data['writer_first_name'] = self.writer.first_name
+            if self.writer.ipi_name:
+                data['writer_ipi_name'] = self.writer.ipi_name
+            if self.writer.ipi_base:
+                data['writer_ipi_base'] = self.writer.ipi_base
+            if self.writer.pr_society:
+                data['writer_pr_society'] = self.writer.pr_society
         data.update({
             'controlled': self.controlled,
             'capacity': self.capacity,

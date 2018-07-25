@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from datetime import date
+from datetime import date, time
 from django.contrib.auth.models import User
 from django.urls import reverse
 from music_publisher.models import *
@@ -31,7 +31,6 @@ class ModelsTest(TestCase):
             album_title='ALBUM', cd_identifier='XXX 123',
             release_date=date.today())
         self.album_cd.save()
-
         self.work = Work(title='THE TITLE', iswc='T-123.456.789-4')
         self.work.save()
         ArtistInWork(artist=self.artist, work=self.work).save()
@@ -40,12 +39,14 @@ class ModelsTest(TestCase):
             controlled=True, relative_share=50, capacity='CA').save()
         WriterInWork(
             writer=self.otherwriter, work=self.work, relative_share=50,
-            controlled=False, capacity='CA').save()
+            controlled=False).save()
         self.alternate_title = AlternateTitle(
             work=self.work, title='The Alternate Title')
         self.alternate_title.save()
         self.work.firstrecording = FirstRecording(
-            work=self.work, isrc='US-123-18-10000')
+            work=self.work, isrc='US-123-18-10000', duration=time(minute=1),
+            catalog_number='THENUMBER', album_cd=self.album_cd,
+            release_date=date.today())
         self.work.firstrecording.save()
         self.work.clean()
         self.work2 = Work(title='Minimal')
@@ -53,6 +54,13 @@ class ModelsTest(TestCase):
         WriterInWork(
             writer=self.thiswriter, work=self.work2, saan='SAMOSAN',
             controlled=True, relative_share=100, capacity='CA').save()
+        self.cwr_export = CWRExport()
+        self.cwr_export.save()
+        self.cwr_export.works.add(self.work)
+        self.cwr_export.works.add(self.work2)
+        self.cwr_export2 = CWRExport(nwr_rev='REV')
+        self.cwr_export2.save()
+        self.cwr_export2.works.add(self.work)
 
     def test_validation(self):
         self.assertTrue(VALIDATE)
@@ -138,9 +146,12 @@ class ModelsTest(TestCase):
         wiw = self.work.writerinwork_set.first()
         self.assertEqual(str(wiw), str(wiw.writer))
 
-    def test_json(self):
-        dump = json.dumps(self.work.json, indent=4)
-        self.assertIn('"SAMOSAN"', dump)
+    def test_cwr(self):
+        self.assertIn('draft_', self.cwr_export.filename)
+        self.cwr_export.get_cwr()
+        self.assertIn('CW', self.cwr_export.filename)
+        self.cwr_export.get_cwr()
+        self.cwr_export2.get_cwr()
 
     def get(self, path, re_post=False):
         response = self.client.get(path)
@@ -168,10 +179,12 @@ class ModelsTest(TestCase):
         self.get(reverse('admin:music_publisher_albumcd_changelist',))
         self.get(reverse('admin:music_publisher_writer_changelist',))
         self.get(reverse('admin:music_publisher_work_changelist',))
+        self.get(reverse('admin:music_publisher_cwrexport_changelist',))
         self.get(reverse('admin:music_publisher_artist_add',))
         self.get(reverse('admin:music_publisher_albumcd_add',))
         self.get(reverse('admin:music_publisher_writer_add',))
         self.get(reverse('admin:music_publisher_work_add',))
+        self.get(reverse('admin:music_publisher_cwrexport_add',))
         self.get(reverse(
             'admin:music_publisher_artist_change', args=(self.artist.id,)),
             re_post={'last_name': 'BAR'})
@@ -186,6 +199,10 @@ class ModelsTest(TestCase):
             re_post={'pr_society': '021'})
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
+            re_post=False)
+        self.client.get(reverse(
+            'admin:music_publisher_cwrexport_change', args=(self.work.id,)) + ''
+            '?download=true',
             re_post=False)
 
 
