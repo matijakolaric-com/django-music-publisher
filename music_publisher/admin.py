@@ -4,9 +4,10 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.db import models, router, transaction
-from django.forms.formsets import all_valid
+from django.db import models
 from django.forms.models import BaseInlineFormSet
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.timezone import now
@@ -14,7 +15,7 @@ from django.views.decorators.csrf import csrf_protect
 import json
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork, VALIDATE)
+    Writer, WriterInWork, VALIDATE, CWRExport)
 
 
 csrf_protect_m = method_decorator(csrf_protect)
@@ -28,6 +29,8 @@ class MusicPublisherAdmin(admin.ModelAdmin):
 
     Should only be used for admin classes for top-level models."""
 
+    save_as = True
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
 
@@ -39,7 +42,7 @@ class MusicPublisherAdmin(admin.ModelAdmin):
                     'Please acquire a Validation and CWR generation licence '
                     'from <a href="https://matijakolaric.com/z_'
                     'contact/" target="_blank">matijakolaric.com</a>.'))
-        elif not self._cwr:
+        elif not obj._cwr:
             messages.add_message(
                 request, messages.ERROR,
                 mark_safe(
@@ -75,7 +78,9 @@ class AlbumCDAdmin(MusicPublisherAdmin):
         '__str__',
         'library', 'cd_identifier',
         'album_title', 'album_label', 'release_date', 'ean',
+        '_cwr'
     )
+    list_filter = ('_cwr',)
 
     search_fields = ('album_title', '^cd_identifier')
     actions = None
@@ -89,8 +94,9 @@ class AlbumCDAdmin(MusicPublisherAdmin):
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
-    list_display = ('last_or_band', 'first_name')
+    list_display = ('last_or_band', 'first_name', '_cwr')
     search_fields = ('last_name',)
+    list_filter = ('_cwr',)
 
     def last_or_band(self, obj):
         return obj.last_name
@@ -109,9 +115,9 @@ class ArtistAdmin(MusicPublisherAdmin):
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
-                    '_can_be_controlled', 'generally_controlled')
+                    '_can_be_controlled', 'generally_controlled', '_cwr')
     list_filter = ('_can_be_controlled', 'generally_controlled',
-                   'pr_society', )
+                   'pr_society', '_cwr')
     search_fields = ('last_name', '^ipi_name')
     readonly_fields = ('_can_be_controlled',)
     fieldsets = (
@@ -200,7 +206,6 @@ class WorkAdmin(MusicPublisherAdmin):
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
         FirstRecordingInline, ArtistInWorkInline)
-    actions = None
 
     def writer_last_names(self, obj):
         return ' / '.join(
@@ -230,26 +235,21 @@ class WorkAdmin(MusicPublisherAdmin):
             return None
         return obj.firstrecording.duration.strftime('%H:%M:%S')
 
-    def json(self, obj):
-        return json.dumps({
-            "publisher_id": SETTINGS.get('publisher_id'),
-            "publisher_name": SETTINGS.get('publisher_name'),
-            "publisher_ipi_name": SETTINGS.get('publisher_ipi_name'),
-            "publisher_ipi_base": SETTINGS.get('publisher_ipi_base'),
-            "publisher_pr_society": SETTINGS.get(
-                'publisher_pr_society'),
-            "publisher_mr_society": SETTINGS.get(
-                'publisher_mr_society'),
-            "publisher_sr_society": SETTINGS.get(
-                'publisher_pr_society'),
-            "revision": False,
-            "works": obj.json,
-        })
-
-    readonly_fields = ('writer_last_names',)
+    readonly_fields = ('writer_last_names', 'work_id')
     list_display = (
-        'title', 'iswc', 'writer_last_names', 'percentage_controlled',
-        'duration', 'isrc', 'album_cd')
+        'work_id', 'title', 'iswc', 'writer_last_names',
+        'percentage_controlled', 'duration', 'isrc', 'album_cd', '_cwr')
+
+    search_fields = (
+        'title', 'alternatetitle__title', 'writerinwork__writer__last_name',
+        '^iswc', '^id')
+
+    def get_search_results(self, request, queryset, search_term):
+        if search_term.isnumeric():
+            print(search_term)
+            search_term = search_term.lstrip('0')
+        return super().get_search_results(request, queryset, search_term)
+
     fieldsets = (
         (None, {
             'fields': (
@@ -259,3 +259,25 @@ class WorkAdmin(MusicPublisherAdmin):
         if form.changed_data:
             obj.last_change = now()
         super().save_model(request, obj, form, *args, **kwargs)
+
+    def create_cwr(self, request, qs):
+        url = reverse('admin:music_publisher_cwrexport_add')
+        ids = qs.values_list('id', flat=True)
+        return HttpResponseRedirect(
+            '{}?works={}'.format(url, ','.join(str(i) for i in ids)))
+    create_cwr.short_description = 'Create CWR from selected works.'
+
+    actions = (create_cwr,)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        print(actions)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+
+@admin.register(CWRExport)
+class CWRExportAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('works', )
+    fields = ('nwr_rev', 'works')

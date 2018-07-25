@@ -1,5 +1,6 @@
+from collections import OrderedDict
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.utils.deconstruct import deconstructible
 import re
@@ -59,7 +60,8 @@ class MusicPublisherBase(models.Model):
     class Meta:
         abstract = True
 
-    _cwr = models.BooleanField(editable=False, default=False)
+    _cwr = models.BooleanField(
+        'CWR-Compliance', editable=False, default=False)
 
     def validate_fields(self, fields):
         """Validate the fields with an external service."""
@@ -88,7 +90,8 @@ class MusicPublisherBase(models.Model):
                 errors[field_name] = (
                     field_dict['error'] or 'Unknown Error')
         if errors:
-            raise ValidationError(errors)
+            raise ValidationError(errors, code='invalid')
+        self._cwr = True
 
     def clean_fields(self, *args, **kwargs):
         """If external service is used, prepare the data for validation."""
@@ -108,7 +111,7 @@ class MusicPublisherBase(models.Model):
                 self.validate_fields(fields)
             except ValidationError as ve:
                 self._cwr = False
-                if ve.code != 'service':
+                if 'service' not in ve.args:
                     raise
         else:
             self._cwr = False
@@ -322,19 +325,30 @@ class Work(WorkBase):
         Note that serialization is not performed here.
         """
 
-        data = {
-            'work_title': self.title,
-            'iswc': self.iswc,
-            'alternate_titles': [
-                at.json for at in self.alternatetitle_set.all()],
-            'artists': [
-                aiw.artist.json for aiw in self.artistinwork_set.all()],
-            'writers': [
-                wiw.json for wiw in self.writerinwork_set.all()],
-        }
-        if self.firstrecording:
+        data = OrderedDict()
+        data['work_title'] = self.title
+        if self.iswc:
+            data['iswc'] = self.iswc
+        data['writers'] = [wiw.json for wiw in self.writerinwork_set.all()]
+        data['alternate_titles'] = [
+            at.json for at in self.alternatetitle_set.all()]
+        data['artists'] = [
+            aiw.artist.json for aiw in self.artistinwork_set.all()]
+        try:
             data.update(self.firstrecording.json)
-        return {self.id: data}
+        except ObjectDoesNotExist:
+            pass
+        return {self.work_id: data}
+
+    @property
+    def work_id(self):
+        return '{:06}'.format(self.id)
+
+    def __str__(self):
+        return '{} {} ({})'.format(
+            self.work_id,
+            self.title,
+            ' / '.join(w.last_name.upper() for w in self.writers.all()))
 
 
 class AlternateTitle(TitleBase):
@@ -367,24 +381,30 @@ class FirstRecording(FirstRecordingBase):
     def json(self):
         """Create serializable data structure, including album/cd data.
         """
-
-        return {
-            'first_release_date': (
-                self.release_date.strftime('%Y-%m-%d') if self.release_date
-                else None),
-            'first_release_duration': (
-                self.duration.strftime('%H%M%S') if self.duration else None),
-            'first_album_title': (
-                self.album_cd.album_title if self.album_cd else None),
-            'first_album_label': (
-                self.album_cd.album_label if self.album_cd else None),
-            'first_release_catalog_number': self.catalog_number,
-            'ean': (self.album_cd.ean if self.album_cd else None),
-            'isrc': self.isrc,
-            'library': (
-                self.album_cd.library if self.album_cd else None),
-            'cd_identifier': (
-                self.album_cd.cd_identifier if self.album_cd else None)}
+        data = OrderedDict()
+        if self.duration:
+            data['first_release_duration'] = self.duration.strftime('%H%M%S')
+        if self.isrc:
+            data['isrc'] = self.isrc
+        if self.catalog_number:
+            data['first_release_catalog_number'] = self.catalog_number
+        if self.album_cd:
+            if self.album_cd.release_date:
+                data['first_release_date'] = (
+                    self.album_cd.release_date.strftime('%Y-%m-%d'))
+            data.update({
+                'first_album_title': self.album_cd.album_title or '',
+                'first_album_label': self.album_cd.album_label or '',
+                'ean': self.album_cd.ean or '',
+            })
+        if self.release_date:
+            data['first_release_date'] = self.release_date.strftime('%Y-%m-%d')
+        if self.album_cd and self.album_cd.library:
+            data.update({
+                'library': self.album_cd.library,
+                'cd_identifier': self.album_cd.cd_identifier
+            })
+        return data
 
 
 class Artist(PersonBase):
@@ -483,16 +503,75 @@ class WriterInWork(models.Model):
 
     @property
     def json(self):
-        return {
+        data = OrderedDict()
+        data.update({
             'writer_id': (
                 self.writer.ipi_name.rjust(11, '0')[0:9]
-                if self.writer.ipi_name else None),
-            'writer_last_name': self.writer.last_name,
-            'writer_first_name': self.writer.first_name,
-            'writer_ipi_name': self.writer.ipi_name,
-            'writer_pr_society': self.writer.pr_society,
+                if (self.writer and self.writer.ipi_name) else ''),
+            'writer_last_name': self.writer.last_name if self.writer else '',
+            'writer_first_name':
+                self.writer.first_name if self.writer else '',
+            'writer_ipi_name': self.writer.ipi_name if self.writer else '',
+            'writer_pr_society':
+                self.writer.pr_society if self.writer else '',
+        })
+        data.update({
             'controlled': self.controlled,
             'capacity': self.capacity,
             'relative_share': str(self.relative_share / 100),
-            'saan': self.saan or self.writer.saan or ''
-        }
+            'saan': (
+                self.saan or
+                (self.writer.saan if self.writer else None) or
+                '')
+        })
+        return data
+
+
+class CWRExport(models.Model):
+    class Meta:
+        verbose_name = 'CWR Export'
+
+    nwr_rev = models.CharField(
+        'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
+            ('NWR', 'New work registration'),
+            ('REV', 'Revision of registered work')))
+    cwr = models.TextField(blank=True, editable=False)
+    works = models.ManyToManyField(Work)
+
+    @property
+    def json(self):
+        j = OrderedDict([('revision', self.nwr_rev == 'REV')])
+        j.update({
+            "publisher_id": SETTINGS.get('publisher_id'),
+            "publisher_name": SETTINGS.get('publisher_name'),
+            "publisher_ipi_name": SETTINGS.get('publisher_ipi_name'),
+            "publisher_ipi_base": SETTINGS.get('publisher_ipi_base'),
+            "publisher_pr_society": SETTINGS.get(
+                'publisher_pr_society'),
+            "publisher_mr_society": SETTINGS.get(
+                'publisher_mr_society'),
+            "publisher_sr_society": SETTINGS.get(
+                'publisher_pr_society'),
+        })
+        works = OrderedDict()
+        for work in self.works.order_by('id'):
+            works.update(work.json)
+        j.update({"works": works})
+        return j
+
+    def clean(self):
+        try:
+            response = requests.post(
+                SETTINGS.get('generator_url'),
+                headers={'Authorization': 'Token {}'.format(
+                    SETTINGS.get('token'))},
+                json=self.json, timeout=30)
+        except requests.exceptions.ConnectionError:
+            raise ValidationError('Network error', code='service')
+        if response.status_code == 400:
+            raise ValidationError('Bad Request', code='service')
+        elif response.status_code != 200:
+            raise ValidationError(
+                'Generation not possible', code='service')
+        else:
+            self.cwr = response.json()['cwr']
