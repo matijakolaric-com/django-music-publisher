@@ -4,14 +4,20 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, router, transaction
+from django.forms.formsets import all_valid
 from django.forms.models import BaseInlineFormSet
+from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_protect
 import json
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, VALIDATE)
+
+
+csrf_protect_m = method_decorator(csrf_protect)
 
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
@@ -22,8 +28,8 @@ class MusicPublisherAdmin(admin.ModelAdmin):
 
     Should only be used for admin classes for top-level models."""
 
-    def save_model(self, request, obj, *args, **kwargs):
-        super().save_model(request, obj, *args, **kwargs)
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
         if not VALIDATE:
             messages.add_message(
                 request, messages.WARNING,
