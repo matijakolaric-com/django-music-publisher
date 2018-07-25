@@ -84,8 +84,8 @@ and basic handling of acknowledgements. It will use external validation and CWR
 generation. 
 
 Currently, models, admin interface and external validation for data on musical 
-works is done, CWR exporting is well under way, but nothing has been done 
-regarding acknowledgements. Test coverage is ~95%.
+works is done, CWR exporting is almost done, but nothing has been done 
+regarding acknowledgements. Test coverage is ~90%.
 
 Installing the app
 ===============================================================================
@@ -102,7 +102,7 @@ You will have to add this to the settings, replace with your data::
     MUSIC_PUBLISHER_SETTINGS = {
         'token': None,
         'validator_url': None,
-        'creator_url': None,
+        'generator_url': None,
 
         'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
         'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
