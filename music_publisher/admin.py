@@ -30,6 +30,7 @@ class MusicPublisherAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+
         if not VALIDATE:
             messages.add_message(
                 request, messages.WARNING,
@@ -38,6 +39,12 @@ class MusicPublisherAdmin(admin.ModelAdmin):
                     'Please acquire a Validation and CWR generation licence '
                     'from <a href="https://matijakolaric.com/z_'
                     'contact/" target="_blank">matijakolaric.com</a>.'))
+        elif not self._cwr:
+            messages.add_message(
+                request, messages.ERROR,
+                mark_safe(
+                    'Validation failed, object saved, but marked as not'
+                    'CWR-compliant. Please re-evaluate.'))
 
 
 @admin.register(AlbumCD)

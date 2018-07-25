@@ -59,6 +59,8 @@ class MusicPublisherBase(models.Model):
     class Meta:
         abstract = True
 
+    _cwr = models.BooleanField(editable=False, default=False)
+
     def validate_fields(self, fields):
         """Validate the fields with an external service."""
 
@@ -72,9 +74,9 @@ class MusicPublisherBase(models.Model):
                     SETTINGS.get('token'))},
                 json=data, timeout=10)
         except requests.exceptions.ConnectionError:
-            raise ValidationError('Network error', code='invalid')
+            raise ValidationError('Network error', code='service')
         if response.status_code != 200:
-            raise ValidationError('Validation failed', code='invalid')
+            raise ValidationError('Validation failed', code='service')
         errors = {}
         rfields = response.json()['fields']
         for i in range(len(fields)):
@@ -102,7 +104,14 @@ class MusicPublisherBase(models.Model):
                         fields[field.name] = {
                             'field': validator.field,
                             'value': value}
-            self.validate_fields(fields)
+            try:
+                self.validate_fields(fields)
+            except ValidationError as ve:
+                self._cwr = False
+                if ve.code != 'service':
+                    raise
+        else:
+            self._cwr = False
         super().clean_fields(*args, **kwargs)
 
 
