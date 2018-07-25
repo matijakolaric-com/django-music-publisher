@@ -536,6 +536,9 @@ class CWRExport(models.Model):
             ('NWR', 'New work registration'),
             ('REV', 'Revision of registered work')))
     cwr = models.TextField(blank=True, editable=False)
+    year = models.CharField(
+        max_length=2, db_index=True, editable=False, blank=True)
+    num_in_year = models.PositiveSmallIntegerField(default=0)
     works = models.ManyToManyField(Work)
 
     @property
@@ -559,7 +562,18 @@ class CWRExport(models.Model):
         j.update({"works": works})
         return j
 
-    def clean(self):
+    @property
+    def filename(self):
+        if not self.cwr:
+            return 'draft_{}'.format(self.id)
+        return 'CW{}{:04}{}_000.V21'.format(
+            self.year,
+            self.num_in_year,
+            SETTINGS.get('publisher_id'))
+
+    def get_cwr(self):
+        if self.cwr:
+            return
         try:
             response = requests.post(
                 SETTINGS.get('generator_url'),
@@ -569,9 +583,16 @@ class CWRExport(models.Model):
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
         if response.status_code == 400:
-            raise ValidationError('Bad Request', code='service')
+            return
         elif response.status_code != 200:
-            raise ValidationError(
-                'Generation not possible', code='service')
+            return
         else:
             self.cwr = response.json()['cwr']
+            self.year = self.cwr[66:68]
+            nr = CWRExport.objects.filter(year=self.year)
+            nr = nr.order_by('-num_in_year').first()
+            if nr:
+                self.num_in_year = nr.num_in_year + 1
+            else:
+                self.num_in_year = 1
+            self.save()

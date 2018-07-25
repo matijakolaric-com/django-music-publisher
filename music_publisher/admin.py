@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
@@ -271,7 +272,6 @@ class WorkAdmin(MusicPublisherAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        print(actions)
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
@@ -279,5 +279,54 @@ class WorkAdmin(MusicPublisherAdmin):
 
 @admin.register(CWRExport)
 class CWRExportAdmin(admin.ModelAdmin):
+
+    def cwr_ready(self, obj):
+        return obj.cwr != ''
+    cwr_ready.boolean = True
+
+    def work_count(self, obj):
+        return obj.works.count()
+    cwr_ready.boolean = True
+
+    def download_link(self, obj):
+        if obj.cwr:
+            url = reverse(
+                'admin:music_publisher_cwrexport_change', args=(obj.id,))
+            url += '?download=true'
+            return mark_safe('<a href="{}">Download</a>'.format(url))
+
     autocomplete_fields = ('works', )
-    fields = ('nwr_rev', 'works')
+    list_display = (
+        'filename', 'nwr_rev', 'work_count', 'cwr_ready', 'download_link')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.cwr:
+            return ('nwr_rev', 'works', 'filename', 'download_link')
+        else:
+            return ()
+
+    def get_fields(self, request, obj=None):
+        if obj and obj.cwr:
+            return ('nwr_rev', 'works', 'filename', 'download_link')
+        else:
+            return ('nwr_rev', 'works')
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            super().save_model(request, obj, form, change)
+            self.obj = obj
+
+    def save_related(self, request, form, formsets, change):
+        if not change:
+            super().save_related(request, form, formsets, change)
+            self.obj.get_cwr()
+
+    def change_view(self, request, object_id, *args, **kwargs):
+        if 'download' in request.GET:
+            obj = get_object_or_404(CWRExport, pk=object_id)
+            response = HttpResponse(obj.cwr.encode().decode('latin1'))
+            cd = 'attachment; filename="{}"'.format(obj.filename)
+            response['Content-Disposition'] = cd
+            return response
+        return super().change_view(request, object_id, *args, **kwargs)
+
