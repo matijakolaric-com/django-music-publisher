@@ -44,22 +44,17 @@ This app covers just a single use-case:
 Situations with multiple writers are covered, but other publishers are ignored.
 This still results in correct CWR files and enough data to acquire ISWC.
 
-If you want to use it for exactly this purpose, just follow the standalone 
-deployment instructions below.
-
 Beyond
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 If you are looking for a solution that covers much more territory, this may be 
 an educational proof of concept, maybe even a good starting point for a custom 
 development. It has very little dependecies and each model has an abstract 
-parent, so including it in your project, even an existing one, should be pretty 
-straightforward.
+parent, so including it in your project, even an existing one, should be pretty
+ straightforward.
 
-On the other hand, required data structure for a general publishing software is 
-far more complex, even the part dealing with registrations. Everybody falls the
-first time in designing the data structure, unless they have help. Yes, this is
-a sales pitch.
+On the other hand, required data structure for a general publishing software 
+is far more complex, even the part dealing with registrations.
 
 CWR Developer Toolset
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,12 +101,6 @@ You will have to add this to the settings, replace with your data::
 When you apply for a free 15-day demo licence, additional documentation will be
 provided, as well as ``token``, ``validator_url``, and ``creator_url`` values.
 
-Publisher data will be required if you choose to go with your own CWR creator,
-unless you change the structure significantly.
-
-If that is the case, then all you may need is to set ``library`` and/or 
-``label``, depending on your needs. 
-
 Installing the project (standalone deployment)
 ===============================================================================
 
@@ -155,3 +144,13 @@ additional societies, do it with this setting (and not in the ``models.py``).
 
 Societies the original publisher and writers, as well as all societies whose
 acknowledgement files are being imported, must be present.
+
+Validation and CWR Generation Service
+===============================================================================
+
+As stated above, this tool uses an external service for data validation and
+generation of CWR files, which is a part of
+`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
+
+Free 15 day demo license is available upon requests. ontact us through this 
+`Contact Page <https://matijakolaric.com/z_contact/>`_. 
