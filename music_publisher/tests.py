@@ -180,11 +180,13 @@ class ModelsTest(TestCase):
         self.get(reverse('admin:music_publisher_writer_changelist',))
         self.get(reverse('admin:music_publisher_work_changelist',))
         self.get(reverse('admin:music_publisher_cwrexport_changelist',))
+        self.get(reverse('admin:music_publisher_ackimport_changelist',))
         self.get(reverse('admin:music_publisher_artist_add',))
         self.get(reverse('admin:music_publisher_albumcd_add',))
         self.get(reverse('admin:music_publisher_writer_add',))
         self.get(reverse('admin:music_publisher_work_add',))
         self.get(reverse('admin:music_publisher_cwrexport_add',))
+        self.get(reverse('admin:music_publisher_ackimport_add',))
         self.get(reverse(
             'admin:music_publisher_artist_change', args=(self.artist.id,)),
             re_post={'last_name': 'BAR'})
@@ -201,8 +203,8 @@ class ModelsTest(TestCase):
             'admin:music_publisher_work_change', args=(self.work.id,)),
             re_post=False)
         self.client.get(reverse(
-            'admin:music_publisher_cwrexport_change', args=(self.work.id,)) + ''
-            '?download=true',
+            'admin:music_publisher_cwrexport_change',
+            args=(self.work.id,)) + '?download=true',
             re_post=False)
 
 

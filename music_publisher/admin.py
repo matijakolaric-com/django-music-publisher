@@ -15,10 +15,9 @@ from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_protect
-import json
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork, VALIDATE, CWRExport, ACKImport)
+    Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement)
 import re
 
 csrf_protect_m = method_decorator(csrf_protect)
@@ -204,11 +203,25 @@ class FirstRecordingInline(admin.StackedInline):
     extra = 0
 
 
+class WorkAcknowledgementInline(admin.TabularInline):
+    model = WorkAcknowledgement
+    extra = 0
+    fields = readonly_fields = (
+        'date', 'society_code', 'remote_work_id', 'status')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+
 @admin.register(Work)
 class WorkAdmin(MusicPublisherAdmin):
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
-        FirstRecordingInline, ArtistInWorkInline)
+        FirstRecordingInline, ArtistInWorkInline,
+        WorkAcknowledgementInline)
 
     def writer_last_names(self, obj):
         return ' / '.join(
@@ -385,13 +398,52 @@ class ACKImportForm(ModelForm):
         self.cleaned_data['society_name'] = name.strip()
         self.cleaned_data['date'] = datetime.strptime(
             max([date1, date2]), '%Y%m%d').date()
-        del cd['acknowledgement_file']
+        self.cleaned_data['acknowledgement_file'] = content
 
 
 @admin.register(ACKImport)
 class ACKImportAdmin(admin.ModelAdmin):
     form = ACKImportForm
     list_display = ('filename', 'society_code', 'society_name', 'date')
+
+    RE_ACK = re.compile(re.compile(
+        r'(?<=\n)ACK.{106}(.{20})(.{20})(.{8})(.{2})', re.S))
+
+    def process(self, request, society_code, file_content):
+        unknown_work_ids = []
+        existing_work_ids = []
+        for x in re.findall(self.RE_ACK, file_content):
+            work_id, remote_work_id, dat, status = x
+            work_id = work_id.strip()
+            if not work_id.isnumeric():
+                unknown_work_ids.append(work_id)
+                continue
+            work_id = int(work_id)
+            remote_work_id = remote_work_id.strip()
+            dat = datetime.strptime(dat, '%Y%m%d').date()
+            work = Work.objects.filter(id=work_id).first()
+            if not work:
+                messages.add_message(
+                    request, messages.ERROR,
+                    'Unknown work ID: {}'.format(work_id))
+                continue
+            wa, c = WorkAcknowledgement.objects.get_or_create(
+                work_id=work_id,
+                remote_work_id=remote_work_id,
+                society_code=society_code,
+                date=dat,
+                status=status)
+            if not c:
+                existing_work_ids.append(str(work_id))
+        if unknown_work_ids:
+            messages.add_message(
+                request, messages.ERROR,
+                'Unknown work IDs: {}'.format(', '.join(unknown_work_ids)))
+        if existing_work_ids:
+            messages.add_message(
+                request, messages.ERROR,
+                'Data already exists for some or all works. '
+                'Affected work IDs: {}'.format(', '.join(existing_work_ids)))
 
     def save_model(self, request, obj, form, change):
         if form.is_valid():
@@ -400,7 +452,8 @@ class ACKImportAdmin(admin.ModelAdmin):
             obj.society_code = cd['society_code']
             obj.society_name = cd['society_name']
             obj.date = cd['date']
-        super().save_model(request, obj, form, change)
+            super().save_model(request, obj, form, change)
+            self.process(request, obj.society_code, cd['acknowledgement_file'])
 
     def has_change_permission(self, request, obj=None):
         if obj:

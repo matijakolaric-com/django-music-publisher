@@ -588,7 +588,7 @@ class CWRExport(models.Model):
             raise ValidationError('Network error', code='service')
         if response.status_code == 400:
             raise ValidationError('Bad Request', code='service')
-        elif response.status_code != 401:
+        elif response.status_code == 401:
             raise ValidationError('Unauthorized', code='service')
         elif response.status_code != 200:
             raise ValidationError('Unknown Error', code='service')
@@ -604,6 +604,30 @@ class CWRExport(models.Model):
             self.save()
 
 
+class WorkAcknowledgement(models.Model):
+
+    TRANSACTION_STATUS_CHOICES = (
+        ('CO', 'Conflict'),
+        ('DU', 'Duplicate'),
+        ('RA', 'Transaction Accepted'),
+        ('AS', 'Registration Accepted'),
+        ('AC', 'Registration Accepted with Changes'),
+        ('RJ', 'Rejected'),
+        ('NP', 'No Participation'),
+        ('RC', 'Claim rejected'),
+    )
+
+    work = models.ForeignKey(Work, on_delete=models.PROTECT)
+    society_code = models.CharField(
+        'Society', max_length=3, choices=SOCIETIES)
+    date = models.DateField()
+    status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
+    remote_work_id = models.CharField(max_length=20, blank=True)
+
+    def __str__(self):
+        return self.status
+
+
 class ACKImport(models.Model):
 
     class Meta:
@@ -614,5 +638,3 @@ class ACKImport(models.Model):
     society_name = models.CharField(max_length=45, editable=False)
     date = models.DateField(editable=False)
     report = models.TextField(editable=False)
-
-
