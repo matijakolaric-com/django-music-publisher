@@ -4,7 +4,7 @@ Django Music Publisher
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
 
-**Current version: 18.7b1**
+**Current version: 18.7b1**, the final release is scheduled for 2018-07-31.
 
 This is a simple **Django app for original music publishers**. The app is 
 released under `MIT license <LICENSE>`_ and is basically free. However, it uses
@@ -50,8 +50,8 @@ Beyond
 If you are looking for a solution that covers much more territory, this may be 
 an educational proof of concept, maybe even a good starting point for a custom 
 development. It has very little dependecies and each model has an abstract 
-parent, so including it in your project, even an existing one, should be pretty
- straightforward.
+parent, so including it in your project, even an existing one, should be 
+pretty straightforward.
 
 On the other hand, required data structure for a general publishing software 
 is far more complex, even the part dealing with registrations.
@@ -152,5 +152,5 @@ As stated above, this tool uses an external service for data validation and
 generation of CWR files, which is a part of
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
 
-Free 15 day demo license is available upon requests. ontact us through this 
+Free 15 day demo license is available upon requests. Contact us through this 
 `Contact Page <https://matijakolaric.com/z_contact/>`_. 
