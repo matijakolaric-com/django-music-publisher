@@ -9,7 +9,7 @@ import requests
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 VALIDATE = SETTINGS.get('validator_url') and SETTINGS.get('token')
-SOCIETIES = (
+SOCIETIES = [
     ('101', 'SOCAN, Canada'),
     ('088', 'CMRRA, Canada'),
 
@@ -27,7 +27,7 @@ SOCIETIES = (
     ('021', 'BMI, United States'),
     ('071', 'SESAC Inc., United States'),
     ('034', 'HFA, United States'),
-)
+]
 
 
 @deconstructible
@@ -566,11 +566,14 @@ class CWRExport(models.Model):
     @property
     def filename(self):
         if not self.cwr:
-            return 'draft_{}'.format(self.id)
+            return 'CW DRAFT {}'.format(self.id)
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
             SETTINGS.get('publisher_id'))
+
+    def __str__(self):
+        return self.filename
 
     def get_cwr(self):
         if self.cwr:
@@ -584,9 +587,11 @@ class CWRExport(models.Model):
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
         if response.status_code == 400:
-            return
+            raise ValidationError('Bad Request', code='service')
+        elif response.status_code != 401:
+            raise ValidationError('Unauthorized', code='service')
         elif response.status_code != 200:
-            return
+            raise ValidationError('Unknown Error', code='service')
         else:
             self.cwr = response.json()['cwr']
             self.year = self.cwr[66:68]
@@ -597,3 +602,17 @@ class CWRExport(models.Model):
             else:
                 self.num_in_year = 1
             self.save()
+
+
+class ACKImport(models.Model):
+
+    class Meta:
+        verbose_name = 'CWR ACK Import'
+
+    filename = models.CharField(max_length=60, editable=False)
+    society_code = models.CharField(max_length=3, editable=False)
+    society_name = models.CharField(max_length=45, editable=False)
+    date = models.DateField(editable=False)
+    report = models.TextField(editable=False)
+
+

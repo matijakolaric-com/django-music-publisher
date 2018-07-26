@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from django import forms
 from django.conf import settings
@@ -5,6 +6,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.forms import ModelForm, FileField
 from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -16,8 +18,8 @@ from django.views.decorators.csrf import csrf_protect
 import json
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork, VALIDATE, CWRExport)
-
+    Writer, WriterInWork, VALIDATE, CWRExport, ACKImport)
+import re
 
 csrf_protect_m = method_decorator(csrf_protect)
 
@@ -280,6 +282,8 @@ class WorkAdmin(MusicPublisherAdmin):
 @admin.register(CWRExport)
 class CWRExportAdmin(admin.ModelAdmin):
 
+    actions = None
+
     def cwr_ready(self, obj):
         return obj.cwr != ''
     cwr_ready.boolean = True
@@ -312,21 +316,96 @@ class CWRExportAdmin(admin.ModelAdmin):
             return ('nwr_rev', 'works')
 
     def save_model(self, request, obj, form, change):
-        if not change:
+        if not (hasattr(self, 'obj') and self.obj.cwr):
             super().save_model(request, obj, form, change)
             self.obj = obj
 
     def save_related(self, request, form, formsets, change):
-        if not change:
+        if not (hasattr(self, 'obj') and self.obj.cwr):
             super().save_related(request, form, formsets, change)
-            self.obj.get_cwr()
+            try:
+                self.obj.get_cwr()
+            except ValidationError as e:
+                messages.add_message(
+                    request, messages.ERROR,
+                    mark_safe(
+                        'CWR could not be fetched from external service. '
+                        'The reason is "{}". Please try saving again later. '
+                        'Currently saved as draft.'.format(str(e))))
 
-    def change_view(self, request, object_id, *args, **kwargs):
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.cwr:
+            return None
+        return super().has_delete_permission(request, obj)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        obj = get_object_or_404(CWRExport, pk=object_id)
         if 'download' in request.GET:
-            obj = get_object_or_404(CWRExport, pk=object_id)
             response = HttpResponse(obj.cwr.encode().decode('latin1'))
             cd = 'attachment; filename="{}"'.format(obj.filename)
             response['Content-Disposition'] = cd
             return response
-        return super().change_view(request, object_id, *args, **kwargs)
+        extra_context = {
+            'show_save': False,
+        }
+        if obj.cwr:
+            extra_context.update({
+                'save_as': False,
+                'show_save_and_continue': False,
+                'show_delete': False,
+            })
+        return super().change_view(
+            request, object_id, form_url='', extra_context=extra_context)
 
+
+class ACKImportForm(ModelForm):
+    class Meta:
+        model = ACKImport
+        fields = ('acknowledgement_file',)
+
+    acknowledgement_file = FileField()
+
+    RE_HDR = re.compile(
+        r'^HDRSO[0 ]{6}([ \d][ \d]\d)(.{45})01\.10(\d{8})\d{6}(\d{8})')
+
+    def clean(self):
+        super().clean()
+        cd = self.cleaned_data
+        ack = cd['acknowledgement_file']
+        filename = ack.name
+        if not (len(filename) in [18, 19] and filename[-5:].upper() != '.V21'):
+            raise ValidationError('Wrong file name format.')
+        self.cleaned_data['filename'] = filename
+        content = ack.file.read().decode('latin1')
+        match = re.match(self.RE_HDR, content)
+        if not match:
+            raise ValidationError('Incorrect CWR header')
+        code, name, date1, date2 = match.groups()
+        self.cleaned_data['society_code'] = code
+        self.cleaned_data['society_name'] = name.strip()
+        self.cleaned_data['date'] = datetime.strptime(
+            max([date1, date2]), '%Y%m%d').date()
+        del cd['acknowledgement_file']
+
+
+@admin.register(ACKImport)
+class ACKImportAdmin(admin.ModelAdmin):
+    form = ACKImportForm
+    list_display = ('filename', 'society_code', 'society_name', 'date')
+
+    def save_model(self, request, obj, form, change):
+        if form.is_valid():
+            cd = form.cleaned_data
+            obj.filename = cd['filename']
+            obj.society_code = cd['society_code']
+            obj.society_name = cd['society_name']
+            obj.date = cd['date']
+        super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request, obj=None):
+        if obj:
+            return False
+        return super().has_change_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return True
