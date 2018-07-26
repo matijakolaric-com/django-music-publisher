@@ -384,7 +384,7 @@ class ACKImportForm(ModelForm):
     def clean(self):
         super().clean()
         cd = self.cleaned_data
-        ack = cd['acknowledgement_file']
+        ack = cd.get('acknowledgement_file')
         filename = ack.name
         if not (len(filename) in [18, 19] and filename[-5:].upper() != '.V21'):
             raise ValidationError('Wrong file name format.')
@@ -403,8 +403,22 @@ class ACKImportForm(ModelForm):
 
 @admin.register(ACKImport)
 class ACKImportAdmin(admin.ModelAdmin):
-    form = ACKImportForm
-    list_display = ('filename', 'society_code', 'society_name', 'date')
+    def get_form(self, request, obj=None):
+        if obj is None:
+            return ACKImportForm
+        return super().get_form(request, obj)
+
+    list_display = (
+        'filename', 'society_code', 'society_name', 'date')
+    fields = readonly_fields = (
+        'filename', 'society_code', 'society_name', 'date', 'report')
+
+    add_fields = ('acknowledgement_file',)
+
+    def get_fields(self, reqest, obj=None):
+        if obj:
+            return self.fields
+        return self.add_fields
 
     RE_ACK = re.compile(re.compile(
         r'(?<=\n)ACK.{106}(.{20})(.{20})(.{8})(.{2})', re.S))
@@ -412,6 +426,7 @@ class ACKImportAdmin(admin.ModelAdmin):
     def process(self, request, society_code, file_content):
         unknown_work_ids = []
         existing_work_ids = []
+        report = ''
         for x in re.findall(self.RE_ACK, file_content):
             work_id, remote_work_id, dat, status = x
             work_id = work_id.strip()
@@ -435,6 +450,8 @@ class ACKImportAdmin(admin.ModelAdmin):
                 status=status)
             if not c:
                 existing_work_ids.append(str(work_id))
+            report += '{} {} <{}>\n'.format(
+                work.work_id, work.title, wa.get_status_display())
         if unknown_work_ids:
             messages.add_message(
                 request, messages.ERROR,
@@ -444,21 +461,20 @@ class ACKImportAdmin(admin.ModelAdmin):
                 request, messages.ERROR,
                 'Data already exists for some or all works. '
                 'Affected work IDs: {}'.format(', '.join(existing_work_ids)))
+        return report
 
     def save_model(self, request, obj, form, change):
+        if change:
+            return
         if form.is_valid():
             cd = form.cleaned_data
             obj.filename = cd['filename']
             obj.society_code = cd['society_code']
             obj.society_name = cd['society_name']
             obj.date = cd['date']
+            obj.report = self.process(
+                request, obj.society_code, cd['acknowledgement_file'])
             super().save_model(request, obj, form, change)
-            self.process(request, obj.society_code, cd['acknowledgement_file'])
-
-    def has_change_permission(self, request, obj=None):
-        if obj:
-            return False
-        return super().has_change_permission(request)
 
     def has_delete_permission(self, request, obj=None):
-        return True
+        return False
