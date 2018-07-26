@@ -74,19 +74,6 @@ validation and one for generation of CWR files. It will work without these
 tools, but data will not be validated as CWR-compliant, and there will be no 
 way to create CWR.
 
-Current Status
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-The goal for the first release, to be released around 2018-08-01, is to have
-all models required for CWR registrations of original works by one original
-publisher, complete administration interface, that includes simple CWR export
-and basic handling of acknowledgements. It will use external validation and CWR 
-generation. 
-
-Currently, models, admin interface and external validation for data on musical 
-works is done, CWR exporting is almost done, but nothing has been done 
-regarding acknowledgements. Test coverage is ~90%.
-
 Installing the app
 ===============================================================================
 
@@ -128,5 +115,43 @@ If that is the case, then all you may need is to set ``library`` and/or
 Installing the project (standalone deployment)
 ===============================================================================
 
-Just ``git clone`` the project. Please note that ``SECRET_KEY`` and 
-``MUSIC_PUBLISHER_SETTINGS`` must be set, then just do the usuall stuff.
+You can only install this project on a computer that has Python 3 preinstalled.
+Supported versions are 3.5 and 3.6. It might work with other Python 3 versions,
+but not with Python 2. It is advised you run this inside a virtual environment.
+
+Do::
+
+    python3 -m venv dmp
+
+    cd dmp
+
+    source bin/activate
+
+    git clone git@github.com:matijakolaric-com/django-music-publisher.git
+
+    cd django_music_publisher
+
+    pip install -r requirements.txt
+
+The next step is to create ``dmp_project/local_settings.py`` or edit 
+``dmp_project/settings.py``. Regardless, ``SECRET_KEY`` and 
+``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. Then::
+
+    python manage.py migrate
+
+    python manage.py createsuperuser
+
+    python manage.py runserver
+
+Then open the following link: http://localhost:8000/ and log in with
+credentials you provided.
+
+Societies
+===============================================================================
+
+The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
+setup, only 12 societies from six countries are present. If you need to add
+additional societies, do it with this setting (and not in the ``models.py``).
+
+Societies the original publisher and writers, as well as all societies whose
+acknowledgement files are being imported, must be present.

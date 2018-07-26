@@ -9,25 +9,28 @@ import requests
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 VALIDATE = SETTINGS.get('validator_url') and SETTINGS.get('token')
-SOCIETIES = [
-    ('101', 'SOCAN, Canada'),
-    ('088', 'CMRRA, Canada'),
+try:
+    SOCIETIES = settings.MUSIC_PUBLISHER_SOCIETIES
+except AttributeError:
+    SOCIETIES = [
+        ('101', 'SOCAN, Canada'),
+        ('088', 'CMRRA, Canada'),
 
-    ('058', 'SACEM, France'),
-    ('068', 'SDRM, France'),
+        ('058', 'SACEM, France'),
+        ('068', 'SDRM, France'),
 
-    ('035', 'GEMA, Germany'),
+        ('035', 'GEMA, Germany'),
 
-    ('074', 'SIAE, Italy'),
+        ('074', 'SIAE, Italy'),
 
-    ('052', 'PRS, United Kingdom'),
-    ('044', 'MCPS, United Kingdom'),
+        ('052', 'PRS, United Kingdom'),
+        ('044', 'MCPS, United Kingdom'),
 
-    ('010', 'ASCAP, United States'),
-    ('021', 'BMI, United States'),
-    ('071', 'SESAC Inc., United States'),
-    ('034', 'HFA, United States'),
-]
+        ('010', 'ASCAP, United States'),
+        ('021', 'BMI, United States'),
+        ('071', 'SESAC Inc., United States'),
+        ('034', 'HFA, United States'),
+    ]
 
 
 @deconstructible
