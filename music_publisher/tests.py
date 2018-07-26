@@ -147,7 +147,7 @@ class ModelsTest(TestCase):
         self.assertEqual(str(wiw), str(wiw.writer))
 
     def test_cwr(self):
-        self.assertIn('draft_', self.cwr_export.filename)
+        self.assertIn('CW DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
         self.cwr_export.get_cwr()
