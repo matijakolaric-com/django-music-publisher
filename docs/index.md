@@ -55,3 +55,18 @@ is available for selection. This is an auto-complete field, which will be useful
 Asterisk ``(*)`` means the writer is generally controlled. Lets go with him, and fill out the rest of the row, but let's
 put 50% in the ``relative share`` and add another writer in work.
 
+![](add_work2.png)
+
+Rarely it happens that a publisher has no data on one of the writers they do not control. If that is the case, one can just 
+leave the field ``writer`` empty. Actually, for writers in work that are not controlled, the only required field is 
+``relative share``. So, lets leave it at that and move to adding data on recording.
+
+![](add_work3.png)
+
+This is where things may get complicated, depending on the settings. This manual will only cover the simplest use case, when 
+neither ``library`` nor ``label`` are set. Press on ``Add another First recording``, then on the ``+`` in the ``Album / Library CD`` field. Fill the ``Album title`` and ``Release date`` fields, save.
+
+![](album.png)
+
+Add a performing artist, the principle should be clear by now, and then save the work. Back to the **list view**..
+
