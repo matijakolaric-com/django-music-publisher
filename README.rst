@@ -159,5 +159,5 @@ As stated above, this tool uses an external service for data validation and
 generation of CWR files, which is a part of
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
 
-Free 15 day demo license is available upon requests. Contact us through this 
+Free 15 day demo licence is available upon requests. Contact us through this 
 `Contact Page <https://matijakolaric.com/z_contact/>`_. 
