@@ -5,14 +5,14 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='18.7b1',
+    version='18.7',
     author='Matija Kolarić',
     license='MIT License',
     description='Django App for Music Publishers',
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://github.com/matijakolaric-com/django-music-publisher/',
-    packages=setuptools.find_packages(exclude=['dmp_project']),
+    packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     classifiers=(
         'Environment :: Web Environment',
         'Framework :: Django :: 2.0',
