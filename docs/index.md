@@ -1,7 +1,5 @@
 
-# User's Manual
-# Django Music Publisher
-
+# User's Manual for Django Music Publisher
 
 This is User's Manual for Django Music Publisher app. It presumes that installation was successful and user has logged in.
 It also presumes you have acquired the token for the CWR validation and generation service.
@@ -27,7 +25,7 @@ separately, but this is not the case with some of the other models. It has six p
 
 For a minimal work registration, all we need to enter are the *title*, and one *writer in work* record. So, let us do that.
 We will put ``MINIMAL WORK`` in the field ``title`` and then press on the ``+`` sign in the ``writer`` column of the first
-˙`writer in work˙` row. A popup will appear (if it does not, one may need to allow popups explicitely).
+``writer in work`` row. A popup will appear (if it does not, one may need to allow popups explicitely).
 
 ![](controlled-writer.png)
 
@@ -44,11 +42,16 @@ be taken to the work **list view**.
 
 ![](work_list.png)
 
+Let's break down this view. In top right, there is the ``add work`` button, which takes you to the **add view**, already described. Below it is a group of filters, which we will cover a bit later.
 
+On the left side, there is a search filter. It searches for works with a matching title, including alternate titles, 
+writer's last lame, ISWC and internal work ID. Below it is an action selection field. Currently, the only available
+action is ``Create CWR from selected works``, which will be covered in detail later. Below it is a table with works, all
+of them, or just those matching selected filters and/or a search term.
 
-
-
-
-
-
+Let's add another work, this time a more complicated one. Press on ``add work``. Enter the title, and click on 
+``Add another Alternate Title``, and enter an alternate title. When you enter the ``writer`` field, ``John Doe (*)`` 
+is available for selection. This is an auto-complete field, which will be usefull once the list of writers gets longer.
+Asterisk ``(*)`` means the writer is generally controlled. Lets go with him, and fill out the rest of the row, but let's
+put 50% in the ``relative share`` and add another writer in work.
 
