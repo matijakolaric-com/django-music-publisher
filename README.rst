@@ -15,46 +15,37 @@ upon request.
 Introduction
 ===============================================================================
 
-Introduction for Music Publishers
+Music Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 If you are not a software developer, looking for a software solution for music
-publishers, then everything beyond this point may be too technical for you.
+publishers, then this may be the right thing for you, but you may need a 
+software developer to implement.
 
-This is a code repository. You may install this code on your computer or server
-and modify it to suit your needs, or use it as is. It is not intended to be 
-simple. It is intended to be customizable and extendable.
-
-Introduction for Software Developers
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-If you are looking for an open source code to make a custom software for a 
-client who is a music publisher, and particularily if it includes Common Works
-Registration (CWR) or even Electronic Batch Registration (EBR), and you have
-never worked in this industry before, then you need to learn that things in 
-this industry are extremely complicated. For large publishers, complicated is
-financially much better than complex, which is much better than simple.
-
-Use Case
+Single Use Case
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This app covers just a single use-case:
 **one original publisher**, publishing **original musical works**.
-(Original work is one that is not a modification of existing work.)
-Situations with multiple writers are covered, but other publishers are ignored.
-This still results in correct CWR files and enough data to acquire ISWC.
+(Original work is one that is not a modification of an existing work.)
+
+Multiple writers, both controlled and uncontrolled, are covered, but data on
+other publishers (other original publishers, administrators and sub-publishers)
+can not be entered. This still results in correct CWR files and enough data to 
+acquire ISWCs.
 
 Beyond
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 If you are looking for a solution that covers much more territory, this may be 
 an educational proof of concept, maybe even a good starting point for a custom 
-development. It has very little dependecies and each model has an abstract 
-parent, so including it in your project, even an existing one, should be 
-pretty straightforward.
+development.
 
-On the other hand, required data structure for a general publishing software 
-is far more complex, even the part dealing with registrations.
+Common Works Registration (CWR), or even the baby version of it, Electronic
+Batch Registration (EBR), is usually the most time-consulimg part of any 
+software project for music publishers. You may be interested in using external
+REST API service for data validation, as well as generation and parsing of CWR 
+files.
 
 CWR Developer Toolset
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
