@@ -18,8 +18,8 @@ Introduction
 Music Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you are not a software developer, looking for a software solution for music
-publishers, then this may be the right thing for you, but you may need a 
+If you are not a software developer, and are looking for a software solution for
+music publishers, then this may be the right thing for you, but you may need a 
 software developer to implement.
 
 Single Use Case
@@ -67,19 +67,19 @@ files.
 CWR Developer Toolset
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This particular software uses two of the REST API tools from the 
+This particular software uses two simplest of the REST API tools from the 
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_,
 one for data validation and one for generation of CWR files.
 
 It will work without these tools, but data will not be validated as 
 CWR-compliant, and there will be no way to create CWR, unless you make your
 own. The latter could be solved with a template, but without the former, it
-would not result in valid CWR files.
+would probably not result in valid CWR files.
 
 Installing the app
 ===============================================================================
 
-If you want to install the `music_publisher` Django app, just use pip::
+If you want to install the `django_music_publisher` app, just use pip::
 
     pip install --upgrade django_music_publisher
 
@@ -149,8 +149,8 @@ The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default
 setup, only 12 societies from six countries are present. If you need to add
 additional societies, do it with this setting (and not in the ``models.py``).
 
-Societies the original publisher and writers, as well as all societies whose
-acknowledgement files are being imported, must be present.
+Societies the original publisher and writers are affiliated with, as well as
+all societies whose acknowledgement files are being imported, must be present.
 
 Validation and CWR Generation Service
 ===============================================================================
