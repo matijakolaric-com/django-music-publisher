@@ -69,6 +69,7 @@ neither ``library`` nor ``label`` are set. Press on ``Add another First recordin
 ![](album.png)
 
 Add a performing artist, the principle should be clear by now, and then save the work. Back to the **list view**. As
-expected,now there are two works
+expected,now there are two works. Let's select both of them, choose ``Create CWR from selected works`` from the action
+menu and press ``Go``.
 
 ![](work_list2.png)
