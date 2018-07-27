@@ -68,5 +68,7 @@ neither ``library`` nor ``label`` are set. Press on ``Add another First recordin
 
 ![](album.png)
 
-Add a performing artist, the principle should be clear by now, and then save the work. Back to the **list view**..
+Add a performing artist, the principle should be clear by now, and then save the work. Back to the **list view**. As
+expected,now there are two works
 
+![](work_list2.png)
