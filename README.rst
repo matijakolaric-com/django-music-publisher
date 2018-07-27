@@ -31,8 +31,21 @@ This app covers just a single use-case:
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
-can not be entered. This still results in correct CWR files and enough data to 
-acquire ISWCs.
+can not be entered. This is just enough data for acquiring ISWCs.
+
+It is presumed that writers keep 50% of performing rights and the other 50%, as 
+well as 100% of mechanical and sync goes to the original publisher.
+
+Alternate titles and basic data on performing artists and just enough data for 
+registration of library works, as well as full data about the first recording,
+can be entered.
+
+This translates to following CWR transaction record types:
+
+* NWR/REV,
+* SPU (just one), SPT (just World),
+* SWR, SWT (just World), PWR (including society-assigned agreement number), OWR,
+* ALT, PER, REC (single) and ORN (limited to library).
 
 Beyond
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -40,6 +53,10 @@ Beyond
 If you are looking for a solution that covers much more territory, this may be 
 an educational proof of concept, maybe even a good starting point for a custom 
 development.
+
+Please note that the limitations of this project are not chosen based on 
+technical complexity of additional features, but due to the fact that beyond 
+this point, the learning curve gets really steep.
 
 Common Works Registration (CWR), or even the baby version of it, Electronic
 Batch Registration (EBR), is usually the most time-consulimg part of any 
