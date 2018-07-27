@@ -50,15 +50,14 @@ files.
 CWR Developer Toolset
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_
-covers basically all cases of CWR generation, validation and parsing. It is 
-being constantly tested with most collecting societies and major publishers. 
-There are various licencing packages.
+This particular software uses two of the REST API tools from the 
+`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_,
+one for data validation and one for generation of CWR files.
 
-This particular software uses two of the tools from the toolset, one for data
-validation and one for generation of CWR files. It will work without these 
-tools, but data will not be validated as CWR-compliant, and there will be no 
-way to create CWR.
+It will work without these tools, but data will not be validated as 
+CWR-compliant, and there will be no way to create CWR, unless you make your
+own. The latter could be solved with a template, but without the former, it
+would not result in valid CWR files.
 
 Installing the app
 ===============================================================================
