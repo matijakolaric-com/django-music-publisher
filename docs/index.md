@@ -14,9 +14,10 @@ interface is shown. User administration is not covered.
 
 Music Publisher app has several models, each has three
 views: list, add and change. We will start by adding a
-new work. Click on the **add** next to **Work**.
+new work. Click on the **Add** next to **Work**.
 
-
+The **add view** for works is shown. Please note that
+Work **change view** is exactly same.
 
 
 
