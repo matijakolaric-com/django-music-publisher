@@ -168,4 +168,4 @@ Free 15 day demo licence is available upon requests. Contact us through this
 Walkthrough
 ================================================================================
 
-`Walkthrough <docs/index.md>`_ is available in the `docs <docs/>`_.
+`Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/overview.png>`_ is available in the ``docs`` folder.
