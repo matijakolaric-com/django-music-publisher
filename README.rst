@@ -15,8 +15,8 @@ upon request.
 Introduction
 ===============================================================================
 
-.. image:: docs/overview.png
-    :target: docs/index.md
+.. image:: https://matijakolaric-com.github.io/django-music-publisher/overview.png
+    :target: https://matijakolaric-com.github.io/django-music-publisher/
 
 Music Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
