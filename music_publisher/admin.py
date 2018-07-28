@@ -256,13 +256,14 @@ class WorkAdmin(MusicPublisherAdmin):
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'isrc', 'album_cd', '_cwr')
 
+    list_filter = ('_cwr', 'firstrecording__album_cd')
+
     search_fields = (
         'title', 'alternatetitle__title', 'writerinwork__writer__last_name',
         '^iswc', '^id')
 
     def get_search_results(self, request, queryset, search_term):
         if search_term.isnumeric():
-            print(search_term)
             search_term = search_term.lstrip('0')
         return super().get_search_results(request, queryset, search_term)
 
@@ -345,6 +346,8 @@ class CWRExportAdmin(admin.ModelAdmin):
                         'CWR could not be fetched from external service. '
                         'The reason is "{}". Please try saving again later. '
                         'Currently saved as draft.'.format(str(e))))
+            finally:
+                del self.obj
 
     def has_delete_permission(self, request, obj=None):
         if obj and obj.cwr:

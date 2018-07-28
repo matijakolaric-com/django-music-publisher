@@ -463,6 +463,9 @@ class WriterInWork(models.Model):
     Please note that in some societies, SAAN is a required field.
     Capacity is limited to roles by original writers."""
 
+    class Meta:
+        verbose_name_plural = 'Writers in Work'
+
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
         Writer, on_delete=models.PROTECT,
@@ -519,6 +522,9 @@ class WriterInWork(models.Model):
                 data['writer_ipi_base'] = self.writer.ipi_base
             if self.writer.pr_society:
                 data['writer_pr_society'] = self.writer.pr_society
+        else:
+            data['writer_id'] = ''
+            data['writer_last_name'] = ''
         data.update({
             'controlled': self.controlled,
             'capacity': self.capacity,
@@ -613,7 +619,7 @@ class WorkAcknowledgement(models.Model):
         ('CO', 'Conflict'),
         ('DU', 'Duplicate'),
         ('RA', 'Transaction Accepted'),
-        ('AS', 'Registration Accepted'),
+        ('SA', 'Registration Accepted'),
         ('AC', 'Registration Accepted with Changes'),
         ('RJ', 'Rejected'),
         ('NP', 'No Participation'),
