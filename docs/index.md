@@ -73,3 +73,15 @@ expected,now there are two works. Let's select both of them, choose ``Create CWR
 menu and press ``Go``.
 
 ![](work_list2.png)
+
+This is a shortcut to fill CWR Export **add view**. It is a very simple for, one can select between ``New Work 
+Registrations`` and ``Revisions``, and then add the list of included works.
+
+c
+
+We just have two works, and they are both already filled and this is our first export, so ``NWR`` is what we want. Press
+``Save and continue editing``. If all went well, then the view should change to read-only, and there is a ``Download`` link. 
+Just press on it and a CWR file will download. Opened in CWR Syntax Highlighter, it will look like this:
+
+![](cwr_file.png)
+
