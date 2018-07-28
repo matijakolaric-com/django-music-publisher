@@ -86,7 +86,9 @@ If you want to install the `django_music_publisher` app, just use pip::
 Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
 URLs need to be added, as everything goes through the Django Admin.
 
-You will have to add this to the settings, replace with your data::
+You will have to add this to the settings, replace with your data.
+
+.. code:: python
 
     MUSIC_PUBLISHER_SETTINGS = {
         'token': None,
@@ -115,7 +117,7 @@ You can only install this project on a computer that has Python 3 preinstalled.
 Supported versions are 3.5 and 3.6. It might work with other Python 3 versions,
 but not with Python 2. It is advised you run this inside a virtual environment.
 
-Do::
+.. code:: python
 
     python3 -m venv dmp
 
@@ -132,6 +134,8 @@ Do::
 The next step is to create ``dmp_project/local_settings.py`` or edit 
 ``dmp_project/settings.py``. Regardless, ``SECRET_KEY`` and 
 ``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. Then::
+
+.. code:: python
 
     python manage.py migrate
 
