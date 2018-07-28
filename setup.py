@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='18.7rc1',
+    version='18.7',
     author='Matija Kolarić',
     license='MIT License',
     description='Django App for Music Publishers',
