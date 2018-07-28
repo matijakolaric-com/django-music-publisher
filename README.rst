@@ -19,45 +19,50 @@ Introduction
 Music Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you are not a software developer, and are looking for a software solution for
-music publishers, then this may be the right thing for you, but you may need a 
-software developer to implement.
+If you are not a software developer, and you are looking for a software 
+solution for music publishers, then this may be the right thing for you, but 
+you may need a software developer to implement it.
 
-Single Use Case
+Use Case
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This app covers just a single use-case:
-**one original publisher**, publishing **original musical works**.
-(Original work is one that is not a modification of an existing work.)
+This app is targeted at **single-entity original publishers**, publishing 
+**original musical works**.
+(Original work is one that is not a modification of an existing musical work.)
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
 can not be entered. This is just enough data for acquiring ISWCs.
 
-It is presumed that writers keep 50% of performing rights and the other 50%, as 
-well as 100% of mechanical and sync goes to the original publisher.
+It is presumed that writers keep 50% of performing rights and the other 50%, 
+as well as 100% of mechanical and sync goes to the original publisher.
 
 Alternate titles and basic data on performing artists and just enough data for 
 registration of library works, as well as full data about the first recording,
 can be entered.
 
-This translates to following CWR transaction record types:
+This translates to following CWR 2.1 transaction record types:
 
 * NWR/REV,
 * SPU (just one), SPT (just World),
-* SWR, SWT (just World), PWR (including society-assigned agreement number), OWR,
-* ALT, PER, REC (single) and ORN (limited to library).
+* SWR, SWT (just World), PWR (including society-assigned agreement number), 
+* OWR,
+* ALT, 
+* PER, 
+* REC (single) and
+* ORN (limited to library).
 
 Beyond
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you are looking for a solution that covers much more territory, this may be 
+If you are looking for a solution that covers more territory, this may be 
 an educational proof of concept, maybe even a good starting point for a custom 
 development.
 
 Please note that the limitations of this project are not chosen based on 
 technical complexity of additional features, but due to the fact that beyond 
-this point, the learning curve gets really steep.
+this point, the learning curve gets really steep, both for software developers 
+and users.
 
 Common Works Registration (CWR), or even the baby version of it, Electronic
 Batch Registration (EBR), is usually the most time-consulimg part of any 
@@ -72,10 +77,11 @@ This particular software uses two simplest of the REST API tools from the
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_,
 one for data validation and one for generation of CWR files.
 
-It will work without these tools, but data will not be validated as 
-CWR-compliant, and there will be no way to create CWR, unless you make your
-own. The latter could be solved with a template, but without the former, it
-would probably not result in valid CWR files.
+Django Music Publisher app  works without these tools, but data will not be 
+validated as CWR-compliant, and there will be no way to create CWR, unless you 
+make your own. 
+
+The latter could be solved with a template, but without the former, it would often not result in valid CWR files.
 
 Installing the app
 ===============================================================================
@@ -164,6 +170,7 @@ Free 15 day demo licence is available upon requests. Contact us through this
 `Contact Page <https://matijakolaric.com/z_contact/>`_. 
 
 Walkthrough
-================================================================================
+===============================================================================
 
-`Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/overview.png>`_ is available in the ``docs`` folder    .
+`Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/>`_
+is available in the ``docs`` folder.
