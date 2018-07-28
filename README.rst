@@ -164,3 +164,8 @@ generation of CWR files, which is a part of
 
 Free 15 day demo licence is available upon requests. Contact us through this 
 `Contact Page <https://matijakolaric.com/z_contact/>`_. 
+
+Walkthrough
+================================================================================
+
+`Walkthrough <docs/index.md>`_ is available in the `docs <docs/>`_.
