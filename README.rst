@@ -4,7 +4,7 @@ Django Music Publisher
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
 
-**Current version: 18.7b1**, the final release is scheduled for 2018-07-31.
+**Current version: 18.7rc1**, the final release is scheduled for 2018-07-31.
 
 This is a simple **Django app for original music publishers**. The app is 
 released under `MIT license <LICENSE>`_ and is basically free. However, it uses
