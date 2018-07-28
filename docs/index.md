@@ -87,7 +87,7 @@ Just press on it and a CWR file will download. Opened in CWR Syntax Highlighter,
 ![](cwr_file.png)
 
 Let's presume that this is the real thing, that you sent this file to your society and got back acknowledgement files (some
-societies send one, some send two like ASCAP, which was used an example. After addign them as CWR ACK Imports, open our first 
+societies send one, some send two like BMI, which was used an example. After addign them as CWR ACK Imports, open our first 
 work. In the bottom of the change view, one can see the overview of all acks related to this work.
 
 ![](acks.png)
