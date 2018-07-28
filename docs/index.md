@@ -84,7 +84,7 @@ recording.
 ![](add_work3.png)
 
 This is where things may get complicated, depending on the settings. This 
-manual will only cover the simplest use case, when neither ``library`` nor 
+document will only cover the simplest use case, when neither ``library`` nor 
 ``label`` are set. Press on ``Add another First recording``, then on the ``+`` 
 in the ``Album / Library CD`` field. Fill the ``Album title`` and ``Release 
 date`` fields, save.
@@ -116,7 +116,7 @@ Let's presume that this is the real thing, that you sent this file to your
 society and got back acknowledgement files (some societies send one, some send 
 two like BMI, which was used an example. After addign them as CWR ACK Imports, 
 open our first work. In the bottom of the change view, one can see the 
-overview of all acks related to this work.
+overview of all acknowledgements related to this work.
 
 ![](acks.png)
 
