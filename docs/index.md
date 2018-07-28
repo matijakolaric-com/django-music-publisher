@@ -2,7 +2,7 @@
 # Walkthrough for Django Music Publisher
 
 This is a walkthrough for Django Music Publisher app. It demonstrates key all aspects of this app, without going
-into every possible detai. It presumes that installation was successful and user has logged in.
+into every possible detail. It presumes that installation was successful and user has logged in.
 It also presumes you have acquired the token for the CWR validation and generation service.
 
 ![](django-admin.png)
