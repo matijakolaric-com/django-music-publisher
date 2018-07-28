@@ -16,13 +16,6 @@ Introduction
 .. image:: https://matijakolaric-com.github.io/django-music-publisher/overview.png
     :target: https://matijakolaric-com.github.io/django-music-publisher/
 
-Music Publisher
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-If you are not a software developer, and you are looking for a software 
-solution for music publishers, then this may be the right thing for you, but 
-you may need a software developer to implement it.
-
 Use Case
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
