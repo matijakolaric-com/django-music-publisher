@@ -1,7 +1,8 @@
 
-# User's Manual for Django Music Publisher
+# Walkthrough for Django Music Publisher
 
-This is User's Manual for Django Music Publisher app. It presumes that installation was successful and user has logged in.
+This is a walkthrough for Django Music Publisher app. It demonstrates key all aspects of this app, without going
+into every possible detai. It presumes that installation was successful and user has logged in.
 It also presumes you have acquired the token for the CWR validation and generation service.
 
 ![](django-admin.png)
@@ -42,9 +43,9 @@ be taken to the work **list view**.
 
 ![](work_list.png)
 
-Let's break down this view. In top right, there is the ``add work`` button, which takes you to the **add view**, already described. Below it is a group of filters, which we will cover a bit later.
+Let's break down this view. In top right, there is the ``add work`` button, which takes you to the **add view**, already described. Below it is a group of filters. They are pretty obvious, so they will not be covered.
 
-On the left side, there is a search filter. It searches for works with a matching title, including alternate titles, 
+On the left side, there is a search field. It searches for works with a matching title, including alternate titles, 
 writer's last lame, ISWC and internal work ID. Below it is an action selection field. Currently, the only available
 action is ``Create CWR from selected works``, which will be covered in detail later. Below it is a table with works, all
 of them, or just those matching selected filters and/or a search term.
@@ -85,3 +86,10 @@ Just press on it and a CWR file will download. Opened in CWR Syntax Highlighter,
 
 ![](cwr_file.png)
 
+Let's presume that this is the real thing, that you sent this file to your society and got back acknowledgement files (some
+societies send one, some send two like ASCAP, which was used an example. After addign them as CWR ACK Imports, open our first 
+work. In the bottom of the change view, one can see the overview of all acks related to this work.
+
+![](acks.png)
+
+This concludes the walkthrough.
