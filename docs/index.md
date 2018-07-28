@@ -77,7 +77,7 @@ menu and press ``Go``.
 This is a shortcut to fill CWR Export **add view**. It is a very simple for, one can select between ``New Work 
 Registrations`` and ``Revisions``, and then add the list of included works.
 
-c
+![](add_cwr.png)
 
 We just have two works, and they are both already filled and this is our first export, so ``NWR`` is what we want. Press
 ``Save and continue editing``. If all went well, then the view should change to read-only, and there is a ``Download`` link. 
