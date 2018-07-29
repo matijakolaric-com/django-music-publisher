@@ -1,21 +1,25 @@
-from django.test import TestCase, Client
-from datetime import date, time
-from django.contrib.auth.models import User
-from django.urls import reverse
-from music_publisher.models import *
-from music_publisher.admin import *
-from django.core.exceptions import ValidationError
-import json
 from collections import OrderedDict
+from datetime import date, time
+from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.test import TestCase, Client
+from django.test.client import RequestFactory
+from django.urls import reverse
+from music_publisher.admin import *
+from music_publisher.models import *
+import json
 
 
 class ModelsTest(TestCase):
     def setUp(self):
+        self.adminsite = AdminSite()
         self.user = User(
             username='superuser', is_superuser=True, is_staff=True)
         self.user.save()
         self.client = Client()
         self.client.force_login(self.user)
+        self.factory = RequestFactory()
 
         self.artist = Artist(last_name="FOO", first_name="")
         self.artist.save()
@@ -173,6 +177,12 @@ class ModelsTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_admin(self):
+        self.cwr_export.get_cwr()
+        self.cwr_export2.get_cwr()
+        request = self.client.get(
+            reverse('admin:music_publisher_ackimport_add',)).wsgi_request
+        ACKImportAdmin(
+            ACKImport, self.adminsite).process(request, '021', CONTENT)
         self.get(reverse('admin:index'))
         self.get(reverse('admin:app_list', args=('music_publisher',)))
         self.get(reverse('admin:music_publisher_artist_changelist',))
@@ -206,186 +216,15 @@ class ModelsTest(TestCase):
             'admin:music_publisher_cwrexport_change',
             args=(self.work.id,)) + '?download=true',
             re_post=False)
+        self.client.get(reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(self.work.id,)),
+            re_post=False)
 
 
-FIELDS = {
-    'writer_id': 'XZY',
-    'writer_last_name': 'DOE-SMITH',
-    'writer_first_name': 'JOHN JAMES',
-    'writer_ipi_name': '00000000395',
-    'writer_pr_society': '021',
-    'controlled': True,
-    'capacity': 'CA',
-    'relative_share': '1.0000'
-}
-
-
-TEST_JSON = '''{
-    "publisher_id": "TOP",
-    "publisher_name": "THE ORIGINAL PUBLISHER",
-    "publisher_ipi_name": "199",
-    "publisher_ipi_base": "I0000000393",
-    "publisher_pr_society": "052",
-    "publisher_mr_society": "044",
-    "publisher_sr_society": null,
-    "revision": false,
-    "works": {
-        "M1N1M41": {
-            "work_title": "MINIMAL",
-            "alternate_titles": [],
-            "artists": [],
-            "writers": [
-                {
-                    "writer_id": "XZY",
-                    "writer_last_name": "DOE-SMITH",
-                    "writer_first_name": "JOHN JAMES",
-                    "writer_ipi_name": "00000000395",
-                    "writer_pr_society": "021",
-                    "controlled": true,
-                    "capacity": "CA",
-                    "relative_share": "1.0000"
-                }
-            ]
-        },
-        "ABC1": {
-            "work_title": "WORK TWO",
-            "isrc": "JMK401400212",
-            "alternate_titles": [],
-            "artists": [
-                {
-                    "artist_last_name": "THE JANE DOE EXTRA BAND"
-                },
-                {
-                    "artist_last_name": "DOE-SMITH",
-                    "artist_first_name": "JOHN JAMES"
-                }
-            ],
-            "writers": [
-                {
-                    "writer_id": "XZY",
-                    "writer_last_name": "DOE-SMITH",
-                    "writer_first_name": "JOHN JAMES",
-                    "writer_ipi_name": "00000000395",
-                    "writer_pr_society": "021",
-                    "controlled": true,
-                    "capacity": "CA",
-                    "relative_share": "1.0000"
-                }
-            ]
-        },
-        "1234": {
-            "work_title": "WORK ONE",
-            "iswc": "T1234567894",
-            "alternate_titles": [
-                {
-                    "alternate_title": "THE ONE"
-                },
-                {
-                    "alternate_title": "THE ONE WORK"
-                }
-            ],
-            "artists": [],
-            "writers": [
-                {
-                    "writer_id": "1",
-                    "writer_last_name": "JONES",
-                    "writer_first_name": "",
-                    "writer_ipi_name": "297",
-                    "writer_pr_society": "052",
-                    "controlled": true,
-                    "capacity": "C ",
-                    "relative_share": "0.6667",
-                    "saan": "XDF1234"
-                },
-                {
-                    "writer_id": "2",
-                    "writer_last_name": "",
-                    "writer_first_name": "",
-                    "controlled": false,
-                    "capacity": "",
-                    "relative_share": "0.3333"
-                }
-            ]
-        },
-        "FLH0U53": {
-            "work_title": "FULL HOUSE",
-            "iswc": "T1234567805",
-            "first_release_date": "2001-07-30",
-            "first_release_duration": "00:03:45",
-            "first_album_title": "THE FIRST ALBUM",
-            "first_album_label": "LABEL WITH NO LABEL",
-            "first_release_catalog_number": "001",
-            "ean": "4006381333931",
-            "isrc": "QMK401400212",
-            "library": "THE EXEMPLARY LIBRARY",
-            "cd_identifier": "ASD 123",
-            "alternate_titles": [
-                {
-                    "alternate_title": "THE COMPLETE EXAMPLE"
-                }
-            ],
-            "artists": [
-                {
-                    "artist_last_name": "THE JANE DOE EXTRA BAND"
-                },
-                {
-                    "artist_last_name": "DOE-SMITH",
-                    "artist_first_name": "JOHN JAMES"
-                }
-            ],
-            "writers": [
-                {
-                    "writer_id": "XZY",
-                    "writer_last_name": "DOE-SMITH",
-                    "writer_first_name": "JOHN JAMES",
-                    "writer_ipi_name": "00000000395",
-                    "writer_ipi_base": "I0000000393",
-                    "writer_pr_society": "021",
-                    "controlled": true,
-                    "capacity": "CA",
-                    "relative_share": "0.3333"
-                },
-                {
-                    "writer_id": "007",
-                    "writer_last_name": "BOND",
-                    "writer_first_name": "JAMES",
-                    "writer_ipi_name": "00000000493",
-                    "writer_pr_society": "052",
-                    "controlled": false,
-                    "capacity": "CA",
-                    "relative_share": "0.1667"
-                },
-                {
-                    "writer_id": "",
-                    "writer_last_name": "",
-                    "writer_first_name": "",
-                    "writer_ipi_name": "",
-                    "writer_pr_society": "",
-                    "controlled": false,
-                    "capacity": "",
-                    "relative_share": "0.1667"
-                },
-                {
-                    "writer_id": "",
-                    "writer_last_name": "",
-                    "writer_first_name": "",
-                    "writer_ipi_name": "",
-                    "writer_pr_society": "",
-                    "controlled": false,
-                    "capacity": "",
-                    "relative_share": "0.1667"
-                },
-                {
-                    "writer_id": "",
-                    "writer_last_name": "",
-                    "writer_first_name": "",
-                    "writer_ipi_name": "",
-                    "writer_pr_society": "",
-                    "controlled": false,
-                    "capacity": "",
-                    "relative_share": "0.1667"
-                }
-            ]
-        }
-    }
-}'''
+CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
+GRHACK0000102.100020180607
+ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001                          20180607SA
+ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607SA
+ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607NP
+TRL000010000008000000839"""
