@@ -127,7 +127,7 @@ Do::
 
     git clone git@github.com:matijakolaric-com/django-music-publisher.git
 
-    cd django_music_publisher
+    cd django-music-publisher
 
     pip install -r requirements.txt
 

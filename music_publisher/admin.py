@@ -11,16 +11,16 @@ from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.decorators import method_decorator
+# from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.timezone import now
-from django.views.decorators.csrf import csrf_protect
+# from django.views.decorators.csrf import csrf_protect
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement)
 import re
 
-csrf_protect_m = method_decorator(csrf_protect)
+# csrf_protect_m = method_decorator(csrf_protect)
 
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS

@@ -16,14 +16,18 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     include_package_data=True,
     classifiers=(
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 2.0',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Music Industry',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
     ),
     zip_safe=False,
 )
