@@ -6,10 +6,10 @@ Django Music Publisher
 .. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher
 .. image:: https://img.shields.io/github/license/mashape/apistatus.svg
-.. image:: https://img.shields.io/pypi/v/nine.svg
-.. image:: https://img.shields.io/pypi/pyversions/Django.svg
-.. image:: https://img.shields.io/pypi/djversions/djangorestframework.svg
-.. image:: https://img.shields.io/pypi/status/Django.svg
+.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
+.. image:: https://img.shields.io/pypi/pyversions/django-music-publisher.svg
+.. image:: https://img.shields.io/pypi/djversions/django-music-publisher.svg
+.. image:: https://img.shields.io/pypi/status/django-music-publisher.svg
 
 
 This is a simple **Django app for original music publishers**. The app is 
