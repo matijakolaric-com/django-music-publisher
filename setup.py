@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='18.7',
+    version='18.7rc2',
     author='Matija Kolarić',
     author_email='i@matijakolaric.com',
     license='MIT License',
@@ -21,7 +21,6 @@ setuptools.setup(
         'Framework :: Django',
         'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',
-        'Intended Audience :: Music Industry',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
