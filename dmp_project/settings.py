@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', '')
+SECRET_KEY = os.getenv('SECRET_KEY', 'nosjouthfjhrwfureiwzzw452uih52k4j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -122,9 +122,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 MUSIC_PUBLISHER_SETTINGS = {
-    'token': os.getenv('TOKEN', None),
-    'validator_url': os.getenv('VALIDATOR_URL', None),
-    'generator_url': os.getenv('GENERATOR_URL', None),
+    'token': '1f4ba2c8bd76dcf71b63337172cfd06ea020344d',
+    'validator_url':
+        'https://matijakolaric.com/api/v1/cwr/original/field/multi/',
+    'generator_url':
+        'https://matijakolaric.com/api/v1/cwr/original/creator/',
 
     'publisher_id': 'XXX',
     'publisher_name': 'THE SEXY PUBLISHER',
