@@ -7,13 +7,13 @@ Django Music Publisher
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
 .. image:: https://img.shields.io/badge/License-MIT-blue.svg
    :target: ./LICENSE
-.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg?branch=master
+.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
-.. image:: https://img.shields.io/pypi/pyversions/django-music-publisher.svg?branch=master
+.. image:: https://img.shields.io/pypi/pyversions/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
-.. image:: https://img.shields.io/pypi/djversions/django-music-publisher.svg?branch=master
+.. image:: https://img.shields.io/pypi/djversions/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
-.. image:: https://img.shields.io/pypi/status/django-music-publisher.svg?branch=master
+.. image:: https://img.shields.io/pypi/status/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 .. image:: https://img.shields.io/badge/contact-matijakolaric.com-d50000.svg
    :target: https://matijakolaric.com/z_contact/
