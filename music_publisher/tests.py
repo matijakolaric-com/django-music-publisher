@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import date, time
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
@@ -8,7 +7,6 @@ from django.test.client import RequestFactory
 from django.urls import reverse
 from music_publisher.admin import *
 from music_publisher.models import *
-import json
 
 
 class ModelsTest(TestCase):
