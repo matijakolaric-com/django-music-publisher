@@ -319,7 +319,8 @@ class Work(WorkBase):
 
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
     writers = models.ManyToManyField('Writer', through='WriterInWork')
-    last_change = models.DateTimeField(editable=False, null=True)
+    last_change = models.DateTimeField(
+        'Last Edited', editable=False, null=True)
 
     @property
     def json(self):
@@ -358,6 +359,9 @@ class AlternateTitle(TitleBase):
     """Conrete class for alternate titles."""
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('work', 'title'),)
 
     @property
     def json(self):
@@ -435,6 +439,7 @@ class ArtistInWork(models.Model):
     class Meta:
         verbose_name = 'Artist Performing Work'
         verbose_name_plural = 'Artists Performing Work'
+        unique_together = (('work', 'artist'),)
 
     def __str__(self):
         return str(self.artist)
@@ -465,6 +470,7 @@ class WriterInWork(models.Model):
 
     class Meta:
         verbose_name_plural = 'Writers in Work'
+        unique_together = (('work', 'writer'),)
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(

@@ -256,7 +256,45 @@ class WorkAdmin(MusicPublisherAdmin):
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'isrc', 'album_cd', '_cwr')
 
-    list_filter = ('_cwr', 'firstrecording__album_cd')
+    class HasISRCListFilter(admin.SimpleListFilter):
+        title = 'Has ISWC'
+        parameter_name = 'has_iswc'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('Y', 'Yes'),
+                ('N', 'No'),
+            )
+
+        def queryset(self, request, queryset):
+            if self.value() == 'Y':
+                return queryset.exclude(iswc__isnull=True)
+            elif self.value() == 'N':
+                return queryset.filter(iswc__isnull=True)
+
+    class HasRecordingListFilter(admin.SimpleListFilter):
+        title = 'Has First Recording'
+        parameter_name = 'has_rec'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('Y', 'Yes'),
+                ('N', 'No'),
+            )
+
+        def queryset(self, request, queryset):
+            if self.value() == 'Y':
+                return queryset.exclude(firstrecording__isnull=True)
+            elif self.value() == 'N':
+                return queryset.filter(firstrecording__isnull=True)
+
+    list_filter = (
+        HasISRCListFilter,
+        HasRecordingListFilter,
+        ('firstrecording__album_cd', admin.RelatedOnlyFieldListFilter),
+        '_cwr',
+        'last_change',
+    )
 
     search_fields = (
         'title', 'alternatetitle__title', 'writerinwork__writer__last_name',
