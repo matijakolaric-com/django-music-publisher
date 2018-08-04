@@ -126,6 +126,8 @@ class TitleBase(MusicPublisherBase):
 
     class Meta:
         abstract = True
+        ordering = ('-id',)
+
 
     title = models.CharField(
         max_length=60, db_index=True, validators=(
@@ -546,6 +548,7 @@ class WriterInWork(models.Model):
 class CWRExport(models.Model):
     class Meta:
         verbose_name = 'CWR Export'
+        ordering = ('-id',)
 
     nwr_rev = models.CharField(
         'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(

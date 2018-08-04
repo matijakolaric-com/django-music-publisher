@@ -26,6 +26,9 @@ input[type=submit]:hover {
     text-decoration: underline;
 }
 
+.select2-container--admin-autocomplete .select2-results__option--highlighted[aria-selected] {
+    background-color: #d50000 !important;
+}
 
 body {
     margin: 0;
@@ -56,10 +59,6 @@ a img {
 a.section:link, a.section:visited {
     color: #fff;
     text-decoration: none;
-}
-
-a.section:focus, a.section:hover {
-    text-decoration: underline;
 }
 
 /* GLOBAL DEFAULTS */
@@ -674,13 +673,6 @@ div.breadcrumbs {
     text-transform: uppercase;
 }
 
-div.breadcrumbs a {
-    /* color: #fff; */
-}
-
-div.breadcrumbs a:focus, div.breadcrumbs a:hover {
-    color: #c4dce8;
-}
 
 /* ACTION ICONS */
 

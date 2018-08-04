@@ -371,9 +371,11 @@ class CWRExportAdmin(admin.ModelAdmin):
         if not (hasattr(self, 'obj') and self.obj.cwr):
             super().save_model(request, obj, form, change)
             self.obj = obj
+        elif hasattr(self, 'obj'):
+            del self.obj
 
     def save_related(self, request, form, formsets, change):
-        if not (hasattr(self, 'obj') and self.obj.cwr):
+        if hasattr(self, 'obj'):
             super().save_related(request, form, formsets, change)
             try:
                 self.obj.get_cwr()
