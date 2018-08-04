@@ -17,6 +17,8 @@ Django Music Publisher
     :target: https://pypi.org/project/django-music-publisher/
 .. image:: https://img.shields.io/badge/contact-matijakolaric.com-d50000.svg
    :target: https://matijakolaric.com/z_contact/
+.. image:: https://img.shields.io/badge/demo-dmp.matijakolaric.com-d50000.svg
+   :target: https://dmp.matijakolaric.com/
 
 This is a simple **Django app for original music publishers**. The app is 
 released under `MIT license <LICENSE>`_ and is basically free. However, it uses
@@ -139,7 +141,7 @@ Do::
 
     source bin/activate
 
-    git clone git@github.com:matijakolaric-com/django-music-publisher.git
+    git clone https://github.com/matijakolaric-com/django-music-publisher.git
 
     cd django-music-publisher
 

@@ -538,7 +538,7 @@ input[type=button][disabled].default {
     margin: 0;
     padding: 8px;
     font-weight: 400;
-    font-size: 13px;
+    font-size: 16px;
     text-align: left;
     background: #d50000;
     color: #fff;

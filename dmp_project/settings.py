@@ -126,8 +126,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "dmp_project", "static"),
 ]
 
-print(os.path.join(BASE_DIR, "dmp_project", "static"))
-
 MUSIC_PUBLISHER_SETTINGS = {
     'token': '1f4ba2c8bd76dcf71b63337172cfd06ea020344d',
     'validator_url':
