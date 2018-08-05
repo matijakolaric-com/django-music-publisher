@@ -256,6 +256,14 @@ class WorkAdmin(MusicPublisherAdmin):
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'isrc', 'album_cd', '_cwr')
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related('writerinwork_set')
+        qs = qs.prefetch_related('writers')
+        qs = qs.prefetch_related('firstrecording__album_cd')
+        return qs
+
+
     class HasISRCListFilter(admin.SimpleListFilter):
         title = 'Has ISWC'
         parameter_name = 'has_iswc'
