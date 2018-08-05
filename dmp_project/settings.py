@@ -133,9 +133,9 @@ MUSIC_PUBLISHER_SETTINGS = {
     'generator_url':
         'https://matijakolaric.com/api/v1/cwr/original/creator/',
 
-    'publisher_id': 'XXX',
-    'publisher_name': 'THE SEXY PUBLISHER',
-    'publisher_ipi_name': '199',
+    'publisher_id': 'FOO',
+    'publisher_name': 'FOO BAR MUSIC PUBLISHING',
+    'publisher_ipi_name': '00000000199',
     'publisher_ipi_base': 'I0000000393',
     'publisher_pr_society': '052',
     'publisher_mr_society': '044',
@@ -144,7 +144,6 @@ MUSIC_PUBLISHER_SETTINGS = {
     'library': 'THE FOO LIBRARY',
     'label': 'FOO BAR MUSIC',
 }
-
 
 admin.site.site_title = admin.site.site_header = MUSIC_PUBLISHER_SETTINGS.get(
     'publisher_name', 'Django Music Publisher')
