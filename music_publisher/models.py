@@ -142,6 +142,8 @@ class WorkBase(TitleBase):
 
     class Meta:
         abstract = True
+        verbose_name_plural = '  Works'
+
 
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
@@ -163,7 +165,7 @@ class AlbumCDBase(MusicPublisherBase):
     class Meta:
         abstract = True
         verbose_name = 'Album and/or Library CD'
-        verbose_name_plural = 'Albums and Library CDs'
+        verbose_name_plural = ' Albums and Library CDs'
 
     cd_identifier = models.CharField(
         'CD Identifier',
@@ -267,6 +269,7 @@ class WriterBase(PersonBase):
     class Meta:
         abstract = True
         ordering = ('last_name', 'first_name', 'ipi_name')
+        verbose_name_plural = ' Writers'
 
     ipi_name = models.CharField(
         'IPI Name #', max_length=11, blank=True, null=True, unique=True,
@@ -422,7 +425,7 @@ class Artist(PersonBase):
     """Concrete class for performing artists."""
     class Meta:
         verbose_name = 'Performing Artist'
-        verbose_name_plural = 'Performing Artists'
+        verbose_name_plural = ' Performing Artists'
 
     @property
     def json(self):
@@ -550,6 +553,7 @@ class WriterInWork(models.Model):
 class CWRExport(models.Model):
     class Meta:
         verbose_name = 'CWR Export'
+        verbose_name_plural = 'CWR Exports'
         ordering = ('-id',)
 
     nwr_rev = models.CharField(
