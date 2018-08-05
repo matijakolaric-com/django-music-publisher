@@ -32,14 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'music_publisher.apps.MusicPublisherConfig',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'music_publisher.apps.MusicPublisherConfig'
 ]
 
 MIDDLEWARE = [
@@ -141,7 +141,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_mr_society': '044',
     'publisher_sr_society': None,
 
-    'library': 'THE FOO LIBRARY',
+    'library': 'FOO BAR MUSIC LIBRARY',
     'label': 'FOO BAR MUSIC',
 }
 

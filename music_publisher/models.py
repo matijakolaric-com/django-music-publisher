@@ -270,12 +270,14 @@ class WriterBase(PersonBase):
 
     ipi_name = models.CharField(
         'IPI Name #', max_length=11, blank=True, null=True, unique=True,
+        help_text='Required for a controlled writer',
         validators=(CWRFieldValidator('writer_ipi_name'),))
     ipi_base = models.CharField(
         'IPI Base #', max_length=15, blank=True, null=True,
         validators=(CWRFieldValidator('writer_ipi_base'),))
     pr_society = models.CharField(
         'Performing Rights Society', max_length=3, blank=True, null=True,
+        help_text='Required for a controlled writer',
         validators=(CWRFieldValidator('writer_pr_society'),),
         choices=SOCIETIES)
     saan = models.CharField(
