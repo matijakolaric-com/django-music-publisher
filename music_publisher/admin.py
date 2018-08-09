@@ -171,19 +171,25 @@ class WriterInWorkFormSet(BaseInlineFormSet):
 
 class WriterInWorkInline(admin.TabularInline):
     autocomplete_fields = ('writer', )
+    readonly_fields = ('original_publisher',)
     model = WriterInWork
     formset = WriterInWorkFormSet
     extra = 0
-    min_num = 1
+    min_num = 1  # One writer is required
     fieldsets = (
         (None, {
             'fields': (
                 'writer',
                 ('capacity', 'relative_share'),
-                ('controlled', 'saan'),
+                ('controlled', 'saan', 'original_publisher'),
             ),
         }),
     )
+
+    def original_publisher(self, obj):
+        if obj.controlled:
+            return SETTINGS.get('publisher_name')
+        return ''
 
 
 class FirstRecordingInline(admin.StackedInline):
@@ -204,6 +210,11 @@ class FirstRecordingInline(admin.StackedInline):
 
 
 class WorkAcknowledgementInline(admin.TabularInline):
+    """Acknowledgement transactions related to this work.
+
+    This should NOT be editable.
+    """
+
     model = WorkAcknowledgement
     extra = 0
     fields = readonly_fields = (
@@ -224,6 +235,8 @@ class WorkAdmin(MusicPublisherAdmin):
         WorkAcknowledgementInline)
 
     def writer_last_names(self, obj):
+        """This is a standard way how writers are shown in other apps."""
+
         return ' / '.join(
             writer.last_name.upper() for writer in obj.writers.all())
     writer_last_names.short_description = 'Writers\' last names'
@@ -262,7 +275,6 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = qs.prefetch_related('writers')
         qs = qs.prefetch_related('firstrecording__album_cd')
         return qs
-
 
     class HasISRCListFilter(admin.SimpleListFilter):
         title = 'Has ISWC'
@@ -475,6 +487,12 @@ class ACKImportAdmin(admin.ModelAdmin):
         r'(?<=\n)ACK.{106}(.{20})(.{20})(.{8})(.{2})', re.S))
 
     def process(self, request, society_code, file_content):
+        """Create appropriate WorkAcknowledgement objects, without duplicates.
+
+        Big part of this code should be moved to the model, left here because
+        messaging is simpler.
+        """
+
         unknown_work_ids = []
         existing_work_ids = []
         report = ''
@@ -523,6 +541,7 @@ class ACKImportAdmin(admin.ModelAdmin):
             obj.society_code = cd['society_code']
             obj.society_name = cd['society_name']
             obj.date = cd['date']
+            # TODO move process() to model, and handle messages here
             obj.report = self.process(
                 request, obj.society_code, cd['acknowledgement_file'])
             super().save_model(request, obj, form, change)

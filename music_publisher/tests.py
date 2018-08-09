@@ -2,11 +2,13 @@ from datetime import date, time
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase, Client
 from django.test.client import RequestFactory
 from django.urls import reverse
 from music_publisher.admin import *
 from music_publisher.models import *
+from io import StringIO
 
 
 class ModelsTest(TestCase):
@@ -161,7 +163,12 @@ class ModelsTest(TestCase):
         adminform = response.context_data.get('adminform')
         if adminform is None:
             return
-        data = adminform.form.initial
+        data = {}
+        for sc in response.context:
+            for d in sc:
+                if 'widget' in sc:
+                    data[sc['widget']['name']] = sc['widget']['value']
+        data.update(adminform.form.initial)
         if not re_post:
             return
         if isinstance(re_post, dict):
@@ -172,7 +179,7 @@ class ModelsTest(TestCase):
             else:
                 data[key] = value
         response = self.client.post(path, data)
-        self.assertEqual(response.status_code, 302)
+        self.assertIn(response.status_code, [200, 302])
 
     def test_admin(self):
         self.cwr_export.get_cwr()
@@ -209,15 +216,26 @@ class ModelsTest(TestCase):
             re_post={'pr_society': '021'})
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
-            re_post=False)
+            re_post={'title': 'CHANGED'})
+        self.get(
+            reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(self.cwr_export.id,)),
+            re_post=True)
         self.client.get(reverse(
             'admin:music_publisher_cwrexport_change',
-            args=(self.work.id,)) + '?download=true',
-            re_post=False)
-        self.client.get(reverse(
-            'admin:music_publisher_cwrexport_change',
-            args=(self.work.id,)),
-            re_post=False)
+            args=(self.work.id,)) + '?download=true',)
+        self.get(
+            reverse('admin:music_publisher_cwrexport_add'),
+            re_post={'nwr_rev': 'NWR', 'works': [1]})
+        mock = StringIO()
+        mock.write(CONTENT)
+        mock.seek(0)
+        mock = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21', 'text', 0, None)
+        self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mock})
 
 
 CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607

@@ -7,8 +7,17 @@ import re
 import requests
 
 
+# SETTINGS and few other things, that will go to Client class
+
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-VALIDATE = SETTINGS.get('validator_url') and SETTINGS.get('token')
+VALIDATE = (
+    SETTINGS.get('validator_url') and
+    SETTINGS.get('generator_url') and
+    SETTINGS.get('token'))
+
+
+# Defaults only have 12 societies from 6 countries. These are G7, without Japan
+
 try:
     SOCIETIES = settings.MUSIC_PUBLISHER_SOCIETIES
 except AttributeError:
@@ -25,6 +34,7 @@ except AttributeError:
 
         ('052', 'PRS, United Kingdom'),
         ('044', 'MCPS, United Kingdom'),
+
 
         ('010', 'ASCAP, United States'),
         ('021', 'BMI, United States'),
@@ -115,6 +125,7 @@ class MusicPublisherBase(models.Model):
             except ValidationError as ve:
                 self._cwr = False
                 if 'service' not in ve.args:
+                    # This means it is an unknown error
                     raise
         else:
             self._cwr = False
@@ -128,9 +139,10 @@ class TitleBase(MusicPublisherBase):
         abstract = True
         ordering = ('-id',)
 
-
     title = models.CharField(
         max_length=60, db_index=True, validators=(
+            # Original CWR Generator matks all alternate titles as 'AT',
+            # so the validation is the sane as in NWR.work_title
             CWRFieldValidator('work_title'),))
 
     def __str__(self):
@@ -144,7 +156,6 @@ class WorkBase(TitleBase):
         abstract = True
         verbose_name_plural = '  Works'
 
-
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('iswc'),))
@@ -152,6 +163,7 @@ class WorkBase(TitleBase):
     def clean_fields(self, *args, **kwargs):
         """Deal with various ways ISWC is written."""
         if self.iswc:
+            # CWR holds ISWC in TNNNNNNNNNNC format
             self.iswc = self.iswc.replace('-', '').replace('.', '')
         return super().clean_fields(*args, **kwargs)
 
@@ -160,12 +172,16 @@ class AlbumCDBase(MusicPublisherBase):
     """Abstract class that deals with albums and music liibrary data.
 
     Note that label and library are set in the settings, so there can
-    be only a single instance."""
+    be only a single 'instance'.
+
+    This limitation is part of this design, other solutions are possible.
+    """
 
     class Meta:
         abstract = True
         verbose_name = 'Album and/or Library CD'
         verbose_name_plural = ' Albums and Library CDs'
+        ordering = ('album_title', 'cd_identifier')
 
     cd_identifier = models.CharField(
         'CD Identifier',
@@ -239,6 +255,7 @@ class FirstRecordingBase(MusicPublisherBase):
 
     def clean_fields(self, *args, **kwargs):
         if self.isrc:
+            # Removing all characters added for readability
             self.isrc = self.isrc.replace('-', '').replace('.', '')
         return super().clean_fields(*args, **kwargs)
 
@@ -331,7 +348,7 @@ class Work(WorkBase):
 
     @property
     def json(self):
-        """Create data structure that can be serielized as JSON.db_index=
+        """Create data structure that can be serielized as JSON.
 
         Note that serialization is not performed here.
         """
