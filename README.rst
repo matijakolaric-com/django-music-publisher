@@ -186,5 +186,5 @@ Walkthrough and Demo
 `Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/>`_
 is available in the ``docs`` folder.
 
-`Demo <https://dmp.matijakolaric-com.github.io/>`_ is also available, some demo
+`Demo <https://dmp.matijakolaric.com/>`_ is also available, some demo
 data is provided.
