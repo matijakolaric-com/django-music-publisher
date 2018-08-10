@@ -106,30 +106,36 @@ class MusicPublisherBase(models.Model):
             raise ValidationError(errors, code='invalid')
         self._cwr = True
 
+    def construct_field_dict(self):
+        """Construct dictionary appropriate for external validation."""
+        fields = {}
+        for field in self._meta.fields:
+            value = getattr(self, field.name)
+            if not value:
+                continue
+            for validator in field.validators:
+                if isinstance(validator, CWRFieldValidator):
+                    fields[field.name] = {
+                        'field': validator.field,
+                        'value': value}
+        return fields
+
     def clean_fields(self, *args, **kwargs):
         """If external service is used, prepare the data for validation."""
 
-        if VALIDATE:
-            fields = {}
-            for field in self._meta.fields:
-                value = getattr(self, field.name)
-                if not value:
-                    continue
-                for validator in field.validators:
-                    if isinstance(validator, CWRFieldValidator):
-                        fields[field.name] = {
-                            'field': validator.field,
-                            'value': value}
-            try:
-                self.validate_fields(fields)
-            except ValidationError as ve:
-                self._cwr = False
-                if 'service' not in ve.args:
-                    # This means it is an unknown error
-                    raise
-        else:
+        if not VALIDATE:
             self._cwr = False
-        super().clean_fields(*args, **kwargs)
+            return super().clean_fields(*args, **kwargs)
+
+        fields = self.construct_field_dict()
+        try:
+            self.validate_fields(fields)
+        except ValidationError as ve:
+            self._cwr = False
+            if 'service' not in ve.args:
+                # This means it is an unknown error
+                raise
+        return super().clean_fields(*args, **kwargs)
 
 
 class TitleBase(MusicPublisherBase):
@@ -426,15 +432,13 @@ class FirstRecording(FirstRecordingBase):
             data.update({
                 'first_album_title': self.album_cd.album_title or '',
                 'first_album_label': self.album_cd.album_label or '',
-                'ean': self.album_cd.ean or '',
-            })
+                'ean': self.album_cd.ean or ''})
         if self.release_date:
             data['first_release_date'] = self.release_date.strftime('%Y-%m-%d')
         if self.album_cd and self.album_cd.library:
             data.update({
                 'library': self.album_cd.library,
-                'cd_identifier': self.album_cd.cd_identifier
-            })
+                'cd_identifier': self.album_cd.cd_identifier})
         return data
 
 
@@ -619,6 +623,7 @@ class CWRExport(models.Model):
     def get_cwr(self):
         if self.cwr:
             return
+
         try:
             response = requests.post(
                 SETTINGS.get('generator_url'),
@@ -627,6 +632,7 @@ class CWRExport(models.Model):
                 json=self.json, timeout=30)
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
+
         if response.status_code == 400:
             raise ValidationError('Bad Request', code='service')
         elif response.status_code == 401:

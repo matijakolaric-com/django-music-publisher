@@ -57,7 +57,9 @@ class ModelsTest(TestCase):
         self.work2.save()
         WriterInWork(
             writer=self.thiswriter, work=self.work2, saan='SAMOSAN',
-            controlled=True, relative_share=100, capacity='CA').save()
+            controlled=True, relative_share=50, capacity='CA').save()
+        WriterInWork(
+            work=self.work2, controlled=False, relative_share=50).save()
         self.cwr_export = CWRExport()
         self.cwr_export.save()
         self.cwr_export.works.add(self.work)
@@ -180,6 +182,7 @@ class ModelsTest(TestCase):
                 data[key] = value
         response = self.client.post(path, data)
         self.assertIn(response.status_code, [200, 302])
+        return response
 
     def test_admin(self):
         self.cwr_export.get_cwr()
@@ -217,6 +220,14 @@ class ModelsTest(TestCase):
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
             re_post={'title': 'CHANGED'})
+        self.get(reverse(
+            'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
+            re_post={'album_title': 'CHANGED', 'library': 'SET'})
+        self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_cwr', 'select_across': 1,
+                'index': 0, '_selected_action': self.work.id})
         self.get(
             reverse(
                 'admin:music_publisher_cwrexport_change',
@@ -232,7 +243,8 @@ class ModelsTest(TestCase):
         mock.write(CONTENT)
         mock.seek(0)
         mock = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21', 'text', 0, None)
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
         self.get(
             reverse('admin:music_publisher_ackimport_add'),
             re_post={'acknowledgement_file': mock})
@@ -243,4 +255,5 @@ GRHACK0000102.100020180607
 ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001                          20180607SA
 ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607SA
 ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607NP
+ACK0000000300000000201805160910510000100000003NWRX                                                           0000000000000X                          20180607NP
 TRL000010000008000000839"""
