@@ -140,7 +140,12 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_pr_society': '052',
     'publisher_mr_society': '044',
     'publisher_sr_society': None,
-
+    'us_publisher_override': {
+        'ASCAP': None,
+        'BMI': None,
+        'SESAC': None,
+    },
+    'saan': True,
     'library': 'FOO BAR MUSIC LIBRARY',
     'label': 'FOO BAR MUSIC',
 }
