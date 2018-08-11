@@ -117,11 +117,20 @@ class ArtistAdmin(MusicPublisherAdmin):
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
-                    '_can_be_controlled', 'generally_controlled', '_cwr')
+                    '_can_be_controlled', 'generally_controlled')
+
+    def get_list_display(self, *args, **kwargs):
+        lst = list(self.list_display)
+        if SETTINGS.get('admin_show_publisher'):
+            lst.append('original_publisher')
+        lst.append('_cwr')
+        return lst
+
     list_filter = ('_can_be_controlled', 'generally_controlled',
                    'pr_society', '_cwr')
+
     search_fields = ('last_name', '^ipi_name')
-    readonly_fields = ('_can_be_controlled',)
+    readonly_fields = ('_can_be_controlled', 'original_publisher')
     fieldsets = (
         ('Name', {
             'fields': (
@@ -133,10 +142,17 @@ class WriterAdmin(MusicPublisherAdmin):
         }),
         ('Generally controlled', {
             'fields': (
-                ('generally_controlled', 'saan'),),
+                ('generally_controlled', 'saan')
+                if SETTINGS.get('admin_show_saan')
+                else ('generally_controlled',)),
         }),
     )
     actions = None
+
+    def original_publisher(self, obj):
+        if obj.generally_controlled and obj.pr_society:
+            return obj.get_publisher_dict().get('publisher_name')
+        return ''
 
     def save_model(self, request, obj, form, *args, **kwargs):
         super().save_model(request, obj, form, *args, **kwargs)
@@ -176,19 +192,19 @@ class WriterInWorkInline(admin.TabularInline):
     formset = WriterInWorkFormSet
     extra = 0
     min_num = 1  # One writer is required
-    fieldsets = (
-        (None, {
-            'fields': (
-                'writer',
-                ('capacity', 'relative_share'),
-                ('controlled', 'saan', 'original_publisher'),
-            ),
-        }),
-    )
+    fields = ('writer', 'capacity', 'relative_share', 'controlled')
+
+    def get_fields(self, *args, **kwargs):
+        lst = list(self.fields)
+        if SETTINGS.get('admin_show_publisher'):
+            lst.append('original_publisher')
+        if SETTINGS.get('admin_show_saan'):
+            lst.append('saan')
+        return lst
 
     def original_publisher(self, obj):
-        if obj.controlled:
-            return SETTINGS.get('publisher_name')
+        if obj.controlled and obj.writer:
+            return obj.writer.get_publisher_dict().get('publisher_name')
         return ''
 
 

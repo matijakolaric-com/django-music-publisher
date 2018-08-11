@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
@@ -39,8 +39,18 @@ except AttributeError:
         ('010', 'ASCAP, United States'),
         ('021', 'BMI, United States'),
         ('071', 'SESAC Inc., United States'),
-        ('034', 'HFA, United States'),
-    ]
+        ('034', 'HFA, United States')]
+
+
+def get_publisher_dict(pr_society):
+    mapping = {'010': 'ASCAP', '021': 'BMI', '071': 'SESAC'}
+    key = mapping.get(pr_society)
+    us_publisher_override = SETTINGS.get('us_publisher_override', {})
+    pub = us_publisher_override.get(key)
+    if pub:
+        pub['pr_society'] = 'pr_society'
+        return pub
+    return SETTINGS
 
 
 @deconstructible
@@ -315,6 +325,9 @@ class WriterBase(PersonBase):
     _can_be_controlled = models.BooleanField(editable=False, default=False)
     generally_controlled = models.BooleanField(default=False)
 
+    def get_publisher_dict(self):
+        return get_publisher_dict(self.pr_society)
+
     def clean_fields(self, *args, **kwargs):
         if self.ipi_base:
             self.ipi_base = self.ipi_base.replace('.', '')
@@ -335,6 +348,10 @@ class WriterBase(PersonBase):
         if self.saan and not self.generally_controlled:
             raise ValidationError({
                 'saan': 'Only for generally controlled writers.'})
+
+    @property
+    def is_us_writer(self):
+        return self.pr_society in ['010', '021', '071']
 
     def __str__(self):
         name = super().__str__()

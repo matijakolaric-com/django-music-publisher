@@ -127,6 +127,9 @@ STATICFILES_DIRS = [
 ]
 
 MUSIC_PUBLISHER_SETTINGS = {
+    'admin_show_publisher': True,
+    'admin_show_saan': False,
+
     'token': '1f4ba2c8bd76dcf71b63337172cfd06ea020344d',
     'validator_url':
         'https://matijakolaric.com/api/v1/cwr/original/field/multi/',
@@ -140,12 +143,17 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_pr_society': '052',
     'publisher_mr_society': '044',
     'publisher_sr_society': None,
+
     'us_publisher_override': {
-        'ASCAP': None,
+        'ASCAP': {
+            'publisher_name': 'FOO A MUSIC PUBLISHING',
+            'publisher_ipi_name': '00000000493',
+            'publisher_mr_society': '044',
+        },
         'BMI': None,
         'SESAC': None,
     },
-    'saan': True,
+
     'library': 'FOO BAR MUSIC LIBRARY',
     'label': 'FOO BAR MUSIC',
 }
