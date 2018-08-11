@@ -146,9 +146,12 @@ MUSIC_PUBLISHER_SETTINGS = {
 
     'us_publisher_override': {
         'ASCAP': {
+            'publisher_id': 'FOOA',
             'publisher_name': 'FOO A MUSIC PUBLISHING',
             'publisher_ipi_name': '00000000493',
+            'publisher_pr_society': '010',
             'publisher_mr_society': '044',
+            'publisher_sr_society': None,
         },
         'BMI': None,
         'SESAC': None,

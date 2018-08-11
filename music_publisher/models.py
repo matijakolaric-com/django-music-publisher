@@ -618,6 +618,12 @@ class CWRExport(models.Model):
                 'publisher_mr_society'),
             "publisher_sr_society": SETTINGS.get(
                 'publisher_pr_society'),
+            "ascap_publisher": SETTINGS.get(
+                'us_publisher_override', {}).get('ASCAP'),
+            "bmi_publisher": SETTINGS.get(
+                'us_publisher_override', {}).get('BMI'),
+            "sesac_publisher": SETTINGS.get(
+                'us_publisher_override', {}).get('SESAC')
         })
         works = OrderedDict()
         for work in self.works.order_by('id'):
@@ -640,6 +646,9 @@ class CWRExport(models.Model):
     def get_cwr(self):
         if self.cwr:
             return
+
+        import json
+        print(json.dumps(self.json))
 
         try:
             response = requests.post(
