@@ -26,8 +26,8 @@ a paid external service for data validation and creation of CWR files, so using
 it *may not be free*. Free 15-day demo licence for this service is available 
 upon request. 
 
-**This branch contains extension towards US publishers with separate entitites
-in each of the US PROs.**
+**This branch contains extension for US publishers with separate entitites in
+each of the US PROs. It is NOT FINISHED.**
 
 Introduction
 ===============================================================================
