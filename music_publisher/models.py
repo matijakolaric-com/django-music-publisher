@@ -16,7 +16,8 @@ VALIDATE = (
     SETTINGS.get('token'))
 
 
-# Defaults only have 12 societies from 6 countries. These are G7, without Japan
+# Default only has 12 societies from 6 countries. These are G7, without Japan
+# If you need to add some, do it in the settings, not here.
 
 try:
     SOCIETIES = settings.MUSIC_PUBLISHER_SOCIETIES
@@ -516,6 +517,7 @@ class WriterInWork(models.Model):
     class Meta:
         verbose_name_plural = 'Writers in Work'
         unique_together = (('work', 'writer'),)
+        ordering = ('writer__last_name', 'writer__first_name')
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
@@ -647,9 +649,6 @@ class CWRExport(models.Model):
         if self.cwr:
             return
 
-        import json
-        print(json.dumps(self.json))
-
         try:
             response = requests.post(
                 SETTINGS.get('generator_url'),
@@ -678,6 +677,9 @@ class CWRExport(models.Model):
 
 
 class WorkAcknowledgement(models.Model):
+
+    class Meta:
+        verbose_name = 'Registration Acknowledgement'
 
     TRANSACTION_STATUS_CHOICES = (
         ('CO', 'Conflict'),

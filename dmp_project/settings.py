@@ -128,7 +128,7 @@ STATICFILES_DIRS = [
 
 MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': True,
-    'admin_show_saan': False,
+    'admin_show_saan': True,
 
     'token': '1f4ba2c8bd76dcf71b63337172cfd06ea020344d',
     'validator_url':
