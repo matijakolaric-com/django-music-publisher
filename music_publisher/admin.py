@@ -129,7 +129,7 @@ class WriterAdmin(MusicPublisherAdmin):
     list_filter = ('_can_be_controlled', 'generally_controlled',
                    'pr_society', '_cwr')
 
-    search_fields = ('last_name', '^ipi_name')
+    search_fields = ('last_name', 'ipi_name')
     readonly_fields = ('_can_be_controlled', 'original_publisher')
     fieldsets = (
         ('Name', {

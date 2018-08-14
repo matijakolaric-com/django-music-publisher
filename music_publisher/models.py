@@ -109,6 +109,7 @@ class MusicPublisherBase(models.Model):
             field_name = keys[i]
             field_dict = rfields[i]
             if field_dict.get('conditionally_valid'):
+                print(field_dict.get('display_value'))
                 pass  # maybe replace by a recommended value?
             else:
                 errors[field_name] = (
@@ -330,6 +331,8 @@ class WriterBase(PersonBase):
         return get_publisher_dict(self.pr_society)
 
     def clean_fields(self, *args, **kwargs):
+        if self.ipi_name:
+            self.ipi_name = self.ipi_name.rjust(11, '0')
         if self.ipi_base:
             self.ipi_base = self.ipi_base.replace('.', '')
             self.ipi_base = re.sub(
@@ -517,7 +520,7 @@ class WriterInWork(models.Model):
     class Meta:
         verbose_name_plural = 'Writers in Work'
         unique_together = (('work', 'writer'),)
-        ordering = ('writer__last_name', 'writer__first_name')
+        ordering = ('-controlled', 'writer__last_name', 'writer__first_name')
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
