@@ -35,9 +35,11 @@ Introduction
 Use Case
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This app is targeted at **single-entity original publishers**, publishing 
+This app is targeted at **single original publishers**, publishing 
 **original musical works**.
 (Original work is one that is not a modification of an existing musical work.)
+A special US situation where an original publisher may have one entity for every
+of the three PROs is also covered.
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
