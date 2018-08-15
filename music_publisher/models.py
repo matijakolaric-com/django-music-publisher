@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
@@ -16,7 +16,8 @@ VALIDATE = (
     SETTINGS.get('token'))
 
 
-# Defaults only have 12 societies from 6 countries. These are G7, without Japan
+# Default only has 12 societies from 6 countries. These are G7, without Japan
+# If you need to add some, do it in the settings, not here.
 
 try:
     SOCIETIES = settings.MUSIC_PUBLISHER_SOCIETIES
@@ -39,8 +40,18 @@ except AttributeError:
         ('010', 'ASCAP, United States'),
         ('021', 'BMI, United States'),
         ('071', 'SESAC Inc., United States'),
-        ('034', 'HFA, United States'),
-    ]
+        ('034', 'HFA, United States')]
+
+
+def get_publisher_dict(pr_society):
+    mapping = {'010': 'ASCAP', '021': 'BMI', '071': 'SESAC'}
+    key = mapping.get(pr_society)
+    us_publisher_override = SETTINGS.get('us_publisher_override', {})
+    pub = us_publisher_override.get(key)
+    if pub:
+        pub['pr_society'] = 'pr_society'
+        return pub
+    return SETTINGS
 
 
 @deconstructible
@@ -98,6 +109,7 @@ class MusicPublisherBase(models.Model):
             field_name = keys[i]
             field_dict = rfields[i]
             if field_dict.get('conditionally_valid'):
+                print(field_dict.get('display_value'))
                 pass  # maybe replace by a recommended value?
             else:
                 errors[field_name] = (
@@ -315,7 +327,12 @@ class WriterBase(PersonBase):
     _can_be_controlled = models.BooleanField(editable=False, default=False)
     generally_controlled = models.BooleanField(default=False)
 
+    def get_publisher_dict(self):
+        return get_publisher_dict(self.pr_society)
+
     def clean_fields(self, *args, **kwargs):
+        if self.ipi_name:
+            self.ipi_name = self.ipi_name.rjust(11, '0')
         if self.ipi_base:
             self.ipi_base = self.ipi_base.replace('.', '')
             self.ipi_base = re.sub(
@@ -335,6 +352,10 @@ class WriterBase(PersonBase):
         if self.saan and not self.generally_controlled:
             raise ValidationError({
                 'saan': 'Only for generally controlled writers.'})
+
+    @property
+    def is_us_writer(self):
+        return self.pr_society in ['010', '021', '071']
 
     def __str__(self):
         name = super().__str__()
@@ -499,6 +520,7 @@ class WriterInWork(models.Model):
     class Meta:
         verbose_name_plural = 'Writers in Work'
         unique_together = (('work', 'writer'),)
+        ordering = ('-controlled', 'writer__last_name', 'writer__first_name')
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
@@ -601,6 +623,12 @@ class CWRExport(models.Model):
                 'publisher_mr_society'),
             "publisher_sr_society": SETTINGS.get(
                 'publisher_pr_society'),
+            "ascap_publisher": SETTINGS.get(
+                'us_publisher_override', {}).get('ASCAP'),
+            "bmi_publisher": SETTINGS.get(
+                'us_publisher_override', {}).get('BMI'),
+            "sesac_publisher": SETTINGS.get(
+                'us_publisher_override', {}).get('SESAC')
         })
         works = OrderedDict()
         for work in self.works.order_by('id'):
@@ -652,6 +680,9 @@ class CWRExport(models.Model):
 
 
 class WorkAcknowledgement(models.Model):
+
+    class Meta:
+        verbose_name = 'Registration Acknowledgement'
 
     TRANSACTION_STATUS_CHOICES = (
         ('CO', 'Conflict'),
