@@ -78,10 +78,21 @@ class AlbumCDAdmin(MusicPublisherAdmin):
 
     list_display = (
         '__str__',
-        'library', 'cd_identifier',
-        'album_title', 'album_label', 'release_date', 'ean',
-        '_cwr'
     )
+
+    def get_list_display(self, *args, **kwargs):
+        lst = list(self.list_display)
+        if SETTINGS.get('label'):
+            lst.append('album_label')
+            lst.append('album_title')
+        lst.append('release_date')
+        lst.append('ean')
+        if SETTINGS.get('library'):
+            lst.append('library')
+            lst.append('cd_identifier')
+        lst.append('_cwr')
+        return lst
+
     list_filter = ('_cwr',)
 
     search_fields = ('album_title', '^cd_identifier')
@@ -256,6 +267,7 @@ class WorkAdmin(MusicPublisherAdmin):
         return ' / '.join(
             writer.last_name.upper() for writer in obj.writers.all())
     writer_last_names.short_description = 'Writers\' last names'
+    writer_last_names.admin_order_field = 'writers__last_name'
 
     def percentage_controlled(self, obj):
         return sum(
@@ -263,22 +275,30 @@ class WorkAdmin(MusicPublisherAdmin):
             if wiw.controlled)
     percentage_controlled.short_description = '% controlled'
 
+    def work_id(self, obj):
+        return obj.work_id
+    work_id.short_description = 'Work ID'
+    work_id.admin_order_field = 'id'
+
     def album_cd(self, obj):
         if not obj.firstrecording:
             return None
         return obj.firstrecording.album_cd
     album_cd.short_description = 'Album / Library CD'
+    album_cd.admin_order_field = 'firstrecording__album_cd'
 
     def isrc(self, obj):
         if not obj.firstrecording:
             return None
         return obj.firstrecording.isrc
     isrc.short_description = 'ISRC'
+    isrc.admin_order_field = 'firstrecording__isrc'
 
     def duration(self, obj):
         if not obj.firstrecording or not obj.firstrecording.duration:
             return None
         return obj.firstrecording.duration.strftime('%H:%M:%S')
+    duration.admin_order_field = 'firstrecording__duration'
 
     readonly_fields = ('writer_last_names', 'work_id')
     list_display = (
@@ -391,6 +411,8 @@ class CWRExportAdmin(admin.ModelAdmin):
     list_display = (
         'filename', 'nwr_rev', 'work_count', 'cwr_ready', 'download_link')
 
+    list_filter = ('nwr_rev', 'year', )
+
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.cwr:
             return ('nwr_rev', 'works', 'filename', 'download_link')
@@ -489,6 +511,7 @@ class ACKImportAdmin(admin.ModelAdmin):
 
     list_display = (
         'filename', 'society_code', 'society_name', 'date')
+    list_filter = ('society_code', 'society_name')
     fields = readonly_fields = (
         'filename', 'society_code', 'society_name', 'date', 'report')
 
