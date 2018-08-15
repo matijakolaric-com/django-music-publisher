@@ -157,8 +157,8 @@ MUSIC_PUBLISHER_SETTINGS = {
         'SESAC': None,
     },
 
-    'library': 'FOO BAR MUSIC LIBRARY',
-    'label': 'FOO BAR MUSIC',
+    # 'library': 'FOO BAR MUSIC LIBRARY',
+    # 'label': 'FOO BAR MUSIC',
 }
 
 admin.site.site_title = admin.site.site_header = MUSIC_PUBLISHER_SETTINGS.get(

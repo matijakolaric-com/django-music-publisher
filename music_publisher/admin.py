@@ -84,7 +84,7 @@ class AlbumCDAdmin(MusicPublisherAdmin):
         lst = list(self.list_display)
         if SETTINGS.get('label'):
             lst.append('album_label')
-            lst.append('album_title')
+        lst.append('album_title')
         lst.append('release_date')
         lst.append('ean')
         if SETTINGS.get('library'):
