@@ -76,7 +76,7 @@ this point, the learning curve gets really steep, both for software developers
 and users.
 
 Common Works Registration (CWR), or even the baby version of it, Electronic
-Batch Registration (EBR), is usually the most time-consulimg part of any 
+Batch Registration (EBR), is usually the most time-consumig part of any 
 software project for music publishers. You may be interested in using external
 REST API service for data validation, as well as generation and parsing of CWR 
 files.
