@@ -72,10 +72,10 @@ class CWRFieldValidator:
     def __call__(self, value):
         return
 
-    def __eq__(self, other):
-        return (
-            isinstance(other, CWRFieldValidator) and
-            self.field == other.field)
+    # def __eq__(self, other):
+    #     return (
+    #         isinstance(other, CWRFieldValidator) and
+    #         self.field == other.field)
 
 
 class MusicPublisherBase(models.Model):
@@ -350,9 +350,9 @@ class WriterBase(PersonBase):
             raise ValidationError({
                 'saan': 'Only for generally controlled writers.'})
 
-    @property
-    def is_us_writer(self):
-        return self.pr_society in ['010', '021', '071']
+    # @property
+    # def is_us_writer(self):
+    #     return self.pr_society in ['010', '021', '071']
 
     def __str__(self):
         name = super().__str__()

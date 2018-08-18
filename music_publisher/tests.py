@@ -28,6 +28,11 @@ class ModelsTest(TestCase):
             ipi_base='I1234567893', pr_society='010')
         self.thiswriter.clean()
         self.thiswriter.save()
+        self.thatwriter = Writer(
+            last_name='FOOBAR', first_name='JACK JR.', ipi_name='297',
+            pr_society='010', generally_controlled=True)
+        self.thatwriter.clean()
+        self.thatwriter.save()
         self.otherwriter = Writer(last_name='DOE', first_name='JANE')
         self.otherwriter.clean()
         self.otherwriter.save()
@@ -71,6 +76,7 @@ class ModelsTest(TestCase):
     def test_validation(self):
         self.assertTrue(VALIDATE)
         self.work.clean_fields()
+        get_publisher_dict(None)
         with self.assertRaises(ValidationError) as ve:
             self.artist.first_name = "BAR, JR"
             self.artist.clean_fields()
@@ -172,7 +178,7 @@ class ModelsTest(TestCase):
                     data[sc['widget']['name']] = sc['widget']['value']
         data.update(adminform.form.initial)
         if not re_post:
-            return
+            return response
         if isinstance(re_post, dict):
             data.update(re_post)
         for key, value in data.items():
@@ -185,6 +191,7 @@ class ModelsTest(TestCase):
         return response
 
     def test_admin(self):
+        self.assertEqual(AlbumCDAdmin.label_not_set(None), 'NOT SET')
         self.cwr_export.get_cwr()
         self.cwr_export2.get_cwr()
         request = self.client.get(
@@ -197,6 +204,12 @@ class ModelsTest(TestCase):
         self.get(reverse('admin:music_publisher_albumcd_changelist',))
         self.get(reverse('admin:music_publisher_writer_changelist',))
         self.get(reverse('admin:music_publisher_work_changelist',))
+        self.get(
+            reverse('admin:music_publisher_work_changelist',) +
+            '?has_iswc=N&has_rec=Y')
+        self.get(
+            reverse('admin:music_publisher_work_changelist',) +
+            '?has_iswc=Y&has_rec=N&q=01')
         self.get(reverse('admin:music_publisher_cwrexport_changelist',))
         self.get(reverse('admin:music_publisher_ackimport_changelist',))
         self.get(reverse('admin:music_publisher_artist_add',))
@@ -221,6 +234,9 @@ class ModelsTest(TestCase):
             'admin:music_publisher_work_change', args=(self.work.id,)),
             re_post={'title': 'CHANGED'})
         self.get(reverse(
+            'admin:music_publisher_work_change', args=(self.work.id,)),
+            re_post={'writerinwork_set-1-relative_share': '111'})
+        self.get(reverse(
             'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
             re_post={'album_title': 'CHANGED', 'library': 'SET'})
         self.client.post(
@@ -235,19 +251,38 @@ class ModelsTest(TestCase):
             re_post=True)
         self.client.get(reverse(
             'admin:music_publisher_cwrexport_change',
-            args=(self.work.id,)) + '?download=true',)
+            args=(self.cwr_export.id,)) + '?download=true',)
         self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'NWR', 'works': [1]})
         mock = StringIO()
         mock.write(CONTENT)
         mock.seek(0)
-        mock = InMemoryUploadedFile(
+        mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
             'text', 0, None)
         self.get(
             reverse('admin:music_publisher_ackimport_add'),
-            re_post={'acknowledgement_file': mock})
+            re_post={'acknowledgement_file': mockfile})
+        mock.seek(3)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOOL.V21',
+            'text', 0, None)
+        self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
+        self.get(
+            reverse(
+                'admin:music_publisher_ackimport_change',
+                args=(1,)),
+            re_post=True)
 
 
 CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
