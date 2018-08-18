@@ -108,10 +108,7 @@ class MusicPublisherBase(models.Model):
         for i in range(len(fields)):
             field_name = keys[i]
             field_dict = rfields[i]
-            if field_dict.get('conditionally_valid'):
-                print(field_dict.get('display_value'))
-                pass  # maybe replace by a recommended value?
-            else:
+            if not field_dict.get('conditionally_valid'):
                 errors[field_name] = (
                     field_dict['error'] or 'Unknown Error')
         if errors:
