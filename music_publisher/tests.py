@@ -279,6 +279,13 @@ class ModelsTest(TestCase):
         self.get(
             reverse('admin:music_publisher_ackimport_add'),
             re_post={'acknowledgement_file': mockfile})
+        mock.seek(3)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'CW180001000_FOOL.V21',

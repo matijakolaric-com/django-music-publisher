@@ -144,18 +144,25 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_mr_society': '044',
     'publisher_sr_society': None,
 
-    # 'us_publisher_override': {
-    #     'ASCAP': {
-    #         'publisher_id': 'FOOA',
-    #         'publisher_name': 'FOO A MUSIC PUBLISHING',
-    #         'publisher_ipi_name': '00000000493',
-    #         'publisher_pr_society': '010',
-    #         'publisher_mr_society': '044',
-    #         'publisher_sr_society': None,
-    #     },
-    #     'BMI': None,
-    #     'SESAC': None,
-    # },
+    'us_publisher_override': {
+        'ASCAP': {
+            'publisher_id': 'FOOA',
+            'publisher_name': 'FOO A MUSIC PUBLISHING',
+            'publisher_ipi_name': '00000000493',
+            'publisher_pr_society': '010',
+            'publisher_mr_society': '044',
+            'publisher_sr_society': None,
+        },
+        'BMI': {
+            'publisher_id': 'FOOB',
+            'publisher_name': 'FOO B MUSIC PUBLISHING',
+            'publisher_ipi_name': '00000000395',
+            'publisher_pr_society': '021',
+            'publisher_mr_society': '044',
+            'publisher_sr_society': None,
+        },
+        'SESAC': None,
+    },
 
     'library': 'FOO BAR MUSIC LIBRARY',
     'label': 'FOO BAR MUSIC',

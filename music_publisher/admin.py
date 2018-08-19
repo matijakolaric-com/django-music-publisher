@@ -281,21 +281,22 @@ class WorkAdmin(MusicPublisherAdmin):
     work_id.admin_order_field = 'id'
 
     def album_cd(self, obj):
-        if not obj.firstrecording:
+        if not (hasattr(obj, 'firstrecording') and obj.firstrecording):
             return None
         return obj.firstrecording.album_cd
     album_cd.short_description = 'Album / Library CD'
     album_cd.admin_order_field = 'firstrecording__album_cd'
 
     def isrc(self, obj):
-        if not obj.firstrecording:
+        if not (hasattr(obj, 'firstrecording') and obj.firstrecording):
             return None
         return obj.firstrecording.isrc
     isrc.short_description = 'ISRC'
     isrc.admin_order_field = 'firstrecording__isrc'
 
     def duration(self, obj):
-        if not obj.firstrecording or not obj.firstrecording.duration:
+        if not (hasattr(obj, 'firstrecording') and
+                obj.firstrecording and obj.firstrecording.duration):
             return None
         return obj.firstrecording.duration.strftime('%H:%M:%S')
     duration.admin_order_field = 'firstrecording__duration'
@@ -312,7 +313,7 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = qs.prefetch_related('firstrecording__album_cd')
         return qs
 
-    class HasISRCListFilter(admin.SimpleListFilter):
+    class HasISWCListFilter(admin.SimpleListFilter):
         title = 'Has ISWC'
         parameter_name = 'has_iswc'
 
@@ -345,7 +346,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 return queryset.filter(firstrecording__isnull=True)
 
     list_filter = (
-        HasISRCListFilter,
+        HasISWCListFilter,
         HasRecordingListFilter,
         ('firstrecording__album_cd', admin.RelatedOnlyFieldListFilter),
         '_cwr',
