@@ -2,9 +2,13 @@ language: python
 python:
   - "3.5"
   - "3.6"
+env:
+  - DJANGO_VERSION=2.0
+  - DJANGO_VERSION=2.1
 # command to install dependencies
 install:
   - pip install -r requirements.txt
+  - pip install -q Django==$DJANGO_VERSION
 # command to run tests
 script:
   - coverage run --source='music_publisher' manage.py test 
