@@ -109,8 +109,34 @@ You will have to add this to the settings, replace with your data.
 .. code:: python
 
     MUSIC_PUBLISHER_SETTINGS = {
-        'admin_show_publisher': True,
+        'admin_show_publisher': False,
         'admin_show_saan': True,
+
+        'token': None,
+        'validator_url': None,
+        'generator_url': None,
+
+        'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
+        'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
+        'publisher_ipi_name': '00000000199',  # IPI name number
+        'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
+        'publisher_pr_society': '052',  # Performing Rights Society Code
+        'publisher_mr_society': '044',  # Mechanical Rights Society Code
+        'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
+
+        'library': 'THE FOO LIBRARY',  # Use only if you are in library music
+        'label': 'FOO BAR MUSIC',  # Use only if you are also a label
+    }
+
+For US publishers with entities in different PROs, define the "main" publisher
+first, which is original publisher for affiliates in the respective PRO and
+foreign societies. Then define ones in other PROs.
+
+.. code:: python
+
+    MUSIC_PUBLISHER_SETTINGS = {
+        'admin_show_publisher': True,
+        'admin_show_saan': False,
 
         'token': None,
         'validator_url': None,
@@ -119,9 +145,8 @@ You will have to add this to the settings, replace with your data.
         'publisher_id': 'FOO',
         'publisher_name': 'FOO S MUSIC PUBLISHING',
         'publisher_ipi_name': '00000000199',
-        'publisher_ipi_base': 'I0000000393',
-        'publisher_pr_society': '071',
-        'publisher_mr_society': '034',
+        'publisher_pr_society': '071',  # SESAC
+        'publisher_mr_society': '034',  # HFA
         'publisher_sr_society': None,
 
         'us_publisher_override': {
@@ -129,19 +154,19 @@ You will have to add this to the settings, replace with your data.
                 'publisher_id': 'FOOA',
                 'publisher_name': 'FOO A MUSIC PUBLISHING',
                 'publisher_ipi_name': '00000000493',
-                'publisher_pr_society': '010',
-                'publisher_mr_society': '034',
+                'publisher_pr_society': '010',  # ASCAP
+                'publisher_mr_society': '034',  # HFA
                 'publisher_sr_society': None,
             },
             'BMI': {
                 'publisher_id': 'FOOB',
                 'publisher_name': 'FOO B MUSIC PUBLISHING',
                 'publisher_ipi_name': '00000000395',
-                'publisher_pr_society': '021',
-                'publisher_mr_society': '044',
+                'publisher_pr_society': '021',  # BMI 
+                'publisher_mr_society': '044',  # HFA
                 'publisher_sr_society': None,
             },
-            'SESAC': None,
+            'SESAC': None,  # Already defined, set to None
         },
 
         'library': 'FOO BAR MUSIC LIBRARY',

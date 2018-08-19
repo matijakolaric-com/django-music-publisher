@@ -30,7 +30,6 @@ class DMPTestCase(TestCase):
         self.assertTrue(SETTINGS.get('publisher_id'))
         self.assertTrue(SETTINGS.get('publisher_name'))
         self.assertTrue(SETTINGS.get('publisher_ipi_name'))
-        self.assertTrue(SETTINGS.get('publisher_ipi_base'))
         self.assertTrue(SETTINGS.get('publisher_pr_society'))
         self.assertIn('publisher_sr_society', SETTINGS)
         self.assertIn('publisher_mr_society', SETTINGS)

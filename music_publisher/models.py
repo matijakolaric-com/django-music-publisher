@@ -613,7 +613,7 @@ class CWRExport(models.Model):
             "publisher_id": SETTINGS.get('publisher_id'),
             "publisher_name": SETTINGS.get('publisher_name'),
             "publisher_ipi_name": SETTINGS.get('publisher_ipi_name'),
-            "publisher_ipi_base": SETTINGS.get('publisher_ipi_base'),
+            "publisher_ipi_base": SETTINGS.get('publisher_ipi_base', ''),
             "publisher_pr_society": SETTINGS.get(
                 'publisher_pr_society'),
             "publisher_mr_society": SETTINGS.get(
