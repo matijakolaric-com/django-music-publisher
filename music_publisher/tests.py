@@ -159,7 +159,7 @@ class ModelsTest(TestCase):
         self.assertEqual(str(wiw), str(wiw.writer))
 
     @override_settings()
-    def test_cwr(self):
+    def test_z_cwr(self):
         self.assertIn('CW DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
