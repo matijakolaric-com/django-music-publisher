@@ -109,20 +109,43 @@ You will have to add this to the settings, replace with your data.
 .. code:: python
 
     MUSIC_PUBLISHER_SETTINGS = {
+        'admin_show_publisher': True,
+        'admin_show_saan': True,
+
         'token': None,
         'validator_url': None,
         'generator_url': None,
 
-        'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
-        'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
-        'publisher_ipi_name': '00000000199',  # IPI name number
-        'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
-        'publisher_pr_society': '052',  # Performing Rights Society Code
-        'publisher_mr_society': '044',  # Mechanical Rights Society Code
-        'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
+        'publisher_id': 'FOO',
+        'publisher_name': 'FOO S MUSIC PUBLISHING',
+        'publisher_ipi_name': '00000000199',
+        'publisher_ipi_base': 'I0000000393',
+        'publisher_pr_society': '071',
+        'publisher_mr_society': '034',
+        'publisher_sr_society': None,
 
-        'library': 'THE FOO LIBRARY',  # Use only if you are in library music
-        'label': 'FOO BAR MUSIC',  # Use only if you are also a label
+        'us_publisher_override': {
+            'ASCAP': {
+                'publisher_id': 'FOOA',
+                'publisher_name': 'FOO A MUSIC PUBLISHING',
+                'publisher_ipi_name': '00000000493',
+                'publisher_pr_society': '010',
+                'publisher_mr_society': '034',
+                'publisher_sr_society': None,
+            },
+            'BMI': {
+                'publisher_id': 'FOOB',
+                'publisher_name': 'FOO B MUSIC PUBLISHING',
+                'publisher_ipi_name': '00000000395',
+                'publisher_pr_society': '021',
+                'publisher_mr_society': '044',
+                'publisher_sr_society': None,
+            },
+            'SESAC': None,
+        },
+
+        'library': 'FOO BAR MUSIC LIBRARY',
+        'label': 'FOO BAR MUSIC',
     }
 
 When you apply for a free 15-day demo licence, additional documentation will be

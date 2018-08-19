@@ -137,11 +137,11 @@ MUSIC_PUBLISHER_SETTINGS = {
         'https://matijakolaric.com/api/v1/cwr/original/creator/',
 
     'publisher_id': 'FOO',
-    'publisher_name': 'FOO BAR MUSIC PUBLISHING',
+    'publisher_name': 'FOO S MUSIC PUBLISHING',
     'publisher_ipi_name': '00000000199',
     'publisher_ipi_base': 'I0000000393',
-    'publisher_pr_society': '052',
-    'publisher_mr_society': '044',
+    'publisher_pr_society': '071',
+    'publisher_mr_society': '034',
     'publisher_sr_society': None,
 
     'us_publisher_override': {
@@ -150,7 +150,7 @@ MUSIC_PUBLISHER_SETTINGS = {
             'publisher_name': 'FOO A MUSIC PUBLISHING',
             'publisher_ipi_name': '00000000493',
             'publisher_pr_society': '010',
-            'publisher_mr_society': '044',
+            'publisher_mr_society': '034',
             'publisher_sr_society': None,
         },
         'BMI': {
