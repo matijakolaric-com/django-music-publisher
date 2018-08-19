@@ -15,8 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
 
 urlpatterns = [
     # admin moved to root
     path('', admin.site.urls),
 ]
+
+admin.site.site_header = settings.MUSIC_PUBLISHER_SETTINGS.get(
+    'publisher_name', 'Django Music Publisher')
+admin.site.site_title = admin.site.site_header
+admin.site.index_title = ''
+admin.site.site_url = ''

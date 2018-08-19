@@ -3,7 +3,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.test.client import RequestFactory
 from django.urls import reverse
 from music_publisher.admin import *
@@ -158,12 +158,17 @@ class ModelsTest(TestCase):
         wiw = self.work.writerinwork_set.first()
         self.assertEqual(str(wiw), str(wiw.writer))
 
+    @override_settings()
     def test_cwr(self):
         self.assertIn('CW DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.cwr_export2.get_cwr()
+        self.cwr_export.cwr = None
+        settings.MUSIC_PUBLISHER_SETTINGS['token'] = 'aaa'
+        self.cwr_export.get_cwr()
+
 
     def get(self, path, re_post=False):
         response = self.client.get(path)

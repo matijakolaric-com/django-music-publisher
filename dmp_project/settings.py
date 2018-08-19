@@ -161,10 +161,10 @@ MUSIC_PUBLISHER_SETTINGS = {
     'label': 'FOO BAR MUSIC',
 }
 
-admin.site.site_title = admin.site.site_header = MUSIC_PUBLISHER_SETTINGS.get(
-    'publisher_name', 'Django Music Publisher')
-admin.site.index_title = ''
-admin.site.site_url = ''
+# admin.site.site_title = admin.site.site_header = MUSIC_PUBLISHER_SETTINGS.get(
+#     'publisher_name', 'Django Music Publisher')
+# admin.site.index_title = ''
+# admin.site.site_url = ''
 
 try:
     from .local_settings import *
