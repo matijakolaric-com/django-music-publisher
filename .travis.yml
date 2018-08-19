@@ -8,7 +8,7 @@ env:
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install -q Django==$DJANGO_VERSION
+  - pip install -U Django==$DJANGO_VERSION
 # command to run tests
 script:
   - coverage run --source='music_publisher' manage.py test 
