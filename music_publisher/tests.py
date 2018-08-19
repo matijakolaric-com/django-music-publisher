@@ -159,16 +159,19 @@ class ModelsTest(TestCase):
         self.assertEqual(str(wiw), str(wiw.writer))
 
     @override_settings()
-    def test_z_cwr(self):
+    def test_cwr(self):
         self.assertIn('CW DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.cwr_export2.get_cwr()
         self.cwr_export.cwr = None
+        token = settings.MUSIC_PUBLISHER_SETTINGS['token']
         settings.MUSIC_PUBLISHER_SETTINGS['token'] = 'aaa'
-        self.cwr_export.get_cwr()
-
+        with self.assertRaises(ValidationError) as ve:
+            self.cwr_export.get_cwr()
+        self.assertIn('Unauthorized', ve.exception.message)
+        settings.MUSIC_PUBLISHER_SETTINGS['token'] = token
 
     def get(self, path, re_post=False):
         response = self.client.get(path)

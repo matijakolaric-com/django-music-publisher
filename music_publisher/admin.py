@@ -247,10 +247,10 @@ class WorkAcknowledgementInline(admin.TabularInline):
     fields = readonly_fields = (
         'date', 'society_code', 'remote_work_id', 'status')
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None, *args, **kwargs):
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, *args, **kwargs):
         return False
 
 
@@ -447,10 +447,10 @@ class CWRExportAdmin(admin.ModelAdmin):
             finally:
                 del self.obj
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None, **kwargs):
         if obj and obj.cwr:
             return None
-        return super().has_delete_permission(request, obj)
+        return super().has_delete_permission(request, obj, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         obj = get_object_or_404(CWRExport, pk=object_id)
@@ -504,10 +504,10 @@ class ACKImportForm(ModelForm):
 
 @admin.register(ACKImport)
 class ACKImportAdmin(admin.ModelAdmin):
-    def get_form(self, request, obj=None):
+    def get_form(self, request, obj=None, **kwargs):
         if obj is None:
             return ACKImportForm
-        return super().get_form(request, obj)
+        return super().get_form(request, obj, **kwargs)
 
     list_display = (
         'filename', 'society_code', 'society_name', 'date')
@@ -585,5 +585,5 @@ class ACKImportAdmin(admin.ModelAdmin):
                 request, obj.society_code, cd['acknowledgement_file'])
             super().save_model(request, obj, form, change)
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None, *args, **kwargs):
         return False
