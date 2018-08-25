@@ -437,7 +437,8 @@ class FirstRecording(FirstRecordingBase):
         """Create serializable data structure, including album/cd data.
         """
         data = OrderedDict()
-        data['first_release_duration'] = self.duration.strftime('%H%M%S')
+        if self.duration:
+            data['first_release_duration'] = self.duration.strftime('%H%M%S')
         data['isrc'] = self.isrc
         data['first_release_catalog_number'] = self.catalog_number
         data['first_release_catalog_number'] = self.catalog_number
