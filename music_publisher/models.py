@@ -437,12 +437,10 @@ class FirstRecording(FirstRecordingBase):
         """Create serializable data structure, including album/cd data.
         """
         data = OrderedDict()
-        if self.duration:
-            data['first_release_duration'] = self.duration.strftime('%H%M%S')
-        if self.isrc:
-            data['isrc'] = self.isrc
-        if self.catalog_number:
-            data['first_release_catalog_number'] = self.catalog_number
+        data['first_release_duration'] = self.duration.strftime('%H%M%S')
+        data['isrc'] = self.isrc
+        data['first_release_catalog_number'] = self.catalog_number
+        data['first_release_catalog_number'] = self.catalog_number
         if self.album_cd:
             if self.album_cd.release_date:
                 data['first_release_date'] = (
@@ -567,14 +565,11 @@ class WriterInWork(models.Model):
             data['writer_id'] = (
                 self.writer.ipi_name.rjust(11, '0')[0:9]
                 if self.writer.ipi_name else '')
-            data['writer_last_name'] = self.writer.last_name
-            data['writer_first_name'] = self.writer.first_name
-            if self.writer.ipi_name:
-                data['writer_ipi_name'] = self.writer.ipi_name
-            if self.writer.ipi_base:
-                data['writer_ipi_base'] = self.writer.ipi_base
-            if self.writer.pr_society:
-                data['writer_pr_society'] = self.writer.pr_society
+            data['writer_last_name'] = self.writer.last_name or ''
+            data['writer_first_name'] = self.writer.first_name or ''
+            data['writer_ipi_name'] = self.writer.ipi_name or ''
+            data['writer_ipi_base'] = self.writer.ipi_base or ''
+            data['writer_pr_society'] = self.writer.pr_society or ''
         else:
             data['writer_id'] = ''
             data['writer_last_name'] = ''
@@ -620,13 +615,12 @@ class CWRExport(models.Model):
                 'publisher_mr_society'),
             "publisher_sr_society": SETTINGS.get(
                 'publisher_pr_society'),
-            "ascap_publisher": SETTINGS.get(
-                'us_publisher_override', {}).get('ASCAP'),
-            "bmi_publisher": SETTINGS.get(
-                'us_publisher_override', {}).get('BMI'),
-            "sesac_publisher": SETTINGS.get(
-                'us_publisher_override', {}).get('SESAC')
         })
+        us = SETTINGS.get('us_publisher_override', {})
+        if us:
+            j["ascap_publisher"] = us.get('ASCAP')
+            j["bmi_publisher"] = us.get('BMI')
+            j["sesac_publisher"] = us.get('SESAC')
         works = OrderedDict()
         for work in self.works.order_by('id'):
             works.update(work.json)
