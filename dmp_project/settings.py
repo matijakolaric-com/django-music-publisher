@@ -129,11 +129,11 @@ STATICFILES_DIRS = [
 MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': True,
     'admin_show_saan': True,
-
-    'token': None,
-    'validator_url': None,
-    'generator_url': None,
-
+    
+    'token': os.getenv('TOKEN', None),
+    'validator_url': os.getenv('VALIDATOR_URL', None),
+    'generator_url': os.getenv('GENERATOR_URL', None),
+    
     'publisher_id': 'FOO',
     'publisher_name': 'FOO S MUSIC PUBLISHING',
     'publisher_ipi_name': '00000000199',
