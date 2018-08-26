@@ -130,11 +130,9 @@ MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': True,
     'admin_show_saan': True,
 
-    'token': '1f4ba2c8bd76dcf71b63337172cfd06ea020344d',
-    'validator_url':
-        'https://matijakolaric.com/api/v1/cwr/original/field/multi/',
-    'generator_url':
-        'https://matijakolaric.com/api/v1/cwr/original/creator/',
+    'token': None,
+    'validator_url': None,
+    'generator_url': None,
 
     'publisher_id': 'FOO',
     'publisher_name': 'FOO S MUSIC PUBLISHING',
