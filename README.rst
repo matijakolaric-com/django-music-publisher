@@ -67,7 +67,6 @@ generation requires an external commerical service.
 
 Django Music Publisher app works without it, but data will not be validated as 
 CWR-compliant, and there will be no way to create CWR, unless you make your own. 
-
 The CWR generation could be solved with a template, but without the former, it 
 would most likely not result in valid CWR files.
 
@@ -196,15 +195,10 @@ but not with Python 2. It is advised you run this inside a virtual environment.
 Do::
 
     python3 -m venv dmp
-
     cd dmp
-
     source bin/activate
-
     git clone https://github.com/matijakolaric-com/django-music-publisher.git
-
     cd django-music-publisher
-
     pip install -r requirements.txt
 
 The next step is to create ``dmp_project/local_settings.py`` or edit 
@@ -212,9 +206,7 @@ The next step is to create ``dmp_project/local_settings.py`` or edit
 ``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. Then::
 
     python manage.py migrate
-
     python manage.py createsuperuser
-
     python manage.py runserver
 
 Then open the following link: http://localhost:8000/ and log in with
