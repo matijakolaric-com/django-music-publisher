@@ -15,16 +15,12 @@ Django Music Publisher
     :target: https://pypi.org/project/django-music-publisher/
 .. image:: https://img.shields.io/pypi/status/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
-.. image:: https://img.shields.io/badge/contact-matijakolaric.com-d50000.svg
-   :target: https://matijakolaric.com/z_contact/
-.. image:: https://img.shields.io/badge/demo-dmp.matijakolaric.com-d50000.svg
-   :target: https://dmp.matijakolaric.com/
+.. image:: https://img.shields.io/badge/home-matijakolaric.com-d50000.svg
+   :target: https://matijakolaric.com/articles/2/
 
 This is a simple **Django app for original music publishers**. The app is 
-released under `MIT license <LICENSE>`_ and is basically free. However, it uses
-a paid external service for data validation and creation of CWR files, so using
-it *may not be free*. Free 15-day demo licence for this service is available 
-upon request. 
+released under `MIT license <LICENSE>`_ and is basically free. At this point, it
+covers all the data required for batch registrations of musical works. 
 
 Introduction
 ===============================================================================
@@ -38,12 +34,15 @@ Use Case
 This app is targeted at **single original publishers**, publishing 
 **original musical works**.
 (Original work is one that is not a modification of an existing musical work.)
-A special US situation where an original publisher may have one entity for every
-of the three PROs is also covered.
+It holds data on musical works, including songwriters (composers and lyricists),
+performing artists, albums, library releases etc, and allows batch registrations.
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
 can not be entered. This is just enough data for acquiring ISWCs.
+
+A special US situation where an original publisher may have one entity for every
+of the three PROs is also covered since version 18.8.
 
 It is presumed that writers keep 50% of performing rights and the other 50%, 
 as well as 100% of mechanical and sync goes to the original publisher.
@@ -62,6 +61,20 @@ This translates to following CWR 2.1 transaction record types:
 * PER, 
 * REC (single) and
 * ORN (limited to library).
+
+Common Works Registration is used for batch registrations, although the actual
+generation requires an external commerical service. 
+
+Django Music Publisher app works without it, but data will not be validated as 
+CWR-compliant, and there will be no way to create CWR, unless you make your own. 
+
+The CWR generation could be solved with a template, but without the former, it 
+would most likely not result in valid CWR files.
+
+Processing of CWR acknowledgement files works without the external service.
+
+Processing of incoming royalty statements is on the roadmap, to be added later
+in 2018. 
 
 Beyond
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -88,11 +101,8 @@ This particular software uses two simplest of the REST API tools from the
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_,
 one for data validation and one for generation of CWR files.
 
-Django Music Publisher app  works without these tools, but data will not be 
-validated as CWR-compliant, and there will be no way to create CWR, unless you 
-make your own. 
-
-The latter could be solved with a template, but without the former, it would often not result in valid CWR files.
+Even if you need a far more complex CWR, this project is still a good proof of
+concept how well these tools work.
 
 Installing the app
 ===============================================================================
@@ -241,3 +251,7 @@ Demo is available, some demo data is provided. There are two versions, the US an
 * `World Demo <https://dmp.matijakolaric.com/>`_
 * `US Demo <https://dmp.matijakolaric.com/us/>`_
 
+More information
+================================================================================
+
+More information can be found in this page `<https://matijakolaric.com/articles/2/>`_

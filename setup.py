@@ -12,7 +12,7 @@ setuptools.setup(
     description='Django App for Music Publishers',
     long_description=long_description,
     long_description_content_type='text/x-rst',
-    url='https://github.com/matijakolaric-com/django-music-publisher/',
+    url='https://matijakolaric.com/articles/2/',
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     include_package_data=True,
     classifiers=(
