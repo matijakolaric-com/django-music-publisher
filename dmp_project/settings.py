@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from django.contrib import admin
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -129,11 +128,13 @@ STATICFILES_DIRS = [
 MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': True,
     'admin_show_saan': True,
-    
+
+    'enforce_saan': True,
+
     'token': os.getenv('TOKEN', None),
     'validator_url': os.getenv('VALIDATOR_URL', None),
     'generator_url': os.getenv('GENERATOR_URL', None),
-    
+
     'publisher_id': 'FOO',
     'publisher_name': 'FOO S MUSIC PUBLISHING',
     'publisher_ipi_name': '00000000199',
@@ -164,11 +165,6 @@ MUSIC_PUBLISHER_SETTINGS = {
     'library': 'FOO BAR MUSIC LIBRARY',
     'label': 'FOO BAR MUSIC',
 }
-
-# admin.site.site_title = admin.site.site_header = MUSIC_PUBLISHER_SETTINGS.get(
-#     'publisher_name', 'Django Music Publisher')
-# admin.site.index_title = ''
-# admin.site.site_url = ''
 
 try:
     from .local_settings import *

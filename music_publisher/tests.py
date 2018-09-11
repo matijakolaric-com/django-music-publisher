@@ -26,15 +26,16 @@ class ModelsTest(TestCase):
         self.thiswriter = Writer(
             last_name='FOOBAR', first_name='JACK', ipi_name='199',
             ipi_base='I1234567893', pr_society='010')
-        self.thiswriter.clean()
+        self.thiswriter.full_clean()
         self.thiswriter.save()
         self.thatwriter = Writer(
             last_name='FOOBAR', first_name='JACK JR.', ipi_name='297',
-            pr_society='010', generally_controlled=True)
-        self.thatwriter.clean()
+            pr_society='010', generally_controlled=True, saan='JaVa',
+            publisher_fee=50)
+        self.thatwriter.full_clean()
         self.thatwriter.save()
         self.otherwriter = Writer(last_name='DOE', first_name='JANE')
-        self.otherwriter.clean()
+        self.otherwriter.full_clean()
         self.otherwriter.save()
         self.album_cd = AlbumCD(
             album_title='ALBUM', cd_identifier='XXX 123',
@@ -57,7 +58,7 @@ class ModelsTest(TestCase):
             catalog_number='THENUMBER', album_cd=self.album_cd,
             release_date=date.today())
         self.work.firstrecording.save()
-        self.work.clean()
+        self.work.full_clean()
         self.work2 = Work(title='Minimal')
         self.work2.save()
         WriterInWork(
@@ -92,42 +93,42 @@ class ModelsTest(TestCase):
         self.assertFalse(self.otherwriter._can_be_controlled)
         with self.assertRaises(ValidationError) as ve:
             self.otherwriter.saan = 'S4N1LJ4V4'
-            self.otherwriter.clean()
+            self.otherwriter.full_clean()
         self.assertIn('saan', ve.exception.message_dict)
         with self.assertRaises(ValidationError) as ve:
             self.otherwriter.saan = None
             self.otherwriter.generally_controlled = True
-            self.otherwriter.clean()
+            self.otherwriter.full_clean()
         self.assertIn('generally_controlled', ve.exception.message_dict)
         with self.assertRaises(ValidationError) as ve:
             self.thiswriter.saan = 'S4N1LJ4V4'
-            self.thiswriter.clean()
+            self.thiswriter.full_clean()
         self.assertIn('saan', ve.exception.message_dict)
         with self.assertRaises(ValidationError) as ve:
             self.thiswriter.ipi_name = None
             self.thiswriter.saan = None
-            self.thiswriter.clean()
-        self.assertFalse(hasattr(ve.exception, 'message_dict'))
+            self.thiswriter.full_clean()
+        self.assertIn('__all__', ve.exception.message_dict)
         wiws = self.work.writerinwork_set.all()
         for wiw in wiws:
             if not wiw.controlled:
                 with self.assertRaises(ValidationError) as ve:
                     wiw.writer.generally_controlled = True
-                    wiw.clean()
+                    wiw.full_clean()
                 self.assertIn('controlled', ve.exception.message_dict)
             else:
                 with self.assertRaises(ValidationError) as ve:
                     wiw.capacity = None
-                    wiw.clean()
+                    wiw.full_clean()
                 self.assertIn('capacity', ve.exception.message_dict)
                 wiw.capacity = 'CA'
                 with self.assertRaises(ValidationError) as ve:
                     wiw.writer._can_be_controlled = False
-                    wiw.clean()
-                self.assertFalse(hasattr(ve.exception, 'message_dict'))
+                    wiw.full_clean()
+                self.assertIn('__all__', ve.exception.message_dict)
                 with self.assertRaises(ValidationError) as ve:
                     wiw.writer = None
-                    wiw.clean()
+                    wiw.full_clean()
                 self.assertIn('writer', ve.exception.message_dict)
 
     def test_str(self):
@@ -142,11 +143,11 @@ class ModelsTest(TestCase):
         self.assertEqual(str(self.album_cd), 'XXX 123')
         self.assertIsNone(self.album_cd.album_label)
         with self.assertRaises(ValidationError) as ve:
-            self.album_cd.clean()
+            self.album_cd.full_clean()
         self.assertIn('album_title', ve.exception.message_dict)
         self.album_cd.cd_identifier = None
         with self.assertRaises(ValidationError) as ve:
-            self.album_cd.clean()
+            self.album_cd.full_clean()
         self.assertIn('cd_identifier', ve.exception.message_dict)
         self.assertIn('album_title', ve.exception.message_dict)
         self.assertEqual(str(self.thiswriter), 'JACK FOOBAR')

@@ -151,11 +151,12 @@ class WriterAdmin(MusicPublisherAdmin):
                 ('ipi_name', 'ipi_base'),
                 'pr_society'),
         }),
-        ('Generally controlled', {
+        ('Generall agreement', {
             'fields': (
-                ('generally_controlled', 'saan')
-                if SETTINGS.get('admin_show_saan')
-                else ('generally_controlled',)),
+                ('generally_controlled', ('saan', 'publisher_fee'))
+                if (SETTINGS.get('admin_show_saan') or
+                    SETTINGS.get('enforce_saan'))
+                else ('generally_controlled', 'publisher_fee')),
         }),
     )
     actions = None
@@ -209,8 +210,9 @@ class WriterInWorkInline(admin.TabularInline):
         lst = list(self.fields)
         if SETTINGS.get('admin_show_publisher'):
             lst.append('original_publisher')
-        if SETTINGS.get('admin_show_saan'):
+        if SETTINGS.get('admin_show_saan') or SETTINGS.get('enforce_saan'):
             lst.append('saan')
+        lst.append('publisher_fee')
         return lst
 
     def original_publisher(self, obj):

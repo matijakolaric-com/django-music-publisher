@@ -22,6 +22,7 @@ class DMPTestCase(TestCase):
         SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
         self.assertTrue(SETTINGS.get('admin_show_publisher'))
         self.assertTrue(SETTINGS.get('admin_show_saan'))
+        self.assertTrue(SETTINGS.get('enforce_saan'))
         self.assertTrue(SETTINGS.get('token'))
         self.assertTrue(SETTINGS.get('validator_url'))
         self.assertTrue(SETTINGS.get('generator_url'))

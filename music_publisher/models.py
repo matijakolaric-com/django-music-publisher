@@ -1,6 +1,7 @@
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.deconstruct import deconstructible
 import re
@@ -10,6 +11,7 @@ import requests
 # SETTINGS and few other things, that will go to Client class
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
+ENFORCE_SAAN = SETTINGS.get('enforce_saan')
 VALIDATE = (
     SETTINGS.get('validator_url') and
     SETTINGS.get('generator_url') and
@@ -322,12 +324,19 @@ class WriterBase(PersonBase):
         max_length=14, blank=True, null=True, unique=True)
 
     _can_be_controlled = models.BooleanField(editable=False, default=False)
-    generally_controlled = models.BooleanField(default=False)
+    generally_controlled = models.BooleanField(
+        'General Agreement', default=False)
+    publisher_fee = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text='Percentage of royalties kept by the publisher')
 
     def get_publisher_dict(self):
         return get_publisher_dict(self.pr_society)
 
     def clean_fields(self, *args, **kwargs):
+        if self.saan:
+            self.saan = self.saan.upper()
         if self.ipi_name:
             self.ipi_name = self.ipi_name.rjust(11, '0')
         if self.ipi_base:
@@ -348,7 +357,16 @@ class WriterBase(PersonBase):
                     'Last name, IPI name # and PR Society must be set.'})
         if self.saan and not self.generally_controlled:
             raise ValidationError({
-                'saan': 'Only for generally controlled writers.'})
+                'saan': 'Only for a general agreement.'})
+        if self.publisher_fee and not self.generally_controlled:
+            raise ValidationError({
+                'publisher_fee': 'Only for a general agreement.'})
+        if self.generally_controlled and ENFORCE_SAAN and not self.saan:
+            raise ValidationError({
+                'saan': 'This field is required.'})
+        if self.saan and ENFORCE_SAAN and not self.publisher_fee:
+            raise ValidationError({
+                'publisher_fee': 'This field is required.'})
 
     # @property
     # def is_us_writer(self):
@@ -533,9 +551,18 @@ class WriterInWork(models.Model):
         ('A ', 'Lyricist'),
         ('CA', 'Composer&Lyricist'),
     ))
+    publisher_fee = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text='Percentage of royalties kept by the publisher')
 
     def __str__(self):
         return str(self.writer)
+
+    def clean_fields(self, *args, **kwargs):
+        if self.saan:
+            self.saan = self.saan.upper()
+        return super().clean_fields(*args, **kwargs)
 
     def clean(self):
         """Make sure that contrlled writers have all the required data."""
@@ -557,6 +584,19 @@ class WriterInWork(models.Model):
                 'Writer \'{}\' is controlled in at least one work, '
                 'required are: Last name, IPI Name # and Performing '
                 'Rights Society.'.format(self.writer))
+        if (ENFORCE_SAAN and self.controlled and
+                not self.writer.generally_controlled):
+            if not self.saan:
+                raise ValidationError({
+                    'saan': 'Must be set. (controlled, no general agreement)'})
+            if not self.publisher_fee:
+                raise ValidationError({
+                    'publisher_fee': (
+                        'Must be set. (controlled, no general agreement)')})
+        if not self.controlled and self.saan:
+            raise ValidationError({'saan': 'Must not be set.'})
+        if not self.controlled and self.publisher_fee:
+            raise ValidationError({'saan': 'Must not be set.'})
 
     @property
     def json(self):
@@ -653,6 +693,7 @@ class CWRExport(models.Model):
             raise ValidationError('Network error', code='service')
 
         if response.status_code == 400:
+            print(response.json())
             raise ValidationError('Bad Request', code='service')
         elif response.status_code == 401:
             raise ValidationError('Unauthorized', code='service')
