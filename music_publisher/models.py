@@ -18,26 +18,39 @@ VALIDATE = (
     SETTINGS.get('token'))
 
 
-# Default only has 12 societies from 6 countries. These are G7, without Japan
+# Default only has 18 societies from 1@ countries. These are G7, without Japan,
+# where we have no information about CWR use and all other societies covered
+# by ICE Services
 # If you need to add some, do it in the settings, not here.
 
 try:
     SOCIETIES = settings.MUSIC_PUBLISHER_SOCIETIES
 except AttributeError:
     SOCIETIES = [
+        ('055', 'SABAM, Belgium'),
+
         ('101', 'SOCAN, Canada'),
         ('088', 'CMRRA, Canada'),
 
+        ('040', 'KODA, Denmark'),
+
+        ('089', 'TEOSTO, Finland'),
+
         ('058', 'SACEM, France'),
-        ('068', 'SDRM, France'),
 
         ('035', 'GEMA, Germany'),
 
         ('074', 'SIAE, Italy'),
 
+        ('023', 'BUMA, Netherlands'),
+        ('078', 'STEMRA, Netherlands'),
+
+        ('090', 'TONO, Norway'),
+
+        ('079', 'STIM, Sweden'),
+
         ('052', 'PRS, United Kingdom'),
         ('044', 'MCPS, United Kingdom'),
-
 
         ('010', 'ASCAP, United States'),
         ('021', 'BMI, United States'),

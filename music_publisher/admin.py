@@ -246,8 +246,7 @@ class WorkAcknowledgementInline(admin.TabularInline):
 
     model = WorkAcknowledgement
     extra = 0
-    fields = readonly_fields = (
-        'date', 'society_code', 'remote_work_id', 'status')
+    fields = ('date', 'society_code', 'remote_work_id', 'status')
 
 
 @admin.register(Work)
