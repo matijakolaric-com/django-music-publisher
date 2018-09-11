@@ -31,6 +31,10 @@ input[type=submit]:hover {
     background-color: #d50000 !important;
 }
 
+.selector-chosen h2 {
+    background-color: #d50000 !important;
+}
+
 body {
     margin: 0;
     padding: 0;
