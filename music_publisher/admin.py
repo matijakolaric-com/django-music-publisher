@@ -249,12 +249,6 @@ class WorkAcknowledgementInline(admin.TabularInline):
     fields = readonly_fields = (
         'date', 'society_code', 'remote_work_id', 'status')
 
-    def has_delete_permission(self, request, obj=None, *args, **kwargs):
-        return False
-
-    def has_add_permission(self, request, *args, **kwargs):
-        return False
-
 
 @admin.register(Work)
 class WorkAdmin(MusicPublisherAdmin):
