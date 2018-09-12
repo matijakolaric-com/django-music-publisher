@@ -212,5 +212,69 @@
             ]
         ]
     }
+},
+{
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+        "name": "Publishing Audit",
+        "permissions": [
+            [
+                "view_ackimport",
+                "music_publisher",
+                "ackimport"
+            ],
+            [
+                "view_albumcd",
+                "music_publisher",
+                "albumcd"
+            ],
+            [
+                "view_alternatetitle",
+                "music_publisher",
+                "alternatetitle"
+            ],
+            [
+                "view_artist",
+                "music_publisher",
+                "artist"
+            ],
+            [
+                "view_artistinwork",
+                "music_publisher",
+                "artistinwork"
+            ],
+            [
+                "view_cwrexport",
+                "music_publisher",
+                "cwrexport"
+            ],
+            [
+                "view_firstrecording",
+                "music_publisher",
+                "firstrecording"
+            ],
+            [
+                "view_work",
+                "music_publisher",
+                "work"
+            ],
+            [
+                "view_workacknowledgement",
+                "music_publisher",
+                "workacknowledgement"
+            ],
+            [
+                "view_writer",
+                "music_publisher",
+                "writer"
+            ],
+            [
+                "view_writerinwork",
+                "music_publisher",
+                "writerinwork"
+            ]
+        ]
+    }
 }
 ]
