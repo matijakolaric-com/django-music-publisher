@@ -171,7 +171,6 @@ class ModelsTest(TestCase):
         self.assertEqual(self.album_cd.library, SETTINGS.get('library'))
         self.album_cd.album_title = None
         self.assertEqual(str(self.album_cd), 'XXX 123')
-        self.assertIsNone(self.album_cd.album_label)
         with self.assertRaises(ValidationError) as ve:
             self.album_cd.full_clean()
         self.assertIn('album_title', ve.exception.message_dict)

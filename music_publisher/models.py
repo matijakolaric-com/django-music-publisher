@@ -12,6 +12,16 @@ import requests
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 ENFORCE_SAAN = SETTINGS.get('enforce_saan')
+ENFORCE_PR_SOCIETY = SETTINGS.get('enforce_pr_society')
+ENFORCE_IPI_NAME = SETTINGS.get('enforce_ipi_name')
+CONTROLLED_WRITER_REQUIRED_FIELDS = ['Last Name']
+if ENFORCE_PR_SOCIETY:
+    CONTROLLED_WRITER_REQUIRED_FIELDS.append('Performing Rights Society')
+if ENFORCE_IPI_NAME:
+    CONTROLLED_WRITER_REQUIRED_FIELDS.append('IPI Name #')
+CAN_NOT_BE_CONTROLLED_MSG = (
+    'Unsufficient data for a controlled writer, required fields are: {}.'
+).format(', '.join(CONTROLLED_WRITER_REQUIRED_FIELDS))
 WORK_ID_PREFIX = SETTINGS.get('work_id_prefix') or ''
 VALIDATE = (
     SETTINGS.get('validator_url') and
@@ -19,7 +29,7 @@ VALIDATE = (
     SETTINGS.get('token'))
 
 
-# Default only has 18 societies from 1@ countries. These are G7, without Japan,
+# Default only has 18 societies from 12 countries. These are G7, without Japan,
 # where we have no information about CWR use and all other societies covered
 # by ICE Services
 # If you need to add some, do it in the settings, not here.
@@ -213,6 +223,7 @@ class AlbumCDBase(MusicPublisherBase):
         verbose_name = 'Album and/or Library CD'
         verbose_name_plural = ' Albums and Library CDs'
         ordering = ('album_title', 'cd_identifier')
+        unique_together = (('album_title', 'album_label'),)
 
     cd_identifier = models.CharField(
         'CD Identifier',
@@ -223,24 +234,22 @@ class AlbumCDBase(MusicPublisherBase):
         help_text='Can be overridden by recording data.',
         blank=True, null=True)
     album_title = models.CharField(
-        help_text='This will set the label.',
-        max_length=60, blank=True, null=True, unique=True, validators=(
+        max_length=60, blank=True, unique=True, validators=(
             CWRFieldValidator('first_album_title'),))
     ean = models.CharField(
         'EAN',
         max_length=13, blank=True, null=True, unique=True, validators=(
             CWRFieldValidator('ean'),))
+    album_label = models.CharField(
+        default=SETTINGS.get('label') or '',
+        max_length=60, blank=True, validators=(
+            CWRFieldValidator('first_album_label'),))
 
     def __str__(self):
         if self.cd_identifier and self.album_title:
             return '{} ({})'.format(
                 self.album_title or '', self.cd_identifier).upper()
         return (self.album_title or self.cd_identifier).upper()
-
-    @property
-    def album_label(self):
-        if self.album_title:
-            return SETTINGS.get('label')
 
     @property
     def library(self):
@@ -360,15 +369,14 @@ class WriterBase(PersonBase):
         return super().clean_fields(*args, **kwargs)
 
     def clean(self):
-        self._can_be_controlled = bool(
-            self.last_name and self.ipi_name and self.pr_society)
-        if not self._can_be_controlled and self.saan:
-            raise ValidationError({
-                'saan': 'Last name, IPI name # and PR Society must be set.'})
+        self._can_be_controlled = bool(self.last_name)
+        if ENFORCE_IPI_NAME:
+            self._can_be_controlled &= bool(self.ipi_name)
+        if ENFORCE_PR_SOCIETY:
+            self._can_be_controlled &= bool(self.pr_society)
         if not self._can_be_controlled and self.generally_controlled:
             raise ValidationError({
-                'generally_controlled':
-                    'Last name, IPI name # and PR Society must be set.'})
+                'generally_controlled': CAN_NOT_BE_CONTROLLED_MSG})
         if self.saan and not self.generally_controlled:
             raise ValidationError({
                 'saan': 'Only for a general agreement.'})
@@ -616,9 +624,7 @@ class WriterInWork(models.Model):
     def json(self):
         data = OrderedDict()
         if self.writer:
-            data['writer_id'] = (
-                self.writer.ipi_name.rjust(11, '0')[0:9]
-                if self.writer.ipi_name else '')
+            data['writer_id'] = 'W{:06d}'.format(self.writer.id)
             data['writer_last_name'] = self.writer.last_name or ''
             data['writer_first_name'] = self.writer.first_name or ''
             data['writer_ipi_name'] = self.writer.ipi_name or ''
@@ -706,6 +712,7 @@ class CWRExport(models.Model):
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
         if response.status_code == 400:
+            print(response.json())
             raise ValidationError('Bad Request', code='service')
         elif response.status_code == 401:
             raise ValidationError('Unauthorized', code='service')

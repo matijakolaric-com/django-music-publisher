@@ -6,7 +6,7 @@ Django Music Publisher
 .. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=master
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
 .. image:: https://img.shields.io/pypi/l/django-music-publisher.svg
-   :target: ./LICENSE
+   :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 .. image:: https://img.shields.io/pypi/pyversions/django-music-publisher.svg
@@ -19,8 +19,9 @@ Django Music Publisher
    :target: https://matijakolaric.com/articles/2/
 
 This is a simple **Django app for original music publishers**. The app is 
-released under `MIT license <LICENSE>`_ and is basically free. At this point, it
-covers all the data required for batch registrations of musical works. 
+released under `MIT license <LICENSE>`_ and is basically free. At this point, 
+it covers all the data required for batch registrations of musical works, as
+well as basic data on agreements between the publisher and a writer.
 
 Introduction
 ===============================================================================
@@ -118,13 +119,19 @@ You will have to add this to the settings, replace with your data.
 .. code:: python
 
     MUSIC_PUBLISHER_SETTINGS = {
-        'admin_show_publisher': False,
-        'admin_show_saan': True,
+        'admin_show_publisher': False,  # Needed only in US version
+        'admin_show_saan': True,  # Needed only if societies assign agr. #
 
-        'token': None,
-        'validator_url': None,
-        'generator_url': None,
+        'enforce_saan': True,  # Agr. # is required in many societies
+        'enforce_pr_society': True,  # Strictly not required, but good practice
+        'enforce_ipi_name': True,  # Strictly not required, but good practice
 
+        'token': None,  # See below
+        'validator_url': None,  # See below
+        'generator_url': None,  # See below
+
+        'work_id_prefix': 'TOP',  # Makes work IDs somewhat unique
+        
         'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
         'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
         'publisher_ipi_name': '00000000199',  # IPI name number
@@ -144,13 +151,19 @@ foreign societies. Then define ones in other PROs.
 .. code:: python
 
     MUSIC_PUBLISHER_SETTINGS = {
-        'admin_show_publisher': True,
-        'admin_show_saan': False,
+        'admin_show_publisher': True,  # Needed in US version
+        'admin_show_saan': False,  # Not used in US
 
-        'token': None,
-        'validator_url': None,
-        'generator_url': None,
+        'enforce_saan': False,  # Not used in US
+        'enforce_pr_society': True,  # Strictly not required, but good practice
+        'enforce_ipi_name': True,  # Strictly not required, but good practice
 
+        'token': None,  # See below
+        'validator_url': None,  # See below
+        'generator_url': None,  # See below
+
+        'work_id_prefix': 'FOO',  # Makes work IDs somewhat unique
+        
         'publisher_id': 'FOO',
         'publisher_name': 'FOO S MUSIC PUBLISHING',
         'publisher_ipi_name': '00000000199',
@@ -178,8 +191,8 @@ foreign societies. Then define ones in other PROs.
             'SESAC': None,  # Already defined, set to None
         },
 
-        'library': 'FOO BAR MUSIC LIBRARY',
-        'label': 'FOO BAR MUSIC',
+        'library': 'FOO BAR MUSIC',  # Use only if you are in library music
+        'label': 'FOO BAR MUSIC',  # Use only if you are also a label
     }
 
 When you apply for a free 15-day demo licence, additional documentation will be
@@ -244,6 +257,6 @@ Demo is available, some demo data is provided. There are two versions, the US an
 * `US Demo <https://dmp.matijakolaric.com/us/>`_
 
 More information
-================================================================================
+===============================================================================
 
 More information can be found in this page `<https://matijakolaric.com/articles/2/>`_.

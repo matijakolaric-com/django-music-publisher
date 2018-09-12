@@ -54,7 +54,7 @@ class MusicPublisherAdmin(admin.ModelAdmin):
 
 @admin.register(AlbumCD)
 class AlbumCDAdmin(MusicPublisherAdmin):
-    readonly_fields = ('album_label', 'library', 'label_not_set')
+    readonly_fields = ('library',)
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = (
@@ -65,8 +65,7 @@ class AlbumCDAdmin(MusicPublisherAdmin):
                 'Library not set', {'fields': ()}),
             ('First Album', {
                 'fields': (
-                    ('album_title', 'album_label' if SETTINGS.get(
-                        'label') else 'label_not_set'),
+                    ('album_title', 'album_label'),
                     ('ean', 'release_date'))
             }),
         )

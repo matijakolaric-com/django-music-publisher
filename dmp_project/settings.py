@@ -130,11 +130,14 @@ MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_saan': True,
 
     'enforce_saan': True,
-    'work_id_prefix': '',
+    'enforce_pr_society': True,
+    'enforce_ipi_name': True,
 
     'token': os.getenv('TOKEN', None),
     'validator_url': os.getenv('VALIDATOR_URL', None),
     'generator_url': os.getenv('GENERATOR_URL', None),
+
+    'work_id_prefix': '',
 
     'publisher_id': 'FOO',
     'publisher_name': 'FOO S MUSIC PUBLISHING',
