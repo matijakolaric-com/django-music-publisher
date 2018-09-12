@@ -12,6 +12,7 @@ import requests
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 ENFORCE_SAAN = SETTINGS.get('enforce_saan')
+WORK_ID_PREFIX = SETTINGS.get('work_id_prefix') or ''
 VALIDATE = (
     SETTINGS.get('validator_url') and
     SETTINGS.get('generator_url') and
@@ -425,7 +426,7 @@ class Work(WorkBase):
 
     @property
     def work_id(self):
-        return '{:06}'.format(self.id)
+        return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
 
     def __str__(self):
         return '{} {} ({})'.format(
@@ -609,7 +610,7 @@ class WriterInWork(models.Model):
         if not self.controlled and self.saan:
             raise ValidationError({'saan': 'Must not be set.'})
         if not self.controlled and self.publisher_fee:
-            raise ValidationError({'saan': 'Must not be set.'})
+            raise ValidationError({'publisher_fee': 'Must not be set.'})
 
     @property
     def json(self):
@@ -704,9 +705,7 @@ class CWRExport(models.Model):
                 json=self.json, timeout=30)
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
-
         if response.status_code == 400:
-            print(response.json())
             raise ValidationError('Bad Request', code='service')
         elif response.status_code == 401:
             raise ValidationError('Unauthorized', code='service')

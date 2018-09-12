@@ -130,6 +130,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_saan': True,
 
     'enforce_saan': True,
+    'work_id_prefix': '',
 
     'token': os.getenv('TOKEN', None),
     'validator_url': os.getenv('VALIDATOR_URL', None),

@@ -46,6 +46,7 @@ class ModelsTest(TestCase):
         ArtistInWork(artist=self.artist, work=self.work).save()
         WriterInWork(
             writer=self.thiswriter, work=self.work, saan='SAMOSAN',
+            publisher_fee='20',
             controlled=True, relative_share=50, capacity='CA').save()
         WriterInWork(
             writer=self.otherwriter, work=self.work, relative_share=50,
@@ -105,10 +106,23 @@ class ModelsTest(TestCase):
             self.thiswriter.full_clean()
         self.assertIn('saan', ve.exception.message_dict)
         with self.assertRaises(ValidationError) as ve:
-            self.thiswriter.ipi_name = None
             self.thiswriter.saan = None
+            self.thiswriter.publisher_fee = 100
             self.thiswriter.full_clean()
-        self.assertIn('__all__', ve.exception.message_dict)
+        self.assertIn('publisher_fee', ve.exception.message_dict)
+        self.thiswriter.publisher_fee = None
+        with self.assertRaises(ValidationError) as ve:
+            self.thiswriter.pr_society = None
+            self.thiswriter.full_clean()
+        with self.assertRaises(ValidationError) as ve:
+            self.thatwriter.saan = None
+            self.thatwriter.full_clean()
+        self.assertIn('saan', ve.exception.message_dict)
+        with self.assertRaises(ValidationError) as ve:
+            self.thatwriter.saan = 'SANILJAVA'
+            self.thatwriter.publisher_fee = None
+            self.thatwriter.full_clean()
+        self.assertIn('publisher_fee', ve.exception.message_dict)
         wiws = self.work.writerinwork_set.all()
         for wiw in wiws:
             if not wiw.controlled:
@@ -116,6 +130,11 @@ class ModelsTest(TestCase):
                     wiw.writer.generally_controlled = True
                     wiw.full_clean()
                 self.assertIn('controlled', ve.exception.message_dict)
+                wiw.writer.generally_controlled = False
+                with self.assertRaises(ValidationError) as ve:
+                    wiw.publisher_fee = 100
+                    wiw.full_clean()
+                self.assertIn('publisher_fee', ve.exception.message_dict)
             else:
                 with self.assertRaises(ValidationError) as ve:
                     wiw.capacity = None
@@ -126,6 +145,17 @@ class ModelsTest(TestCase):
                     wiw.writer._can_be_controlled = False
                     wiw.full_clean()
                 self.assertIn('__all__', ve.exception.message_dict)
+                wiw.writer._can_be_controlled = True
+                if wiw.writer and not wiw.writer.generally_controlled:
+                    with self.assertRaises(ValidationError) as ve:
+                        wiw.saan = None
+                        wiw.full_clean()
+                    self.assertIn('saan', ve.exception.message_dict)
+                    with self.assertRaises(ValidationError) as ve:
+                        wiw.saan = 'SIJ'
+                        wiw.publisher_fee = None
+                        wiw.full_clean()
+                    self.assertIn('publisher_fee', ve.exception.message_dict)
                 with self.assertRaises(ValidationError) as ve:
                     wiw.writer = None
                     wiw.full_clean()
@@ -241,10 +271,12 @@ class ModelsTest(TestCase):
             re_post={'pr_society': '021'})
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
-            re_post={'title': 'CHANGED'})
+            re_post={'title': 'CHANGED', 'writerinwork_set-0-controlled': 1})
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
-            re_post={'writerinwork_set-1-relative_share': '111'})
+            re_post={
+                'writerinwork_set-1-relative_share': '111',
+                'writerinwork_set-0-controlled': 1})
         self.get(reverse(
             'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
             re_post={'album_title': 'CHANGED', 'library': 'SET'})
