@@ -15,6 +15,10 @@
     background-color: #333 !important;
 }
 
+fieldset.collapsed .collapse-toggle {
+    color: #d50000 !important;
+}
+
 .button,
 input[type=submit],
 .button:active,
