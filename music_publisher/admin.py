@@ -188,7 +188,7 @@ class TrackInline(admin.TabularInline):
         models.TimeField: {'widget': forms.TimeInput},
     }
     classes = ('collapse', )
-    verbose_name_plural = 'First Recordings'
+    verbose_name_plural = 'First Recordings on this Album'
     extra = 0
 
 
