@@ -123,6 +123,7 @@ You will have to add this to the settings, replace with your data.
         'admin_show_saan': True,  # Needed only if societies assign agr. #
 
         'enforce_saan': True,  # Agr. # is required in many societies
+        'enforce_publisher_fee': True,  # False for self-publishers
         'enforce_pr_society': True,  # Strictly not required, but good practice
         'enforce_ipi_name': True,  # Strictly not required, but good practice
 
@@ -155,6 +156,7 @@ foreign societies. Then define ones in other PROs.
         'admin_show_saan': False,  # Not used in US
 
         'enforce_saan': False,  # Not used in US
+        'enforce_publisher_fee': True,  # False for self-publishers
         'enforce_pr_society': True,  # Strictly not required, but good practice
         'enforce_ipi_name': True,  # Strictly not required, but good practice
 

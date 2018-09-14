@@ -130,6 +130,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_saan': True,
 
     'enforce_saan': True,
+    'enforce_publisher_fee': True,
     'enforce_pr_society': True,
     'enforce_ipi_name': True,
 

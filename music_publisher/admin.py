@@ -20,10 +20,11 @@ from .models import (
     Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement)
 import re
 
-# csrf_protect_m = method_decorator(csrf_protect)
 
-
-SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
+if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
+    SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
+else:
+    SETTINGS = {}
 
 
 class MusicPublisherAdmin(admin.ModelAdmin):
@@ -150,7 +151,7 @@ class WriterAdmin(MusicPublisherAdmin):
                 ('ipi_name', 'ipi_base'),
                 'pr_society'),
         }),
-        ('Generall agreement', {
+        ('General agreement', {
             'fields': (
                 ('generally_controlled', ('saan', 'publisher_fee'))
                 if (SETTINGS.get('admin_show_saan') or
@@ -187,11 +188,16 @@ class WriterInWorkFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
         total = 0
+        controlled = False
         for form in self.forms:
             if not form.is_valid():
                 return
             if form.cleaned_data and not form.cleaned_data.get('DELETE'):
                 total += form.cleaned_data['relative_share']
+                if form.cleaned_data['controlled']:
+                    controlled = True
+        if not controlled:
+            raise ValidationError('At least one writer must be controlled.')
         if not(Decimal(99.98) <= total <= Decimal(100.02)):
             raise ValidationError('Sum of relative shares must be 100%.')
 
