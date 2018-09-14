@@ -177,7 +177,11 @@ class FirstRecordingInline(admin.StackedInline):
 
 
 class TrackInline(admin.TabularInline):
-    autocomplete_fields = ('work', )
+    import django
+    if django.VERSION >= (2, 1):
+        autocomplete_fields = ('work', )
+    else:
+        raw_id_fields = ('work', )
     fields = ('work', 'isrc', 'catalog_number', 'duration',)
     model = FirstRecording
     formfield_overrides = {
