@@ -53,78 +53,6 @@ class MusicPublisherAdmin(admin.ModelAdmin):
                     'CWR-compliant. Please re-evaluate.'))
 
 
-@admin.register(AlbumCD)
-class AlbumCDAdmin(MusicPublisherAdmin):
-    readonly_fields = ('library',)
-
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = (
-            ('Library', {
-                'fields': (
-                    ('cd_identifier', 'library'),)
-            }) if SETTINGS.get('library') else (
-                'Library not set', {'fields': ()}),
-            ('First Album', {
-                'fields': (
-                    ('album_title', 'album_label'),
-                    ('ean', 'release_date'))
-            }),
-        )
-        return fieldsets
-
-    def label_not_set(self, obj=None):
-        return 'NOT SET'
-    label_not_set.short_description = 'Label'
-
-    list_display = (
-        '__str__',
-    )
-
-    def get_list_display(self, *args, **kwargs):
-        lst = list(self.list_display)
-        if SETTINGS.get('label'):
-            lst.append('album_label')
-        lst.append('album_title')
-        lst.append('release_date')
-        lst.append('ean')
-        if SETTINGS.get('library'):
-            lst.append('library')
-            lst.append('cd_identifier')
-        lst.append('_cwr')
-        return lst
-
-    list_filter = ('_cwr',)
-
-    search_fields = ('album_title', '^cd_identifier')
-    actions = None
-
-    def save_model(self, request, obj, form, *args, **kwargs):
-        super().save_model(request, obj, form, *args, **kwargs)
-        if form.changed_data:
-            qs = Work.objects.filter(firstrecording__album_cd=obj)
-            qs.update(last_change=now())
-
-
-@admin.register(Artist)
-class ArtistAdmin(MusicPublisherAdmin):
-    list_display = ('last_or_band', 'first_name', '_cwr')
-    search_fields = ('last_name',)
-    list_filter = ('_cwr',)
-
-    def last_or_band(self, obj):
-        return obj.last_name
-    last_or_band.short_description = 'Last or band name'
-    last_or_band.admin_order_field = 'last_name'
-
-    actions = None
-
-    def save_model(self, request, obj, form, *args, **kwargs):
-        super().save_model(request, obj, form, *args, **kwargs)
-        if form.changed_data:
-            qs = Work.objects.filter(artistinwork__artist=obj)
-            qs.update(last_change=now())
-
-
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
@@ -179,9 +107,14 @@ class AlternateTitleInline(admin.TabularInline):
 
 
 class ArtistInWorkInline(admin.TabularInline):
-    autocomplete_fields = ('artist', )
+    autocomplete_fields = ('artist', 'work')
     model = ArtistInWork
     extra = 0
+
+
+class WorksPerformedByArtistInline(ArtistInWorkInline):
+    verbose_name_plural = 'Works Performed'
+    classes = ('collapse',)
 
 
 class WriterInWorkFormSet(BaseInlineFormSet):
@@ -240,6 +173,18 @@ class FirstRecordingInline(admin.StackedInline):
         models.TimeField: {'widget': forms.TimeInput},
     }
     model = FirstRecording
+    extra = 0
+
+
+class TrackInline(admin.TabularInline):
+    autocomplete_fields = ('work', )
+    fields = ('work', 'isrc', 'catalog_number', 'duration',)
+    model = FirstRecording
+    formfield_overrides = {
+        models.TimeField: {'widget': forms.TimeInput},
+    }
+    classes = ('collapse', )
+    verbose_name_plural = 'First Recordings'
     extra = 0
 
 
@@ -588,3 +533,77 @@ class ACKImportAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
         return False
+
+
+@admin.register(AlbumCD)
+class AlbumCDAdmin(MusicPublisherAdmin):
+    readonly_fields = ('library',)
+    inlines = [TrackInline]
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = (
+            ('Library', {
+                'fields': (
+                    ('cd_identifier', 'library'),)
+            }) if SETTINGS.get('library') else (
+                'Library not set', {'fields': ()}),
+            ('First Album', {
+                'fields': (
+                    ('album_title', 'album_label'),
+                    ('ean', 'release_date'))
+            }),
+        )
+        return fieldsets
+
+    def label_not_set(self, obj=None):
+        return 'NOT SET'
+    label_not_set.short_description = 'Label'
+
+    list_display = (
+        '__str__',
+    )
+
+    def get_list_display(self, *args, **kwargs):
+        lst = list(self.list_display)
+        if SETTINGS.get('label'):
+            lst.append('album_label')
+        lst.append('album_title')
+        lst.append('release_date')
+        lst.append('ean')
+        if SETTINGS.get('library'):
+            lst.append('library')
+            lst.append('cd_identifier')
+        lst.append('_cwr')
+        return lst
+
+    list_filter = ('_cwr',)
+
+    search_fields = ('album_title', '^cd_identifier')
+    actions = None
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(firstrecording__album_cd=obj)
+            qs.update(last_change=now())
+
+
+@admin.register(Artist)
+class ArtistAdmin(MusicPublisherAdmin):
+    list_display = ('last_or_band', 'first_name', '_cwr')
+    search_fields = ('last_name',)
+    list_filter = ('_cwr',)
+    inlines = [WorksPerformedByArtistInline]
+
+    def last_or_band(self, obj):
+        return obj.last_name
+    last_or_band.short_description = 'Last or band name'
+    last_or_band.admin_order_field = 'last_name'
+
+    actions = None
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(artistinwork__artist=obj)
+            qs.update(last_change=now())

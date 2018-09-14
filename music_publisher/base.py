@@ -134,7 +134,6 @@ class MusicPublisherBase(models.Model):
         if response.status_code != 200:
             raise ValidationError('Validation failed', code='service')
         errors = {}
-        print(response.json())
         rfields = response.json()['fields']
         for i in range(len(fields)):
             field_name = keys[i]
