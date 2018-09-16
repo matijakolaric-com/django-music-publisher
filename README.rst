@@ -222,10 +222,18 @@ The next step is to create ``dmp_project/local_settings.py`` or edit
 
     python manage.py migrate
     python manage.py createsuperuser
+
+If you wish to add two predefined permission groups, run::
+    
+    python manage.py loaddata publishing_staff.json
+    
+Finally, run:
+
     python manage.py runserver
 
 Then open the following link: http://localhost:8000/ and log in with
-credentials you provided.
+credentials you provided. For isnructions on permanent deployment, please use 
+official `Django documentation <https://www.djangoproject.com/>`_.
 
 Societies
 ===============================================================================

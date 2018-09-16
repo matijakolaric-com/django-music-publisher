@@ -171,6 +171,11 @@ MUSIC_PUBLISHER_SETTINGS = {
     'label': 'FOO BAR MUSIC',
 }
 
+TIME_INPUT_FORMATS = [
+    '%H:%M:%S',     # '14:30:59'
+    '%M:%S',        # '14:30'
+]
+
 try:
     from .local_settings import *
 except ImportError:
