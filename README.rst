@@ -227,7 +227,7 @@ If you wish to add two predefined permission groups, run::
     
     python manage.py loaddata publishing_staff.json
     
-Finally, run:
+Finally, run::
 
     python manage.py runserver
 
