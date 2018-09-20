@@ -232,7 +232,7 @@ Finally, run:
     python manage.py runserver
 
 Then open the following link: http://localhost:8000/ and log in with
-credentials you provided. For isnructions on permanent deployment, please use 
+credentials you provided. For instructions on permanent deployment, please use 
 official `Django documentation <https://www.djangoproject.com/>`_.
 
 Societies
