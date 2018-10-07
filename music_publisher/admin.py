@@ -347,7 +347,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     cwr_ready.boolean = True
 
     def work_count(self, obj):
-        return obj.works.count()
+        return obj.works__count
     cwr_ready.boolean = True
 
     def download_link(self, obj):
@@ -356,6 +356,11 @@ class CWRExportAdmin(admin.ModelAdmin):
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
             url += '?download=true'
             return mark_safe('<a href="{}">Download</a>'.format(url))
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count('works'))
+        return qs
 
     autocomplete_fields = ('works', )
     list_display = (
