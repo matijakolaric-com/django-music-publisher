@@ -1,15 +1,18 @@
 language: python
-python:
-  - "3.5"
-  - "3.6"
-  - "3.7"
-services:
-  - postgresql
-env:
-  - DJANGO_VERSION=2.0.9 DATABASE_URL="sqlite:///db.sqlite3"
-  - DJANGO_VERSION=2.1.2 DATABASE_URL="sqlite:///db.sqlite3"
-  - DJANGO_VERSION=2.0.9 DATABASE_URL="postgres://postgres@localhost/test_db"
-  - DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/test_db"
+matrix:
+  include:
+    - python: "3.5"
+      env: DJANGO_VERSION=2.0.9 DATABASE_URL="sqlite:///db.sqlite3"
+    - python: "3.5"
+      env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+    - python: "3.6"
+      env: DJANGO_VERSION=2.1.2 DATABASE_URL="sqlite:///db.sqlite3"
+    - python: "3.6"
+      env: DJANGO_VERSION=2.0.9 DATABASE_URL="postgres://postgres@localhost/dmp"
+    - python: "3.6"
+      env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+    - python: "3.7-dev"
+      env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
