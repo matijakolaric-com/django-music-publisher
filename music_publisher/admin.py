@@ -9,7 +9,7 @@ from django.db import models
 from django.forms import ModelForm, FileField
 from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 # from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
@@ -19,6 +19,8 @@ from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement)
 import re
+import requests
+import json
 
 
 if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
@@ -350,6 +352,27 @@ class CWRExportAdmin(admin.ModelAdmin):
         return obj.works__count
     cwr_ready.boolean = True
 
+    def get_highlighted_data(self, obj):
+        data = {'cwr': obj.cwr}
+        try:
+            response = requests.post(
+                SETTINGS.get('highlighter_url'),
+                headers={'Authorization': 'Token {}'.format(
+                    SETTINGS.get('token'))},
+                json=data, timeout=10)
+            html = response.json()['html']
+        except Exception:
+            html = obj.cwr
+        return html
+
+    def view_link(self, obj):
+        if obj.cwr:
+            url = reverse(
+                'admin:music_publisher_cwrexport_change', args=(obj.id,))
+            url += '?preview=true'
+            return mark_safe(
+                '<a href="{}" target="_blank">View CWR</a>'.format(url))
+
     def download_link(self, obj):
         if obj.cwr:
             url = reverse(
@@ -364,19 +387,22 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('works', )
     list_display = (
-        'filename', 'nwr_rev', 'work_count', 'cwr_ready', 'download_link')
+        'filename', 'nwr_rev', 'work_count', 'cwr_ready', 'view_link',
+        'download_link')
 
     list_filter = ('nwr_rev', 'year', )
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.cwr:
-            return ('nwr_rev', 'works', 'filename', 'download_link')
+            return (
+                'nwr_rev', 'works', 'filename', 'view_link', 'download_link')
         else:
             return ()
 
     def get_fields(self, request, obj=None):
         if obj and obj.cwr:
-            return ('nwr_rev', 'works', 'filename', 'download_link')
+            return (
+                'nwr_rev', 'works', 'filename', 'view_link', 'download_link')
         else:
             return ('nwr_rev', 'works')
 
@@ -409,7 +435,12 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         obj = get_object_or_404(CWRExport, pk=object_id)
-        if 'download' in request.GET:
+        if 'preview' in request.GET:
+            html = self.get_highlighted_data(obj)
+            return render(request, 'raw_cwr.html', {
+                'lines': html,
+                'title': obj.filename})
+        elif 'download' in request.GET:
             response = HttpResponse(obj.cwr.encode().decode('latin1'))
             cd = 'attachment; filename="{}"'.format(obj.filename)
             response['Content-Disposition'] = cd

@@ -369,3 +369,6 @@ class ACKImport(models.Model):
     society_name = models.CharField(max_length=45, editable=False)
     date = models.DateField(editable=False)
     report = models.TextField(editable=False)
+
+    def __str__(self):
+        return self.filename

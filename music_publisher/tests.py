@@ -292,6 +292,9 @@ class ModelsTest(TestCase):
         self.client.get(reverse(
             'admin:music_publisher_cwrexport_change',
             args=(self.cwr_export.id,)) + '?download=true',)
+        self.client.get(reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(self.cwr_export.id,)) + '?preview=true',)
         self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'NWR', 'works': [1]})

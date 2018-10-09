@@ -137,6 +137,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'token': os.getenv('TOKEN', None),
     'validator_url': os.getenv('VALIDATOR_URL', None),
     'generator_url': os.getenv('GENERATOR_URL', None),
+    'highlighter_url': os.getenv('HIGHLIGHTER_URL', None),
 
     'work_id_prefix': '',
 
