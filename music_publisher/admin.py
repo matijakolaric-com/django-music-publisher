@@ -438,6 +438,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         if 'preview' in request.GET:
             html = self.get_highlighted_data(obj)
             return render(request, 'raw_cwr.html', {
+                **self.admin_site.each_context(request),
                 'lines': html,
                 'title': obj.filename})
         elif 'download' in request.GET:
