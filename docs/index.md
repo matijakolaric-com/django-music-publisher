@@ -6,6 +6,9 @@ aspects of this app, without going into every possible detail. It presumes that
 installation was successful and user has logged in. It also presumes you have
 acquired the token for the CWR validation and generation service.
 
+This walktrough has been written for version 18.7. Although there are many new
+features, it is still relevant.
+
 ![](django-admin.png)
 
 After logging in, the home view of the administration interface is shown. User 
