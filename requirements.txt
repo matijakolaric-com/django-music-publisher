@@ -5,6 +5,7 @@ coveralls==1.3.0
 Django>=2.1.2
 dj_database_url
 idna==2.7
+psycopg2
 pytz==2018.5
 requests==2.19.1
 requests-toolbelt==0.8.0
