@@ -269,4 +269,4 @@ Demo is available, some demo data is provided. There are two versions, the US an
 More information
 ===============================================================================
 
-More information can be found in this page `<https://matijakolaric.com/articles/2/>`_.
+More information can be found at `<https://matijakolaric.com/articles/2/>`_.
