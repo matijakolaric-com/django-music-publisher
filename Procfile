@@ -1,1 +1,1 @@
-web: python manage.py runserver $PORT
+web: waitress-serve --port=$PORT dmp_project.wsgi:application
