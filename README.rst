@@ -198,7 +198,8 @@ foreign societies. Then define ones in other PROs.
     }
 
 When you apply for a free 15-day demo licence, additional documentation will be
-provided, as well as ``token``, ``validator_url``, and ``creator_url`` values.
+provided, as well as ``token``, ``validator_url``, ``creator_url`` and
+``highlighter_url`` values.
 
 Installing the project (standalone deployment)
 ===============================================================================
@@ -234,6 +235,14 @@ Finally, run::
 Then open the following link: http://localhost:8000/ and log in with
 credentials you provided. For instructions on permanent deployment, please use 
 official `Django documentation <https://www.djangoproject.com/>`_.
+
+Heroku
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+If you would like to try Django Music Publisher, Heroku is a good choice. The
+free PostgreSQL tier can have up to 10.000 rows, wich translates to about
+1.000 works.
+
+Please consider putting all the sensitive data in the Config Vars.
 
 Societies
 ===============================================================================
