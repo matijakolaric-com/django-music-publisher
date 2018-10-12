@@ -68,8 +68,8 @@ generation requires an external commerical service.
 
 Django Music Publisher app works without it, but data will not be validated as 
 CWR-compliant, and there will be no way to create CWR, unless you make your own. 
-The CWR generation could be solved with a template, but without the former, it 
-would most likely not result in valid CWR files.
+The CWR generation could be solved with a template, but without the validation, 
+it would most likely not result in valid CWR files.
 
 Processing of CWR acknowledgement files works without the external service.
 
