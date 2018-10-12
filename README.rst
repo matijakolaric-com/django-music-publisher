@@ -244,11 +244,11 @@ free PostgreSQL tier can have up to 10.000 rows, wich translates to about
 
 With default settings, all that is required is to set folowing Config Vars:
 
-* ALLOWED_HOSTS
-* DATABASE_URL
-* DEBUG
-* SECRET_KEY
-* STATIC_URL (or you may choose to use Whitenoise for)
+* ALLOWED_HOSTS set to '*'
+* DATABASE_URL is usually set by PostgteSQL addon
+* DEBUG should be set to '' (empty string)
+* SECRET_KEY should be generated and kept secret
+* STATIC_URL (to whereever you host static files)
 
 Also, if you are using CWR generation and validation service, setting these:
 
