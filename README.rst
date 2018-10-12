@@ -250,7 +250,8 @@ With default settings, all that is required is to set folowing Config Vars:
 * SECRET_KEY
 * STATIC_URL (or you may choose to use Whitenoise for)
 
-Also, if you are using CWR generation and validation service, setting thise
+Also, if you are using CWR generation and validation service, setting these:
+
 * TOKEN
 * VALIDATOR_URL
 * GENERATOR_URL
