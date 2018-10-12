@@ -242,7 +242,19 @@ If you would like to try Django Music Publisher, Heroku is a good choice. The
 free PostgreSQL tier can have up to 10.000 rows, wich translates to about
 1.000 works.
 
-Please consider putting all the sensitive data in the Config Vars.
+With default settings, all that is required is to set folowing Config Vars:
+
+* ALLOWED_HOSTS
+* DATABASE_URL
+* DEBUG
+* SECRET_KEY
+* STATIC_URL (or you may choose to use Whitenoise for)
+
+Also, if you are using CWR generation and validation service, setting thise
+* TOKEN
+* VALIDATOR_URL
+* GENERATOR_URL
+* HIGHLIGHTER_URL
 
 Societies
 ===============================================================================
