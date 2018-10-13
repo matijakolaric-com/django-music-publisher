@@ -139,7 +139,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'work_id_prefix': '',
 
     'publisher_id': 'FOO',
-    'publisher_name': 'FOO S MUSIC PUBLISHING',
+    'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO',
     'publisher_ipi_name': '00000000199',
     'publisher_pr_society': '071',
     'publisher_mr_society': '034',
