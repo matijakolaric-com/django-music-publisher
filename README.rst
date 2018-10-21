@@ -40,10 +40,10 @@ performing artists, albums, library releases etc, and allows batch registrations
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
-can not be entered. This is just enough data for acquiring ISWCs.
+can not be entered.
 
 A special US situation where an original publisher may have one entity for every
-of the three PROs is also covered since version 18.8.
+of the three PROs is also covered.
 
 It is presumed that writers keep 50% of performing rights and the other 50%, 
 as well as 100% of mechanical and sync goes to the original publisher.
@@ -64,12 +64,10 @@ This translates to following CWR 2.1 transaction record types:
 * ORN (limited to library).
 
 Common Works Registration is used for batch registrations, although the actual
-generation requires an external commerical service. 
-
-Django Music Publisher app works without it, but data will not be validated as 
-CWR-compliant, and there will be no way to create CWR, unless you make your own. 
-The CWR generation could be solved with a template, but without the validation, 
-it would most likely not result in valid CWR files.
+generation of CWR files requires an external service. 
+Django Music Publisher can work without it, but data will not be validated as 
+CWR-compliant, and there will be no way to create CWR, unless you make your own
+CWR generator.
 
 Processing of CWR acknowledgement files works without the external service.
 
@@ -79,22 +77,12 @@ in 2018.
 Beyond
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you are looking for a solution that covers more territory, this may be 
-an educational proof of concept, maybe even a good starting point for a custom 
-development.
-
 Please note that the limitations of this project are not chosen based on 
 technical complexity of additional features, but due to the fact that beyond 
 this point, the learning curve gets really steep, both for software developers 
 and users.
 
-Common Works Registration (CWR), or even the baby version of it, Electronic
-Batch Registration (EBR), is usually the most time-consumig part of any 
-software project for music publishers. You may be interested in using external
-REST API service for data validation, as well as generation and parsing of CWR 
-files.
-
-CWR Developer Toolset
+CWR Validation, Generation and Syntax Highlighting
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This particular software uses two simplest of the REST API tools from the 
@@ -104,7 +92,7 @@ one for data validation and one for generation of CWR files.
 Even if you need a far more complex CWR, this project is still a good proof of
 concept how well these tools work.
 
-Installing the app
+Installing the App
 ===============================================================================
 
 If you want to install the `django_music_publisher` app, just use pip::
@@ -130,6 +118,7 @@ You will have to add this to the settings, replace with your data.
         'token': None,  # See below
         'validator_url': None,  # See below
         'generator_url': None,  # See below
+        'highlighter_url': None,  # See below
 
         'work_id_prefix': 'TOP',  # Makes work IDs somewhat unique
         
@@ -146,8 +135,8 @@ You will have to add this to the settings, replace with your data.
     }
 
 For US publishers with entities in different PROs, define the "main" publisher
-first, which is original publisher for affiliates in the respective PRO and
-foreign societies. Then define ones in other PROs.
+first, which is original publisher for affiliate writers in the respective PRO
+and foreign societies. Then define publishers in other PROs.
 
 .. code:: python
 
@@ -218,7 +207,8 @@ Do::
     pip install -r requirements.txt
 
 The next step is to create ``dmp_project/local_settings.py`` or edit 
-``dmp_project/settings.py``. Regardless, ``SECRET_KEY`` and 
+``dmp_project/settings.py`` or set the appropriate environment 
+variables. Regardless, ``SECRET_KEY``, ``ALLOWED_HOSTS``,  and 
 ``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. Then::
 
     python manage.py migrate
@@ -239,27 +229,24 @@ official `Django documentation <https://www.djangoproject.com/>`_.
 Heroku
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 If you would like to try Django Music Publisher, Heroku is a good choice. The
-free PostgreSQL tier can have up to 10.000 rows, wich translates to about
-1.000 works.
+free PostgreSQL tier can have up to 10.000 rows, which translates to about
+1.000 works. 
 
-With default settings, all that is required is to set folowing Config Vars:
+Master branch, after it passes the CI, is deployed on Heroku automatically.
+All that is required is to set the following Config Vars:
 
-* ALLOWED_HOSTS set to your host name, or a comma-separated list of hostnames
-* DATABASE_URL is usually set by PostgreSQL addon
-* SECRET_KEY should be generated, if not, one is autogerenated on every 
-  deployment, which may be fine for free tier testing, but not for serious work
-
-Also, if you are using CWR generation and validation service, set these:
-
-* TOKEN is mandatory
-* VALIDATOR_URL, GENERATOR_URL, HIGHLIGHTER_URL will be provided for the 
-service in your region.
+* ALLOWED_HOSTS set to your host name
+* DATABASE_URL set by PostgreSQL addon
+* SECRET_KEY is auto-generated on every deployment, which may be fine for
+  testing, but not for production
+* TOKEN is set in order to use the external CWR generation, validation and
+  syntax highlighting service.
 
 Societies
 ===============================================================================
 
 The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-setup, only 12 societies from six countries are present. If you need to add
+setup, only 18 societies from 12 countries are present. If you need to add
 additional societies, do it with this setting (and not in the ``models.py``).
 
 Societies the original publisher and writers are affiliated with, as well as
@@ -281,7 +268,8 @@ Walkthrough and Demo
 `Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/>`_
 is available in the ``docs`` folder.
 
-Demo is available, some demo data is provided. There are two versions, the US and the World version:
+Demo is available, some demo data is provided. There are two versions, the US
+and the World version:
 
 * `World Demo <https://dmp.matijakolaric.com/>`_
 * `US Demo <https://dmp.matijakolaric.com/us/>`_
