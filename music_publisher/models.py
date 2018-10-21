@@ -250,24 +250,15 @@ class WriterInWork(models.Model):
         return data
 
 
-class CWRExport(models.Model):
+class WorkExport(object):
     class Meta:
-        verbose_name = 'CWR Export'
-        verbose_name_plural = 'CWR Exports'
-        ordering = ('-id',)
+        abstract = True
 
-    nwr_rev = models.CharField(
-        'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
-            ('NWR', 'New work registration'),
-            ('REV', 'Revision of registered work')))
-    cwr = models.TextField(blank=True, editable=False)
-    year = models.CharField(
-        max_length=2, db_index=True, editable=False, blank=True)
-    num_in_year = models.PositiveSmallIntegerField(default=0)
-    works = models.ManyToManyField(Work)
+    nwr_rev = None
 
-    @property
-    def json(self):
+    def get_json(self, qs=None):
+        if qs is None:
+            qs = self.works.order_by('id')
         j = OrderedDict([('revision', self.nwr_rev == 'REV')])
         j.update({
             "publisher_id": SETTINGS.get('publisher_id'),
@@ -287,10 +278,31 @@ class CWRExport(models.Model):
             j["bmi_publisher"] = us.get('BMI')
             j["sesac_publisher"] = us.get('SESAC')
         works = OrderedDict()
-        for work in self.works.order_by('id'):
+        for work in qs:
             works.update(work.json)
         j.update({"works": works})
         return j
+
+    @property
+    def json(self):
+        return self.get_json()
+
+
+class CWRExport(WorkExport, models.Model):
+    class Meta:
+        verbose_name = 'CWR Export'
+        verbose_name_plural = 'CWR Exports'
+        ordering = ('-id',)
+
+    nwr_rev = models.CharField(
+        'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
+            ('NWR', 'New work registration'),
+            ('REV', 'Revision of registered work')))
+    cwr = models.TextField(blank=True, editable=False)
+    year = models.CharField(
+        max_length=2, db_index=True, editable=False, blank=True)
+    num_in_year = models.PositiveSmallIntegerField(default=0)
+    works = models.ManyToManyField(Work)
 
     @property
     def filename(self):
@@ -307,10 +319,12 @@ class CWRExport(models.Model):
     def get_cwr(self):
         if self.cwr:
             return
-
+        url = SETTINGS.get('generator_url')
+        if url is None:
+            raise ValidationError('CWR generator URL not set.')
         try:
             response = requests.post(
-                SETTINGS.get('generator_url'),
+                url,
                 headers={'Authorization': 'Token {}'.format(
                     SETTINGS.get('token'))},
                 json=self.json, timeout=30)

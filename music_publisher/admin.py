@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.forms import ModelForm, FileField
 from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 # from django.utils.decorators import method_decorator
@@ -17,7 +17,8 @@ from django.utils.timezone import now
 # from django.views.decorators.csrf import csrf_protect
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement)
+    Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement,
+    WorkExport, WORK_ID_PREFIX)
 import re
 import requests
 import json
@@ -333,7 +334,16 @@ class WorkAdmin(MusicPublisherAdmin):
             '{}?works={}'.format(url, ','.join(str(i) for i in ids)))
     create_cwr.short_description = 'Create CWR from selected works.'
 
-    actions = (create_cwr,)
+    def create_json(self, request, qs):
+        j = WorkExport().get_json(qs)
+        response = JsonResponse(j, json_dumps_params={'indent': 4})
+        name = '{}{}'.format(WORK_ID_PREFIX, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.json"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+    create_json.short_description = 'Export selected works.'
+
+    actions = (create_cwr, create_json)
 
     def get_actions(self, request):
         actions = super().get_actions(request)
