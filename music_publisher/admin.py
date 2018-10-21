@@ -28,6 +28,8 @@ if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
 else:
     SETTINGS = {}
 
+IS_POPUP_VAR = admin.options.IS_POPUP_VAR
+
 
 class MusicPublisherAdmin(admin.ModelAdmin):
     """Custom Admin class, easily extendable.
@@ -252,7 +254,7 @@ class WorkAdmin(MusicPublisherAdmin):
         return obj.firstrecording.duration.strftime('%H:%M:%S')
     duration.admin_order_field = 'firstrecording__duration'
 
-    readonly_fields = ('writer_last_names', 'work_id')
+    readonly_fields = ('writer_last_names', 'work_id', 'json')
     list_display = (
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'isrc', 'album_cd', '_cwr')
@@ -316,7 +318,8 @@ class WorkAdmin(MusicPublisherAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('title', 'iswc'),)}),)
+                'work_id',
+                ('title', 'iswc'))}),)
 
     def save_model(self, request, obj, form, *args, **kwargs):
         if form.changed_data:
@@ -581,6 +584,11 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     readonly_fields = ('library',)
     inlines = [TrackInline]
 
+    def get_inline_instances(self, request, obj=None):
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = (
             ('Library', {
@@ -635,6 +643,11 @@ class ArtistAdmin(MusicPublisherAdmin):
     search_fields = ('last_name',)
     list_filter = ('_cwr',)
     inlines = [WorksPerformedByArtistInline]
+
+    def get_inline_instances(self, request, obj=None):
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
 
     def last_or_band(self, obj):
         return obj.last_name

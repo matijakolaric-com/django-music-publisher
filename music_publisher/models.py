@@ -39,6 +39,8 @@ class Work(WorkBase):
 
     @property
     def work_id(self):
+        if self.id is None:
+            return ''
         return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
 
     def __str__(self):
