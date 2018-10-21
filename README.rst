@@ -244,18 +244,16 @@ free PostgreSQL tier can have up to 10.000 rows, wich translates to about
 
 With default settings, all that is required is to set folowing Config Vars:
 
-* ALLOWED_HOSTS set to '*'
+* ALLOWED_HOSTS set to your host name, or a comma-separated list of hostnames
 * DATABASE_URL is usually set by PostgteSQL addon
-* DEBUG should be set to '' (empty string)
-* SECRET_KEY should be generated and kept secret
-* STATIC_URL (to whereever you host static files)
+* SECRET_KEY should be generated, if not, one is autogerenated on every 
+deployment, which may be fine for free tier testing, but not for serious work
 
-Also, if you are using CWR generation and validation service, setting these:
+Also, if you are using CWR generation and validation service, set these:
 
-* TOKEN
-* VALIDATOR_URL
-* GENERATOR_URL
-* HIGHLIGHTER_URL
+* TOKEN is mandatory
+* VALIDATOR_URL, GENERATOR_URL, HIGHLIGHTER_URL will be provided for the 
+service in your region.
 
 Societies
 ===============================================================================
