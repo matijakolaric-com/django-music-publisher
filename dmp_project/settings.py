@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', 'nosjouthfjhrwfureiwzzw452uih52k4j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', True)
+DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
@@ -116,7 +116,7 @@ USE_TZ = True
 
 STATIC_URL = os.getenv('STATIC_URL', '/static/')
 
-STATIC_ROOT = os.getenv('STATIC_ROOT', os.path.join(BASE_DIR, "static"))
+STATIC_ROOT = os.getenv('STATIC_ROOT', 'https://matijakolaric-com.github.io/django-music-publisher/static/')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "dmp_project", "static"),
@@ -132,9 +132,9 @@ MUSIC_PUBLISHER_SETTINGS = {
     'enforce_ipi_name': True,
 
     'token': os.getenv('TOKEN', None),
-    'validator_url': os.getenv('VALIDATOR_URL', None),
-    'generator_url': os.getenv('GENERATOR_URL', None),
-    'highlighter_url': os.getenv('HIGHLIGHTER_URL', None),
+    'validator_url': os.getenv('VALIDATOR_URL', 'https://matijakolaric.com/api/v1/cwr/original/field/multi/'),
+    'generator_url': os.getenv('GENERATOR_URL', 'https://matijakolaric.com/api/v1/cwr/original/creator/'),
+    'highlighter_url': os.getenv('HIGHLIGHTER_URL', 'https://matijakolaric.com/api/v1/cwr/highlighter/'),
 
     'work_id_prefix': '',
 
