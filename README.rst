@@ -247,7 +247,7 @@ With default settings, all that is required is to set folowing Config Vars:
 * ALLOWED_HOSTS set to your host name, or a comma-separated list of hostnames
 * DATABASE_URL is usually set by PostgteSQL addon
 * SECRET_KEY should be generated, if not, one is autogerenated on every 
-deployment, which may be fine for free tier testing, but not for serious work
+  deployment, which may be fine for free tier testing, but not for serious work
 
 Also, if you are using CWR generation and validation service, set these:
 
