@@ -247,6 +247,12 @@ class WriterInWork(models.Model):
                 (self.writer.saan if self.writer else None) or
                 '')
         })
+        if self.controlled:
+            publisher = self.writer.get_publisher_dict()
+            data['original_publishers'] = [{
+                "publisher_id": publisher.get('publisher_id'),
+                "publisher_name": publisher.get('publisher_name')
+            }]
         return data
 
 
@@ -261,6 +267,8 @@ class WorkExport(object):
             qs = self.works.order_by('id')
         j = OrderedDict([('revision', self.nwr_rev == 'REV')])
         j.update({
+            "sender_id": SETTINGS.get('publisher_ipi_name'),
+            "sender_name": SETTINGS.get('publisher_name'),
             "publisher_id": SETTINGS.get('publisher_id'),
             "publisher_name": SETTINGS.get('publisher_name'),
             "publisher_ipi_name": SETTINGS.get('publisher_ipi_name'),
