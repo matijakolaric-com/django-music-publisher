@@ -250,6 +250,8 @@ class ModelsTest(TestCase):
             '?has_iswc=Y&has_rec=N&q=01')
         self.get(reverse('admin:music_publisher_cwrexport_changelist',))
         self.get(reverse('admin:music_publisher_ackimport_changelist',))
+        self.get(reverse('admin:music_publisher_artist_add',) + '&_popup=1')
+        self.get(reverse('admin:music_publisher_albumcd_add',) + '&_popup=1')
         self.get(reverse('admin:music_publisher_artist_add',))
         self.get(reverse('admin:music_publisher_albumcd_add',))
         self.get(reverse('admin:music_publisher_writer_add',))
