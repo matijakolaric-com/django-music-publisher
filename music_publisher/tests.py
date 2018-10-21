@@ -284,6 +284,11 @@ class ModelsTest(TestCase):
             data={
                 'action': 'create_cwr', 'select_across': 1,
                 'index': 0, '_selected_action': self.work.id})
+        self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.work.id})
         self.get(
             reverse(
                 'admin:music_publisher_cwrexport_change',
