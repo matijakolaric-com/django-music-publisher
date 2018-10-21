@@ -242,17 +242,16 @@ class WriterInWork(models.Model):
             'controlled': self.controlled,
             'capacity': self.capacity,
             'relative_share': str(self.relative_share / 100),
-            'saan': (
-                self.saan or
-                (self.writer.saan if self.writer else None) or
-                '')
         })
         if self.controlled:
             publisher = self.writer.get_publisher_dict()
-            data['original_publishers'] = [{
-                "publisher_id": publisher.get('publisher_id'),
-                "publisher_name": publisher.get('publisher_name')
-            }]
+            data.update({
+                'publisher_for_writer_id': publisher.get('publisher_id'),
+                'saan': (
+                    self.saan or
+                    (self.writer.saan if self.writer else None) or
+                    '')
+            })
         return data
 
 
