@@ -233,14 +233,15 @@ free PostgreSQL tier can have up to 10.000 rows, which translates to about
 1.000 works. 
 
 Master branch, after it passes the CI, is deployed on Heroku automatically.
-All that is required is to set the following Config Vars:
+The following Config Vars are all that is required for that:
 
-* ALLOWED_HOSTS set to your host name
-* DATABASE_URL set by PostgreSQL addon
-* SECRET_KEY is auto-generated on every deployment, which may be fine for
-  testing, but not for production
+* ALLOWED_HOSTS set to the correct host name
+* DATABASE_URL was set by PostgreSQL add-on
 * TOKEN is set in order to use the external CWR generation, validation and
   syntax highlighting service.
+
+* SECRET_KEY is not set, it is auto-generated on every deployment, which may 
+  be fine for testing, but for production it should be set as well
 
 Societies
 ===============================================================================
