@@ -35,15 +35,16 @@ Use Case
 This app is targeted at **single original publishers**, publishing 
 **original musical works**.
 (Original work is one that is not a modification of an existing musical work.)
-It holds data on musical works, including songwriters (composers and lyricists),
-performing artists, albums, library releases etc, and allows batch registrations.
+It holds data on musical works, including songwriters (composers and 
+lyricists), performing artists, albums, library releases etc, and allows batch 
+registrations.
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
 can not be entered.
 
-A special US situation where an original publisher may have one entity for every
-of the three PROs is also covered.
+A special US situation where an original publisher may have one entity for 
+every of the three PROs is also covered.
 
 It is presumed that writers keep 50% of performing rights and the other 50%, 
 as well as 100% of mechanical and sync goes to the original publisher.
@@ -242,6 +243,8 @@ The following Config Vars are all that is required for that:
 
 * SECRET_KEY is not set, it is auto-generated on every deployment, which may 
   be fine for testing, but for production it should be set as well
+
+Static files are automatically collected and served with Whitenoise.
 
 Societies
 ===============================================================================
