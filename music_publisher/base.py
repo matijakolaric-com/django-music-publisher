@@ -70,7 +70,10 @@ except AttributeError:
         ('010', 'ASCAP, United States'),
         ('021', 'BMI, United States'),
         ('071', 'SESAC Inc., United States'),
-        ('034', 'HFA, United States')]
+        ('034', 'HFA, United States'),
+
+        ('319', 'ICE Services, Administrative Agency'),
+        ('707', 'Musicmark, Administrative Agency')]
 
 
 def get_publisher_dict(pr_society):
