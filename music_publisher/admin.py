@@ -480,7 +480,7 @@ class ACKImportForm(ModelForm):
     acknowledgement_file = FileField()
 
     RE_HDR = re.compile(
-        r'^HDRSO[0 ]{6}([ \d][ \d]\d)(.{45})01\.10(\d{8})\d{6}(\d{8})')
+        r'^HDR(?:SO|AA)[0 ]{6}([ \d][ \d]\d)(.{45})01\.10(\d{8})\d{6}(\d{8})')
 
     def clean(self):
         super().clean()
@@ -537,7 +537,11 @@ class ACKImportAdmin(admin.ModelAdmin):
         report = ''
         for x in re.findall(self.RE_ACK, file_content):
             work_id, remote_work_id, dat, status = x
+            # work ID is numeric with an optional string
             work_id = work_id.strip()
+            PREFIX = SETTINGS.get('work_id_prefix', '')
+            if work_id.startswith(PREFIX):
+                work_id = work_id[len(PREFIX):]
             if not work_id.isnumeric():
                 unknown_work_ids.append(work_id)
                 continue
