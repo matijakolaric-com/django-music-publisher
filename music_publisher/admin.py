@@ -21,7 +21,6 @@ from .models import (
     WorkExport, WORK_ID_PREFIX)
 import re
 import requests
-import json
 
 
 if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):

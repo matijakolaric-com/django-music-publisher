@@ -77,7 +77,9 @@ WSGI_APPLICATION = 'dmp_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {'default': dj_database_url.config(default='sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3')))}
+DATABASES = {
+    'default': dj_database_url.config(
+        default='sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3')))}
 
 
 # Password validation
@@ -85,16 +87,20 @@ DATABASES = {'default': dj_database_url.config(default='sqlite:///{}'.format(os.
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'NumericPasswordValidator',
     },
 ]
 
@@ -134,9 +140,15 @@ MUSIC_PUBLISHER_SETTINGS = {
     'enforce_ipi_name': True,
 
     'token': os.getenv('TOKEN', None),
-    'validator_url': os.getenv('VALIDATOR_URL', 'https://matijakolaric.com/api/v1/cwr/original/field/multi/'),
-    'generator_url': os.getenv('GENERATOR_URL', 'https://matijakolaric.com/api/v1/cwr/original/creator/'),
-    'highlighter_url': os.getenv('HIGHLIGHTER_URL', 'https://matijakolaric.com/api/v1/cwr/highlighter/'),
+    'validator_url': os.getenv(
+        'VALIDATOR_URL',
+        'https://matijakolaric.com/api/v1/cwr/original/field/multi/'),
+    'generator_url': os.getenv(
+        'GENERATOR_URL',
+        'https://matijakolaric.com/api/v1/cwr/original/creator/'),
+    'highlighter_url': os.getenv(
+        'HIGHLIGHTER_URL',
+        'https://matijakolaric.com/api/v1/cwr/highlighter/'),
 
     'work_id_prefix': os.getenv('WORK_ID_PREFIX', ''),
 
