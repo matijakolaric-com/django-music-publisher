@@ -138,7 +138,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'generator_url': os.getenv('GENERATOR_URL', 'https://matijakolaric.com/api/v1/cwr/original/creator/'),
     'highlighter_url': os.getenv('HIGHLIGHTER_URL', 'https://matijakolaric.com/api/v1/cwr/highlighter/'),
 
-    'work_id_prefix': '',
+    'work_id_prefix': os.getenv('WORK_ID_PREFIX', ''),
 
     'publisher_id': 'FOO',
     'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO',

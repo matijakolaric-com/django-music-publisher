@@ -8,7 +8,7 @@ matrix:
     - python: "3.6"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="sqlite:///db.sqlite3"
     - python: "3.6"
-      env: DJANGO_VERSION=2.0.9 DATABASE_URL="postgres://postgres@localhost/dmp"
+      env: DJANGO_VERSION=2.0.9 DATABASE_URL="postgres://postgres@localhost/dmp" WORK_ID_PREFIX="XXX"
     - python: "3.6"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
     - python: "3.7-dev"
