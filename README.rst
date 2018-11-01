@@ -250,8 +250,9 @@ Societies
 ===============================================================================
 
 The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-setup, only 18 societies from 12 countries are present. If you need to add
-additional societies, do it with this setting (and not in the ``models.py``).
+setup, only 18 societies from 12 countries are present, as well as two 
+administrative agencies. If you need to add additional societies, do it with 
+this setting (and not in the ``models.py``).
 
 Societies the original publisher and writers are affiliated with, as well as
 all societies whose acknowledgement files are being imported, must be present.
