@@ -364,7 +364,7 @@ class WorkAcknowledgement(models.Model):
         ('CO', 'Conflict'),
         ('DU', 'Duplicate'),
         ('RA', 'Transaction Accepted'),
-        ('SA', 'Registration Accepted'),
+        ('AS', 'Registration Accepted'),
         ('AC', 'Registration Accepted with Changes'),
         ('RJ', 'Rejected'),
         ('NP', 'No Participation'),
