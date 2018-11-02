@@ -13,6 +13,7 @@ if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
     SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 else:
     SETTINGS = {}
+
 ENFORCE_SAAN = SETTINGS.get('enforce_saan')
 ENFORCE_PUBLISHER_FEE = SETTINGS.get('enforce_publisher_fee')
 ENFORCE_PR_SOCIETY = SETTINGS.get('enforce_pr_society')

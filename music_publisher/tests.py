@@ -75,6 +75,7 @@ class ModelsTest(TestCase):
         self.cwr_export2.save()
         self.cwr_export2.works.add(self.work)
 
+    @override_settings()
     def test_validation(self):
         self.assertTrue(VALIDATE)
         self.work.clean_fields()
@@ -135,6 +136,12 @@ class ModelsTest(TestCase):
                     wiw.publisher_fee = 100
                     wiw.full_clean()
                 self.assertIn('publisher_fee', ve.exception.message_dict)
+                wiw.publisher_fee = None
+                with self.assertRaises(ValidationError) as ve:
+                    wiw.saan = 'JAVA'
+                    wiw.full_clean()
+                self.assertIn('saan', ve.exception.message_dict)
+                wiw.saan = None
             else:
                 with self.assertRaises(ValidationError) as ve:
                     wiw.capacity = None
@@ -160,6 +167,11 @@ class ModelsTest(TestCase):
                     wiw.writer = None
                     wiw.full_clean()
                 self.assertIn('writer', ve.exception.message_dict)
+        settings.MUSIC_PUBLISHER_SETTINGS['validator_url'] = \
+            'https://240.0.0.1/'  # no routing possible to this address
+        self.work.full_clean()
+        self.assertFalse(self.work._cwr)
+        self.work.full_clean()
 
     def test_str(self):
         self.assertEqual(str(self.artist), 'FOO')
@@ -202,6 +214,20 @@ class ModelsTest(TestCase):
             self.cwr_export.get_cwr()
         self.assertIn('Unauthorized', ve.exception.message)
         settings.MUSIC_PUBLISHER_SETTINGS['token'] = token
+        url = settings.MUSIC_PUBLISHER_SETTINGS['generator_url']
+        settings.MUSIC_PUBLISHER_SETTINGS['generator_url'] = None
+        with self.assertRaises(ValidationError) as ve:
+            self.cwr_export.get_cwr()
+        settings.MUSIC_PUBLISHER_SETTINGS['generator_url'] = \
+            'https://240.0.0.1/'  # no routing possiblle
+        with self.assertRaises(ValidationError) as ve:
+            self.cwr_export.get_cwr()
+        settings.MUSIC_PUBLISHER_SETTINGS['generator_url'] = url
+        pin = settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name']
+        settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name'] = 100
+        with self.assertRaises(ValidationError) as ve:
+            self.cwr_export.get_cwr()
+        settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name'] = pin
 
     def get(self, path, re_post=False):
         response = self.client.get(path)
@@ -228,6 +254,7 @@ class ModelsTest(TestCase):
         self.assertIn(response.status_code, [200, 302])
         return response
 
+    @override_settings()
     def test_admin(self):
         self.assertEqual(AlbumCDAdmin.label_not_set(None), 'NOT SET')
         self.cwr_export.get_cwr()
@@ -262,6 +289,13 @@ class ModelsTest(TestCase):
             'admin:music_publisher_artist_change', args=(self.artist.id,)),
             re_post={'last_name': 'BAR'})
         self.assertEqual(str(Artist.objects.get(pk=self.artist.id)), 'BAR')
+        url = settings.MUSIC_PUBLISHER_SETTINGS['validator_url']
+        settings.MUSIC_PUBLISHER_SETTINGS['validator_url'] = \
+            'https://240.0.0.1/'  # no routing possiblle
+        self.get(reverse(
+            'admin:music_publisher_artist_change', args=(self.artist.id,)),
+            re_post={'last_name': 'CAFE'})
+        settings.MUSIC_PUBLISHER_SETTINGS['validator_url'] = url
         self.get(reverse(
             'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
             re_post={'album_title': None, 'release_date': None})
@@ -278,6 +312,10 @@ class ModelsTest(TestCase):
             re_post={
                 'writerinwork_set-1-relative_share': '111',
                 'writerinwork_set-0-controlled': 1})
+        self.get(reverse(
+            'admin:music_publisher_work_change', args=(self.work.id,)),
+            re_post={
+                'writerinwork_set-1-relative_share': 'BAD DATA'})
         self.get(reverse(
             'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
             re_post={'album_title': 'CHANGED', 'library': 'SET'})
@@ -299,6 +337,11 @@ class ModelsTest(TestCase):
         self.client.get(reverse(
             'admin:music_publisher_cwrexport_change',
             args=(self.cwr_export.id,)) + '?download=true',)
+        self.client.get(reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(self.cwr_export.id,)) + '?preview=true',)
+        settings.MUSIC_PUBLISHER_SETTINGS['highlighter_url'] = \
+            'https://240.0.0.1/'  # no routing possiblle
         self.client.get(reverse(
             'admin:music_publisher_cwrexport_change',
             args=(self.cwr_export.id,)) + '?preview=true',)
