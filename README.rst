@@ -90,9 +90,8 @@ and users.
 CWR Validation, Generation and Syntax Highlighting
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This particular software uses two simplest of the REST API tools from the 
-`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_,
-one for data validation and one for generation of CWR files.
+This particular software uses three REST API tools from the 
+`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
 
 Even if you need a far more complex CWR, this project is still a good proof of
 concept how well these tools work.
