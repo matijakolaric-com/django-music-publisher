@@ -235,14 +235,14 @@ class ModelsTest(TestCase):
         adminform = response.context_data.get('adminform')
         if adminform is None:
             return
+        if not re_post:
+            return response
         data = {}
         for sc in response.context:
             for d in sc:
                 if 'widget' in sc:
                     data[sc['widget']['name']] = sc['widget']['value']
         data.update(adminform.form.initial)
-        if not re_post:
-            return response
         if isinstance(re_post, dict):
             data.update(re_post)
         for key, value in data.items():
