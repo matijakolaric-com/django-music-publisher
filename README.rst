@@ -20,8 +20,11 @@ Django Music Publisher
 
 This is a simple **Django app for original music publishers**. The app is 
 released under `MIT license <LICENSE>`_ and is basically free. At this point, 
-it covers all the data required for batch registrations of musical works, as
-well as basic data on agreements between the publisher and a writer.
+it covers all the data required for batch (CWR) registrations of musical works, 
+as well as basic data on agreements between the publisher and a writer.
+
+An external (commercial) service can be used for complete data validation and 
+CWR generation.
 
 Introduction
 ===============================================================================
@@ -36,14 +39,14 @@ This app is targeted at **single original publishers**, publishing
 **original musical works**.
 (Original work is one that is not a modification of an existing musical work.)
 It holds data on musical works, including songwriters (composers and 
-lyricists), performing artists, albums, library releases etc, and allows batch 
-registrations.
+lyricists), performing artists, albums, library releases etc, and allows data 
+imports and exports.
 
 Multiple writers, both controlled and uncontrolled, are covered, but data on
 other publishers (other original publishers, administrators and sub-publishers)
 can not be entered.
 
-A special US situation where an original publisher may have one entity for 
+A special **US** situation where an original publisher may have one entity for 
 every of the three PROs is also covered.
 
 It is presumed that writers keep 50% of performing rights and the other 50%, 
@@ -53,7 +56,7 @@ Alternate titles and basic data on performing artists and just enough data for
 registration of library works, as well as full data about the first recording,
 can be entered.
 
-This translates to following CWR 2.1 transaction record types:
+This translates to following CWR 2.x transaction record types:
 
 * NWR/REV,
 * SPU (just one), SPT (just World),
@@ -65,7 +68,8 @@ This translates to following CWR 2.1 transaction record types:
 * ORN (limited to library).
 
 Common Works Registration is used for batch registrations, although the actual
-generation of CWR files requires an external service. 
+data validation generation of CWR files uses an external commercial service.
+
 Django Music Publisher can work without it, but data will not be validated as 
 CWR-compliant, and there will be no way to create CWR, unless you make your own
 CWR generator.
@@ -86,9 +90,8 @@ and users.
 CWR Validation, Generation and Syntax Highlighting
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This particular software uses two simplest of the REST API tools from the 
-`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_,
-one for data validation and one for generation of CWR files.
+This particular software uses three REST API tools from the 
+`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
 
 Even if you need a far more complex CWR, this project is still a good proof of
 concept how well these tools work.
@@ -96,7 +99,8 @@ concept how well these tools work.
 Installing the App
 ===============================================================================
 
-If you want to install the `django_music_publisher` app, just use pip::
+If you want to install the latest stable release of the 
+`django_music_publisher` app, just use pip::
 
     pip install --upgrade django_music_publisher
 
@@ -153,6 +157,7 @@ and foreign societies. Then define publishers in other PROs.
         'token': None,  # See below
         'validator_url': None,  # See below
         'generator_url': None,  # See below
+        'highlighter_url': None,  # See below
 
         'work_id_prefix': 'FOO',  # Makes work IDs somewhat unique
         
@@ -187,16 +192,18 @@ and foreign societies. Then define publishers in other PROs.
         'label': 'FOO BAR MUSIC',  # Use only if you are also a label
     }
 
-When you apply for a free 15-day demo licence, additional documentation will be
+When you apply for a free 15-day demo licence for the external service that
+validates the data and generates CWR, additional documentation will be
 provided, as well as ``token``, ``validator_url``, ``creator_url`` and
 ``highlighter_url`` values.
 
 Installing the project (standalone deployment)
 ===============================================================================
 
-You can only install this project on a computer that has Python 3 preinstalled.
-Supported versions are 3.5 and 3.6. It might work with other Python 3 versions,
-but not with Python 2. It is advised you run this inside a virtual environment.
+You can only install this project on a system that has Python 3 preinstalled.
+Supported versions are 3.5, 3.6 and 3.7. 
+It might work with other Python 3 versions, but not with Python 2. It is 
+advised you run this inside a virtual environment.
 
 Do::
 
@@ -207,9 +214,8 @@ Do::
     cd django-music-publisher
     pip install -r requirements.txt
 
-The next step is to create ``dmp_project/local_settings.py`` or edit 
-``dmp_project/settings.py`` or set the appropriate environment 
-variables. Regardless, ``SECRET_KEY``, ``ALLOWED_HOSTS``,  and 
+The next step is to create ``dmp_project/local_settings.py`` or set the 
+appropriate environment variables. ``SECRET_KEY``, ``ALLOWED_HOSTS``, and 
 ``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. Then::
 
     python manage.py migrate
@@ -224,8 +230,9 @@ Finally, run::
     python manage.py runserver
 
 Then open the following link: http://localhost:8000/ and log in with
-credentials you provided. For instructions on permanent deployment, please use 
-official `Django documentation <https://www.djangoproject.com/>`_.
+credentials you provided in a previous step. For instructions on permanent 
+deployment, please use official 
+`Django documentation <https://www.djangoproject.com/>`_.
 
 Heroku
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -244,7 +251,8 @@ The following Config Vars are all that is required for that:
 * SECRET_KEY is not set, it is auto-generated on every deployment, which may 
   be fine for testing, but for production it should be set as well
 
-Static files are automatically collected and served with Whitenoise.
+Static files are automatically collected and served with Whitenoise. Waitress
+is used instead of more usual uwsgi/gunicorn.
 
 Societies
 ===============================================================================
@@ -273,7 +281,7 @@ Walkthrough and Demo
 `Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/>`_
 is available in the ``docs`` folder.
 
-Demo is available, some demo data is provided. There are two versions, the US
+A demo is available with some demo data is provided. There are two versions, the US
 and the World version:
 
 * `World Demo <https://dmp.matijakolaric.com/>`_

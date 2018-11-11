@@ -153,7 +153,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'work_id_prefix': os.getenv('WORK_ID_PREFIX', ''),
 
     'publisher_id': 'FOO',
-    'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO',
+    'publisher_name': 'GOLDO LITEMOTIF PUBLISHING',
     'publisher_ipi_name': '00000000199',
     'publisher_pr_society': '071',
     'publisher_mr_society': '034',
