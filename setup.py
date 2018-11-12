@@ -14,6 +14,10 @@ setuptools.setup(
     long_description_content_type='text/x-rst',
     url='https://matijakolaric.com/articles/2/',
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
+    install_requires=(
+        'Django>=2.0.9',
+        'requests>=2.20.0',
+    ),
     include_package_data=True,
     classifiers=(
         'Development Status :: 5 - Production/Stable',
