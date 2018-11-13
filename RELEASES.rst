@@ -1,7 +1,7 @@
 Upcoming release schedule
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Django Music Publisher uses the Fibonacci Release Cycle, with a monthly unit. This coincides with updates of specs, DDEX was just updated, CWR is just about to be, MLC will be defined in 2019 and will go into effect early in 2020. On the other hand, the scope of the project is pretty narrow without any plans to make it broader, and the industry is otherwise evolving slowly, so there will likely be very few new feature requests.
+Django Music Publisher uses the Fibonacci Release Cycle, with a monthly unit. This coincides with updates of specs, DDEX was just updated, CWR is just about to be, MLC will be defined in 2019 and will go into effect early in 2020. On the other hand, the scope of the project is pretty narrow, without any plans to make it broader, and the industry is otherwise evolving slowly, so there will likely be very few new feature requests.
 
 The goal of this project is not to compete with commercial solutions, but to lead the way with *light versions* of new features. If you disagree, feel free to fork this project.
 
