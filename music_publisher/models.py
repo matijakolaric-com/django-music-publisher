@@ -112,7 +112,8 @@ class Artist(ArtistBase):
     def json(self):
         return {
             'artist_last_name': self.last_name,
-            'artist_first_name': self.first_name}
+            'artist_last_name': self.last_name,
+            'isni': self.isni}
 
 
 class ArtistInWork(models.Model):
