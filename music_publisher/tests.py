@@ -281,6 +281,7 @@ class ModelsTest(TestCase):
         self.get(reverse('admin:music_publisher_ackimport_changelist',))
         self.get(reverse('admin:music_publisher_artist_add',) + '?_popup=1')
         self.get(reverse('admin:music_publisher_albumcd_add',) + '?_popup=1')
+        self.get(reverse('admin:music_publisher_work_add',) + '?_popup=1')
         self.get(reverse('admin:music_publisher_artist_add',))
         self.get(reverse('admin:music_publisher_albumcd_add',))
         self.get(reverse('admin:music_publisher_writer_add',))
