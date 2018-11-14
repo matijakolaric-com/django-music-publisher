@@ -615,11 +615,6 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     readonly_fields = ('library',)
     inlines = [TrackInline]
 
-    def get_inline_instances(self, request, obj=None):
-        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return []
-        return super().get_inline_instances(request)
-
     def get_fieldsets(self, request, obj=None):
         fieldsets = (
             ('Library', {
