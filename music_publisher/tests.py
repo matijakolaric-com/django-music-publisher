@@ -56,7 +56,7 @@ class ModelsTest(TestCase):
         self.alternate_title.save()
         self.work.firstrecording = FirstRecording(
             work=self.work, isrc='US-123-18-10000', duration=time(minute=1),
-            catalog_number='THENUMBER', album_cd=self.album_cd,
+            album_cd=self.album_cd,
             release_date=date.today())
         self.work.firstrecording.save()
         self.work.full_clean()

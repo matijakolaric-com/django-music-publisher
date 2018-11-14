@@ -164,11 +164,11 @@ class WriterInWorkInline(admin.TabularInline):
 
 
 class RecordingInline(admin.StackedInline):
-    autocomplete_fields = ('album_cd', 'artist')
+    autocomplete_fields = ('album_cd', 'artist', 'work')
     fieldsets = (
         (None, {
             'fields': (
-                ('record_label', 'artist'),
+                ('work', 'record_label', 'artist'),
                 ('isrc', 'duration', 'release_date'),
                 ('album_cd', )),
         }),
@@ -176,12 +176,13 @@ class RecordingInline(admin.StackedInline):
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
+    verbose_name_plural = 'First Recordings'
     model = FirstRecording
     extra = 0
 
 
 class TrackInline(admin.StackedInline):
-    autocomplete_fields = ('album_cd', 'work')
+    autocomplete_fields = ('album_cd', 'artist', 'work')
     fieldsets = (
         (None, {
             'fields': (
@@ -672,7 +673,7 @@ class ArtistAdmin(MusicPublisherAdmin):
     list_display = ('last_or_band', 'first_name', 'isni', '_cwr')
     search_fields = ('last_name', 'isni',)
     list_filter = ('_cwr',)
-    inlines = [WorksPerformedByArtistInline]
+    inlines = [RecordingInline, WorksPerformedByArtistInline]
 
     fieldsets = (
         ('Name', {

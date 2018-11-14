@@ -101,7 +101,9 @@ class FirstRecording(RecordingBase):
         if self.duration:
             data['first_release_duration'] = self.duration.strftime('%H%M%S')
         data['isrc'] = self.isrc or ''
-        data['first_release_catalog_number'] = self.catalog_number or ''
+        data['record_label'] = self.record_label
+        if self.artist:
+            data['recording_artist'] = self.artist.json
         if self.album_cd:
             if self.album_cd.release_date:
                 data['first_release_date'] = (
@@ -129,8 +131,8 @@ class ArtistInWork(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name = 'Artist Performing Work'
-        verbose_name_plural = 'Artists Performing Work'
+        verbose_name = 'Artist performing work'
+        verbose_name_plural = 'Artists performing works'
         unique_together = (('work', 'artist'),)
 
     def __str__(self):
