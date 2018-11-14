@@ -182,7 +182,12 @@ class RecordingInline(admin.StackedInline):
 
 
 class TrackInline(admin.StackedInline):
-    autocomplete_fields = ('album_cd', 'artist', 'work')
+    import django
+    if django.VERSION >= (2, 1):
+        autocomplete_fields = ('work', 'artist')
+    else:
+        autocomplete_fields = ('artist',)
+        raw_id_fields = ('work', )
     fieldsets = (
         (None, {
             'fields': (
