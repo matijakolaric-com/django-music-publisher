@@ -68,10 +68,24 @@ class AlbumCD(AlbumCDBase):
     pass
 
 
-class FirstRecording(FirstRecordingBase):
+class Artist(ArtistBase):
+    """Concrete class for performing artists."""
+
+    @property
+    def json(self):
+        return {
+            'artist_last_name': self.last_name,
+            'artist_last_name': self.last_name,
+            'isni': self.isni}
+
+
+class FirstRecording(RecordingBase):
     """Concrete class for first recording."""
 
     work = models.OneToOneField(Work, on_delete=models.CASCADE)
+    artist = models.ForeignKey(
+        Artist, on_delete=models.PROTECT, blank=True, null=True,
+        verbose_name='Recording Artist')
     album_cd = models.ForeignKey(
         AlbumCD, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Album / Library CD')
@@ -103,17 +117,6 @@ class FirstRecording(FirstRecordingBase):
                 'library': self.album_cd.library,
                 'cd_identifier': self.album_cd.cd_identifier})
         return data
-
-
-class Artist(ArtistBase):
-    """Concrete class for performing artists."""
-
-    @property
-    def json(self):
-        return {
-            'artist_last_name': self.last_name,
-            'artist_last_name': self.last_name,
-            'isni': self.isni}
 
 
 class ArtistInWork(models.Model):
