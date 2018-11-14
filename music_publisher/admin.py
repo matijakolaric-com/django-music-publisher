@@ -652,8 +652,8 @@ class AlbumCDAdmin(MusicPublisherAdmin):
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
-    list_display = ('last_or_band', 'first_name', '_cwr')
-    search_fields = ('last_name',)
+    list_display = ('last_or_band', 'first_name', 'isni', '_cwr')
+    search_fields = ('last_name', 'isni',)
     list_filter = ('_cwr',)
     inlines = [WorksPerformedByArtistInline]
 

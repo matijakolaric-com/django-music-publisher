@@ -1,5 +1,5 @@
 Django Music Publisher
-*******************************************************************************
+******************************************************************************
 
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
@@ -44,13 +44,11 @@ Multiple writers, both controlled and uncontrolled, are covered, with minor
 limitations, but data on other publishers (other original publishers, 
 administrators and sub-publishers) can not be entered.
 
-A special **US** situation where an original publisher may have one entity for 
-every of the three PROs is also covered. So is the situation where a publisher
-is affiliated with multiple societies world-wide. (This does not apply to 
-writers.)
+The special **US** situation, where an original publisher may have one entity for 
+every of the three PROs, is also covered. 
 
 It is presumed that writers keep 50% of performing rights and the other 50%, 
-as well as 100% of mechanical and sync goes to the original publisher.
+as well as 100% of mechanical and sync, goes to the original publisher.
 
 Alternate titles, data on performing artists, data related to registration 
 of library work and data about the first recording can be entered.
@@ -70,8 +68,7 @@ Common Works Registration is used for batch registrations, although the actual
 data validation generation of CWR files uses an external commercial service.
 
 Django Music Publisher can work without it, but data will not be validated as 
-CWR-compliant, and there will be no way to create CWR, unless you make your own
-CWR generator.
+CWR-compliant, and there will be no way to export CWR.
 
 Processing of CWR acknowledgement files works without the external service.
 
@@ -93,7 +90,7 @@ This particular software uses three REST API tools from the
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
 
 Even if you need a far more complex CWR, this project is still a good proof of
-concept how well these tools work.
+concept how well these tools work. Only CWR version 2.1 is supported.
 
 Installing the App
 ===============================================================================

@@ -405,6 +405,10 @@ class ArtistBase(PersonBase, MusicPublisherBase):
         verbose_name = 'Performing Artist'
         verbose_name_plural = ' Performing Artists'
 
+    isni = models.CharField(
+        max_length=16, blank=True,
+        validators=(CWRFieldValidator('isni'),))
+
 
 class WriterBase(PersonBase, IPIBase, MusicPublisherBase):
     """Base class for writers, the second most important top-level class."""
