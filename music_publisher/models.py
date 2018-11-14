@@ -31,6 +31,10 @@ class Work(WorkBase):
             at.json for at in self.alternatetitle_set.all()]
         data['artists'] = [
             aiw.artist.json for aiw in self.artistinwork_set.all()]
+        data['society_work_codes'] = [
+            wa for wa in self.workacknowledgement_set.filter(
+                remote_work_id__gt='').values(
+                'society_code', 'remote_work_id').distinct()]
         try:
             data.update(self.firstrecording.json)
         except ObjectDoesNotExist:
