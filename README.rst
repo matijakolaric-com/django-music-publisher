@@ -37,37 +37,33 @@ Use Case
 
 This app is targeted at **single original publishers**, publishing 
 **original musical works**.
-It holds data on musical works, including songwriters, performing artists, 
-albums, library releases etc. It allows data imports and exports.
+It holds data on musical works, including alternate titles, songwriters, 
+performing artists, first recordings, music library and albums. It allows 
+data imports and exports.
 
 Multiple writers, both controlled and uncontrolled, are covered, with minor 
 limitations, but data on other publishers (other original publishers, 
 administrators and sub-publishers) can not be entered.
 
 A special **US** situation where an original publisher may have one entity for 
-every of the three PROs is also covered. So is the situation where a publisher
-is affiliated with multiple societies world-wide. (This does not apply to 
-writers.)
+every of the three PROs is also covered.
 
 It is presumed that writers keep 50% of performing rights and the other 50%, 
 as well as 100% of mechanical and sync goes to the original publisher.
 
-Alternate titles, data on performing artists, data related to registration 
-of library work and data about the first recording can be entered.
-
-This translates to following CWR 2.x / 3.x transaction record types:
+This translates to following CWR 2.x / 3.0 transaction record types:
 
 ======================================  =====================================
-CWR 2.x                                 CWR3.x
+CWR 2.1 / 2.2                           CWR3.0
 ======================================  =====================================
-NWR/REV                                 WRK
+NWR/REV                                 WRK, XRF
 SPU, SPT (just World)                   SPU, SPT
 SWR, SWT (just World), PWR, OWR         SWR, SWT (just World), PWR, OWR, OWT
 ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC (single), ORN (only LIB) 
 ======================================  =====================================
 
 Common Works Registration is used for batch registrations, although the actual
-data validation generation of CWR files uses an external commercial service.
+data validation and generation of CWR files uses an external commercial service.
 
 Django Music Publisher can work without it, but data will not be validated as 
 CWR-compliant, and there will be no way to create CWR, unless you make your own
@@ -280,8 +276,8 @@ Walkthrough and Demo
 `Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/>`_
 is available in the ``docs`` folder.
 
-A demo is available with some demo data is provided. There are two versions, the US
-and the World version:
+A demo is available with some demo data. There are two versions, the US and the 
+World version:
 
 * `World Demo <https://dmp.matijakolaric.com/>`_
 * `US Demo <https://dmp.matijakolaric.com/us/>`_
