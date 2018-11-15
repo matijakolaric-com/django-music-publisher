@@ -48,8 +48,9 @@ administrators and sub-publishers) can not be entered.
 A special **US** situation where an original publisher may have one entity for 
 every of the three PROs is also covered.
 
-It is presumed that writers keep 50% of performing rights and the other 50%, 
-as well as 100% of mechanical and sync goes to the original publisher.
+It is presumed that writers owns and collect 50% of performing rights and the 
+other 50%, as well as 100% of mechanical and sync are owned and collected by 
+the original publisher.
 
 This translates to following CWR 2.x / 3.0 transaction record types:
 
