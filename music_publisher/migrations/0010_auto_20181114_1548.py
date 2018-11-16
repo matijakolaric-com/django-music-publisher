@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='artist',
             name='isni',
-            field=models.CharField(blank=True, max_length=16, validators=[music_publisher.base.CWRFieldValidator('isni')]),
+            field=models.CharField(blank=True, null=True, max_length=16, validators=[music_publisher.base.CWRFieldValidator('isni')]),
         ),
         migrations.AlterField(
             model_name='workacknowledgement',
