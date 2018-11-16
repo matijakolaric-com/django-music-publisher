@@ -1,5 +1,5 @@
 Django Music Publisher
-*******************************************************************************
+******************************************************************************
 
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
@@ -67,8 +67,7 @@ Common Works Registration is used for batch registrations, although the actual
 data validation and generation of CWR files uses an external commercial service.
 
 Django Music Publisher can work without it, but data will not be validated as 
-CWR-compliant, and there will be no way to create CWR, unless you make your own
-CWR generator.
+CWR-compliant, and there will be no way to export CWR.
 
 Processing of CWR acknowledgement files works without the external service.
 
@@ -90,7 +89,7 @@ This particular software uses three REST API tools from the
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
 
 Even if you need a far more complex CWR, this project is still a good proof of
-concept how well these tools work.
+concept how well these tools work. Only CWR version 2.1 is supported.
 
 Installing the App
 ===============================================================================

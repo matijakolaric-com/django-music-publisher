@@ -163,36 +163,46 @@ class WriterInWorkInline(admin.TabularInline):
         return ''
 
 
-class FirstRecordingInline(admin.StackedInline):
-    autocomplete_fields = ('album_cd', )
+class RecordingInline(admin.StackedInline):
+    autocomplete_fields = ('album_cd', 'artist', 'work')
     fieldsets = (
         (None, {
             'fields': (
-                'album_cd',
-                ('isrc', 'duration'),
-                ('catalog_number', 'release_date')),
+                ('work', 'record_label', 'artist'),
+                ('isrc', 'duration', 'release_date'),
+                ('album_cd', )),
         }),
     )
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
+    verbose_name_plural = 'First Recordings'
     model = FirstRecording
     extra = 0
 
 
-class TrackInline(admin.TabularInline):
+class TrackInline(admin.StackedInline):
     import django
     if django.VERSION >= (2, 1):
-        autocomplete_fields = ('work', )
+        autocomplete_fields = ('work', 'artist')
     else:
+        autocomplete_fields = ('artist', )
         raw_id_fields = ('work', )
-    fields = ('work', 'isrc', 'catalog_number', 'duration',)
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('work',),
+                ('record_label', 'artist'),
+                ('isrc', 'duration', 'release_date'),
+            ),
+        }),
+    )
     model = FirstRecording
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
     classes = ('collapse', )
-    verbose_name_plural = 'First Recordings on this Album'
+    verbose_name_plural = 'Tracks'
     extra = 0
 
 
@@ -211,7 +221,7 @@ class WorkAcknowledgementInline(admin.TabularInline):
 class WorkAdmin(MusicPublisherAdmin):
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
-        FirstRecordingInline, ArtistInWorkInline,
+        RecordingInline, ArtistInWorkInline,
         WorkAcknowledgementInline)
 
     def writer_last_names(self, obj):
@@ -349,6 +359,14 @@ class WorkAdmin(MusicPublisherAdmin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
+
+    def get_inline_instances(self, request, obj=None):
+        instances = super().get_inline_instances(request)
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return [i for i in instances if type(i) not in [
+                ArtistInWorkInline, RecordingInline, WorkAcknowledgementInline
+            ]]
+        return instances
 
 
 @admin.register(CWRExport)
@@ -597,11 +615,6 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     readonly_fields = ('library',)
     inlines = [TrackInline]
 
-    def get_inline_instances(self, request, obj=None):
-        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return []
-        return super().get_inline_instances(request)
-
     def get_fieldsets(self, request, obj=None):
         fieldsets = (
             ('Library', {
@@ -643,6 +656,11 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     search_fields = ('album_title', '^cd_identifier')
     actions = None
 
+    def get_inline_instances(self, request, obj=None):
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
+
     def save_model(self, request, obj, form, *args, **kwargs):
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
@@ -652,10 +670,20 @@ class AlbumCDAdmin(MusicPublisherAdmin):
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
-    list_display = ('last_or_band', 'first_name', '_cwr')
-    search_fields = ('last_name',)
+    list_display = ('last_or_band', 'first_name', 'isni', '_cwr')
+    search_fields = ('last_name', 'isni',)
     list_filter = ('_cwr',)
-    inlines = [WorksPerformedByArtistInline]
+    inlines = [RecordingInline, WorksPerformedByArtistInline]
+
+    fieldsets = (
+        ('Name', {
+            'fields': (
+                ('first_name', 'last_name'),)}),
+        ('ISNI', {
+            'fields': (
+                'isni',),
+        }),
+    )
 
     def get_inline_instances(self, request, obj=None):
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:

@@ -31,6 +31,10 @@ class Work(WorkBase):
             at.json for at in self.alternatetitle_set.all()]
         data['artists'] = [
             aiw.artist.json for aiw in self.artistinwork_set.all()]
+        data['society_work_codes'] = [
+            wa for wa in self.workacknowledgement_set.filter(
+                remote_work_id__gt='').values(
+                'society_code', 'remote_work_id').distinct()]
         try:
             data.update(self.firstrecording.json)
         except ObjectDoesNotExist:
@@ -68,10 +72,24 @@ class AlbumCD(AlbumCDBase):
     pass
 
 
-class FirstRecording(FirstRecordingBase):
+class Artist(ArtistBase):
+    """Concrete class for performing artists."""
+
+    @property
+    def json(self):
+        return {
+            'artist_last_name': self.last_name,
+            'artist_last_name': self.last_name,
+            'isni': self.isni}
+
+
+class FirstRecording(RecordingBase):
     """Concrete class for first recording."""
 
     work = models.OneToOneField(Work, on_delete=models.CASCADE)
+    artist = models.ForeignKey(
+        Artist, on_delete=models.PROTECT, blank=True, null=True,
+        verbose_name='Recording Artist')
     album_cd = models.ForeignKey(
         AlbumCD, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Album / Library CD')
@@ -87,7 +105,9 @@ class FirstRecording(FirstRecordingBase):
         if self.duration:
             data['first_release_duration'] = self.duration.strftime('%H%M%S')
         data['isrc'] = self.isrc or ''
-        data['first_release_catalog_number'] = self.catalog_number or ''
+        data['record_label'] = self.record_label
+        if self.artist:
+            data['recording_artist'] = self.artist.json
         if self.album_cd:
             if self.album_cd.release_date:
                 data['first_release_date'] = (
@@ -105,16 +125,6 @@ class FirstRecording(FirstRecordingBase):
         return data
 
 
-class Artist(ArtistBase):
-    """Concrete class for performing artists."""
-
-    @property
-    def json(self):
-        return {
-            'artist_last_name': self.last_name,
-            'artist_first_name': self.first_name}
-
-
 class ArtistInWork(models.Model):
     """Intermediary class in M2M relationship.
 
@@ -125,8 +135,8 @@ class ArtistInWork(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name = 'Artist Performing Work'
-        verbose_name_plural = 'Artists Performing Work'
+        verbose_name = 'Artist performing work'
+        verbose_name_plural = 'Artists performing works'
         unique_together = (('work', 'artist'),)
 
     def __str__(self):

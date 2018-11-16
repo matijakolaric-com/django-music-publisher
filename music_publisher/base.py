@@ -281,7 +281,7 @@ class AlbumCDBase(MusicPublisherBase):
                 'album_title': 'Required if EAN or release date is set.'})
 
 
-class FirstRecordingBase(MusicPublisherBase):
+class RecordingBase(MusicPublisherBase):
     """Holds data on first recording.
 
     Note that the limitation of just one REC record per work has been
@@ -292,15 +292,15 @@ class FirstRecordingBase(MusicPublisherBase):
         abstract = True
         verbose_name_plural = 'First recording of the work'
 
+    release_date = models.DateField(blank=True, null=True)
+    duration = models.TimeField(blank=True, null=True)
     isrc = models.CharField(
         'ISRC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('isrc'),))
-    release_date = models.DateField(blank=True, null=True)
-    duration = models.TimeField(blank=True, null=True)
-    catalog_number = models.CharField(
-        max_length=18, blank=True, null=True, unique=True, validators=(
-            CWRFieldValidator(
-                'first_release_catalog_number'),))
+    record_label = models.CharField(
+        default=SETTINGS.get('label') or '',
+        max_length=60, blank=True, validators=(
+            CWRFieldValidator('first_album_label'),))
 
     def clean_fields(self, *args, **kwargs):
         if self.isrc:
@@ -404,6 +404,11 @@ class ArtistBase(PersonBase, MusicPublisherBase):
         abstract = True
         verbose_name = 'Performing Artist'
         verbose_name_plural = ' Performing Artists'
+
+    isni = models.CharField(
+        'ISNI',
+        max_length=16, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('isni'),))
 
 
 class WriterBase(PersonBase, IPIBase, MusicPublisherBase):

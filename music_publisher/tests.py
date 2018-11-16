@@ -23,6 +23,8 @@ class ModelsTest(TestCase):
 
         self.artist = Artist(last_name="FOO", first_name="")
         self.artist.save()
+        self.recordingartist = Artist(last_name="BAR", first_name="BARBARA")
+        self.recordingartist.save()
         self.thiswriter = Writer(
             last_name='FOOBAR', first_name='JACK', ipi_name='199',
             ipi_base='I1234567893', pr_society='010')
@@ -56,7 +58,7 @@ class ModelsTest(TestCase):
         self.alternate_title.save()
         self.work.firstrecording = FirstRecording(
             work=self.work, isrc='US-123-18-10000', duration=time(minute=1),
-            catalog_number='THENUMBER', album_cd=self.album_cd,
+            album_cd=self.album_cd, artist=self.recordingartist,
             release_date=date.today())
         self.work.firstrecording.save()
         self.work.full_clean()
@@ -279,6 +281,7 @@ class ModelsTest(TestCase):
         self.get(reverse('admin:music_publisher_ackimport_changelist',))
         self.get(reverse('admin:music_publisher_artist_add',) + '?_popup=1')
         self.get(reverse('admin:music_publisher_albumcd_add',) + '?_popup=1')
+        self.get(reverse('admin:music_publisher_work_add',) + '?_popup=1')
         self.get(reverse('admin:music_publisher_artist_add',))
         self.get(reverse('admin:music_publisher_albumcd_add',))
         self.get(reverse('admin:music_publisher_writer_add',))
