@@ -78,7 +78,7 @@ class Artist(ArtistBase):
     @property
     def json(self):
         return {
-            'artist_last_name': self.last_name,
+            'artist_first_name': self.first_name,
             'artist_last_name': self.last_name,
             'isni': self.isni}
 
@@ -111,13 +111,13 @@ class FirstRecording(RecordingBase):
         if self.album_cd:
             if self.album_cd.release_date:
                 data['first_release_date'] = (
-                    self.album_cd.release_date.strftime('%Y-%m-%d'))
+                    self.album_cd.release_date.strftime('%Y%m%d'))
             data.update({
                 'first_album_title': self.album_cd.album_title or '',
                 'first_album_label': self.album_cd.album_label or '',
                 'ean': self.album_cd.ean or ''})
         if self.release_date:
-            data['first_release_date'] = self.release_date.strftime('%Y-%m-%d')
+            data['first_release_date'] = self.release_date.strftime('%Y%m%d')
         if self.album_cd and self.album_cd.library:
             data.update({
                 'library': self.album_cd.library,
@@ -255,12 +255,15 @@ class WriterInWork(models.Model):
         })
         if self.controlled:
             publisher = self.writer.get_publisher_dict()
+            saan = (
+                self.saan or
+                (self.writer.saan if self.writer else None) or
+                ''
+            )
             data.update({
                 'publisher_for_writer_id': publisher.get('publisher_id'),
-                'saan': (
-                    self.saan or
-                    (self.writer.saan if self.writer else None) or
-                    '')
+                'saan': saan,
+                'general_agreement': saan and not self.saan,
             })
         return data
 
@@ -274,7 +277,13 @@ class WorkExport(object):
     def get_json(self, qs=None):
         if qs is None:
             qs = self.works.order_by('id')
-        j = OrderedDict([('revision', self.nwr_rev == 'REV')])
+        if self.nwr_rev == 'WRK':
+            j = OrderedDict([
+                ('filename', 'CW18AAA'),
+                ('version', '3.0'),
+            ])
+        else:
+            j = OrderedDict([('revision', self.nwr_rev == 'REV')])
         j.update({
             "sender_id": SETTINGS.get('publisher_ipi_name'),
             "sender_name": SETTINGS.get('publisher_name'),
@@ -287,7 +296,7 @@ class WorkExport(object):
             "publisher_mr_society": SETTINGS.get(
                 'publisher_mr_society'),
             "publisher_sr_society": SETTINGS.get(
-                'publisher_pr_society'),
+                'publisher_sr_society'),
         })
         us = SETTINGS.get('us_publisher_override', {})
         if us:
@@ -313,8 +322,9 @@ class CWRExport(WorkExport, models.Model):
 
     nwr_rev = models.CharField(
         'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
-            ('NWR', 'New work registration'),
-            ('REV', 'Revision of registered work')))
+            ('NWR', 'CWR 2.1: New work registration'),
+            ('REV', 'CWR 2.1: Revision of registered work'),
+            ('WRK', 'CWR 3.0: Work registration')))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
