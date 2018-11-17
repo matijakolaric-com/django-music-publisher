@@ -204,7 +204,7 @@ class ModelsTest(TestCase):
 
     @override_settings()
     def test_cwr(self):
-        self.assertIn('CW DRAFT ', self.cwr_export.filename)
+        self.assertIn('NWR DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
         self.cwr_export.get_cwr()
@@ -351,6 +351,9 @@ class ModelsTest(TestCase):
         self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'NWR', 'works': [1]})
+        self.get(
+            reverse('admin:music_publisher_cwrexport_add'),
+            re_post={'nwr_rev': 'WRK', 'works': [1]})
         mock = StringIO()
         mock.write(CONTENT)
         mock.seek(0)

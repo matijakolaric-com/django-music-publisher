@@ -2,6 +2,7 @@ from collections import OrderedDict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.timezone import now
 import requests
 from .base import *
 
@@ -274,12 +275,16 @@ class WorkExport(object):
 
     nwr_rev = None
 
+    @property
+    def is_version_3(self):
+        return self.nwr_rev == 'WRK'
+
     def get_json(self, qs=None):
         if qs is None:
             qs = self.works.order_by('id')
-        if self.nwr_rev == 'WRK':
+        if self.is_version_3:
             j = OrderedDict([
-                ('filename', 'CW18AAA'),
+                ('filename', self.filename),
                 ('version', '3.0'),
             ])
         else:
@@ -324,7 +329,7 @@ class CWRExport(WorkExport, models.Model):
         'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
             ('NWR', 'CWR 2.1: New work registration'),
             ('REV', 'CWR 2.1: Revision of registered work'),
-            ('WRK', 'CWR 3.0: Work registration')))
+            ('WRK', 'CWR 3.0: Work registration (alpha)')))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
@@ -334,7 +339,12 @@ class CWRExport(WorkExport, models.Model):
     @property
     def filename(self):
         if not self.cwr:
-            return 'CW DRAFT {}'.format(self.id)
+            return '{} DRAFT {}'.format(self.nwr_rev, self.id)
+        if self.is_version_3:
+            return 'CW{}{:04}{}_000_V3-0-0.SUB'.format(
+                self.year,
+                self.num_in_year,
+                SETTINGS.get('publisher_id'))
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
@@ -364,14 +374,21 @@ class CWRExport(WorkExport, models.Model):
         elif response.status_code != 200:
             raise ValidationError('Unknown Error', code='service')
         else:
-            self.cwr = response.json()['cwr']
-            self.year = self.cwr[66:68]
+            cwr = response.json()['cwr']
+            self.cwr = cwr[0:157]
+            if self.is_version_3:
+                self.year = self.cwr[56:58]
+            else:
+                self.year = self.cwr[66:68]
+            # self.filename depends on self.year !!!
             nr = CWRExport.objects.filter(year=self.year)
             nr = nr.order_by('-num_in_year').first()
             if nr:
                 self.num_in_year = nr.num_in_year + 1
             else:
                 self.num_in_year = 1
+            self.cwr += self.filename.ljust(27)
+            self.cwr += cwr[184:]
             self.save()
 
 

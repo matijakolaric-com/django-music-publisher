@@ -383,6 +383,8 @@ class CWRExportAdmin(admin.ModelAdmin):
     cwr_ready.boolean = True
 
     def get_highlighted_data(self, obj):
+        if obj.is_version_3:
+            return obj.cwr
         data = {'cwr': obj.cwr}
         try:
             response = requests.post(
