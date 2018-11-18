@@ -318,6 +318,13 @@ class ModelsTest(TestCase):
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
             re_post={
+                'writerinwork_set-0-relative_share': '50',
+                'writerinwork_set-1-relative_share': '50',
+                'writerinwork_set-0-controlled': 0,
+                'writerinwork_set-1-controlled': 0})
+        self.get(reverse(
+            'admin:music_publisher_work_change', args=(self.work.id,)),
+            re_post={
                 'writerinwork_set-1-relative_share': 'BAD DATA'})
         self.get(reverse(
             'admin:music_publisher_albumcd_change', args=(self.album_cd.id,)),
@@ -345,15 +352,16 @@ class ModelsTest(TestCase):
             args=(self.cwr_export.id,)) + '?preview=true',)
         settings.MUSIC_PUBLISHER_SETTINGS['highlighter_url'] = \
             'https://240.0.0.1/'  # no routing possiblle
-        self.client.get(reverse(
-            'admin:music_publisher_cwrexport_change',
-            args=(self.cwr_export.id,)) + '?preview=true',)
         self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'NWR', 'works': [1]})
         self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'WRK', 'works': [1]})
+        for export in CWRExport.objects.order_by('-id')[0:2]:
+            self.client.get(reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(export.id,)) + '?preview=true',)
         mock = StringIO()
         mock.write(CONTENT)
         mock.seek(0)

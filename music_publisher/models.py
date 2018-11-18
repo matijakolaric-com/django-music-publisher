@@ -377,32 +377,24 @@ class CWRExport(WorkExport, models.Model):
             raise ValidationError('Unauthorized', code='service')
         elif response.status_code != 200:
             raise ValidationError('Unknown Error', code='service')
-        elif self.is_version_3:
+
+        nr = CWRExport.objects.filter(year=self.year)
+        nr = nr.order_by('-num_in_year').first()
+        if nr:
+            self.num_in_year = nr.num_in_year + 1
+        else:
+            self.num_in_year = 1
+        if self.is_version_3:
             cwr = response.json()['cwr']
             self.cwr = cwr[0:157]
             self.year = self.cwr[56:58]
             # self.filename depends on self.year !!!
-            nr = CWRExport.objects.filter(year=self.year)
-            nr = nr.order_by('-num_in_year').first()
-            if nr:
-                self.num_in_year = nr.num_in_year + 1
-            else:
-                self.num_in_year = 1
             self.cwr += self.filename.ljust(27)
             self.cwr += cwr[184:]
-            self.save()
         else:
             self.cwr = response.json()['cwr']
             self.year = self.cwr[66:68]
-            nr = CWRExport.objects.filter(year=self.year)
-            nr = nr.order_by('-num_in_year').first()
-            if nr:
-                self.num_in_year = nr.num_in_year + 1
-            else:
-                self.num_in_year = 1
-            self.save()
-
-
+        self.save()
 
 
 class WorkAcknowledgement(models.Model):
