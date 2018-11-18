@@ -334,7 +334,9 @@ class CWRExport(WorkExport, models.Model):
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
     num_in_year = models.PositiveSmallIntegerField(default=0)
-    works = models.ManyToManyField(Work)
+    works = models.ManyToManyField(Work, related_name='cwr_exports')
+    _work_count = models.IntegerField(
+        editable=False, null=True)
 
     @property
     def filename(self):
@@ -357,6 +359,8 @@ class CWRExport(WorkExport, models.Model):
         if self.cwr:
             return
         url = SETTINGS.get('generator_url')
+        json = self.json
+        self._work_count = len(json.get('works'))
         if url is None:
             raise ValidationError('CWR generator URL not set.')
         try:
@@ -364,7 +368,7 @@ class CWRExport(WorkExport, models.Model):
                 url,
                 headers={'Authorization': 'Token {}'.format(
                     SETTINGS.get('token'))},
-                json=self.json, timeout=30)
+                json=json, timeout=30)
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
         if response.status_code == 400:
