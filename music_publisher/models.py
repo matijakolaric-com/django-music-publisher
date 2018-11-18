@@ -2,6 +2,7 @@ from collections import OrderedDict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.timezone import now
 import requests
 from .base import *
 
@@ -78,7 +79,7 @@ class Artist(ArtistBase):
     @property
     def json(self):
         return {
-            'artist_last_name': self.last_name,
+            'artist_first_name': self.first_name,
             'artist_last_name': self.last_name,
             'isni': self.isni}
 
@@ -111,13 +112,13 @@ class FirstRecording(RecordingBase):
         if self.album_cd:
             if self.album_cd.release_date:
                 data['first_release_date'] = (
-                    self.album_cd.release_date.strftime('%Y-%m-%d'))
+                    self.album_cd.release_date.strftime('%Y%m%d'))
             data.update({
                 'first_album_title': self.album_cd.album_title or '',
                 'first_album_label': self.album_cd.album_label or '',
                 'ean': self.album_cd.ean or ''})
         if self.release_date:
-            data['first_release_date'] = self.release_date.strftime('%Y-%m-%d')
+            data['first_release_date'] = self.release_date.strftime('%Y%m%d')
         if self.album_cd and self.album_cd.library:
             data.update({
                 'library': self.album_cd.library,
@@ -255,12 +256,15 @@ class WriterInWork(models.Model):
         })
         if self.controlled:
             publisher = self.writer.get_publisher_dict()
+            saan = (
+                self.saan or
+                (self.writer.saan if self.writer else None) or
+                ''
+            )
             data.update({
                 'publisher_for_writer_id': publisher.get('publisher_id'),
-                'saan': (
-                    self.saan or
-                    (self.writer.saan if self.writer else None) or
-                    '')
+                'saan': saan,
+                'general_agreement': saan and not self.saan,
             })
         return data
 
@@ -271,10 +275,20 @@ class WorkExport(object):
 
     nwr_rev = None
 
+    @property
+    def is_version_3(self):
+        return self.nwr_rev == 'WRK'
+
     def get_json(self, qs=None):
         if qs is None:
             qs = self.works.order_by('id')
-        j = OrderedDict([('revision', self.nwr_rev == 'REV')])
+        if self.is_version_3:
+            j = OrderedDict([
+                ('filename', self.filename),
+                ('version', '3.0'),
+            ])
+        else:
+            j = OrderedDict([('revision', self.nwr_rev == 'REV')])
         j.update({
             "sender_id": SETTINGS.get('publisher_ipi_name'),
             "sender_name": SETTINGS.get('publisher_name'),
@@ -287,7 +301,7 @@ class WorkExport(object):
             "publisher_mr_society": SETTINGS.get(
                 'publisher_mr_society'),
             "publisher_sr_society": SETTINGS.get(
-                'publisher_pr_society'),
+                'publisher_sr_society'),
         })
         us = SETTINGS.get('us_publisher_override', {})
         if us:
@@ -313,18 +327,26 @@ class CWRExport(WorkExport, models.Model):
 
     nwr_rev = models.CharField(
         'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
-            ('NWR', 'New work registration'),
-            ('REV', 'Revision of registered work')))
+            ('NWR', 'CWR 2.1: New work registration'),
+            ('REV', 'CWR 2.1: Revision of registered work'),
+            ('WRK', 'CWR 3.0: Work registration (alpha)')))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
     num_in_year = models.PositiveSmallIntegerField(default=0)
-    works = models.ManyToManyField(Work)
+    works = models.ManyToManyField(Work, related_name='cwr_exports')
+    _work_count = models.IntegerField(
+        editable=False, null=True)
 
     @property
     def filename(self):
         if not self.cwr:
-            return 'CW DRAFT {}'.format(self.id)
+            return '{} DRAFT {}'.format(self.nwr_rev, self.id)
+        if self.is_version_3:
+            return 'CW{}{:04}{}_000_V3-0-0.SUB'.format(
+                self.year,
+                self.num_in_year,
+                SETTINGS.get('publisher_id'))
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
@@ -337,6 +359,8 @@ class CWRExport(WorkExport, models.Model):
         if self.cwr:
             return
         url = SETTINGS.get('generator_url')
+        json = self.json
+        self._work_count = len(json.get('works'))
         if url is None:
             raise ValidationError('CWR generator URL not set.')
         try:
@@ -344,7 +368,7 @@ class CWRExport(WorkExport, models.Model):
                 url,
                 headers={'Authorization': 'Token {}'.format(
                     SETTINGS.get('token'))},
-                json=self.json, timeout=30)
+                json=json, timeout=30)
         except requests.exceptions.ConnectionError:
             raise ValidationError('Network error', code='service')
         if response.status_code == 400:
@@ -353,6 +377,20 @@ class CWRExport(WorkExport, models.Model):
             raise ValidationError('Unauthorized', code='service')
         elif response.status_code != 200:
             raise ValidationError('Unknown Error', code='service')
+        elif self.is_version_3:
+            cwr = response.json()['cwr']
+            self.cwr = cwr[0:157]
+            self.year = self.cwr[56:58]
+            # self.filename depends on self.year !!!
+            nr = CWRExport.objects.filter(year=self.year)
+            nr = nr.order_by('-num_in_year').first()
+            if nr:
+                self.num_in_year = nr.num_in_year + 1
+            else:
+                self.num_in_year = 1
+            self.cwr += self.filename.ljust(27)
+            self.cwr += cwr[184:]
+            self.save()
         else:
             self.cwr = response.json()['cwr']
             self.year = self.cwr[66:68]
@@ -363,6 +401,8 @@ class CWRExport(WorkExport, models.Model):
             else:
                 self.num_in_year = 1
             self.save()
+
+
 
 
 class WorkAcknowledgement(models.Model):

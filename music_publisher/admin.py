@@ -257,6 +257,14 @@ class WorkAdmin(MusicPublisherAdmin):
     isrc.short_description = 'ISRC'
     isrc.admin_order_field = 'firstrecording__isrc'
 
+    def cwr_export_count(self, obj):
+        count = obj.cwr_exports__count
+        url = reverse('admin:music_publisher_cwrexport_changelist')
+        url += '?works__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    cwr_export_count.short_description = 'CWR Export #'
+    cwr_export_count.admin_order_field = 'cwr_exports__count'
+
     def duration(self, obj):
         if not (hasattr(obj, 'firstrecording') and
                 obj.firstrecording and obj.firstrecording.duration):
@@ -264,16 +272,19 @@ class WorkAdmin(MusicPublisherAdmin):
         return obj.firstrecording.duration.strftime('%H:%M:%S')
     duration.admin_order_field = 'firstrecording__duration'
 
-    readonly_fields = ('writer_last_names', 'work_id', 'json')
+    readonly_fields = (
+        'writer_last_names', 'work_id', 'json', 'cwr_export_count')
     list_display = (
         'work_id', 'title', 'iswc', 'writer_last_names',
-        'percentage_controlled', 'duration', 'isrc', 'album_cd', '_cwr')
+        'percentage_controlled', 'duration', 'isrc', 'album_cd',
+        'cwr_export_count' ,'_cwr')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('writerinwork_set')
         qs = qs.prefetch_related('writers')
         qs = qs.prefetch_related('firstrecording__album_cd')
+        qs = qs.annotate(models.Count('cwr_exports'))
         return qs
 
     class HasISWCListFilter(admin.SimpleListFilter):
@@ -379,10 +390,12 @@ class CWRExportAdmin(admin.ModelAdmin):
     cwr_ready.boolean = True
 
     def work_count(self, obj):
-        return obj.works__count
+        return obj._work_count or obj.works__count
     cwr_ready.boolean = True
 
     def get_highlighted_data(self, obj):
+        if obj.is_version_3:
+            return obj.cwr
         data = {'cwr': obj.cwr}
         try:
             response = requests.post(
@@ -420,7 +433,8 @@ class CWRExportAdmin(admin.ModelAdmin):
         'filename', 'nwr_rev', 'work_count', 'cwr_ready', 'view_link',
         'download_link')
 
-    list_filter = ('nwr_rev', 'year', )
+    list_filter = ('nwr_rev', 'year')
+    search_fields = ('works__title',)
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.cwr:
