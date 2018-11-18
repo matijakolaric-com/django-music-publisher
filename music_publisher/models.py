@@ -390,6 +390,8 @@ class CWRExport(WorkExport, models.Model):
         else:
             self.cwr = response.json()['cwr']
             self.year = self.cwr[66:68]
+            nr = CWRExport.objects.filter(year=self.year)
+            nr = nr.order_by('-num_in_year').first()
             if nr:
                 self.num_in_year = nr.num_in_year + 1
             else:
