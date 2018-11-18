@@ -243,7 +243,7 @@ class AlbumCDBase(MusicPublisherBase):
         help_text='Can be overridden by recording data.',
         blank=True, null=True)
     album_title = models.CharField(
-        max_length=60, blank=True, unique=True, validators=(
+        max_length=60, blank=True, null=True, unique=True, validators=(
             CWRFieldValidator('first_album_title'),))
     ean = models.CharField(
         'EAN',
