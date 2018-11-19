@@ -5,14 +5,20 @@ matrix:
       env: DJANGO_VERSION=2.0.9 DATABASE_URL="sqlite:///db.sqlite3"
     - python: "3.5"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+      addons:
+        postgresql: "9.4"
     - python: "3.6"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="sqlite:///db.sqlite3"
     - python: "3.6"
       env: DJANGO_VERSION=2.0.9 DATABASE_URL="postgres://postgres@localhost/dmp" WORK_ID_PREFIX="XXX"
     - python: "3.6"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+      addons:
+        postgresql: "9.4"
     - python: "3.7-dev"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+      addons:
+        postgresql: "9.4"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
