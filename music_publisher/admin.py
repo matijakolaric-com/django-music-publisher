@@ -262,7 +262,7 @@ class WorkAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_cwrexport_changelist')
         url += '?works__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
-    cwr_export_count.short_description = 'CWR Export #'
+    cwr_export_count.short_description = 'CWRs'
     cwr_export_count.admin_order_field = 'cwr_exports__count'
 
     def duration(self, obj):

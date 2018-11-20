@@ -118,7 +118,7 @@ class MusicPublisherBase(models.Model):
         abstract = True
 
     _cwr = models.BooleanField(
-        'CWR-Compliance', editable=False, default=False)
+        'CWR-Ready', editable=False, default=False)
 
     def validate_fields(self, fields):
         """Validate the fields with an external service."""
