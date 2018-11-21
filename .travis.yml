@@ -18,7 +18,7 @@ matrix:
     - python: "3.7-dev"
       env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
-        postgresql: "11"
+        postgresql: "10"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
