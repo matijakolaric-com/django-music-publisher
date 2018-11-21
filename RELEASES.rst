@@ -22,17 +22,17 @@ version  short description                                                      
 Compatibility
 +++++++++++++++++++++++++++++++++++++++++++++++++
 
-The goal is to support only Django LTS versions, as well as only Python 3 versions that come with Ubuntu LTS versions, including the pre_releases.
+The goal is to support only Django LTS versions, as well as only Python 3 versions that come with supported Ubuntu LTS versions, including the pre-releases.
 
-It is tested with SQLite3 and PostgreSQL, when it comes to PostgreSQL, it is tested against the oldest supported, as well as the latest version.
+It is tested with SQLite3 and PostgreSQL, when it comes to PostgreSQL, it is tested against the oldest supported releases.
 
-=======================  ===========================  ==========
+=======================  ============  =============  ==========
 Django Music Publisher   Django        Python         PostgreSQL
-18.11                    2.0\*, 2.1    3.5, 3.6, 3.7  9.4 to 10
-19.2                     2.1, 2.2 LTS  3.5, 3.6, 3.7
-19.7                                   3.6, 3.7
-20.3     
-21.4     
+18.11                    2.0\*, 2.1    3.5, 3.6, 3.7  9.4 to 9.6
+19.2                     2.1, 2.2LTS   3.5, 3.6, 3.7
+19.7                     2.2LTS        3.6, 3.7
+20.3                     2.2LTS        3.6, 3.7 
+21.4                     2.2 & 3.2LTS  3.6, 3.7 
 =======================  ============  =============  ==========
 
-\* Depends if the 2.0.10 version will be released with 2.1.4, if not, the support will be dropped
+\* Depends if the 2.0.10 version will be released with 2.1.4, if not, the support will be dropped.
