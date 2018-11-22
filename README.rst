@@ -48,7 +48,7 @@ administrators and sub-publishers) can not be entered.
 A special **US** situation where an original publisher may have one entity for 
 every of the three PROs is also covered.
 
-It is presumed that writers owns and collect 50% of performing rights and the 
+It is presumed that writers own and collect 50% of performing rights and the 
 other 50%, as well as 100% of mechanical and sync are owned and collected by 
 the original publisher.
 
@@ -89,7 +89,9 @@ This particular software uses three REST API tools from the
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
 
 Even if you need a far more complex CWR, this project is still a good proof of
-concept how well these tools work. Only CWR version 2.1 is supported.
+concept how well these tools work. Only CWR version 2.1 is fully supported.
+
+CWR version 3.0 is under development (alpha).
 
 Installing the App
 ===============================================================================
