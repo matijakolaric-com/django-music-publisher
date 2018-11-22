@@ -270,11 +270,8 @@ generation of CWR files, which is a part of
 Free 15 day demo licence is available upon requests. Contact us through this 
 `Contact Page <https://matijakolaric.com/z_contact/>`_. 
 
-Walkthrough and Demo
+Demo
 ===============================================================================
-
-`Walkthrough <https://matijakolaric-com.github.io/django-music-publisher/>`_
-is available in the ``docs`` folder.
 
 A demo is available with some demo data. There are two versions, the US and the 
 World version:
