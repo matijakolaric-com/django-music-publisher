@@ -6,8 +6,8 @@ aspects of this app, without going into every possible detail. It presumes that
 installation was successful and user has logged in. It also presumes you have
 acquired the token for the CWR validation and generation service.
 
-This walktrough has been written for version 18.7, many things have been upgraded
-since, but this is still relevant.
+Visible fields depend on settings, these are recommending settings for US publishers
+with enitites affiliated with ASCAP, BMI and SESAC.
 
 ![](django-admin.png)
 
@@ -32,27 +32,36 @@ It has six parts:
 * Work Acknowledgements
 
 For a minimal work registration, all we need to enter are the *title*, and one 
-*writer in work* record. So, let us do that. We will put ``MINIMAL WORK`` in 
-the field ``title`` and then press on the ``+`` sign in the ``writer`` column 
-of the first ``writer in work`` row. A popup will appear (if it does not, you 
-may need to allow popups explicitely).
+controlled *writer in work* record. To add a new eriter, press on the green plus 
+sign in the *writer* column. The following pop-up window will appear.
 
 ![](controlled-writer.png)
 
-Minimal data for a controlled writer is entered in the example above. If this
-writer is controlled in all works, e.g., there is a general agreement between 
-the original publisher and this writer, check ``generally controlled``. If 
-your society requires it, also enter the ``society-assigned agreement number``.
-Your society will provide you with information on agreement registrations.
-Press ``save`` and you will return to the work **add view**. Please fill out 
-the rest of the row.
+Minimal data for a controlled writer depends on the settings. 
 
-![](wiw.png)
+If this a writer is controlled in all works, e.g., there is a general agreement 
+between the original publisher and this writer, check ``generally controlled``. 
 
-There is another ``society-assigned agreement number`` field here. The former 
+*Publisher fee* is the percentage of the royalties kept by the publisher, while
+the rest is passed on to the writer.
+
+If your society requires it, also enter the ``society-assigned agreement number`` (
+not shown with the US settings). Your society will provide you with information on 
+agreement registrations. Press ``save`` and you will return to the work 
+**add view**. Please fill out the rest of the row.
+
+The sum of relative shares must always be 100%. Also, at least one writer must be 
+marked as controlled. For controlled writers, *capacity* is a required field. There
+may be more required fields, depending on the settings.
+
+There may be another ``society-assigned agreement number`` field here. The former 
 is for **general agreements**, and this one is for **specific agreements**. If 
-you fill out both, the specific one will be used. Press ``save``. You will be 
-taken to the work **list view**.
+you fill out both, the specific one will be used. 
+
+Press ``save``. If data passes validation, you will be taken to the work 
+**list view**. Please note that the validation is complete and strict. Any value
+or combination of values in different fields that does not result in valid CWR 
+registrations is rejected.
 
 ![](work_list.png)
 
@@ -62,10 +71,18 @@ filters. They are pretty obvious, so they will not be covered.
 
 On the left side, there is a search field. It searches for works with a 
 matching title, including alternate titles, writer's last lame, ISWC and 
-internal work ID. Below it is an action selection field. Currently, the only 
-available action is ``Create CWR from selected works``, which will be covered 
+internal work ID. Below it is an action selection field. Currently, there are
+two available actions:
+
+* ``Create CWR from selected works``
+* ``Export selected works``
+
+Both will be covered 
 in detail later. Below it is a table with works, all of them, or just those 
 matching selected filters and/or a search term.
+
+*From this point on, the default Django Admin colors are used, not the custom
+ones from this project, and the images have not been updated.*
 
 Let's add another work, this time a more complicated one. Press on 
 ``add work``. Enter the title, and click on ``Add another Alternate Title``, 
