@@ -1,3 +1,5 @@
+"""Summary
+"""
 from django.test import TestCase
 from django.apps import apps
 from django.urls import reverse
@@ -5,10 +7,12 @@ from django.conf import settings
 
 
 class DMPTestCase(TestCase):
-    """Tests that go beyond music_publisher app tests."""
+    """Tests that go beyond music_publisher app tests.
+    """
 
     def test_settings(self):
-        """Test if all is well with the settings."""
+        """Test if all is well with the settings.
+        """
 
         self.assertTrue(
             apps.is_installed('music_publisher'),

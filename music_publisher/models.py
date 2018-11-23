@@ -2,13 +2,21 @@ from collections import OrderedDict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils.timezone import now
 import requests
 from .base import *
 
 
 class Work(WorkBase):
     """Concrete class, with references to foreign objects.
+
+    Attributes:
+        artists (django.db.models.ManyToManyField):
+            Artists performing the work
+        last_change (django.db.models.DateTimeField):
+            when the last change was made to this object or any of the child
+            objects, basically used in filtering
+        writers (django.db.models.ManyToManyField):
+            Writers who created the work
     """
 
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
@@ -18,9 +26,10 @@ class Work(WorkBase):
 
     @property
     def json(self):
-        """Create data structure that can be serielized as JSON.
+        """Create a data structure that can be serielized as JSON.
 
-        Note that serialization is not performed here.
+        Returns:
+            dict: JSON-serializable data structure
         """
 
         data = OrderedDict()
@@ -44,6 +53,11 @@ class Work(WorkBase):
 
     @property
     def work_id(self):
+        """Create Work ID used in registrations
+
+        Returns:
+            str: Internal Work ID
+        """
         if self.id is None:
             return ''
         return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
@@ -56,7 +70,11 @@ class Work(WorkBase):
 
 
 class AlternateTitle(TitleBase):
-    """Conrete class for alternate titles."""
+    """Conrete class for alternate titles.
+
+    Attributes:
+        work (django.db.models.ForeignKey): Foreign key to Work model
+    """
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
 
@@ -65,6 +83,11 @@ class AlternateTitle(TitleBase):
 
     @property
     def json(self):
+        """Create a data structure that can be serielized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
         return {'alternate_title': self.title}
 
 
@@ -78,6 +101,11 @@ class Artist(ArtistBase):
 
     @property
     def json(self):
+        """Create a data structure that can be serielized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
         return {
             'artist_first_name': self.first_name,
             'artist_last_name': self.last_name,
@@ -85,7 +113,14 @@ class Artist(ArtistBase):
 
 
 class FirstRecording(RecordingBase):
-    """Concrete class for first recording."""
+    """Concrete class for first recording.
+
+    Attributes:
+        album_cd (django.db.models.ForeignKey): FK to Album/CD
+        artist (django.db.models.ForeignKey):
+            FK to Artist, in this context, it is a recording artist
+        work (django.db.models.OneToOneField): One to One field to Work
+    """
 
     work = models.OneToOneField(Work, on_delete=models.CASCADE)
     artist = models.ForeignKey(
@@ -100,7 +135,10 @@ class FirstRecording(RecordingBase):
 
     @property
     def json(self):
-        """Create serializable data structure, including album/cd data.
+        """Create a data structure that can be serielized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
         """
         data = OrderedDict()
         if self.duration:
@@ -127,9 +165,11 @@ class FirstRecording(RecordingBase):
 
 
 class ArtistInWork(models.Model):
-    """Intermediary class in M2M relationship.
+    """Artist performing the work (live in CWR 3).
 
-    It is always better to write them explicitely.
+    Attributes:
+        artist (django.db.models.ForeignKey): FK to Artist
+        work (django.db.models.ForeignKey): FK to Work
     """
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
