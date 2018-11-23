@@ -185,27 +185,37 @@ class ArtistInWork(models.Model):
 
 
 class Writer(WriterBase):
-    """Concrete class for writers."""
+    """Concrete class for writers.
+    """
 
     def clean(self, *args, **kwargs):
-        """Controlled writer requires more data, so once a writer is in
-        that role, it is not allowed to remove required data."""
-
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
+        # A controlled writer requires more data, so once a writer is in
+        # that role, it is not allowed to remove required data."""
         if self.writerinwork_set.filter(controlled=True).exists():
             raise ValidationError(
-                'This writer is controlled in at least one work, '
-                'required are: Last name, IPI Name # and Performing '
-                'Rights Society.')
+                'This writer is controlled in at least one work. ' +
+                CAN_NOT_BE_CONTROLLED_MSG)
 
 
 class WriterInWork(models.Model):
-    """Intermediary class in M2M relationship with few additional fields.
+    """Writers who created this work.
 
-    Please note that in some societies, SAAN is a required field.
-    Capacity is limited to roles by original writers."""
+    At least one writer in work must be controlled.
+    Sum of relative shares must be (roughly) 100%.
+    Capacity is limited to roles for original writers.
+
+    Attributes:
+        capacity (TYPE): Description
+        controlled (TYPE): Description
+        publisher_fee (TYPE): Description
+        relative_share (TYPE): Description
+        saan (TYPE): Description
+        work (TYPE): Description
+        writer (TYPE): Description
+    """
 
     class Meta:
         verbose_name_plural = 'Writers in Work'
@@ -242,7 +252,11 @@ class WriterInWork(models.Model):
         return super().clean_fields(*args, **kwargs)
 
     def clean(self):
-        """Make sure that contrlled writers have all the required data."""
+        """Make sure that controlled writers have all the required data.
+
+        Also check that writers that are not controlled do not have data
+        that can not apply to them."""
+
         if (self.writer and self.writer.generally_controlled and
                 not self.controlled):
             raise ValidationError({

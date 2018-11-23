@@ -9,6 +9,9 @@ psycopg2-binary
 pytz==2018.5
 requests==2.20.0
 requests-toolbelt==0.8.0
+Sphinx
+sphinxcontrib-napoleon
+sphinxcontrib-websupport
 tqdm==4.23.4
 urllib3==1.23
 waitress
