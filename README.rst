@@ -5,7 +5,7 @@ Django Music Publisher
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
 .. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=latest
-    :target: https://django-music-publisher.readthedocs.io/en/stable/?badge=latest
+    :target: https://django-music-publisher.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 .. image:: https://img.shields.io/pypi/status/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
