@@ -4,7 +4,7 @@ Future Releases
 Upcoming release schedule
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Current plan is to have two releases in 2019, one in 2020 and then one every two years, with Django LTS releases. This is due to the fact that CWR 3.0 is going to be released soon, as well as new DDEX versions.
+Current plan is to have two releases in 2019, one in 2020 and then one every two years, with Django LTS releases. This is due to the fact that CWR 3.0 is going to be released soon, as well as new DDEX versions. Also, MLC may come up with a new set of requirements in the next year, but once all of that is done, we will most likely return to the slow progress of the industry.
 
 =======  ====================================================================================================  ==========  ==========  ==========
 Upcoming Major Releases                                                                                                Release dates for
