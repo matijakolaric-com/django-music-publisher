@@ -7,6 +7,11 @@ At this point, it covers all the data required for batch (CWR) registrations of 
 
 An external, commercial service is used for data validation and CWR generation. Django Music Publisher can work without it, but data will not be validated as CWR-compliant, and there will be no way to export CWR.
 
+Project Scope
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Django Music Publisher will always support only original publishers, with the special situation for the US, where a publisher may have separate entities in each of the PROs. It is not intended to be used by administrators or sub-publishers.
+
 Current Features
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -33,13 +38,19 @@ It is presumed that writers own and collect 50% of performing rights and the oth
 
 Basic publishing agreement data can be entered, but currently no statement processing capabilities are included.
 
-Project Scope
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-The scope of this project was not chosen based on technical complexity of additional features, but due to the fact that beyond this point, the learning curve gets really steep, both for software developers and users.
-
-Django Music Publisher will always support only one original publisher, with the special situation for the US, where a publisher may have separate entities in each of the PROs. It is not intended to be used by administrators or sub-publishers.
-
-Plans and Ideas
+Ideas and plans
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+Following features are required in order to make Django Music Publisher completely free and available to small music publishers without any limitations:
+
+* Adding custom work IDs
+* Adding data imports, requires custom work IDs
+* Including complete validation, CWR generation and highlighting in the open source
+* Adding MWN (DDEX)
+* Including modifications of musical works
+* Royalty statement processing
+* Extending the features towards the recording/labes side of music rights
+* Implementing other DDEX formats/processes
+* Simplified deployment
+
+Looking for sponsors/donators.
