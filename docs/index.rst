@@ -11,7 +11,7 @@ Django Music Publisher
     :target: https://pypi.org/project/django-music-publisher/
 .. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=master
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
-.. image:: https://img.shields.io/pypi/l/django-music-publisher.svg
+.. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher/
    :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
