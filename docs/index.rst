@@ -1,9 +1,9 @@
 Django Music Publisher
 ======================
 
-.. image:: https://img.shields.io/github/commits-since/matijakolaric-com/django-music-publisher.svg
+.. image:: https://img.shields.io/github/release/matijakolaric-com/django-music-publisher.svg
     :target: https://github.com/matijakolaric-com/django-music-publisher/
-    :alt: Commit Since Last Release
+    :alt: Latest Release
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
