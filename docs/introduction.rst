@@ -10,7 +10,7 @@ An external, commercial service is used for data validation and CWR generation. 
 Project Scope
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Django Music Publisher will always support only original publishers, with the special situation for the US, where a publisher may have separate entities in each of the PROs. It is not intended to be used by administrators or sub-publishers.
+Django Music Publisher will always support only original publishers, covering the special situation in the US, where a publisher may have separate entities in each of the PROs. It is not intended to be used by administrators or sub-publishers.
 
 Current Features
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -49,7 +49,7 @@ Following features are required in order to make Django Music Publisher complete
 * Adding MWN (DDEX)
 * Including modifications of musical works
 * Royalty statement processing
-* Extending the features towards the recording/labes side of music rights
+* Extending the features towards the recording/label side of music rights
 * Implementing other DDEX formats/processes
 * Simplified deployment
 
