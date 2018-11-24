@@ -31,6 +31,7 @@ Django Music Publisher
    introduction
    publishing
    installation
+   releases
    modules
 
 

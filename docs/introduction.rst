@@ -41,9 +41,8 @@ Basic publishing agreement data can be entered, but currently no statement proce
 Ideas and plans
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Following features are required in order to make Django Music Publisher completely free and available to small music publishers without any limitations:
+The following features are required in order to make Django Music Publisher completely free and available to small music publishers without any limitations:
 
-* Adding custom work IDs
 * Adding data imports, requires custom work IDs
 * Including complete validation, CWR generation and highlighting in the open source
 * Adding MWN (DDEX)
@@ -53,4 +52,4 @@ Following features are required in order to make Django Music Publisher complete
 * Implementing other DDEX formats/processes
 * Simplified deployment
 
-Looking for sponsors/donators.
+Please note that without sponsors, further development will be restricted to bugfixes and implementing CWR 3.0 functionality, using the external service, as outlined in `releases <releases>`_.

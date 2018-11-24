@@ -3,7 +3,7 @@ Installation
 
 Django Music Publisher can be installed either as a Django app, or as a stand-alone project.
 
-Installing the App
+Installing the app
 ===============================================================================
 
 If you want to install the latest stable release of the 
