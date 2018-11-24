@@ -27,9 +27,10 @@ Django Music Publisher
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    introduction
+   publishing
    music_publisher
 
 
