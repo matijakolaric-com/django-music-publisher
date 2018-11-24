@@ -1,5 +1,5 @@
-music_publisher
-===============
+API Docs
+========
 
 .. toctree::
    :maxdepth: 2
