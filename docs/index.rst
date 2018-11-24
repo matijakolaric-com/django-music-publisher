@@ -1,9 +1,6 @@
 Django Music Publisher
 ======================
 
-.. image:: https://img.shields.io/github/release/matijakolaric-com/django-music-publisher.svg
-    :target: https://github.com/matijakolaric-com/django-music-publisher/
-    :alt: Latest Release
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
@@ -16,6 +13,9 @@ Django Music Publisher
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg
    :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
     :alt: License
+.. image:: https://img.shields.io/github/release/matijakolaric-com/django-music-publisher.svg
+    :target: https://github.com/matijakolaric-com/django-music-publisher/
+    :alt: Latest Release
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 .. image:: https://img.shields.io/pypi/pyversions/django-music-publisher.svg
