@@ -5,7 +5,7 @@ Django Music Publisher is an open source software for original music publishers.
 
 At this point, it covers all the features required for batch (CWR) registrations of musical works, as well as basic data on agreements between the publisher and writers.
 
-An external, commercial service is used for data validation and CWR generation. Django Music Publisher can work without it, but data will not be validated as CWR-compliant, and there will be no way to export CWR.
+An external, commercial service is used for data validation and CWR generation. If used, the integration is seamless. Django Music Publisher can work without it, but data will not be validated as CWR-compliant, and there will be no way to export CWR.
 
 Project Scope
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,3 +54,8 @@ The following features are required in order to make Django Music Publisher comp
 * Automated CWR delivery (first to MusicMark and ICE Services)
 
 Please note that without sponsors, further development will be restricted to bugfixes and implementing CWR 3.0 functionality, using the external service, as outlined in :doc:`releases`.
+
+Video Introduction
+++++++++++++++++++
+
+A short introduction is available in this `video <https://www.youtube.com/watch?v=CG22Ov37qEU&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_.

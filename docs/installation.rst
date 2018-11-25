@@ -14,6 +14,9 @@ If you want to install the latest stable release of the
 Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
 URLs need to be added, as everything goes through the Django Admin.
 
+Settings
+++++++++
+
 You will have to add this to the settings, replace with your data.
 
 .. code:: python
@@ -104,6 +107,8 @@ validates the data and generates CWR, additional documentation will be
 provided, as well as ``token``, ``validator_url``, ``creator_url`` and
 ``highlighter_url`` values.
 
+More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_.
+
 Installing the project (standalone deployment)
 ===============================================================================
 
@@ -143,6 +148,7 @@ deployment, please use official
 
 Heroku
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 If you would like to try Django Music Publisher, Heroku is a good choice. The
 free PostgreSQL tier can have up to 10.000 rows, which translates to about
 1.000 works. 
