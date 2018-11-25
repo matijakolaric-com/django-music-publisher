@@ -1,3 +1,10 @@
+"""Interface for :mod:`music_publisher` app.
+
+Please note that this is the only interface.
+
+Attributes:
+    IS_POPUP_VAR (bool): :attr:`django.contrib.admin.options.IS_POPUP_VAR`
+"""
 from datetime import datetime
 from decimal import Decimal
 from django import forms
@@ -18,7 +25,7 @@ from django.utils.timezone import now
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement,
-    WorkExport, WORK_ID_PREFIX)
+    WORK_ID_PREFIX)
 import re
 import requests
 
@@ -39,8 +46,10 @@ class MusicPublisherAdmin(admin.ModelAdmin):
     save_as = True
 
     def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
+        """Do super().save_model, msg if validation was not performed.
+        """
 
+        super().save_model(request, obj, form, change)
         if not VALIDATE:
             messages.add_message(
                 request, messages.WARNING,
@@ -59,10 +68,17 @@ class MusicPublisherAdmin(admin.ModelAdmin):
 
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
+    """Interface for :class:`.models.Writer`.
+    """
+
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
                     '_can_be_controlled', 'generally_controlled')
 
     def get_list_display(self, *args, **kwargs):
+        """Return the list of fields based on settings.
+
+        Original Publisher is important for the US."""
+
         lst = list(self.list_display)
         if SETTINGS.get('admin_show_publisher'):
             lst.append('original_publisher')
@@ -94,11 +110,17 @@ class WriterAdmin(MusicPublisherAdmin):
     actions = None
 
     def original_publisher(self, obj):
+        """Return the original publisher.
+
+        This makes sense only in the US context."""
+
         if obj.generally_controlled and obj.pr_society:
             return obj.get_publisher_dict().get('publisher_name')
         return ''
 
     def save_model(self, request, obj, form, *args, **kwargs):
+        """Perform normal save_model, then update last_change of
+        all connected works."""
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
             qs = Work.objects.filter(writerinwork__writer=obj)
@@ -106,23 +128,35 @@ class WriterAdmin(MusicPublisherAdmin):
 
 
 class AlternateTitleInline(admin.TabularInline):
+    """Inline interface for :class:`.models.AlternateTitle`.
+    """
     model = AlternateTitle
     extra = 0
 
 
 class ArtistInWorkInline(admin.TabularInline):
+    """Inline interface for :class:`.models.ArtistInWork`.
+    """
     autocomplete_fields = ('artist', 'work')
     model = ArtistInWork
     extra = 0
 
 
-class WorksPerformedByArtistInline(ArtistInWorkInline):
-    verbose_name_plural = 'Works Performed'
-    classes = ('collapse',)
-
-
 class WriterInWorkFormSet(BaseInlineFormSet):
+    """Formset for :class:`WriterInWorkInline`.
+    """
+
     def clean(self):
+        """Performs these checks:
+            at least one writer must be controlled,
+            sum of relative shares must be ~100%
+
+        Returns:
+            None
+
+        Raises:
+            ValidationError
+        """
         super().clean()
         total = 0
         controlled = False
@@ -140,6 +174,9 @@ class WriterInWorkFormSet(BaseInlineFormSet):
 
 
 class WriterInWorkInline(admin.TabularInline):
+    """Inline interface for :class:`.models.WriterInWork`.
+    """
+
     autocomplete_fields = ('writer', )
     readonly_fields = ('original_publisher',)
     model = WriterInWork
@@ -149,6 +186,8 @@ class WriterInWorkInline(admin.TabularInline):
     fields = ('writer', 'capacity', 'relative_share', 'controlled')
 
     def get_fields(self, *args, **kwargs):
+        """Return list of fields depending on settings.
+        """
         lst = list(self.fields)
         if SETTINGS.get('admin_show_publisher'):
             lst.append('original_publisher')
@@ -158,12 +197,18 @@ class WriterInWorkInline(admin.TabularInline):
         return lst
 
     def original_publisher(self, obj):
+        """Return the original publisher.
+
+        This makes sense only in the US context."""
         if obj.controlled and obj.writer:
             return obj.writer.get_publisher_dict().get('publisher_name')
         return ''
 
 
 class RecordingInline(admin.StackedInline):
+    """Inline interface for :class:`.models.FirstRecording`,
+        used in :class:`WorkAdmin` and :class:`ArtistAdmin`.
+    """
     autocomplete_fields = ('album_cd', 'artist', 'work')
     fieldsets = (
         (None, {
@@ -182,6 +227,10 @@ class RecordingInline(admin.StackedInline):
 
 
 class TrackInline(admin.StackedInline):
+    """Inline interface for :class:`.models.FirstRecording`,
+        used in :class:`AlbumCDAdmin`.
+    """
+
     import django
     if django.VERSION >= (2, 1):
         autocomplete_fields = ('work', 'artist')
@@ -207,9 +256,10 @@ class TrackInline(admin.StackedInline):
 
 
 class WorkAcknowledgementInline(admin.TabularInline):
-    """Acknowledgement transactions related to this work.
+    """Inline interface for :class:`.models.WorkAcknowledgement`,
+        used in :class:`WorkAdmin`.
 
-    This should NOT be editable.
+        Please note that normal users should only have a 'view' permission.
     """
 
     model = WorkAcknowledgement
@@ -219,6 +269,22 @@ class WorkAcknowledgementInline(admin.TabularInline):
 
 @admin.register(Work)
 class WorkAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Work`.
+
+    This is by far the most important part of the interface.
+
+    Attributes:
+        actions (tuple): batch actions used:
+            :meth:`create_cwr`,
+            :meth:`create_json`
+        inlines (tuple): inlines used in change view:
+            :class:`AlternateTitleInline`,
+            :class:`WriterInWorkInline`,
+            :class:`RecordingInline`,
+            :class:`ArtistInWorkInline`,
+            :class:`WorkAcknowledgementInline`,
+    """
+
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
         RecordingInline, ArtistInWorkInline,
@@ -233,6 +299,12 @@ class WorkAdmin(MusicPublisherAdmin):
     writer_last_names.admin_order_field = 'writers__last_name'
 
     def percentage_controlled(self, obj):
+        """Controlled percentage
+        (sum of relative shares for controlled writers)
+
+        Please note that writers in work are already included in the queryset
+        for other reasons, so no overhead except summing.
+        """
         return sum(
             wiw.relative_share for wiw in obj.writerinwork_set.all()
             if wiw.controlled)
@@ -258,6 +330,9 @@ class WorkAdmin(MusicPublisherAdmin):
     isrc.admin_order_field = 'firstrecording__isrc'
 
     def cwr_export_count(self, obj):
+        """Return the count of CWR exports with the link to the filtered
+        changelist view for :class:`CWRExportAdmin`."""
+
         count = obj.cwr_exports__count
         url = reverse('admin:music_publisher_cwrexport_changelist')
         url += '?works__id__exact={}'.format(obj.id)
@@ -277,9 +352,11 @@ class WorkAdmin(MusicPublisherAdmin):
     list_display = (
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'isrc', 'album_cd',
-        'cwr_export_count' ,'_cwr')
+        'cwr_export_count', '_cwr')
 
     def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('writerinwork_set')
         qs = qs.prefetch_related('writers')
@@ -288,32 +365,45 @@ class WorkAdmin(MusicPublisherAdmin):
         return qs
 
     class HasISWCListFilter(admin.SimpleListFilter):
+        """Custom list filter on the presence of ISWC.
+        """
+
         title = 'Has ISWC'
         parameter_name = 'has_iswc'
 
         def lookups(self, request, model_admin):
+            """Simple Yes/No filter
+            """
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
+            """Filter on presence of :attr:`.iswc`.
+            """
             if self.value() == 'Y':
                 return queryset.exclude(iswc__isnull=True)
             elif self.value() == 'N':
                 return queryset.filter(iswc__isnull=True)
 
     class HasRecordingListFilter(admin.SimpleListFilter):
+        """Custom list filter on the presence of first recording.
+        """
         title = 'Has First Recording'
         parameter_name = 'has_rec'
 
         def lookups(self, request, model_admin):
+            """Simple Yes/No filter
+            """
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
+            """Filter on presence of :class:`.models.FirstRecording`.
+            """
             if self.value() == 'Y':
                 return queryset.exclude(firstrecording__isnull=True)
             elif self.value() == 'N':
@@ -332,6 +422,8 @@ class WorkAdmin(MusicPublisherAdmin):
         '^iswc', '^id')
 
     def get_search_results(self, request, queryset, search_term):
+        """Deal with the situation term is work ID.
+        """
         if search_term.isnumeric():
             search_term = search_term.lstrip('0')
         return super().get_search_results(request, queryset, search_term)
@@ -348,6 +440,9 @@ class WorkAdmin(MusicPublisherAdmin):
         super().save_model(request, obj, form, *args, **kwargs)
 
     def create_cwr(self, request, qs):
+        """Batch action that redirects to the add view for
+        :class:`CWRExportAdmin` with selected works.
+        """
         url = reverse('admin:music_publisher_cwrexport_add')
         ids = qs.values_list('id', flat=True)
         return HttpResponseRedirect(
@@ -355,7 +450,13 @@ class WorkAdmin(MusicPublisherAdmin):
     create_cwr.short_description = 'Create CWR from selected works.'
 
     def create_json(self, request, qs):
-        j = WorkExport().get_json(qs)
+        """Batch action that downloads a JSON file containing selected works.
+
+        Returns:
+            JsonResponse: JSON file with selected works
+        """
+
+        j = CWRExport().get_json(qs)
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(WORK_ID_PREFIX, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
@@ -366,12 +467,14 @@ class WorkAdmin(MusicPublisherAdmin):
     actions = (create_cwr, create_json)
 
     def get_actions(self, request):
+        """Custom action disabling the default ``delete_selected``."""
         actions = super().get_actions(request)
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
 
     def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
         instances = super().get_inline_instances(request)
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
             return [i for i in instances if type(i) not in [
@@ -382,18 +485,28 @@ class WorkAdmin(MusicPublisherAdmin):
 
 @admin.register(CWRExport)
 class CWRExportAdmin(admin.ModelAdmin):
+    """Admin interface for :class:`.models.CWRExport`.
+    """
 
     actions = None
 
     def cwr_ready(self, obj):
+        """Is CWR created?"""
         return obj.cwr != ''
     cwr_ready.boolean = True
 
     def work_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
         return obj._work_count or obj.works__count
     cwr_ready.boolean = True
 
     def get_highlighted_data(self, obj):
+        """Get CWR highlighting from the external service.
+
+        (available only for CWR 2.1)
+        """
         if obj.is_version_3:
             return obj.cwr
         data = {'cwr': obj.cwr}
@@ -424,6 +537,8 @@ class CWRExportAdmin(admin.ModelAdmin):
             return mark_safe('<a href="{}">Download</a>'.format(url))
 
     def get_queryset(self, request):
+        """Optimized query with count of works in the export.
+        """
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('works'))
         return qs
@@ -437,6 +552,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     search_fields = ('works__title',)
 
     def get_readonly_fields(self, request, obj=None):
+        """Read-only fields differ if CWR has been completed."""
         if obj and obj.cwr:
             return (
                 'nwr_rev', 'works', 'filename', 'view_link', 'download_link')
@@ -444,6 +560,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             return ()
 
     def get_fields(self, request, obj=None):
+        """Shown fields differ if CWR has been completed."""
         if obj and obj.cwr:
             return (
                 'nwr_rev', 'works', 'filename', 'view_link', 'download_link')
@@ -451,6 +568,10 @@ class CWRExportAdmin(admin.ModelAdmin):
             return ('nwr_rev', 'works')
 
     def save_model(self, request, obj, form, change):
+        """Django splits the saving process int two parts, which does not
+            work in this case, so this is simply passing the main object
+            through to :meth:`save_related`.
+        """
         if not (hasattr(self, 'obj') and self.obj.cwr):
             super().save_model(request, obj, form, change)
             self.obj = obj
@@ -458,6 +579,10 @@ class CWRExportAdmin(admin.ModelAdmin):
             del self.obj
 
     def save_related(self, request, form, formsets, change):
+        """:meth:`save_model` passes the main object, which is needed to fetch
+            CWR form the external service, but only after related objects are
+            saved.
+        """
         if hasattr(self, 'obj'):
             super().save_related(request, form, formsets, change)
             try:
@@ -473,11 +598,19 @@ class CWRExportAdmin(admin.ModelAdmin):
                 del self.obj
 
     def has_delete_permission(self, request, obj=None, **kwargs):
+        """If CWR has been created, it can no longer be deleted, as it may
+        have been sent. This may change once the delivery is automated."""
+
         if obj and obj.cwr:
             return None
         return super().has_delete_permission(request, obj, **kwargs)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
+        """Normal change view with two sub-views defined by GET parameters:
+
+        Parameters:
+            preview: that returns the highlighted preview of CWR file,
+            download: that downloads the CWR file."""
         obj = get_object_or_404(CWRExport, pk=object_id)
         if 'preview' in request.GET:
             html = self.get_highlighted_data(obj)
@@ -504,6 +637,13 @@ class CWRExportAdmin(admin.ModelAdmin):
 
 
 class ACKImportForm(ModelForm):
+
+    """Form used for CWR acknowledgement imports.
+
+    Attributes:
+        acknowledgement_file (FileField): Field for file upload
+    """
+
     class Meta:
         model = ACKImport
         fields = ('acknowledgement_file',)
@@ -514,6 +654,8 @@ class ACKImportForm(ModelForm):
         r'^HDR(?:SO|AA)[0 ]{6}([ \d][ \d]\d)(.{45})01\.10(\d{8})\d{6}(\d{8})')
 
     def clean(self):
+        """Perform usual clean, then process the file, returning the content
+            field as if it was the TextField."""
         super().clean()
         cd = self.cleaned_data
         ack = cd.get('acknowledgement_file')
@@ -535,7 +677,12 @@ class ACKImportForm(ModelForm):
 
 @admin.register(ACKImport)
 class ACKImportAdmin(admin.ModelAdmin):
+    """Admin interface for :class:`.models.ACKImport`.
+    """
+
     def get_form(self, request, obj=None, **kwargs):
+        """Returns a custom form for new objects, default one for changes.
+        """
         if obj is None:
             return ACKImportForm
         return super().get_form(request, obj, **kwargs)
@@ -549,6 +696,8 @@ class ACKImportAdmin(admin.ModelAdmin):
     add_fields = ('acknowledgement_file',)
 
     def get_fields(self, reqest, obj=None):
+        """Return different fields for add vs change.
+        """
         if obj:
             return self.fields
         return self.add_fields
@@ -607,6 +756,9 @@ class ACKImportAdmin(admin.ModelAdmin):
         return report
 
     def save_model(self, request, obj, form, change):
+        """Custom save_model, it ignores changes, validates the for for new
+            instances, if valid, it processes the file and, upon success,
+            calls ``super().save_model``."""
         if change:
             return
         if form.is_valid():
@@ -621,15 +773,22 @@ class ACKImportAdmin(admin.ModelAdmin):
             super().save_model(request, obj, form, change)
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
+        """Deleting ACK imports is a really bad idea.
+        """
         return False
 
 
 @admin.register(AlbumCD)
 class AlbumCDAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.AlbumCD`.
+    """
+
     readonly_fields = ('library',)
     inlines = [TrackInline]
 
     def get_fieldsets(self, request, obj=None):
+        """Fields depend on settings.
+        """
         fieldsets = (
             ('Library', {
                 'fields': (
@@ -645,6 +804,7 @@ class AlbumCDAdmin(MusicPublisherAdmin):
         return fieldsets
 
     def label_not_set(self, obj=None):
+        """Return the text if label is not set"""
         return 'NOT SET'
     label_not_set.short_description = 'Label'
 
@@ -653,6 +813,8 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     )
 
     def get_list_display(self, *args, **kwargs):
+        """The list of fields depends on settings.
+        """
         lst = list(self.list_display)
         if SETTINGS.get('label'):
             lst.append('album_label')
@@ -671,11 +833,14 @@ class AlbumCDAdmin(MusicPublisherAdmin):
     actions = None
 
     def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
             return []
         return super().get_inline_instances(request)
 
     def save_model(self, request, obj, form, *args, **kwargs):
+        """Save, then update ``last_change`` of the corresponding works.
+        """
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
             qs = Work.objects.filter(firstrecording__album_cd=obj)
@@ -684,10 +849,13 @@ class AlbumCDAdmin(MusicPublisherAdmin):
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Artist`.
+    """
+
     list_display = ('last_or_band', 'first_name', 'isni', '_cwr')
     search_fields = ('last_name', 'isni',)
     list_filter = ('_cwr',)
-    inlines = [RecordingInline, WorksPerformedByArtistInline]
+    inlines = [RecordingInline, ArtistInWorkInline]
 
     fieldsets = (
         ('Name', {
@@ -700,11 +868,13 @@ class ArtistAdmin(MusicPublisherAdmin):
     )
 
     def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
             return []
         return super().get_inline_instances(request)
 
     def last_or_band(self, obj):
+        """Placeholder for :attr:`.models.Artist.last_name`."""
         return obj.last_name
     last_or_band.short_description = 'Last or band name'
     last_or_band.admin_order_field = 'last_name'
@@ -712,6 +882,8 @@ class ArtistAdmin(MusicPublisherAdmin):
     actions = None
 
     def save_model(self, request, obj, form, *args, **kwargs):
+        """Save, then update ``last_change`` of the corresponding works.
+        """
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
             qs = Work.objects.filter(artistinwork__artist=obj)

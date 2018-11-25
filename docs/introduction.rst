@@ -51,5 +51,6 @@ The following features are required in order to make Django Music Publisher comp
 * Extending the features towards the recording/label side of music rights
 * Implementing other DDEX formats/processes
 * Simplified deployment
+* Automated CWR delivery (first to MusicMark and ICE Services)
 
 Please note that without sponsors, further development will be restricted to bugfixes and implementing CWR 3.0 functionality, using the external service, as outlined in :doc:`releases`.

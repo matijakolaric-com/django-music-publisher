@@ -208,13 +208,18 @@ class WriterInWork(models.Model):
     Capacity is limited to roles for original writers.
 
     Attributes:
-        capacity (TYPE): Description
-        controlled (TYPE): Description
-        publisher_fee (TYPE): Description
-        relative_share (TYPE): Description
-        saan (TYPE): Description
-        work (TYPE): Description
-        writer (TYPE): Description
+        capacity (django.db.models.CharField): Role of the writer in this work
+        controlled (django.db.models.BooleanField): A complete mistery field
+        publisher_fee (django.db.models.DecimalField): Percentage of royalties
+            kept by publisher
+        relative_share (django.db.models.DecimalField): Initial split among
+            writers, prior to publishing
+        saan (django.db.models.CharField): Society-assigned agreement number
+            between the writer and the original publisher, please note that
+            this field is for SPECIFIC agreements, for a general agreement,
+            use :attr:`.base.IPIBase.saan`
+        work (django.db.models.ForeignKey): FK to Work
+        writer (django.db.models.ForeignKey): FK to Writer
     """
 
     class Meta:
@@ -292,6 +297,11 @@ class WriterInWork(models.Model):
 
     @property
     def json(self):
+        """Create a data structure that can be serielized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
         data = OrderedDict()
         if self.writer:
             data['writer_id'] = 'W{:06d}'.format(self.writer.id)
@@ -323,17 +333,64 @@ class WriterInWork(models.Model):
         return data
 
 
-class WorkExport(object):
-    class Meta:
-        abstract = True
+class CWRExport(models.Model):
+    """Export in CWR format.
 
-    nwr_rev = None
+    Common Works Registration format is a standard format for registration of
+    musical works world-wide. As of November 2018, version 2.1r7 is used
+    everywhere, while some societies accept 2.2 as well, it adds no benefits
+    in this context. Version 3.0 is in draft.
+
+    Attributes:
+        nwr_rev (django.db.models.CharField): Choice field where user can
+            select which version and type of CWR it is.
+    """
+
+    class Meta:
+        verbose_name = 'CWR Export'
+        verbose_name_plural = 'CWR Exports'
+        ordering = ('-id',)
+
+    nwr_rev = models.CharField(
+        'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
+            ('NWR', 'CWR 2.1: New work registration'),
+            ('REV', 'CWR 2.1: Revision of registered work'),
+            ('WRK', 'CWR 3.0: Work registration (alpha)')))
+    cwr = models.TextField(blank=True, editable=False)
+    year = models.CharField(
+        max_length=2, db_index=True, editable=False, blank=True)
+    num_in_year = models.PositiveSmallIntegerField(default=0)
+    works = models.ManyToManyField(Work, related_name='cwr_exports')
+    _work_count = models.IntegerField(
+        editable=False, null=True)
 
     @property
     def is_version_3(self):
         return self.nwr_rev == 'WRK'
 
+    @property
+    def filename(self):
+        if not self.cwr:
+            return '{} DRAFT {}'.format(self.nwr_rev, self.id)
+        if self.is_version_3:
+            return 'CW{}{:04}{}_000_V3-0-0.SUB'.format(
+                self.year,
+                self.num_in_year,
+                SETTINGS.get('publisher_id'))
+        return 'CW{}{:04}{}_000.V21'.format(
+            self.year,
+            self.num_in_year,
+            SETTINGS.get('publisher_id'))
+
+    def __str__(self):
+        return self.filename
+
     def get_json(self, qs=None):
+        """Create a data structure that can be serielized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
         if qs is None:
             qs = self.works.order_by('id')
         if self.is_version_3:
@@ -370,46 +427,24 @@ class WorkExport(object):
 
     @property
     def json(self):
+        """Property that wraps :meth:`get_json`.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
         return self.get_json()
 
-
-class CWRExport(WorkExport, models.Model):
-    class Meta:
-        verbose_name = 'CWR Export'
-        verbose_name_plural = 'CWR Exports'
-        ordering = ('-id',)
-
-    nwr_rev = models.CharField(
-        'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
-            ('NWR', 'CWR 2.1: New work registration'),
-            ('REV', 'CWR 2.1: Revision of registered work'),
-            ('WRK', 'CWR 3.0: Work registration (alpha)')))
-    cwr = models.TextField(blank=True, editable=False)
-    year = models.CharField(
-        max_length=2, db_index=True, editable=False, blank=True)
-    num_in_year = models.PositiveSmallIntegerField(default=0)
-    works = models.ManyToManyField(Work, related_name='cwr_exports')
-    _work_count = models.IntegerField(
-        editable=False, null=True)
-
-    @property
-    def filename(self):
-        if not self.cwr:
-            return '{} DRAFT {}'.format(self.nwr_rev, self.id)
-        if self.is_version_3:
-            return 'CW{}{:04}{}_000_V3-0-0.SUB'.format(
-                self.year,
-                self.num_in_year,
-                SETTINGS.get('publisher_id'))
-        return 'CW{}{:04}{}_000.V21'.format(
-            self.year,
-            self.num_in_year,
-            SETTINGS.get('publisher_id'))
-
-    def __str__(self):
-        return self.filename
-
     def get_cwr(self):
+        """Get CWR from the external service, and save.
+
+        Returns:
+            None
+
+        Raises:
+            ValidationError: Validation errors are raised in case of
+                network issues, bad requests, etc, so they can be
+                handeled by admin.
+        """
         if self.cwr:
             return
         url = SETTINGS.get('generator_url')
@@ -452,6 +487,16 @@ class CWRExport(WorkExport, models.Model):
 
 
 class WorkAcknowledgement(models.Model):
+    """Acknowledgement of work registration.
+
+    Attributes:
+        date (django.db.models.DateField): Acknowledgement date
+        remote_work_id (django.db.models.CharField): Remote work ID
+        society_code (django.db.models.CharField): 3-digit society code
+        status (django.db.models.CharField): 2-letter status code
+        TRANSACTION_STATUS_CHOICES (tuple): choices for status
+        work (django.db.models.ForeignKey): FK to Work
+    """
 
     class Meta:
         verbose_name = 'Registration Acknowledgement'
@@ -479,6 +524,17 @@ class WorkAcknowledgement(models.Model):
 
 
 class ACKImport(models.Model):
+    """CWR acknowledgement file import.
+
+    Attributes:
+        date (django.db.models.DateField): Acknowledgement date
+        filename (django.db.models.CharField): Description
+        report (django.db.models.CharField): Basically a log
+        society_code (models.CharField): 3-digit society code,
+            please note that ``choices`` is not set.
+        society_name (models.CharField): Society name,
+            used if society code is missing.
+    """
 
     class Meta:
         verbose_name = 'CWR ACK Import'

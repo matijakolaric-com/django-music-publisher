@@ -1,3 +1,13 @@
+"""Tests for :mod:`music_publisher`.
+
+Tests are the weakest link in the package. They do test that things do not break, which makes a grat difference, but they do not test how things work.
+
+A major re-write is required.
+
+Attributes:
+    CONTENT (str): CWR ACK file contents
+"""
+
 from datetime import date, time
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
@@ -11,8 +21,13 @@ from music_publisher.models import *
 from io import StringIO
 
 
-class ModelsTest(TestCase):
+class AllTest(TestCase):
+    """All Tests in a sibgle class.
+    """
+
     def setUp(self):
+        """Set up the initial data.
+        """
         self.adminsite = AdminSite()
         self.user = User(
             username='superuser', is_superuser=True, is_staff=True)
@@ -79,6 +94,8 @@ class ModelsTest(TestCase):
 
     @override_settings()
     def test_validation(self):
+        """Test the field-level validation for the initial models.
+        """
         self.assertTrue(VALIDATE)
         self.work.clean_fields()
         get_publisher_dict(None)
@@ -176,6 +193,8 @@ class ModelsTest(TestCase):
         self.work.full_clean()
 
     def test_str(self):
+        """Test that all strings are in CWR_compliant form.
+        """
         self.assertEqual(str(self.artist), 'FOO')
         self.artist.first_name = "BAR JR"
         self.assertEqual(str(self.artist), 'BAR JR FOO')
@@ -204,6 +223,8 @@ class ModelsTest(TestCase):
 
     @override_settings()
     def test_cwr(self):
+        """Test external CWR generation.
+        """
         self.assertIn('NWR DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
@@ -232,6 +253,9 @@ class ModelsTest(TestCase):
         settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name'] = pin
 
     def get(self, path, re_post=False):
+        """A helper method that similates opening of view and then simulates
+            manual changes and save.
+        """
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
         adminform = response.context_data.get('adminform')
@@ -258,6 +282,8 @@ class ModelsTest(TestCase):
 
     @override_settings()
     def test_admin(self):
+        """Integration tests for admin interface.
+        """
         self.assertEqual(AlbumCDAdmin.label_not_set(None), 'NOT SET')
         self.cwr_export.get_cwr()
         self.cwr_export2.get_cwr()

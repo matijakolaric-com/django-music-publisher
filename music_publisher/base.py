@@ -426,7 +426,9 @@ class IPIBase(models.Model):
             Performing Rights Society Code
         publisher_fee (django.db.models.DecimalField): Publisher Fee
         saan (django.db.models.CharField):
-            Society-assigned agreement number
+            Society-assigned agreement number, in this context it is used for
+            general agreements, for specific agreements use
+            :attr:`.models.WriterInWork.saan`.
     """
 
     class Meta:

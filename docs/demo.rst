@@ -11,7 +11,7 @@ on the log-in screen.
 * `World Demo <https://dmp.matijakolaric.com/>`_
 * `US Demo <https://dmp.matijakolaric.com/us/>`_
 
-More information
+Articles
 ===============================================================================
 
-Additional information can be found in the `articles <https://matijakolaric.com/articles/2/>`_.
+Additional information can be found in the `articles <https://matijakolaric.com/articles/2/>`_ by the maintainer.

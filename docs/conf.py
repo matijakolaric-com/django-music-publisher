@@ -48,7 +48,7 @@ extensions = [
 ]
 
 
-autodoc_member_order = 'bysource'
+# autodoc_member_order = 'bysource'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -75,7 +75,7 @@ language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'default'
+pygments_style = 'friendly'
 
 
 # -- Options for HTML output -------------------------------------------------
