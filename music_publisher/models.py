@@ -328,7 +328,7 @@ class WriterInWork(models.Model):
             data.update({
                 'publisher_for_writer_id': publisher.get('publisher_id'),
                 'saan': saan,
-                'general_agreement': saan and not self.saan,
+                'general_agreement': bool(saan and not self.saan),
             })
         return data
 
