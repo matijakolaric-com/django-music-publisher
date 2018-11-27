@@ -33,8 +33,8 @@ Django Music Publisher is an open source software for original music publishers.
 * Home: https://matijakolaric.com/articles/2/
 * Demo: https://dmp.matijakolaric.com/us/
 
-Documentation
-=============
+General Documentation
+=====================
 
 .. toctree::
    :maxdepth: 2
@@ -44,7 +44,23 @@ Documentation
    installation
    releases
    demo
+
+User Manual
+===========
+
+.. toctree::
+   :maxdepth: 2
+
+   manual
+
+API Docs
+========
+
+.. toctree::
+   :maxdepth: 2
+
    modules
+
 
 
 

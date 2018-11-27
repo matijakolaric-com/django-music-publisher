@@ -109,6 +109,8 @@ provided, as well as ``token``, ``validator_url``, ``creator_url`` and
 
 More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_.
 
+.. _StandaloneDeployment:
+
 Installing the project (standalone deployment)
 ===============================================================================
 
