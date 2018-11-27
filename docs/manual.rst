@@ -120,15 +120,46 @@ This is where you put in the information on composers and lyricists who created 
 
    Add writer pop-up view
 
-* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. Please note that the current version of Django Music Publisher does not support work modifications.
+* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. Please note that the current version of Django Music Publisher does not support work modifications.
 
-* ``Relative share`` is where the relative share (writers' split) is put in. The sum of relative shares for each work must be 100%.
+* ``Relative share`` is where the relative share (writers' split) is put in. The sum of relative shares for each work must be 100%. So, just put ``100`` in the only ``Writer in Work`` line.
 
-* ``Controlled`` is where you select if you control the writer or not.
+* ``Controlled`` is where you select if you control the writer or not. Select it for the only ``Writer in Work`` line.
 
 * ``Original publisher`` is a read-only field showing which entity is the original publisher. This field only makes sense for us publishers with multiple entities. It can be disabled in the settings.
 
-* ``Society-assigned agreement number`` is a field where society-assigned agreement numbers for **specific agreements** are entered. For **general agreements**. they are set when defining the ``Writers``. If both exist, the **specific** one is used. This field can also be disabled in settings, as it is only used (and even required) in some societies.
+* ``Society-assigned agreement number`` is a field where society-assigned agreement numbers for **specific agreements** are entered. For **general agreements**. they are set when defining the ``Writers``. If both exist, the **specific** one is used. This field can also be disabled in settings, as it is only used (and even required) in some societies. It may also be set as required for controlled writers. It should not be filled for other writers.
 
-* ``Publisher fee`` is the fee kept by the publisher, while the rest is forwarded to the writer. Please note that this is a preparation for the upcoming royalty statement processing features. This field can also be disabled in the setttings.
+* ``Publisher fee`` is the fee kept by the publisher, while the rest is forwarded to the writer. Please note that this is a preparation for the upcoming royalty statement processing feature. This field can also be disabled in the setttings. It may also be set as required for controlled writers. It should not be filled for other writers.
 
+First Recording
++++++++++++++++
+
+Django Music Publisher can only hold data on the first recording of a musical work, not all of them. This is caused by the fact that not all societies world-wide have removed the long obsolete rule in CWR. This may change in future releases.
+
+.. figure:: /images/first_recording.png
+   :width: 100%
+
+   Data on the first recording of the work
+
+All fields are self-explanatory. Please note that fields ``Album / Library CD`` and ``Recording Artist`` behave in the same way the described field ``Writer`` does. Let us presume that our first work has not been recorded yet and remove this form.
+
+Artists Performing Works
+++++++++++++++++++++++++
+
+Here you list the artists who are performing the work, there is no need to repeat the ``Artist`` set as the ``Recording Artist`` in the previous section. Leave this empty for now.
+
+Work Registrations
+++++++++++++++++++
+
+This is where the work registrations are recorded. Please note that only superusers (in the default configuration) can modify this section, as it is automatically filled out from uploaded acknowledgement files. This will be covered a bit later in this document.
+
+Work list view
+++++++++++++++
+
+.. figure:: /images/work_list.png
+   :width: 100%
+
+   Work list view
+
+Once you press ``Save``, you are taken to the ``Work list view``.
