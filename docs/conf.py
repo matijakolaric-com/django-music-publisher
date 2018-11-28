@@ -8,6 +8,7 @@
 
 # -- Path setup --------------------------------------------------------------
 
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -118,7 +119,7 @@ htmlhelp_basename = 'DjangoMusicPublisherdoc'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
-    # 'papersize': 'letterpaper',
+    'papersize': 'a4paper',
 
     # The font size ('10pt', '11pt' or '12pt').
     #
@@ -159,7 +160,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'DjangoMusicPublisher', 'Django Music Publisher Documentation',
-     author, 'DjangoMusicPublisher', 'One line description of project.',
+     author, 'DjangoMusicPublisher', 'Open source solution for original music publishers.',
      'Miscellaneous'),
 ]
 
