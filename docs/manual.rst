@@ -15,5 +15,6 @@ This manual continues at the point where :ref:`StandaloneDeployment` ended, pres
    manual_works
    manual_works_list
    manual_cwr
+   manual_albumcd
 
 

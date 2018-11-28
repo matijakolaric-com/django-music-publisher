@@ -250,7 +250,6 @@ class TrackInline(admin.StackedInline):
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
-    classes = ('collapse', )
     verbose_name_plural = 'Tracks'
     extra = 0
 
