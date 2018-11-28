@@ -8,7 +8,7 @@ Creating CWR Export
 
 There are several ways to get to this screen, from the ``home`` page or app menu or ``CWR export list view`` by pressing on ``Add CWR Export`` or from the batch ``create CWR from selected works`` action in ``Works list view``.
 
-Please note that the field ``Works`` uses autocomplete, and if you dont come here through the action, you must add works in this view. 
+Please note that the field ``Works`` uses autocomplete, and if you don't come here through the action, you must add works in this view one at a time. 
 
 ``NWR/REV`` field is for you to select what kind of CWR file you want to create. CWR 2.1 makes a distinction between ``New Work Registrations`` and ``Revisions``, while CWR 3.0 (not yet in use anywhere) has no such distinction. You definielly want to start with a default value. Press on ``Save``.
 
@@ -24,4 +24,4 @@ You will be taken to the ``CWR export list view``, which may look familiar, as a
 
    CWR syntax highlighter view
 
-It actually shows the CWR file with syntax highlighting. When you hover over the fields with your cursor, additional information is shown. This is to help you solve any issues with your society or any other receiver of the CWR file.
+It actually shows the CWR file with syntax highlighting. When you hover over the fields with your cursor, additional information is shown to help in solving issues with your society or any other receiver of the CWR file.

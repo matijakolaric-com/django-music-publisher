@@ -26,7 +26,7 @@ Writers in Work
 
 This is where you put in the information on composers and lyricists who created this musical work. As information on at least one controlled writer is required, let us look at all the columns:
 
-* ``Writer`` is where you can select a writer. The field is conditionally required for controlled writers, and at least one writer must be controlled, so you need to select at least one. But, as there are no writers, press on the green plus ``+`` sign next to it. A pop-up window appears. Fill out ``First name``, ``Last name``, ``IPI Name #`` and ``Performing Rights Society``, and press ``Save``. The newly added writer will appear in this field. There is another way to add writers, which will be covered later. Please also note that for shares you do nto controll, this field is not required. If left empty, it means that the writer is unknown.
+* ``Writer`` is where you can select a writer. The field is conditionally required for controlled writers, and at least one writer must be controlled, so you need to select at least one. But, as there are no writers, press on the green plus ``+`` sign next to it. A pop-up window appears. Fill out ``First name``, ``Last name``, ``IPI Name #`` and ``Performing Rights Society``, and press ``Save``. The newly added writer will appear in this field. There is another way to add writers, which will be covered later. Please also note that for shares you do not control, this field is not required. If left empty, it means that the writer is unknown.
 
 .. figure:: /images/popup_add_writer.png
    :width: 100%
@@ -35,7 +35,7 @@ This is where you put in the information on composers and lyricists who created 
 
 * ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. Please note that the current version of Django Music Publisher does not support work modifications.
 
-* ``Relative share`` is where the relative share (writers' split) is put in. The sum of relative shares for each work must be 100%. So, just put ``100`` in the only ``Writer in Work`` line.
+* ``Relative share`` is where the relative share is put in. The sum of relative shares for each work must be 100%. So, just put ``100`` in the only ``Writer in Work`` line.
 
 * ``Controlled`` is where you select if you control the writer or not. Select it for the only ``Writer in Work`` line.
 
@@ -48,7 +48,7 @@ This is where you put in the information on composers and lyricists who created 
 First Recording
 +++++++++++++++
 
-Django Music Publisher can only hold data on the first recording of a musical work, not all of them. This is caused by the fact that not all societies world-wide have removed the long obsolete rule in CWR. This may change in future releases.
+Django Music Publisher can only hold data on the first recording/release of a musical work, not all of them. This is caused by the fact that not all societies world-wide have removed a long obsolete rule in CWR. This may change in future releases.
 
 .. figure:: /images/first_recording.png
    :width: 100%
@@ -60,7 +60,7 @@ All fields are self-explanatory. Please note that fields ``Album / Library CD`` 
 Artists Performing Works
 ++++++++++++++++++++++++
 
-Here you list the artists who are performing the work, there is no need to repeat the ``Artist`` set as the ``Recording Artist`` in the previous section. Leave this empty for now.
+Here you list the artists who are performing the work, there is no need to repeat the ``Artist`` set as the ``Recording Artist`` in the previous section. 
 
 Work Registrations
 ++++++++++++++++++

@@ -32,13 +32,13 @@ SWR, SWT (just World), PWR, OWR         SWR, SWT (just World), PWR, OWR, OWT
 ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC (single), ORN (only LIB) 
 ======================================  =====================================
 
-A special **US** situation where the original publisher may have one entity for every of the three PROs is also covered.
+A special **US** situation where an original publisher may have one entity for every of the three PROs is also covered.
 
 It is presumed that writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by the original publisher. While there are exceptions, this is how things usually work.
 
 Basic publishing agreement data can be entered, but currently no statement processing capabilities are included.
 
-Ideas and plans
+Ideas and Plans
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The following features are required in order to make Django Music Publisher completely free and available to small music publishers without any limitations:

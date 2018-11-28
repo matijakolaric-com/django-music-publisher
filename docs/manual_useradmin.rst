@@ -1,7 +1,7 @@
-User administration
+User Administration
 ===================
 
-Generally, it is a bad idea for superusers to do everyday works. Even if you are just one person, you may want to create a "normal" user first.
+Generally, it is a bad idea for superusers to do everyday tasks. Even if you are just one person, should create a "normal" user first.
 
 We do it by pressing on ``+ Add`` link for the ``Users`` in the ``Authentication and Authorization``. The following view is shown:
 
@@ -17,7 +17,7 @@ We add the username and the password twice and press on ``Save and continue edit
 
    Change User view
 
-Please note that the password is not visible, and if the superuser needs to change it for another user, use the ``thsi form`` link in the password field.
+Please note that the password is not visible, and if the superuser needs to change it for another user, use the ``this form`` link in the password field.
 
 ``Staff status`` has to be set for all users of Django Music Publisher, and they have to be assigned to an appropriate permission group. Two permission groups are set during installation:
 
@@ -31,6 +31,6 @@ Select one of them and press on the icon that will move it to ``Chosen groups``.
 
    User list view
 
-You will be taken to the User list view. All users are shown here. Just as the add and change views, list views are very standard. They will be covered a bit later.
+You will be taken to the ``User list view``. All users are shown here. Just as the add and change views, list views are very standard. They will be covered a bit later.
 
-You can log out now, and log in as the newly added user. The home screen is a bit dirrefent, according to the assigned permissions.
+You can log out now, and log in as the newly added user. The ``home view`` is a bit dirrefent, according to the assigned permissions.

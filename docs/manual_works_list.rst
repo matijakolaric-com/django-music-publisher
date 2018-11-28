@@ -1,4 +1,4 @@
-Work list view
+Work List View
 ==============
 
 .. figure:: /images/work_list.png
@@ -18,7 +18,7 @@ Before we do anything else, we need to get a few more works in. Usually, works c
 
    Save as new
 
-Repeat the process several times, you may even try to add few more writers, and these may or may not be controlled. 
+Repeat the process several times, you may even add a few more writers, both controlled and not controlled. 
 
 You may want to try using ``search field`` and ``filters``, the use should be pretty obvoius, so it will not be explained, search works on titles, including alternate ones, writer's last names, ISWCs and work IDs.
 

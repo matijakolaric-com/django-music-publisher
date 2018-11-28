@@ -3,7 +3,7 @@ Albums and Libraries
 
 So far, in this manual, we have created basic musical works and CWR registrations, without any data on recordings, albums and/or libraries.
 
-As it was mentioned in the section on adding and changing works, it is possible to add this information thorugh ``Add Work view``. That is the preferred way if information is available fromt he start of the input process. However, sometimes we want to register works before we have data on recordings. While opening every work and adding the data is definitelly an option, there is a faster way.
+As it was mentioned in the section on adding and changing works, it is possible to add this information thorugh ``Add Work view``. That is the preferred way if information is available from the start of the input process. However, sometimes we want to register works before we have data on recordings. While opening every work and adding the data is definitelly an option, there is a faster way.
 
 Press ``Add`` next to ``Albums and Library CDs``. The following interface appears:
 
@@ -12,30 +12,30 @@ Press ``Add`` next to ``Albums and Library CDs``. The following interface appear
 
    Album and/or Library CD Add view
 
-This view has three parts, on library, on album and list of tracks. Either library data or album data or both must be entered.
+This view has three sections: library, album and tracks. Either library data or album data or both must be entered.
 
 Production music library
 ++++++++++++++++++++++++
 
-Library refer to production music library. Please note that if ``LIBRARY`` is not presnt in settings, the field ``CD Identifier`` will not be present. Django Music Publisher does not support multiple libraries. It also does not support other origins, such as film, theatre, television etc.
+Library refers to production music library. Please note that if ``LIBRARY`` is not present in settings, the field ``CD Identifier`` will not be present either. Django Music Publisher does not support multiple libraries. It also does not support other origins, such as film, theatre, television etc.
 
-If you wish to mark a work as a library work, you must enter ``CD Indentifier``, the CWR documentation recommends to put in ``INTERNET`` if you do not care about this, though some societies use this field for identification and royalty distribution. Please contact your society for details.
+If you wish to mark a work as a library work, you must enter ``CD Indentifier``, the CWR documentation recommends to put in ``INTERNET`` if you do not care about identifiers, though some societies use this field for identification and royalty distribution. Please contact your society for details.
 
 If you leave this field empty, the work will not be marked as library work.
 
 Albums
 ++++++
 
-The second part of this view holds information about the album (or any other release). You may also use ti as a placeholder. ``Album name`` is required, other data is optional.
+The second part of this view holds information about the album (or any other release). You may also use it as a placeholder. ``Album name`` is required, other data is optional.
 
 Tracks
 ++++++
 
 In the last part, you can enter tracks. This is the same data that can be entered through ``Add/Change Work view``, in the part ``First recording``.
 
-Please note that Django Music Publisher is limited to first recordings/releases, so it is not possible to add one work to more than one track. You should NOT try to go around this limitation by creating duplicate works, it will create issues. If you really need that feature, then Django Music Publisher is not the right solution for you.
+Please note that Django Music Publisher is limited to first recordings/releases, so it is not possible to add one work to more than one album. You should NOT try to go around this limitation by creating duplicate works, it will create issues that will be hard to resolve. If you really need that feature, then Django Music Publisher is not the right solution for you.
 
-The field ``release date`` is present both in album data and in track data. If both are entered, then the one from track data is used, otherwise the one form the album data. There is no need to enter the same date in both locations, though it will not break anything if you do.
+The field ``release date`` is present both in album data and in track data. If both are entered, then the one from track data is used. There is no need to enter the same date in both locations, though it will not break anything if you do.
 
 .. figure:: /images/tracks_added.png
    :width: 100%

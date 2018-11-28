@@ -1,4 +1,4 @@
-music\_publisher package
+music\_publisher Package
 ========================
 
 .. automodule:: music_publisher

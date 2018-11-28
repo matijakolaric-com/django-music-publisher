@@ -3,7 +3,7 @@ Installation
 
 Django Music Publisher can be installed either as a Django app, or as a stand-alone project.
 
-Installing the app
+Installing the App
 ===============================================================================
 
 If you want to install the latest stable release of the 
@@ -111,7 +111,7 @@ More information is available in this `video <https://www.youtube.com/watch?v=CO
 
 .. _StandaloneDeployment:
 
-Installing the project (standalone deployment)
+Installing the Project (Standalone Deployment)
 ===============================================================================
 
 You can only install this project on a system that has Python 3 preinstalled.
@@ -163,7 +163,7 @@ The following Config Vars are all that is required for that:
 * TOKEN is set in order to use the external CWR generation, validation and
   syntax highlighting service.
 
-* SECRET_KEY is not set, it is auto-generated on every deployment, which may 
+* SECRET_KEY is auto-generated on every deployment, which may 
   be fine for testing, but for production it should be set as well
 
 Static files are automatically collected and served with Whitenoise. Waitress
@@ -177,8 +177,7 @@ setup, only 18 societies from 12 countries are present, as well as two
 administrative agencies. If you need to add additional societies, do it with 
 this setting (and not in the ``models.py``).
 
-Societies the original publisher and writers are affiliated with, as well as
-all societies whose acknowledgement files are being imported, must be present.
+All societies the original publisher and all writers are affiliated with, as well as all societies and agencies whose acknowledgement files are being imported, must be present.
 
 Validation and CWR Generation Service
 ===============================================================================
