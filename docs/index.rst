@@ -1,5 +1,5 @@
 Django Music Publisher
-======================
+++++++++++++++++++++++
 
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
@@ -41,17 +41,10 @@ General Documentation
 
    introduction
    publishing
-   installation
-   releases
    demo
-
-User Manual
-===========
-
-.. toctree::
-   :maxdepth: 2
-
+   installation
    manual
+   releases
 
 API Docs
 ========
