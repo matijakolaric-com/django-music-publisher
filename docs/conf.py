@@ -27,9 +27,9 @@ copyright = '2018, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = ''
+version = '18.11'
 # The full version, including alpha/beta/rc tags
-release = ''
+release = '18.11'
 
 
 # -- General configuration ---------------------------------------------------
