@@ -33,8 +33,7 @@ Django Music Publisher   Django        Python         PostgreSQL
 18.11                    2.0\*, 2.1    3.5, 3.6, 3.7  9.4 to 9.6
 19.2                     2.1, 2.2 LTS  3.5, 3.6, 3.7
 19.7                     2.2 LTS       3.6, 3.7
-20.3                     2.2 LTS
-21.4                     3.2 LTS
+21.7                     3.2 LTS
 =======================  ============  =============  ==========
 
 \* Depends if the 2.0.10 version will be released with 2.1.4, if not, the support will be dropped.
