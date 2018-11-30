@@ -73,7 +73,7 @@ Minor release                                             €100
 MWN (DDEX)
 ----------
 
-This is about finding a sponsor and who would be willing to be a guinea pig. If you would like to be both, please contact the maintainer.
+This is about finding a sponsor who would be willing to be a guinea pig. If you would like to be both, please contact the maintainer.
 
 Recording-related data and other DDEX formats
 ---------------------------------------------
