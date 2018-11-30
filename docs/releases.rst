@@ -31,7 +31,7 @@ Security releases are released when a real security issue is detected in Django 
 Minor Releases - Sponsored Features
 ===================================
 
-The maintainer has no interest in developing this project beyond current features without some kind of compensation. The licence permits anyone to fork the project and continue developing it. But since there is a chance that someone will see the benefit in sponsoring further development, here are some estimates of time needed to develop the features that have been identified as missing. All sponsored code will, just as the rest of it, be released under MIT licence. No exceptions.
+The maintainer has no interest in developing this project beyond current features without some kind of compensation. The licence permits anyone to fork the project and continue developing it. But since there is a chance that someone will see the benefit in sponsoring further development, here are some development cost breakdowns for several features that have been identified as missing. All sponsored code will, just as the rest of it, be released under MIT licence. No exceptions.
 
 Free CWR
 --------
