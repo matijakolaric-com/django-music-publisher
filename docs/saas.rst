@@ -1,7 +1,7 @@
 Software as a Service
 #####################
 
-The idea behind Django Music Publisher was to give small publishers an opportunity to compete. The current version, extended with the CWR generation code or together with the existing CWR service the maintainer provides, is up to the task. However, the deployment and technical maitenance may still be too complicated for an average small publisher.
+The idea behind Django Music Publisher is to give small publishers an opportunity to compete. The current version, extended with the CWR generation code or together with the existing CWR service the maintainer provides, is up to the task. However, the deployment and technical maitenance may still be too complicated for an average small publisher.
 
 The code is released under MIT licence, which allows anyone to provide a commercial or a free service based on it, potentially with some extensions. Some general guidelines along these lines are provided in this section. The technical part requires an experienced Django developer, but most of it should be generally understandable.
 
