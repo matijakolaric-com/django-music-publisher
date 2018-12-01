@@ -130,7 +130,9 @@ Do::
 
 The next step is to create ``dmp_project/local_settings.py`` or set the 
 appropriate environment variables. ``SECRET_KEY``, ``ALLOWED_HOSTS``, and 
-``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. Then::
+``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. 
+
+Then::
 
     python manage.py migrate
     python manage.py createsuperuser
@@ -139,7 +141,8 @@ If you wish to add two predefined permission groups, run::
     
     python manage.py loaddata publishing_staff.json
     
-Finally, run::
+For local installations, set ``DEBUG`` to ``True`` in 
+``dmp_project/local_settings.py`` or as environment variable. Then run::
 
     python manage.py runserver
 
