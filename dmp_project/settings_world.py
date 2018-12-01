@@ -5,6 +5,8 @@ try:
 except ImportError:
     pass
 
+ROOT_URLCONF = 'dmp_project.urls_world'
+
 MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': False,
     'admin_show_saan': True,
