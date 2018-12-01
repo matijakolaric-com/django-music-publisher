@@ -48,8 +48,8 @@ CWR validation in DMP (with current features)       €1000
 CWR syntax highlighting in DMP                      €500
 Integration tests                                   €300
 Documentation update                                €100
-Minor release                                       €100
-**Total**                                           **€2500**
+Minor release                                       €50
+**Total**                                           **€2450**
 =================================================== =========
 
 Modifications of existing works
@@ -66,8 +66,8 @@ Original work model and inline, new writer capacit.       €500
 Validation rules spanning all NWR/REV, VER, SWR, OWR rows €750
 Integration tests                                         €300
 Documentation update                                      €100
-Minor release                                             €100
-**Total**                                                 **€1750**
+Minor release                                             €50
+**Total**                                                 **€1700**
 ========================================================= =========
 
 MWN (DDEX)
