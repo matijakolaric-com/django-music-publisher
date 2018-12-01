@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 
 urlpatterns = [
-    path('/us/', admin.site.urls),
+    path('us/', admin.site.urls),
 ]
 
 admin.site.site_header = 'Django Music Publisher US Demo'
