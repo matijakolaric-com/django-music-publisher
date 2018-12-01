@@ -18,8 +18,8 @@ from django.urls import path
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    path('us/', admin.site.urls),
     path('us/password_change/', RedirectView.as_view(url='/us/logout/')),
+    path('us/', admin.site.urls),
 ]
 
 admin.site.site_header = 'Django Music Publisher US Demo'
