@@ -11,13 +11,13 @@ Who could do it and why
 Soocieties (PROs, MROs) or Administrative Agencies
 ==================================================
 
-In an ideal world, societies would provide such a service for free. Most of them already provides some of this functionality through their web interfaces, but not nearly all of them. Also, their existing services are dead ends, as any custom integration or extension is not possible. While this ensured some kind of lock-in for their affiliates, today the societies are competing.
+In an ideal world, societies would provide such a service for free. Most of them already provide some of this functionality through their web interfaces, but not nearly all of them. Also, their existing services are dead ends, as any custom integration or extension is not possible. While this ensured some kind of lock-in for their affiliates, today the societies are competing.
 
 Providing Django Music Publisher, optionally customized and branded, to their affiliates for free or at cost would greatly benefit both them and their affiliates. The main benefit for the societies is a very simple one: less user support. It offers superb data validation as users enter their data, so there would be far less user support due to errors. They can simply skip the whole initial testing. And if delivery gets automated, maybe even directly, bypassing the CWR, it would decrease the need for user support even further.
 
 Surely, supporting the affiliates in using it does need additional user support, but the benefits should be significant. They would be offering more for less. The cost of installing and maintaining such a system is insignificant compared to to the reduced costs of affiliate support.
 
-The benefit to the affiliates is also quite obvious. They have a simple and workable solution with no or little additional costs. Being open source, it can not really become a dead end, they can always export their data and move to a commercial service (covered next) with additional features, or host the same solution themselves and extend and/ir integrate it as needed.
+The benefit to the affiliates is also quite obvious. They have a simple and workable solution with no or little additional costs. Being open source, it can not really become a dead end, they can always export their data and move to a commercial service (covered next) with additional features, or host the same solution themselves and extend and/or integrate it as needed.
 
 
 Majors - Administrators and Sub-Publishers
