@@ -11,6 +11,12 @@ on the log-in screen.
 * `World Demo <https://dmp.matijakolaric.com/>`_
 * `US Demo <https://dmp.matijakolaric.com/us/>`_
 
+For both demos:
+
+* Username: ``demo``
+* Password: ``demo``
+
+
 Articles
 ===============================================================================
 

@@ -29,7 +29,7 @@ Django Music Publisher is an open source software for original music publishers.
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 * Home: https://matijakolaric.com/articles/2/
-* Demo: Username: ``demo``, Password: ``demo``
+* Demo: (Username: ``demo``, Password: ``demo``)
 
   * World: https://dmp.matijakolaric.com/
   * US: https://dmp.matijakolaric.com/us/
