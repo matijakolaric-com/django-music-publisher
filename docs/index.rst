@@ -40,6 +40,8 @@ Django Music Publisher is an open source software for original music publishers.
    installation
    manual
    releases
+   features
+   saas
    modules
 
 * :ref:`genindex`
