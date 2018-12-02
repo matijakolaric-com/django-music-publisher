@@ -3,6 +3,16 @@ Sponsored Features
 
 The maintainer has no interest in developing this project beyond current features without some kind of compensation. The licence permits anyone to fork the project and continue developing it. Here are development cost breakdowns for several features that have been identified as missing. All sponsored code will, just as the rest of it, be released under MIT licence. No exceptions.
 
+Royalty statement processing
+----------------------------
+
+There are many different input formats, and they also come in different currencies with different conversion rates at different dates.
+As Django Music Publisher is only for original publishers, the only scenario where statement processing makes sense is that part of the revenue has to be passed on to the writers. That is not the case with all users.
+
+The ``publisher fee`` field states the percentage kept by the publisher. A very simple statement processing needs to be able to parse incoming statements, and convert it to a custom spreadsheet format. It really comes down to knowing how to use Excel or some of the alternatives. For someone who knwos how pivot tables work, no statement processing software will come even close to Excel.
+
+The sponsorship for the core and PRS/MCPS statement conversion has been secured. 
+
 Free CWR
 --------
 
