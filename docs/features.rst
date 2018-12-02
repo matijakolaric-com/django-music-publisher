@@ -18,10 +18,10 @@ Task                                                      Cost
 ========================================================= =========
 Creating a spreadsheet template                           €100
 Creating a basic parsing /exporting framework             €750
-Creating a custom import (per format)                     €150
+Creating a custom import (per format)                     €150+
 Documentation update                                      €100
 Minor release                                             €50
-**Total**                                                 **€1150**
+**Total**                                                 **€1150+**
 ========================================================= =========
 
 
