@@ -231,12 +231,7 @@ class TrackInline(admin.StackedInline):
         used in :class:`AlbumCDAdmin`.
     """
 
-    import django
-    if django.VERSION >= (2, 1):
-        autocomplete_fields = ('work', 'artist')
-    else:
-        autocomplete_fields = ('artist', )
-        raw_id_fields = ('work', )
+    autocomplete_fields = ('work', 'artist')
     fieldsets = (
         (None, {
             'fields': (
