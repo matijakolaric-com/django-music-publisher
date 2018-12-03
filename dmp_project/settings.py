@@ -139,7 +139,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'enforce_pr_society': True,
     'enforce_ipi_name': True,
 
-    'token': os.getenv('TOKEN', None),
+    'token': os.getenv('TOKEN', '8bf5027ed99ddcc5cbeea8391bea6a369a2f9e0a'),
     'validator_url': os.getenv(
         'VALIDATOR_URL',
         'https://matijakolaric.com/api/v1/cwr/original/field/multi/'),
