@@ -15,7 +15,7 @@ setuptools.setup(
     url='https://django-music-publisher.readthedocs.io/en/stable/',
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=2.0.10',
+        'Django>=2.1.4',
         'requests>=2.20.0',
     ),
     include_package_data=True,
@@ -23,7 +23,6 @@ setuptools.setup(
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 2.0',
         'Framework :: Django :: 2.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
