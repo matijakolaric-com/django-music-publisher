@@ -1,29 +1,27 @@
 language: python
 matrix:
   include:
-    - python: "3.5"
-      env: DJANGO_VERSION=2.0.9 DATABASE_URL="sqlite:///db.sqlite3"
-    - python: "3.5"
-      env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+    - name: "Py3.5 PostgreSQL9.4"
+      python: "3.5"
       addons:
         postgresql: "9.4"
-    - python: "3.6"
-      env: DJANGO_VERSION=2.1.2 DATABASE_URL="sqlite:///db.sqlite3"
-    - python: "3.6"
-      env: DJANGO_VERSION=2.0.9 DATABASE_URL="postgres://postgres@localhost/dmp" WORK_ID_PREFIX="XXX"
-    - python: "3.6"
-      env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+      env: DATABASE_URL="postgres://postgres@localhost/dmp"
+    - name: "Py3.6 SQLite3"
+      python: "3.6"
+      env: DATABASE_URL="sqlite:///db.sqlite3"
+    - name: "Py3.6 PostgreSQL9.5 XXX"
+      python: "3.6"
+      env: DATABASE_URL="postgres://postgres@localhost/dmp" WORK_ID_PREFIX="XXX"
       addons:
         postgresql: "9.5"
-    - python: "3.7-dev"
-      env: DJANGO_VERSION=2.1.2 DATABASE_URL="postgres://postgres@localhost/dmp"
+    - name: "Py3.7 PostgreSQL9.6"
+      python: "3.7-dev"
+      env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
         postgresql: "9.6"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install -U Django==$DJANGO_VERSION
-# command to run tests
 script:
   - coverage run --source='music_publisher' manage.py test 
 after_success: coveralls
