@@ -18,9 +18,6 @@ Version  New features                                                      beta 
 21.7     Django 3.2 LTS                                                    02.07.2021                          3.2 LTS       3.6, 3.7
 =======  ================================================================  ==========  ==========  ==========  ============  =============  ==========
 
-\* Version 18.11 will be delayed, avaiting a bugfix Django 2.1.4 release
-
-
 Minor Releases - Security and Bugfix
 ====================================
 
