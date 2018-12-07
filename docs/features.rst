@@ -9,7 +9,7 @@ Royalty statement processing
 There are many different input formats, and they also come in different currencies with different conversion rates at different dates.
 As Django Music Publisher is only for original publishers, the only scenario where statement processing makes sense is that part of the revenue has to be passed on to the writers. That is not the case with all users.
 
-The ``publisher fee`` field states the percentage kept by the publisher. A very simple statement processing needs to be able to parse incoming statements, and convert it to a custom spreadsheet format. It really comes down to knowing how to use Excel or some of the alternatives. For someone who knwos how pivot tables work, that is more than enough.
+The ``publisher fee`` field states the percentage kept by the publisher. A very simple statement processing needs to be able to parse incoming statements, and convert it to a custom spreadsheet format. It really comes down to knowing how to use Excel or some of the alternatives. For someone who knows how pivot tables work, that is more than enough.
 
 CWR service subscribers also get these features for free, but it would be nice if they would be freely available to the public.
 
