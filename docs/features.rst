@@ -30,19 +30,20 @@ Free CWR
 
 The current version uses an external service for data validation, CWR generation and syntax highlighting. Django Music Publisher began as a proof of concept for this very service and the current version is fulfilling that purpose. 
 
-However, these are the most important features of Django Music Publisher and they belong into the open source code. Here is what needs to be done:
+However, data validation and CWR generation are the most important features of Django Music Publisher and they belong into the open source code. Here is what needs to be done:
 
 =================================================== =========
 Task                                                Cost
 =================================================== =========
-CWR generation in DMP (with current features)       €500
-CWR validation in DMP (with current features)       €1000
-CWR syntax highlighting in DMP                      €500
+CWR validation in DMP (with current features)       €500
+CWR generation in DMP (with current features)       €750
+CWR syntax highlighting in DMP                      €750
 Integration tests                                   €300
 Documentation update                                €100
 Minor release                                       €50
 **Total**                                           **€2450**
 =================================================== =========
+
 
 Modifications of existing works
 -------------------------------
