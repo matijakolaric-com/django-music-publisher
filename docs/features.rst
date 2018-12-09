@@ -36,13 +36,14 @@ However, data validation and CWR generation are the most important features of D
 Task                                                Cost
 =================================================== =========
 CWR validation in DMP (with current features)       €500
-CWR generation in DMP (with current features)       €750
-CWR syntax highlighting in DMP                      €750
+CWR generation in DMP (with current features)       €1000
 Integration tests                                   €300
 Documentation update                                €100
 Minor release                                       €50
-**Total**                                           **€2450**
+**Total**                                           **€1950**
 =================================================== =========
+
+Please note that these changes **do not include CWR syntax highlighting**, which is a very nice thing to have, but not really a crucial one. 
 
 
 Modifications of existing works
