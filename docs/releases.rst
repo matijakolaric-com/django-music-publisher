@@ -21,11 +21,11 @@ Version  New features                                                      beta 
 Minor Releases - Security and Bugfix
 ====================================
 
-Minor releases will be either bugfix/security releases and/or sponsored feature releases.
+Minor releases are bugfix/security releases.
 
 Security releases are released when a real security issue is detected in Django Music Publisher ot any of the dependencies. Bugfix releases are released as bugs get fixed, the speed of it depends on the severity of a bug.
 
-Minor Releases - Sponsored Features
-===================================
+Sponsored Releases
+==================
 
-Any future feature requires sponsorship. Proposed new features are covered in the next section.
+If sufficient funding becomes available through sponsors, there will be a sponsored release with new features. Proposed new features are covered in the next section.

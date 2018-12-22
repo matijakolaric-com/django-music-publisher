@@ -1,34 +1,12 @@
 Sponsored Features
 ##################
 
-The maintainer has no interest in developing this project beyond current features without some kind of compensation. The licence permits anyone to fork the project and continue developing it. Here are development cost breakdowns for several features that have been identified as missing. All sponsored code will, just as the rest of it, be released under MIT licence. No exceptions.
-
-Royalty statement processing
-----------------------------
-
-There are many different input formats, and they also come in different currencies with different conversion rates at different dates.
-As Django Music Publisher is only for original publishers, the only scenario where statement processing makes sense is that part of the revenue has to be passed on to the writers. That is not the case with all users.
-
-The ``publisher fee`` field states the percentage kept by the publisher. A very simple statement processing needs to be able to parse incoming statements, and convert it to a custom spreadsheet format. It really comes down to knowing how to use Excel or some of the alternatives. For someone who knows how pivot tables work, that is more than enough.
-
-CWR service subscribers also get these features for free, but it would be nice if they would be freely available to the public.
-
-========================================================= =========
-Task                                                      Cost
-========================================================= =========
-Creating a spreadsheet template                           €100
-Creating a basic parsing /exporting framework             €750
-Creating a custom import (per format)                     €150+
-Documentation update                                      €100
-Minor release                                             €50
-**Total**                                                 **€1150+**
-========================================================= =========
-
+Here are development cost breakdowns for several features that have been identified as missing in previous releases.
 
 Free CWR
---------
+----------------------
 
-The current version uses an external service for data validation, CWR generation and syntax highlighting. Django Music Publisher began as a proof of concept for this very service and the current version is fulfilling that purpose. 
+Previous releases of Django Music Publisher used an external service for data validation, CWR generation and syntax highlighting. Django Music Publisher began as a proof of concept for this service. 
 
 However, data validation and CWR generation are the most important features of Django Music Publisher and they belong into the open source code. Here is what needs to be done:
 
@@ -49,9 +27,9 @@ Please note that these changes **do not include CWR syntax highlighting**, which
 Modifications of existing works
 -------------------------------
 
-The current version of Django Music Publisher has some limitations that are based on the limitations of the lowest tier of the external CWR generating service it uses. One such limitation is that it only allows registration of original musical works, not modifications.
+Previous releases of Django Music Publisher had some limitations, inherited from the external CWR generation service it used. One such limitation is that it only allows registration of original musical works, not modifications.
 
-Once the previous feature is finished, it would be simple to extend the functionality so it would include registrations of the modifications of existing musical works, including ones in the public domain. Here is what needs to be done:
+Once the previous feature was finished, i became possible to remove this limitation. Here is what needs to be done:
 
 ========================================================= =========
 Task                                                      Cost
@@ -64,10 +42,30 @@ Minor release                                             €50
 **Total**                                                 **€1700**
 ========================================================= =========
 
+
+Royalty Distribution Processing
+-------------------------------
+
+There are many different input formats, and they also come in different currencies with different conversion rates at different dates. However, much of the work can be done in Excel, once the basic distribution has been calculated.
+
+This is cost breakdown for a simple case (ASCAP/BMI/SOCAN).
+
+========================================================= =========
+Task                                                      Cost
+========================================================= =========
+Creating an output spreadsheet template                   €100
+Creating a basic parsing / exporting framework            €750
+Creating a custom import (per spreadsheet format)         €150+
+Documentation update                                      €100
+Minor release                                             €50
+**Total**                                                 **€1150+**
+========================================================= =========
+
+
 Data import
 -----------
 
-Current version does not support data imports from third party software solutions or spreadsheet data. So far the maintanier has been providing this as a paid service. However, it would be in public interest if people would be able to do it themselves.
+Current releases do not support data imports from third party software solutions or spreadsheet data. So far the maintanier has been providing this as a paid service. However, it would be in public interest if people would be able to do it themselves.
 
 There are several caveats here, the first one is related to internal work numbering. If imported data was already used for registrations via CWR or EBR or any format that has submitter work IDs, then they must be maintained. Second one is that usual formats contain more data then Django Music Publisher can hold. The third issue is that often the data does not contain all the data required for a minimal CWR.
 
@@ -116,3 +114,10 @@ This is definitelly something that would be very helpful. There are three issues
 * we are deailing with sensitive data here, bad deployments might easily result in security issues, data loss or worse.
 
 Definitelly something to look into. Maybe as a separate package?
+
+The following features are required in order to make Django Music Publisher completely free and available to small music publishers without any limitations:
+
+* Adding MWN (DDEX)
+* Extending the features towards the recording/label side of music rights
+* Implementing other DDEX formats/processes
+* Automated CWR delivery (first to MusicMark and ICE Services)

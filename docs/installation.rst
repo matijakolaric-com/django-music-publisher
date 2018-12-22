@@ -102,10 +102,11 @@ and foreign societies. Then define publishers in other PROs.
         'label': 'FOO BAR MUSIC',  # Use only if you are also a label
     }
 
-When you apply for a free 15-day demo licence for the external service that
-validates the data and generates CWR, additional documentation will be
-provided, as well as ``token``, ``validator_url``, ``creator_url`` and
-``highlighter_url`` values.
+
+Django Music Publisher began as a proof of concept for a Music Metadata API, a service providing metadata validation and generation of several metadata file formats. Basic data validation and CWR generation have since been added to Django Music Publisher code, but CWR syntax highlighting still requires this external service.
+
+Still, for historical reasons, all three can still be used, and therefore the settings for ``token``, ``validator_url``, ``creator_url`` and
+``highlighter_url``.
 
 More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_.
 
@@ -114,10 +115,7 @@ More information is available in this `video <https://www.youtube.com/watch?v=CO
 Installing the Project (Standalone Deployment)
 ===============================================================================
 
-You can only install this project on a system that has Python 3 preinstalled.
-Supported versions are 3.5, 3.6 and 3.7. 
-It might work with other Python 3 versions, but not with Python 2. It is 
-advised you run this inside a virtual environment.
+You can only install this project on a system that has Python 3 preinstalled. Supported versions are 3.5, 3.6 and 3.7. It might work with other Python 3 versions, but not with Python 2. It is advised you run this inside a virtual environment.
 
 Do::
 
@@ -172,6 +170,11 @@ The following Config Vars are all that is required for that:
 Static files are automatically collected and served with Whitenoise. Waitress
 is used instead of more usual uwsgi/gunicorn.
 
+DMP Guru
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+`DMP Guru <https://dmp.guru/>`_ is a professional specialised hosting service for Django Music Publisher. With it your instance of Django Music Publisher can be deployed in several minutes with correct settings for your society (or societies), it will regularily upgraded, data will be backed up, and you can export your data and move to another arrangement at any point.
+
 Societies
 ===============================================================================
 
@@ -182,12 +185,11 @@ this setting (and not in the ``models.py``).
 
 All societies the original publisher and all writers are affiliated with, as well as all societies and agencies whose acknowledgement files are being imported, must be present.
 
-Validation and CWR Generation Service
+Data Validation, CWR Generation and Syntax Highlighting Service
 ===============================================================================
 
-As stated above, this tool uses an external service for data validation and
-generation of CWR files, which is a part of
+As stated above, this tool can use an external service for data validation and
+generation of CWR files, as well as CWR syntax highlighting, which is a part of
 `CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
 
-Free 15 day demo licence is available upon requests. Contact us through this 
-`Contact Page <https://matijakolaric.com/z_contact/>`_. 
+A free 15 day demo licence is available upon requests. 
