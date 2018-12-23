@@ -1,7 +1,7 @@
 Introduction for Developers and Sysadmins
 #########################################
 
-This is a very brief introduction to for software developers and system administrators, as music rights are quite complex and often counter-intuitive. It is using a techie language, publishers beware.
+This is a very brief introduction to for software developers and system administrators, as music rights are quite complex and often counter-intuitive. It starts from the basics, but it is using a techie language, publishers beware.
 
 Music Publishing
 ****************
