@@ -37,22 +37,44 @@ class Work(WorkBase):
 
         data = OrderedDict()
         data['work_title'] = self.title
+        if self.original_title:
+            data['version_type'] = 'modification'
+            data['original_title'] = self.original_title
+        else:
+            data['version_type'] = 'original'
         if self.iswc:
             data['iswc'] = self.iswc
-        data['writers'] = [wiw.json for wiw in self.writerinwork_set.all()]
         data['alternate_titles'] = [
             at.json for at in self.alternatetitle_set.all()]
-        data['artists'] = [
-            aiw.artist.json for aiw in self.artistinwork_set.all()]
-        data['society_work_codes'] = [
-            wa for wa in self.workacknowledgement_set.filter(
-                remote_work_id__gt='').values(
-                'society_code', 'remote_work_id').distinct()]
+        data['publishers'] = {}
+        data['writers'] = {}
+
+        data['writers_for_work'] = []
+        for wiw in self.writerinwork_set.all():
+            j = wiw.json
+            writer = j.pop('writer', None)
+            if writer:
+                id = writer.pop('writer_id')
+                data['writers'][id] = writer
+            data['writers_for_work'].append(j)
+        data['albums'] = {}
+        data['artists'] = {}
         try:
             data.update(self.firstrecording.json)
         except ObjectDoesNotExist:
             pass
-        return {self.work_id: data}
+        data['live_artists'] = []
+        for aiw in self.artistinwork_set.all():
+            j = aiw.json
+            data['artists'][j['artist_id']] = j.pop('artist')
+            data['live_artists'].append(j)
+        data['society_work_codes'] = []
+        for wa in self.workacknowledgement_set.filter(
+                remote_work_id__gt='').values(
+                'society_code', 'remote_work_id').distinct():
+            wa['society_code'] = wa['society_code'].lstrip('0')
+            data['society_work_codes'].append(wa)
+        return (self.work_id, data)
 
     @property
     def work_id(self):
@@ -109,10 +131,12 @@ class Artist(ArtistBase):
         Returns:
             dict: JSON-serializable data structure
         """
-        return {
-            'artist_first_name': self.first_name,
-            'artist_last_name': self.last_name,
-            'isni': self.isni}
+        j = {'last_name': self.last_name}
+        if self.first_name:
+            j['first_name'] = self.first_name
+        if self.isni:
+            j['isni'] = self.isni
+        return j
 
 
 class FirstRecording(RecordingBase):
@@ -149,21 +173,37 @@ class FirstRecording(RecordingBase):
         data['isrc'] = self.isrc or ''
         data['record_label'] = self.record_label
         if self.artist:
-            data['recording_artist'] = self.artist.json
-        if self.album_cd:
+            artist_id = 'A{:06d}'.format(self.artist.id)
+            data['artist_id'] = artist_id
+        if self.album_cd and self.album_cd.album_title:
             if self.album_cd.release_date:
-                data['first_release_date'] = (
+                data['release_date'] = (
                     self.album_cd.release_date.strftime('%Y%m%d'))
-            data.update({
-                'first_album_title': self.album_cd.album_title or '',
-                'first_album_label': self.album_cd.album_label or '',
-                'ean': self.album_cd.ean or ''})
+            album_id = 'AL{:03d}'.format(self.album_cd.id)
+            data['album_id'] = album_id
         if self.release_date:
-            data['first_release_date'] = self.release_date.strftime('%Y%m%d')
+            data['release_date'] = self.release_date.strftime('%Y%m%d')
+        data = {'recordings': [data]}
+        if self.artist:
+            data['artists'] = {artist_id: self.artist.json}
+        if self.album_cd and self.album_cd.album_title:
+            album = {
+                'title': self.album_cd.album_title
+            }
+            if self.album_cd.release_date:
+                album['release_date'] = (
+                    self.album_cd.release_date.strftime('%Y%m%d'))
+            if self.album_cd.album_label:
+                album['label'] = self.album_cd.album_label
+            if self.album_cd.ean:
+                album['ean'] = self.album_cd.ean
+            data['albums'] = {album_id: album}
         if self.album_cd and self.album_cd.library:
-            data.update({
-                'library': self.album_cd.library,
-                'cd_identifier': self.album_cd.cd_identifier})
+            data['libraries'] = {'L001': {'name': self.album_cd.library}}
+            data['source'] = {
+                'type': 'library',
+                'library_id': 'L001',
+                'cd_identifier': self.album_cd.cd_identifier}
         return data
 
 
@@ -185,6 +225,13 @@ class ArtistInWork(models.Model):
 
     def __str__(self):
         return str(self.artist)
+
+    @property
+    def json(self):
+        data = {}
+        data['artist_id'] = 'A{:06d}'.format(self.artist.id)
+        data['artist'] = self.artist.json
+        return data
 
 
 class Writer(WriterBase):
@@ -303,33 +350,43 @@ class WriterInWork(models.Model):
             dict: JSON-serializable data structure
         """
         data = OrderedDict()
-        if self.writer:
-            data['writer'] = 'W{:06d}'.format(self.writer.id)
-            # data['writer_last_name'] = self.writer.last_name or ''
-            # data['writer_first_name'] = self.writer.first_name or ''
-            # data['writer_ipi_name'] = self.writer.ipi_name or ''
-            # data['writer_ipi_base'] = self.writer.ipi_base or ''
-            # data['writer_pr_society'] = self.writer.pr_society or ''
-        else:
-            data['writer'] = None
-            # data['writer_last_name'] = ''
         data.update({
             'controlled': self.controlled,
-            'capacity': self.capacity,
             'relative_share': str(self.relative_share / 100),
         })
+        if self.writer:
+            data['writer_id'] = 'W{:06d}'.format(self.writer.id)
+            data['writer'] = {
+                'writer_id': data['writer_id'],
+                'last_name': self.writer.last_name
+            }
+            if self.writer.first_name:
+                data['writer']['first_name'] = self.writer.first_name
+            if self.writer.ipi_name:
+                data['writer']['ipi_name'] = self.writer.ipi_name
+            if self.writer.ipi_base:
+                data['writer']['ipi_base'] = self.writer.ipi_base
+            if self.writer.pr_society:
+                data['writer']['pr_society'] = self.writer.pr_society
+
+        if self.capacity:
+            data['capacity'] = self.capacity,
         if self.controlled:
             publisher = self.writer.get_publisher_dict()
-            saan = (
-                self.saan or
-                (self.writer.saan if self.writer else None) or
-                ''
-            )
-            data.update({
-                'publisher_for_writer': publisher.get('publisher_id'),
-                'saan': saan,
-                'general_agreement': bool(saan and not self.saan),
-            })
+            pwr = {
+                'publisher_id': publisher.get('publisher_id'),
+            }
+            data['publishers_for_writer'] = [pwr]
+            data['writer']['publisher_dict'] = {
+                'name': publisher.get('publisher_name'),
+                'publisher_id': publisher.get('publisher_id')
+            }
+            if self.saan:
+                agr = {'saan': self.saan, 'type': 'OS'}
+                data['publishers_for_writer'][0]['agreement'] = agr
+            elif self.writer.saan:
+                agr = {'saan': self.writer.saan, 'type': 'OG'}
+                data['publishers_for_writer'][0]['agreement'] = agr
         return data
 
 

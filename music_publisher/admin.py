@@ -441,7 +441,7 @@ class WorkAdmin(MusicPublisherAdmin):
             '{}?works={}'.format(url, ','.join(str(i) for i in ids)))
     create_cwr.short_description = 'Create CWR from selected works.'
 
-    def create_json(self, request, qs):
+    def create_json(self, request, qs, normalized=False):
         """Batch action that downloads a JSON file containing selected works.
 
         Returns:
@@ -449,17 +449,66 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
+        if normalized:
+            publishers = {}
+            writers = {}
+            albums = {}
+            artists = {}
+            libraries = {}
+        qs = qs.prefetch_related('writers')
         for work in qs:
-            works.update(work.json)
-        j = {"works": works, **SETTINGS}
+            key, j = work.json
+            if normalized:
+                writers.update(j.pop('writers'))
+                albums.update(j.pop('albums'))
+                artists.update(j.pop('artists'))
+                libraries.update(j.pop('libraries'))
+            else:
+                pr_societies = set()
+                for writer in j['writers'].values():
+                    publisher = writer.pop('publisher_dict')
+                    pr_society = publisher.get('pr_society')
+                    if pr_society not in pr_societies:
+                        pr_societies.add(pr_society)
+                        publisher_id = publisher.pop('publisher_id')
+                        j['publishers'][publisher_id] = publisher
+            works[key] = j
+        pr_societies = set()
+        if normalized:
+            for writer in writers.values():
+                publisher = writer.pop('publisher_dict')
+                pr_society = publisher.get('pr_society')
+                if pr_society not in pr_societies:
+                    pr_societies.add(pr_society)
+                    publisher_id = publisher.pop('publisher_id')
+                    publishers[publisher_id] = publisher
+            j = {
+                'publishers': publishers,
+                'writers': writers,
+                'albums': albums,
+                'artists': artists,
+                'libraries': libraries,
+                'works': works,
+            }
+        else:
+            j = {
+                'works': works,
+            }
+
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(WORK_ID_PREFIX, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
-    create_json.short_description = 'Export selected works.'
+    create_json.short_description = \
+        'Export selected works to a streaming JSON format.'
 
-    actions = (create_cwr, create_json)
+    def create_normalized_json(self, request, qs):
+        return self.create_json(request, qs, normalized=True)
+    create_normalized_json.short_description = \
+        'Export selected works to a normalized JSON format.'
+
+    actions = (create_cwr, create_json, create_normalized_json)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
