@@ -553,36 +553,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         else:
             return ('nwr_rev', 'works')
 
-    def save_model(self, request, obj, form, change):
-        """Django splits the saving process int two parts, which does not
-            work in this case, so this is simply passing the main object
-            through to :meth:`save_related`.
-        """
-        if not (hasattr(self, 'obj') and self.obj.cwr):
-            super().save_model(request, obj, form, change)
-            self.obj = obj
-        elif hasattr(self, 'obj'):
-            del self.obj
-
-    def save_related(self, request, form, formsets, change):
-        """:meth:`save_model` passes the main object, which is needed to fetch
-            CWR form the external service, but only after related objects are
-            saved.
-        """
-        if hasattr(self, 'obj'):
-            super().save_related(request, form, formsets, change)
-            try:
-                self.obj.get_cwr()
-            except ValidationError as e:
-                messages.add_message(
-                    request, messages.ERROR,
-                    mark_safe(
-                        'CWR could not be fetched from external service. '
-                        'The reason is "{}". Please try saving again later. '
-                        'Currently saved as draft.'.format(str(e))))
-            finally:
-                del self.obj
-
     def has_delete_permission(self, request, obj=None, **kwargs):
         """If CWR has been created, it can no longer be deleted, as it may
         have been sent. This may change once the delivery is automated."""

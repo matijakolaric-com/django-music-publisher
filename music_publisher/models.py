@@ -518,10 +518,6 @@ class CWRExport(models.Model):
     def get_cwr(self):
         if self.cwr:
             return
-        if not SETTINGS.get('publisher_id'):
-            raise ValidationError(
-                'Publisher CWR Delivery Code not set, CWR can not be saved. '
-                'Please add CWR Code in the control panel before proceeding.')
         self.cwr = ''.join(self.yield_lines(self.works.all()))
         self.year = self.cwr[66:68]
         nr = type(self).objects.filter(year=self.year)
