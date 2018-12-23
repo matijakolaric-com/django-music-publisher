@@ -8,6 +8,7 @@ from .cwr_templates import *
 from datetime import datetime
 from django.template import Context
 
+
 class Work(WorkBase):
     """Concrete class, with references to foreign objects.
 
@@ -303,15 +304,15 @@ class WriterInWork(models.Model):
         """
         data = OrderedDict()
         if self.writer:
-            data['writer_id'] = 'W{:06d}'.format(self.writer.id)
-            data['writer_last_name'] = self.writer.last_name or ''
-            data['writer_first_name'] = self.writer.first_name or ''
-            data['writer_ipi_name'] = self.writer.ipi_name or ''
-            data['writer_ipi_base'] = self.writer.ipi_base or ''
-            data['writer_pr_society'] = self.writer.pr_society or ''
+            data['writer'] = 'W{:06d}'.format(self.writer.id)
+            # data['writer_last_name'] = self.writer.last_name or ''
+            # data['writer_first_name'] = self.writer.first_name or ''
+            # data['writer_ipi_name'] = self.writer.ipi_name or ''
+            # data['writer_ipi_base'] = self.writer.ipi_base or ''
+            # data['writer_pr_society'] = self.writer.pr_society or ''
         else:
-            data['writer_id'] = ''
-            data['writer_last_name'] = ''
+            data['writer'] = None
+            # data['writer_last_name'] = ''
         data.update({
             'controlled': self.controlled,
             'capacity': self.capacity,
@@ -325,7 +326,7 @@ class WriterInWork(models.Model):
                 ''
             )
             data.update({
-                'publisher_for_writer_id': publisher.get('publisher_id'),
+                'publisher_for_writer': publisher.get('publisher_id'),
                 'saan': saan,
                 'general_agreement': bool(saan and not self.saan),
             })
