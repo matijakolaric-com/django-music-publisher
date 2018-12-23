@@ -32,7 +32,6 @@ Latest release **19.1 Epiphany** was sponsored by `DMP Guru <https://dmp.guru>`_
 
    introduction
    publishing
-   demo
    installation
    manual
    releases
