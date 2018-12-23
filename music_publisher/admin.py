@@ -137,7 +137,9 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         controlled = False
         for form in self.forms:
             if not form.is_valid():
+                print('invalid', form.errors)
                 return
+            print('valid')
             if form.cleaned_data and not form.cleaned_data.get('DELETE'):
                 total += form.cleaned_data['relative_share']
                 if form.cleaned_data['controlled']:

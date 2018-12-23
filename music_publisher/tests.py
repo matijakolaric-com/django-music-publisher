@@ -315,13 +315,14 @@ class AllTest(TestCase):
             re_post={
                 'writerinwork_set-1-relative_share': '111',
                 'writerinwork_set-0-controlled': 1})
-        print(self.get(reverse(
+        self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
             re_post={
                 'writerinwork_set-0-relative_share': '50',
+                'writerinwork_set-0-saan': '',
+                'writerinwork_set-0-controlled': '',
                 'writerinwork_set-1-relative_share': '50',
-                'writerinwork_set-0-controlled': 0,
-                'writerinwork_set-1-controlled': 0}))
+                'writerinwork_set-1-controlled': ''})
         self.get(reverse(
             'admin:music_publisher_work_change', args=(self.work.id,)),
             re_post={

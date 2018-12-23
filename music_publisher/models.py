@@ -278,10 +278,7 @@ class WriterInWork(models.Model):
                 'writer': 'Must be set for a controlled writer.'
             })
         if (self.controlled and not self.writer._can_be_controlled):
-            raise ValidationError(
-                'Writer \'{}\' is controlled in at least one work, '
-                'required are: Last name, IPI Name # and Performing '
-                'Rights Society.'.format(self.writer))
+            raise ValidationError(CAN_NOT_BE_CONTROLLED_MSG)
         if (ENFORCE_SAAN and self.controlled and
                 not self.writer.generally_controlled and not self.saan):
             raise ValidationError({
