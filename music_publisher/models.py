@@ -65,7 +65,7 @@ class Work(WorkBase):
     def __str__(self):
         return '{} {} ({})'.format(
             self.work_id,
-            self.title,
+            self.title.upper(),
             ' / '.join(w.last_name.upper() for w in self.writers.all()))
 
 

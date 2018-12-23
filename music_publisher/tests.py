@@ -96,7 +96,6 @@ class AllTest(TestCase):
     def test_validation(self):
         """Test the field-level validation for the initial models.
         """
-        self.assertTrue(VALIDATE)
         self.work.clean_fields()
         get_publisher_dict(None)
         with self.assertRaises(ValidationError) as ve:
@@ -105,8 +104,6 @@ class AllTest(TestCase):
         self.assertIn('first_name', ve.exception.message_dict)
         self.artist.first_name = "BAR JR"
         self.assertFalse(CWRFieldValidator('x') == CWRFieldValidator('y'))
-        with self.assertRaises(ValidationError):
-            self.artist.validate_fields({'bad': 'dict'})
         self.work.firstrecording.clean_fields()
         self.assertEqual(self.work.firstrecording.isrc, 'US1231810000')
         self.thiswriter.clean_fields()
@@ -189,7 +186,6 @@ class AllTest(TestCase):
         settings.MUSIC_PUBLISHER_SETTINGS['validator_url'] = \
             'https://240.0.0.1/'  # no routing possible to this address
         self.work.full_clean()
-        self.assertFalse(self.work._cwr)
         self.work.full_clean()
 
     def test_str(self):

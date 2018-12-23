@@ -24,7 +24,7 @@ from django.utils.timezone import now
 # from django.views.decorators.csrf import csrf_protect
 from .models import (
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork, VALIDATE, CWRExport, ACKImport, WorkAcknowledgement,
+    Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement,
     WORK_ID_PREFIX)
 import re
 import requests
@@ -45,26 +45,6 @@ class MusicPublisherAdmin(admin.ModelAdmin):
 
     save_as = True
 
-    def save_model(self, request, obj, form, change):
-        """Do super().save_model, msg if validation was not performed.
-        """
-
-        super().save_model(request, obj, form, change)
-        if not VALIDATE:
-            messages.add_message(
-                request, messages.WARNING,
-                mark_safe(
-                    'Validation was not performed. Your data may be corrupt. '
-                    'Please acquire a Validation and CWR generation licence '
-                    'from <a href="https://matijakolaric.com/z_'
-                    'contact/" target="_blank">matijakolaric.com</a>.'))
-        elif not obj._cwr:
-            messages.add_message(
-                request, messages.ERROR,
-                mark_safe(
-                    'Validation failed, object saved, but marked as not'
-                    'CWR-compliant. Please re-evaluate.'))
-
 
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
@@ -82,12 +62,9 @@ class WriterAdmin(MusicPublisherAdmin):
         lst = list(self.list_display)
         if SETTINGS.get('admin_show_publisher'):
             lst.append('original_publisher')
-        lst.append('_cwr')
         return lst
 
-    list_filter = ('_can_be_controlled', 'generally_controlled',
-                   'pr_society', '_cwr')
-
+    list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
     readonly_fields = ('_can_be_controlled', 'original_publisher')
     fieldsets = (
@@ -261,6 +238,25 @@ class WorkAcknowledgementInline(admin.TabularInline):
     fields = ('date', 'society_code', 'remote_work_id', 'status')
 
 
+class WorkForm(forms.ModelForm):
+    class Meta:
+        model = Work
+        fields = ['title', 'iswc', 'original_title']
+
+    version_type = forms.NullBooleanField(
+        widget=forms.Select(
+            choices=(
+                (None, ''),
+                (True, 'Modification'),
+                (False, 'Original Work'))),
+        disabled=True,
+        required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['version_type'].initial = self.instance.is_modification()
+
+
 @admin.register(Work)
 class WorkAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Work`.
@@ -278,6 +274,10 @@ class WorkAdmin(MusicPublisherAdmin):
             :class:`ArtistInWorkInline`,
             :class:`WorkAcknowledgementInline`,
     """
+
+    form = WorkForm
+
+    readonly_fields = ('version_type')
 
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
@@ -346,7 +346,7 @@ class WorkAdmin(MusicPublisherAdmin):
     list_display = (
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'isrc', 'album_cd',
-        'cwr_export_count', '_cwr')
+        'cwr_export_count')
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -407,7 +407,6 @@ class WorkAdmin(MusicPublisherAdmin):
         HasISWCListFilter,
         HasRecordingListFilter,
         ('firstrecording__album_cd', admin.RelatedOnlyFieldListFilter),
-        '_cwr',
         'last_change',
     )
 
@@ -426,7 +425,8 @@ class WorkAdmin(MusicPublisherAdmin):
         (None, {
             'fields': (
                 'work_id',
-                ('title', 'iswc'))}),)
+                ('title', 'iswc'),
+                ('original_title', 'version_type'))}),)
 
     def save_model(self, request, obj, form, *args, **kwargs):
         if form.changed_data:
@@ -818,10 +818,7 @@ class AlbumCDAdmin(MusicPublisherAdmin):
         if SETTINGS.get('library'):
             lst.append('library')
             lst.append('cd_identifier')
-        lst.append('_cwr')
         return lst
-
-    list_filter = ('_cwr',)
 
     search_fields = ('album_title', '^cd_identifier')
     actions = None
@@ -846,11 +843,9 @@ class ArtistAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Artist`.
     """
 
-    list_display = ('last_or_band', 'first_name', 'isni', '_cwr')
+    list_display = ('last_or_band', 'first_name', 'isni')
     search_fields = ('last_name', 'isni',)
-    list_filter = ('_cwr',)
     inlines = [RecordingInline, ArtistInWorkInline]
-
     fieldsets = (
         ('Name', {
             'fields': (
