@@ -9,7 +9,7 @@ matrix:
     - name: "Py3.6 SQLite3"
       python: "3.6"
       env: DATABASE_URL="sqlite:///db.sqlite3"
-    - name: "Py3.6 PostgreSQL9.5 XXX"
+    - name: "Py3.6 PostgreSQL9.6 XXX"
       python: "3.6"
       env: DATABASE_URL="postgres://postgres@localhost/dmp" WORK_ID_PREFIX="XXX"
       addons:
@@ -19,6 +19,11 @@ matrix:
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
         postgresql: "10"
+    - name: "Py3.8 PostgreSQL11"
+      python: "3.7-dev"
+      env: DATABASE_URL="postgres://postgres@localhost/dmp"
+      addons:
+        postgresql: "11"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
