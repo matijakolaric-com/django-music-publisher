@@ -25,12 +25,7 @@ import re
 import warnings
 
 
-# SETTINGS, strictly not required, except for validation and CWR generation
-
-if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
-    SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-else:
-    SETTINGS = {}
+SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
 ENFORCE_SAAN = SETTINGS.get('enforce_saan')
 ENFORCE_PUBLISHER_FEE = SETTINGS.get('enforce_publisher_fee')
@@ -253,6 +248,12 @@ class MusicPublisherBase(models.Model):
 
     class Meta:
         abstract = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "Might get depreciated in 19.7 release.",
+            PendingDeprecationWarning)
 
 
 class TitleBase(MusicPublisherBase):
