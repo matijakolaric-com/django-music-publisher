@@ -13,13 +13,8 @@ matrix:
       python: "3.6"
       env: DATABASE_URL="postgres://postgres@localhost/dmp" WORK_ID_PREFIX="XXX"
       addons:
-        postgresql: "9.6"
-    - name: "Py3.7 PostgreSQL10"
-      python: "3.7"
-      env: DATABASE_URL="postgres://postgres@localhost/dmp"
-      addons:
         postgresql: "10"
-    - name: "Py3.8 PostgreSQL11"
+    - name: "Py3.7 PostgreSQL10"
       python: "3.7-dev"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
