@@ -3,7 +3,9 @@ Introduction for Music Publishers
 
 Django Music Publisher is an open source software for original music publishers. It is based on Django Web framework, a free and open source marvel.
 
-At this point, it covers all the features required for batch (CWR) registrations of musical works, as well as basic data on agreements between the publisher and writers.
+It is a tool for managing metadata on musical works (composition and lyrics) and recordings, including data on writers, recording and performing artists, albums and music libraries. It uses Common Works Registration (CRW) protocol for batch registartions of musical works. 
+
+Built by an experienced developer with over 12 years of experience in music publishing, it focuses on doing several crucial tasks in music publishing effectivelly and integrates well with similar tools.
 
 Project Scope
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -15,7 +17,7 @@ Current Features
 
 **Original publishers** will find the current features sufficient for registration at all societies that receive batch registrations of musical works in CWR format.
 
-The database holds data on musical works, including alternate titles, songwriters, performing artists, first recordings (including recording artists), music libraries and albums, as well as CWR exports and registration acknowledgements.
+The database holds data on musical works and recordings, including alternate titles, songwriters, performing artists, recording and performing artists, music libraries and albums, as well as CWR exports and registration acknowledgements. 
 
 Multiple writers, both controlled and uncontrolled, are covered, with minor limitations, but data on other publishers (other original publishers, administrators and sub-publishers) can not be entered.
 
@@ -32,7 +34,7 @@ ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC (single), ORN (only LIB)
 
 It is presumed that writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by publishers. While there are exceptions, this is how things usually work.
 
-Basic publishing agreement data can be entered, sufficient for simple royalty distribution processing.
+Basic publishing agreement data can be entered, sufficient for simple royalty distribution processing. It can take data from a spreadsheet (CSV or Excel) file and augment this data with the data from the database. This data can be used in pivot tables for creation of client statements.
 
 Deployment options
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
