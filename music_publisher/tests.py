@@ -39,7 +39,7 @@ class AllTest(TestCase):
         self.artist = Artist(last_name="FOO", first_name="")
         self.artist.save()
         self.recordingartist = Artist(last_name="BAR", first_name="BARBARA")
-        self.recordingartist.save()
+        self.recordingartist.save()z
         self.thiswriter = Writer(
             last_name='FOOBAR', first_name='JACK', ipi_name='199',
             ipi_base='I1234567893', pr_society='010')
@@ -89,8 +89,8 @@ class AllTest(TestCase):
         self.cwr_export.works.add(self.work)
         self.cwr_export.works.add(self.work2)
         self.cwr_export2 = CWRExport(nwr_rev='REV')
-        self.cwr_export2.save()
         self.cwr_export2.works.add(self.work)
+        self.cwr_export2.save()
 
     @override_settings()
     def test_validation(self):
