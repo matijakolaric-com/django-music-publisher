@@ -7,18 +7,14 @@ matrix:
       addons:
         postgresql: "10"
           apt:
-          packages:
-            - postgresql-10
-            - postgresql-client-10
-    - name: "Py3.7 PostgreSQL10"
+            packages:
+              - postgresql-10
+              - postgresql-client-10
+    - name: "Py3.7 PostgreSQL9.6"
       python: "3.7-dev"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
-        postgresql: "10"
-          apt:
-          packages:
-            - postgresql-10
-            - postgresql-client-10
+        postgresql: "9.6"
     - name: "Py3.5 PostgreSQL9.4"
       python: "3.5"
       addons:
