@@ -221,32 +221,10 @@ class AllTest(TestCase):
     def test_cwr(self):
         """Test external CWR generation.
         """
-        self.assertIn('NWR DRAFT ', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.assertIn('CW', self.cwr_export.filename)
         self.cwr_export.get_cwr()
         self.cwr_export2.get_cwr()
-        self.cwr_export.cwr = None
-        token = settings.MUSIC_PUBLISHER_SETTINGS['token']
-        settings.MUSIC_PUBLISHER_SETTINGS['token'] = 'aaa'
-        with self.assertRaises(ValidationError) as ve:
-            self.cwr_export.get_cwr()
-        self.assertIn('Unauthorized', ve.exception.message)
-        settings.MUSIC_PUBLISHER_SETTINGS['token'] = token
-        url = settings.MUSIC_PUBLISHER_SETTINGS['generator_url']
-        settings.MUSIC_PUBLISHER_SETTINGS['generator_url'] = None
-        with self.assertRaises(ValidationError) as ve:
-            self.cwr_export.get_cwr()
-        settings.MUSIC_PUBLISHER_SETTINGS['generator_url'] = \
-            'https://240.0.0.1/'  # no routing possiblle
-        with self.assertRaises(ValidationError) as ve:
-            self.cwr_export.get_cwr()
-        settings.MUSIC_PUBLISHER_SETTINGS['generator_url'] = url
-        pin = settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name']
-        settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name'] = 100
-        with self.assertRaises(ValidationError) as ve:
-            self.cwr_export.get_cwr()
-        settings.MUSIC_PUBLISHER_SETTINGS['publisher_ipi_name'] = pin
 
     def get(self, path, re_post=False):
         """A helper method that similates opening of view and then simulates

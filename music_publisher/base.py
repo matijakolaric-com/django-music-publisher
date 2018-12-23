@@ -562,6 +562,11 @@ class ArtistBase(PersonBase, MusicPublisherBase):
         max_length=16, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('isni'),))
 
+    def clean_fields(self, *args, **kwargs):
+        if self.isni:
+            self.isni = self.isni.rjust(16, '0').upper()
+        return models.Model.clean_fields(self, *args, **kwargs)
+
 
 class WriterBase(PersonBase, IPIBase, MusicPublisherBase):
     """Base class for writers, the second most important top-level class.

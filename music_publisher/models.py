@@ -4,7 +4,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 import requests
 from .base import *
-
+from .cwr_templates import *
+from datetime import datetime
+from django.template import Context
 
 class Work(WorkBase):
     """Concrete class, with references to foreign objects.
@@ -352,10 +354,10 @@ class CWRExport(models.Model):
         ordering = ('-id',)
 
     nwr_rev = models.CharField(
-        'NWR/REV', max_length=3, db_index=True, default='NWR', choices=(
+        'CWR version/type', max_length=3, db_index=True, default='NWR',
+        choices=(
             ('NWR', 'CWR 2.1: New work registration'),
-            ('REV', 'CWR 2.1: Revision of registered work'),
-            ('WRK', 'CWR 3.0: Work registration (alpha)')))
+            ('REV', 'CWR 2.1: Revision of registered work')))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
@@ -365,18 +367,7 @@ class CWRExport(models.Model):
         editable=False, null=True)
 
     @property
-    def is_version_3(self):
-        return self.nwr_rev == 'WRK'
-
-    @property
     def filename(self):
-        if not self.cwr:
-            return '{} DRAFT {}'.format(self.nwr_rev, self.id)
-        if self.is_version_3:
-            return 'CW{}{:04}{}_000_V3-0-0.SUB'.format(
-                self.year,
-                self.num_in_year,
-                SETTINGS.get('publisher_id'))
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
@@ -385,105 +376,160 @@ class CWRExport(models.Model):
     def __str__(self):
         return self.filename
 
-    def get_json(self, qs=None):
-        """Create a data structure that can be serielized as JSON.
+    def get_record(self, key, record):
+        template = TEMPLATES_21.get(key)
+        return template.render(Context(record)).upper()
 
-        Returns:
-            dict: JSON-serializable data structure
-        """
-        if qs is None:
-            qs = self.works.order_by('id')
-        if self.is_version_3:
-            j = OrderedDict([
-                ('filename', self.filename),
-                ('version', '3.0'),
-            ])
-        else:
-            j = OrderedDict([('revision', self.nwr_rev == 'REV')])
-        j.update({
-            "sender_id": SETTINGS.get('publisher_ipi_name'),
-            "sender_name": SETTINGS.get('publisher_name'),
-            "publisher_id": SETTINGS.get('publisher_id'),
-            "publisher_name": SETTINGS.get('publisher_name'),
-            "publisher_ipi_name": SETTINGS.get('publisher_ipi_name'),
-            "publisher_ipi_base": SETTINGS.get('publisher_ipi_base', ''),
-            "publisher_pr_society": SETTINGS.get(
-                'publisher_pr_society'),
-            "publisher_mr_society": SETTINGS.get(
-                'publisher_mr_society'),
-            "publisher_sr_society": SETTINGS.get(
-                'publisher_sr_society'),
+    def get_transaction_record(self, key, record):
+        record['transaction_sequence'] = self.transaction_count
+        record['record_sequence'] = self.record_sequence
+        line = self.get_record(key, record)
+        self.record_count += 1
+        self.record_sequence += 1
+        return line
+
+    def yield_lines(self, works):
+        self.record_count = self.record_sequence = self.transaction_count = 0
+        yield self.get_record('HDR', {
+            'creation_date': datetime.now(),
+            **SETTINGS
         })
-        us = SETTINGS.get('us_publisher_override', {})
-        if us:
-            j["ascap_publisher"] = us.get('ASCAP')
-            j["bmi_publisher"] = us.get('BMI')
-            j["sesac_publisher"] = us.get('SESAC')
-        works = OrderedDict()
-        for work in qs:
-            works.update(work.json)
-        j.update({"works": works})
-        return j
+        yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
 
-    @property
-    def json(self):
-        """Property that wraps :meth:`get_json`.
+        for work in works:
+            self.record_sequence = 0
+            d = {
+                'record_type': self.nwr_rev,
+                'work_id': work.work_id,
+                'work_title': work.title,
+                'iswc': work.iswc}
+            try:
+                d['isrc'] = work.firstrecording.isrc
+                d['duration'] = work.firstrecording.duration
+                d['recorded_indicator'] = 'Y'
+            except ObjectDoesNotExist:
+                d['recorded_indicator'] = 'U'
+            yield self.get_transaction_record('NWR', d)
+            publishers = {}
+            for wiw in work.writerinwork_set.all():
+                if not wiw.controlled:
+                    continue
+                d = wiw.writer.get_publisher_dict()
+                key = d['publisher_id']
+                if key in publishers:
+                    publishers[key]['share'] += wiw.relative_share
+                else:
+                    publishers[key] = d
+                    publishers[key]['share'] = wiw.relative_share
+            for i, (key, publisher) in enumerate(publishers.items()):
+                publisher['sequence'] = i + 1
+                yield self.get_transaction_record('SPU', publisher)
+                yield self.get_transaction_record('SPT', publisher)
 
-        Returns:
-            dict: JSON-serializable data structure
-        """
-        return self.get_json()
+            for wiw in work.writerinwork_set.all():
+                if not wiw.controlled:
+                    continue
+                w = wiw.writer
+                record = {
+                    'capacity': wiw.capacity,
+                    'share': wiw.relative_share,
+                    'saan': wiw.saan or w.saan}
+
+                record['interested_party_number'] = 'W{:06d}'.format(w.id)
+                record['ipi_name'] = w.ipi_name
+                record['ipi_base'] = w.ipi_base
+                record['last_name'] = w.last_name
+                record['first_name'] = w.first_name
+                record['pr_society'] = w.pr_society
+                yield self.get_transaction_record('SWR', record)
+                yield self.get_transaction_record('SWT', record)
+                record.update(w.get_publisher_dict())
+                yield self.get_transaction_record('PWR', record)
+            for wiw in work.writerinwork_set.all():
+                if wiw.controlled:
+                    continue
+                record = {
+                    'capacity': wiw.capacity,
+                    'share': wiw.relative_share}
+                if wiw.writer:
+                    w = wiw.writer
+                    record['interested_party_number'] = 'W{:06d}'.format(w.id)
+                    record['ipi_name'] = w.ipi_name
+                    record['ipi_base'] = w.ipi_base
+                    record['last_name'] = w.last_name
+                    record['first_name'] = w.first_name
+                    record['pr_society'] = w.pr_society
+                else:
+                    record['writer_unknown_indicator'] = 'Y'
+                yield self.get_transaction_record('OWR', record)
+
+            for record in work.alternatetitle_set.all():
+                yield self.get_transaction_record('ALT', {
+                    'alternate_title': record.title})
+            for artist in work.artists.all():
+                yield self.get_transaction_record('PER', {
+                    'first_name': artist.first_name,
+                    'last_name': artist.last_name,
+                })
+            try:
+                artist = work.firstrecording.artist
+                if artist:
+                    yield self.get_transaction_record('PER', {
+                        'first_name': artist.first_name,
+                        'last_name': artist.last_name,
+                    })
+            except ObjectDoesNotExist:
+                pass
+            try:
+                rec = work.firstrecording
+                release_date = rec.release_date
+                record_label = rec.record_label
+                album_title = ''
+                if rec.album_cd:
+                    release_date = release_date or rec.album_cd.release_date
+                    album_title = album_title or rec.album_cd.album_title
+                    album_label = rec.album_cd.album_label or record_label
+                yield self.get_transaction_record('REC', {
+                    'isrc': rec.isrc,
+                    'duration': rec.duration,
+                    'release_date': release_date,
+                    'album_title': album_title,
+                    'album_label': album_label
+                })
+            except ObjectDoesNotExist:
+                pass
+            try:
+                album = work.firstrecording.album_cd
+                if album.cd_identifier:
+                    yield self.get_transaction_record('ORN', {
+                        'library': album.library,
+                        'cd_identifier': album.cd_identifier})
+            except ObjectDoesNotExist:
+                pass
+            self.transaction_count += 1
+
+        yield self.get_record('GRT', {
+            'transaction_count': self.transaction_count,
+            'record_count': self.record_count + 2})
+        yield self.get_record('TRL', {
+            'transaction_count': self.transaction_count,
+            'record_count': self.record_count + 4})
 
     def get_cwr(self):
-        """Get CWR from the external service, and save.
-
-        Returns:
-            None
-
-        Raises:
-            ValidationError: Validation errors are raised in case of
-                network issues, bad requests, etc, so they can be
-                handeled by admin.
-        """
         if self.cwr:
             return
-        url = SETTINGS.get('generator_url')
-        json = self.json
-        self._work_count = len(json.get('works'))
-        if url is None:
-            raise ValidationError('CWR generator URL not set.')
-        try:
-            response = requests.post(
-                url,
-                headers={'Authorization': 'Token {}'.format(
-                    SETTINGS.get('token'))},
-                json=json, timeout=30)
-        except requests.exceptions.ConnectionError:
-            raise ValidationError('Network error', code='service')
-        if response.status_code == 400:
-            raise ValidationError('Bad Request', code='service')
-        elif response.status_code == 401:
-            raise ValidationError('Unauthorized', code='service')
-        elif response.status_code != 200:
-            raise ValidationError('Unknown Error', code='service')
-
-        if self.is_version_3:
-            cwr = response.json()['cwr']
-            self.cwr = cwr[0:157]
-            self.year = self.cwr[56:58]
-        else:
-            self.cwr = response.json()['cwr']
-            self.year = self.cwr[66:68]
-        nr = CWRExport.objects.filter(year=self.year)
+        if not SETTINGS.get('publisher_id'):
+            raise ValidationError(
+                'Publisher CWR Delivery Code not set, CWR can not be saved. '
+                'Please add CWR Code in the control panel before proceeding.')
+        self.cwr = ''.join(self.yield_lines(self.works.all()))
+        self.year = self.cwr[66:68]
+        nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
         if nr:
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
-        if self.is_version_3:
-            # self.filename depends on self.year !!!
-            self.cwr += self.filename.ljust(27)
-            self.cwr += cwr[184:]
         self.save()
 
 
@@ -548,3 +594,4 @@ class ACKImport(models.Model):
 
     def __str__(self):
         return self.filename
+

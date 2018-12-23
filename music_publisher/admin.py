@@ -5,6 +5,7 @@ Please note that this is the only interface.
 Attributes:
     IS_POPUP_VAR (bool): :attr:`django.contrib.admin.options.IS_POPUP_VAR`
 """
+from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
 from django import forms
@@ -450,7 +451,10 @@ class WorkAdmin(MusicPublisherAdmin):
             JsonResponse: JSON file with selected works
         """
 
-        j = CWRExport().get_json(qs)
+        works = OrderedDict()
+        for work in qs:
+            works.update(work.json)
+        j = {"works": works, **SETTINGS}
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(WORK_ID_PREFIX, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
@@ -496,24 +500,12 @@ class CWRExportAdmin(admin.ModelAdmin):
         return obj._work_count or obj.works__count
     cwr_ready.boolean = True
 
-    def get_highlighted_data(self, obj):
-        """Get CWR highlighting from the external service.
+    def get_preview(self, obj):
+        """Get CWR preview.
 
-        (available only for CWR 2.1)
-        """
-        if obj.is_version_3:
-            return obj.cwr
-        data = {'cwr': obj.cwr}
-        try:
-            response = requests.post(
-                SETTINGS.get('highlighter_url'),
-                headers={'Authorization': 'Token {}'.format(
-                    SETTINGS.get('token'))},
-                json=data, timeout=10)
-            html = response.json()['html']
-        except Exception:
-            html = obj.cwr
-        return html
+        If you are using highlighing, then override this method."""
+
+        return obj.cwr
 
     def view_link(self, obj):
         if obj.cwr:
@@ -607,7 +599,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             download: that downloads the CWR file."""
         obj = get_object_or_404(CWRExport, pk=object_id)
         if 'preview' in request.GET:
-            html = self.get_highlighted_data(obj)
+            html = self.get_preview(obj)
             return render(request, 'raw_cwr.html', {
                 **self.admin_site.each_context(request),
                 'lines': html,
