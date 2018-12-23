@@ -31,10 +31,7 @@ import re
 import requests
 
 
-if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
-    SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-else:
-    SETTINGS = {}
+SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
