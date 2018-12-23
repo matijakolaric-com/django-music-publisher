@@ -16,7 +16,7 @@ Django Music Publisher
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 
-Django Music Publisher is an open source software for original music publishers.
+Django Music Publisher is an open source software for original music publishers. It is a tool for managing metadata on musical works (composition and lyrics) and recordings, including data on writers, recording and performing artists, albums and music libraries. It uses Common Works Registration (CRW) protocol for batch registartions of musical works.
 
 .. image:: images/add_work.png
 
@@ -25,6 +25,7 @@ Django Music Publisher is an open source software for original music publishers.
 * PYPI: https://pypi.org/project/django-music-publisher/
 
 Latest release **19.1 Epiphany** was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
+
 
 .. toctree::
    :maxdepth: 2
