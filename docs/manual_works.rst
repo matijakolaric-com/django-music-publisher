@@ -35,7 +35,7 @@ This is where you put in the information on composers and lyricists who created 
 
    Add writer pop-up view
 
-* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. If modifications are allowed, further roles are present and a far more complex set of validation rules apply. Please note that at least one of the writers should be a ``Composer`` or a ``Composer and Lyricist``.
+* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. If modifications are allowed, further roles are present and a far more complex set of validation rules applies. Please note that at least one of the writers should be a ``Composer`` or a ``Composer and Lyricist``.
 
 * ``Relative share`` is where the relative share is put in. The sum of relative shares for each work must be 100%. So, just put ``100`` in the only ``Writer in Work`` line.
 
