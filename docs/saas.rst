@@ -73,5 +73,5 @@ There is a central application that remotely manages DMP instances. Initial inst
 
 Every DMP instance consists of two docker containers, one running Django and the other running PostgreSQL. Each DMP instance only has a single user, with credentials being shared with the central application.
 
-DMP Guru does offer the whitelabel solution to societies, majors, etc.
+The whole solution applied as DMP Guru is on offer as a whitelabel solution to societies, majors, etc.
 
