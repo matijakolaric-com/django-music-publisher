@@ -1,7 +1,10 @@
-Installation
-************
+Installation and Configuration
+******************************
 
-Django Music Publisher can be installed either as a Django app, or as a stand-alone project.
+Django Music Publisher can be installed either as a Django app, or as a stand-alone project. 
+
+There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>`_ that simplifies the process for a moderate subscription fee.
+
 
 Installing the App
 ===============================================================================
@@ -31,8 +34,6 @@ You will have to add this to the settings, replace with your data.
         'enforce_ipi_name': True,  # Strictly not required, but good practice
 
         'token': None,  # See below
-        'validator_url': None,  # See below
-        'generator_url': None,  # See below
         'highlighter_url': None,  # See below
 
         'work_id_prefix': 'TOP',  # Makes work IDs somewhat unique
@@ -65,8 +66,6 @@ and foreign societies. Then define publishers in other PROs.
         'enforce_ipi_name': True,  # Strictly not required, but good practice
 
         'token': None,  # See below
-        'validator_url': None,  # See below
-        'generator_url': None,  # See below
         'highlighter_url': None,  # See below
 
         'work_id_prefix': 'FOO',  # Makes work IDs somewhat unique
@@ -103,12 +102,11 @@ and foreign societies. Then define publishers in other PROs.
     }
 
 
-Django Music Publisher began as a proof of concept for a Music Metadata API, a service providing metadata validation and generation of several metadata file formats. Basic data validation and CWR generation have since been added to Django Music Publisher code, but CWR syntax highlighting still requires this external service.
+Django Music Publisher began as a proof of concept for a CWR Developer Toolset, a REST API service providing metadata validation and CWR generation, as well as syntax highlighting. 
 
-Still, for historical reasons, all three can still be used, and therefore the settings for ``token``, ``validator_url``, ``creator_url`` and
-``highlighter_url``.
+Basic data validation and CWR generation have since been added to Django Music Publisher code, but integrating CWR syntax highlighting still requires this external service. It is not required, and there is a free online `CWR Syntax Highlighting <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ tool with the exactly same functionality. Settings ``token`` and ``highlighter_url`` are used for this integration.
 
-More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_.
+More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
 
 .. _StandaloneDeployment:
 
@@ -135,7 +133,7 @@ Then::
     python manage.py migrate
     python manage.py createsuperuser
 
-If you wish to add two predefined permission groups, run::
+If you wish to add two predefined permission groups (recommended), run::
     
     python manage.py loaddata publishing_staff.json
     
@@ -149,26 +147,16 @@ credentials you provided in a previous step. For instructions on permanent
 deployment, please use official 
 `Django documentation <https://www.djangoproject.com/>`_.
 
-Heroku
+Heroku / Dokku
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If you would like to try Django Music Publisher, Heroku is a good choice. The
-free PostgreSQL tier can have up to 10.000 rows, which translates to about
-1.000 works. 
+Django Music Publisher installation on Heroku or Dokku with PostgreSQL is very simple, the ``Procfile`` is provided.
 
-Master branch, after it passes the CI, is deployed on Heroku automatically.
-The following Config Vars are all that is required for that:
+Only two environment variables (config vars) must be set, in addition to DATABASE_URL:
 
 * ALLOWED_HOSTS set to the correct host name
-* DATABASE_URL was set by PostgreSQL add-on
-* TOKEN is set in order to use the external CWR generation, validation and
-  syntax highlighting service.
-
 * SECRET_KEY is auto-generated on every deployment, which may 
   be fine for testing, but for production it should be set as well
-
-Static files are automatically collected and served with Whitenoise. Waitress
-is used instead of more usual uwsgi/gunicorn.
 
 DMP Guru
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -183,13 +171,4 @@ setup, only 18 societies from 12 countries are present, as well as two
 administrative agencies. If you need to add additional societies, do it with 
 this setting (and not in the ``models.py``).
 
-All societies the original publisher and all writers are affiliated with, as well as all societies and agencies whose acknowledgement files are being imported, must be present.
-
-Data Validation, CWR Generation and Syntax Highlighting Service
-===============================================================================
-
-As stated above, this tool can use an external service for data validation and
-generation of CWR files, as well as CWR syntax highlighting, which is a part of
-`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
-
-A free 15 day demo licence is available upon requests. 
+All societies the original publisher and all writers are affiliated with must be present.

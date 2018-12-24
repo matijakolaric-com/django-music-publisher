@@ -27,17 +27,45 @@ Django Music Publisher is an open source software for original music publishers.
 Latest release **19.1 Epiphany** was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
 
 
+General Documenation
+********************
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    introduction
    publishing
    installation
-   manual
    releases
    features
    saas
+
+User manual
+********************
+
+.. toctree::
+   :maxdepth: 1
+
+   manual
+   manual_home
+   manual_useradmin
+   manual_app
+   manual_works
+   manual_works_list
+   manual_cwr
+   manual_ack
+   manual_albumcd
+
+For Developers
+********************
+
+.. toctree::
+   :maxdepth: 1
+
    modules
 
-* :ref:`genindex`
+Indices
+********************
+
 * :ref:`modindex`
+* :ref:`genindex`

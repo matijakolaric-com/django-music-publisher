@@ -1,7 +1,7 @@
 Introduction for Developers and Sysadmins
 #########################################
 
-This is a very brief introduction to for software developers and system administrators, as music rights are quite complex and often counter-intuitive. It starts from the basics, but it is using a techie language, publishers beware.
+This is a very brief introduction for software developers and system administrators. It is required as music rights are quite complex and often counter-intuitive and available information can be misleading.
 
 Music Publishing
 ****************
@@ -31,7 +31,7 @@ In the context of registrations, basically there are three roles:
 
 Django Music Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of composite works and some other rare cases.
 
-Please note that the term *self-publisher* means original publisher with a single signed writer - usually the owner, or sometimes all members of a band.
+Please note that the term *self-publisher* is used for an original publisher with a single signed writer - usually the owner, or sometimes all members of a band. They usually do not require royalty statement processing.
 
 Publisher Size
 **************
