@@ -13,6 +13,8 @@ General
 
 This part contains the fields ``Title`` and ``ISWC``, as well as read-only field ``Work ID``, which is set automatically upon first save. Please note that the label ``Title`` is bold, representing that this field is required. So, lets put a title in.
 
+If ``allow_modifications`` is set, two more fields are shown, ``original title`` and ``version type``, with only the former being editable. My filling out this field, the ``version type`` will be set to ``modification`` and a significantly more complex set of validation rules will apply.
+
 Alternate Titles
 ++++++++++++++++
 
@@ -33,7 +35,7 @@ This is where you put in the information on composers and lyricists who created 
 
    Add writer pop-up view
 
-* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. Please note that the current version of Django Music Publisher does not support work modifications.
+* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. If modifications are allowed, further roles are present and a far more complex set of validation rules apply. Please note that at least one of the writers should be a ``Composer`` or a ``Composer and Lyricist``.
 
 * ``Relative share`` is where the relative share is put in. The sum of relative shares for each work must be 100%. So, just put ``100`` in the only ``Writer in Work`` line.
 
