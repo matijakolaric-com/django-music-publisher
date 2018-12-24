@@ -1,4 +1,4 @@
-Introduction
+User Manual
 ############
 
 This manual is aimed at music publishing professionals. It explains how Django Music Publisher is used, but it does not explain how music publishing works.

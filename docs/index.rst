@@ -44,17 +44,9 @@ User manual
 ********************
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    manual
-   manual_home
-   manual_useradmin
-   manual_app
-   manual_works
-   manual_works_list
-   manual_cwr
-   manual_ack
-   manual_albumcd
 
 For Developers
 ********************
