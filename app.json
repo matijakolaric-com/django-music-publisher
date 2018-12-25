@@ -20,9 +20,6 @@
     }
   },
   "addons": [
-    "postgresql",
-    {
-      "plan": "hobby-dev",
-    }
+    "postgresql"
   ]
 }
