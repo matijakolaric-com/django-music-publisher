@@ -115,6 +115,17 @@ More information is available in this `video <https://www.youtube.com/watch?v=CO
 
 .. _StandaloneDeployment:
 
+
+Additional Societies
+++++++++++++++++++++
+
+The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
+setup, only 18 societies from 12 countries are present, as well as two 
+administrative agencies. If you need to add additional societies, do it with 
+this setting (and not in the ``models.py``).
+
+All societies the original publisher and all writers are affiliated with must be present.
+
 Installing the Project (Standalone Deployment)
 ===============================================================================
 
@@ -152,28 +163,18 @@ credentials you provided in a previous step. For instructions on permanent
 deployment, please use official 
 `Django documentation <https://www.djangoproject.com/>`_.
 
-Heroku / Dokku
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Deployment on Heroku / Dokku
+==============================================================================
 
-Django Music Publisher installation on Heroku or Dokku with PostgreSQL is very simple, the ``Procfile`` is provided.
+``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var. The recommended way to do this is to create a custom Django project in a private repository what uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
 
-Only two environment variables (config vars) must be set, in addition to DATABASE_URL:
-
-* ALLOWED_HOSTS set to the correct host name
-* SECRET_KEY is auto-generated on every deployment, which may 
-  be fine for testing, but for production it should be set as well
 
 DMP Guru
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+==============================================================================
 
-`DMP Guru <https://dmp.guru/>`_ is a professional specialised hosting service for Django Music Publisher. With it your instance of Django Music Publisher can be deployed in several minutes with correct settings for your society (or societies), it will regularily upgraded, data will be backed up, and you can export your data and move to another arrangement at any point.
+`DMP Guru <https://dmp.guru/>`_ is a commercial hosting service for Django Music Publisher. Your instance of Django Music Publisher can be deployed in a minute. 
 
-Societies
-===============================================================================
+You only need to provide basic data about the publisher (e.g. name, IPI name #, collecting society (or societies)) and it will figure out the correct settings. 
 
-The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-setup, only 18 societies from 12 countries are present, as well as two 
-administrative agencies. If you need to add additional societies, do it with 
-this setting (and not in the ``models.py``).
+Your DMP instance will be properly maintained, regularily upgraded, data will be backed up daily, and you can export your data and move to another arrangement at any point.
 
-All societies the original publisher and all writers are affiliated with must be present.
