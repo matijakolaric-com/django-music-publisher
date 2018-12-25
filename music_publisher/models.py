@@ -274,7 +274,7 @@ class WriterInWork(models.Model):
 
     class Meta:
         verbose_name_plural = 'Writers in Work'
-        unique_together = (('work', 'writer'),)
+        unique_together = (('work', 'writer', 'controlled'),)
         ordering = ('-controlled', 'writer__last_name', 'writer__first_name')
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
@@ -570,7 +570,7 @@ class CWRExport(models.Model):
             'transaction_count': self.transaction_count,
             'record_count': self.record_count + 4})
 
-    def get_cwr(self):
+    def save(self, *args, **kwargs):
         if self.cwr:
             return
         self.cwr = ''.join(self.yield_lines(self.works.all()))
@@ -581,7 +581,7 @@ class CWRExport(models.Model):
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
-        self.save()
+        super().save(*args, **kwargs)
 
 
 class WorkAcknowledgement(models.Model):

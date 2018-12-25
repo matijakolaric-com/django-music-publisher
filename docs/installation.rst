@@ -27,14 +27,15 @@ You will have to add this to the settings, replace with your data.
     MUSIC_PUBLISHER_SETTINGS = {
         'admin_show_publisher': False,  # Needed only in US version
         'admin_show_saan': True,  # Needed only if societies assign agr. #
+        'allow_modifications': True,  # Only original works if False
+        'allow_multiple_ops': False,  # If set to True, writers can be partly contr.
 
         'enforce_saan': True,  # Agr. # is required in many societies
         'enforce_publisher_fee': True,  # False for self-publishers
         'enforce_pr_society': True,  # Strictly not required, but good practice
         'enforce_ipi_name': True,  # Strictly not required, but good practice
 
-        'token': None,  # See below
-        'highlighter_url': None,  # See below
+        'allow_modifications': True  # If set to False, only original works
 
         'work_id_prefix': 'TOP',  # Makes work IDs somewhat unique
         
@@ -59,14 +60,13 @@ and foreign societies. Then define publishers in other PROs.
     MUSIC_PUBLISHER_SETTINGS = {
         'admin_show_publisher': True,  # Needed in US version
         'admin_show_saan': False,  # Not used in US
+        'allow_modifications': True,  # Only original works if False
+        'allow_multiple_ops': False,  # If set to True, writers can be partly contr.
 
         'enforce_saan': False,  # Not used in US
         'enforce_publisher_fee': True,  # False for self-publishers
         'enforce_pr_society': True,  # Strictly not required, but good practice
         'enforce_ipi_name': True,  # Strictly not required, but good practice
-
-        'token': None,  # See below
-        'highlighter_url': None,  # See below
 
         'work_id_prefix': 'FOO',  # Makes work IDs somewhat unique
         
@@ -101,15 +101,6 @@ and foreign societies. Then define publishers in other PROs.
         'label': 'FOO BAR MUSIC',  # Use only if you are also a label
     }
 
-
-Django Music Publisher began as a proof of concept for a CWR Developer Toolset, a REST API service providing metadata validation and CWR generation, as well as syntax highlighting. 
-
-.. _SyntaxHighlighting:
-
-CWR Syntax Highlighting
-+++++++++++++++++++++++
-
-Basic data validation and CWR generation have since been added to Django Music Publisher code, but integrating CWR syntax highlighting still requires this external service. It is not required, and there is a free online `CWR Syntax Highlighting <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ tool with the exactly same functionality. Settings ``token`` and ``highlighter_url`` are used for this integration.
 
 More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
 

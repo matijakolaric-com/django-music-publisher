@@ -611,7 +611,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Normal change view with two sub-views defined by GET parameters:
 
         Parameters:
-            preview: that returns the highlighted preview of CWR file,
+            preview: that returns the preview of CWR file,
             download: that downloads the CWR file."""
         obj = get_object_or_404(CWRExport, pk=object_id)
         if 'preview' in request.GET:
