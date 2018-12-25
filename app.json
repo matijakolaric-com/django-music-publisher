@@ -23,6 +23,6 @@
     "heroku-postgresql"
   ],
   "scripts": {
-    "postdeploy": "python manage.py migrate && python manage.py migrate && python manage.py createsuperuser --username admin --email info@example.com < <(echo admin)"
+    "postdeploy": "python manage.py migrate && python manage.py migrate && python manage.py createsuperuser --noinput --username admin --email info@example.com && python manage.py changepassword admin < <(echo admin)"
   }
 }
