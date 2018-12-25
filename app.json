@@ -1,0 +1,31 @@
+{
+  "name": "Django Music Publisher",
+  "description": "Django Music Publisher is an open source software for original music publishers. It is a tool for managing metadata on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as royalty distribution processing. It uses Common Works Registration (CRW) protocol for batch registration of musical works. ",
+  "website": "https://django-music-publisher.readthedocs.io",
+  "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
+  "scripts": {
+    "postdeploy": "bundle exec rake bootstrap"
+  },
+  "env": {
+    "SECRET_KEY": {
+      "description": "Django's SECRET_KEY",
+      "generator": "secret"
+    },
+    "ALLOWED_HOSTS": {
+      "description": "Allow all hosts.",
+      "value": "*"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    "heroku-postgresql",
+    {
+      "plan": "hobby-dev",
+    }
+  ]
+}
