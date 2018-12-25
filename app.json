@@ -18,5 +18,11 @@
       "quantity": 1,
       "size": "free"
     }
-  }
+  },
+  "addons": [
+    "postgresql",
+    {
+      "plan": "hobby-dev",
+    }
+  ]
 }
