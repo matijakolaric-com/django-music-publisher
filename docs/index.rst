@@ -58,8 +58,5 @@ For Developers
 
    modules
 
-Indices
-********************
-
 * :ref:`modindex`
 * :ref:`genindex`

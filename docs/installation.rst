@@ -166,7 +166,7 @@ deployment, please use official
 Deployment on Heroku / Dokku
 ==============================================================================
 
-``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var. The recommended way to do this is to create a custom Django project in a private repository what uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
+``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var. The recommended way to do this is to create a custom Django project in a private repository that uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
 
 
 DMP Guru
