@@ -1,4 +1,22 @@
 {
   "name": "Django Music Publisher",
-  "repository": "https://github.com/matijakolaric-com/django-music-publisher/"
+  "description": "A tool for managing metadata on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as royalty distribution processing. It uses Common Works Registration (CRW) protocol for batch registration of musical works.",
+  "website": "https://django-music-publisher.readthedocs.io",
+  "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
+  "env": {
+    "SECRET_KEY": {
+      "description": "Django's SECRET_KEY",
+      "generator": "secret"
+    },
+    "ALLOWED_HOSTS": {
+      "description": "Allow all hosts.",
+      "value": "*"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
 }
