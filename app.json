@@ -21,5 +21,8 @@
   },
   "addons": [
     "heroku-postgresql"
-  ]
+  ],
+  "scripts": {
+    "postdeploy": "python manage.py createsuperuser",
+  }
 }
