@@ -466,9 +466,9 @@ class WorkAdmin(MusicPublisherAdmin):
             else:
                 pr_societies = set()
                 for writer in j['writers'].values():
-                    publisher = writer.pop('publisher_dict')
+                    publisher = writer.pop('publisher_dict', {})
                     pr_society = publisher.get('pr_society')
-                    if pr_society not in pr_societies:
+                    if pr_society and pr_society not in pr_societies:
                         pr_societies.add(pr_society)
                         publisher_id = publisher.pop('publisher_id')
                         j['publishers'][publisher_id] = publisher
@@ -476,9 +476,9 @@ class WorkAdmin(MusicPublisherAdmin):
         pr_societies = set()
         if normalized:
             for writer in writers.values():
-                publisher = writer.pop('publisher_dict')
+                publisher = writer.pop('publisher_dict', {})
                 pr_society = publisher.get('pr_society')
-                if pr_society not in pr_societies:
+                if pr_society and pr_society not in pr_societies:
                     pr_societies.add(pr_society)
                     publisher_id = publisher.pop('publisher_id')
                     publishers[publisher_id] = publisher
