@@ -23,6 +23,6 @@
     "heroku-postgresql"
   ],
   "scripts": {
-    "postdeploy": "python manage.py createsuperuser"
+    "postdeploy": "python manage.py migrate && python manage.py migrate && python manage.py createsuperuser"
   }
 }
