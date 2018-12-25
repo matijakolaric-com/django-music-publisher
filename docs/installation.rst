@@ -104,6 +104,11 @@ and foreign societies. Then define publishers in other PROs.
 
 Django Music Publisher began as a proof of concept for a CWR Developer Toolset, a REST API service providing metadata validation and CWR generation, as well as syntax highlighting. 
 
+.. _SyntaxHighlighting:
+
+CWR Syntax Highlighting
++++++++++++++++++++++++
+
 Basic data validation and CWR generation have since been added to Django Music Publisher code, but integrating CWR syntax highlighting still requires this external service. It is not required, and there is a free online `CWR Syntax Highlighting <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ tool with the exactly same functionality. Settings ``token`` and ``highlighter_url`` are used for this integration.
 
 More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.

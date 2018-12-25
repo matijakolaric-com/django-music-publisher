@@ -17,11 +17,14 @@ Please note that the field ``Works`` uses autocomplete, and if you don't come he
 
    CWR export list view
 
-You will be taken to the ``CWR export list view``, which may look familiar, as all ``list views`` are similar. But it has two links in each row: ``View CWR`` and ``Download``. The latter will download the CWR file, and the former will take you to the following view:
+You will be taken to the ``CWR export list view``, which may look familiar, as all ``list views`` are similar. But it has two links in each row: ``View CWR`` and ``Download``. The latter will download the CWR file, and the former will take you to the preview:
 
 .. figure:: /images/highlight.png
    :width: 100%
 
-   CWR syntax highlighter view
+   CWR preview with syntax highlighting
 
-It actually shows the CWR file with syntax highlighting. When you hover over the fields with your cursor, additional information is shown to help in solving issues with your society or any other receiver of the CWR file.
+Please note that the example shown above the CWR file with syntax highlighting. This feature is not available in open source code, but requires the use of an external service. See :ref:`SyntaxHighlighting`.
+
+When you hover over the fields with your cursor, additional information is shown to help in solving issues with your society or any other receiver of the CWR file.
+
