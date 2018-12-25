@@ -1,10 +1,11 @@
 User Manual
 ############
 
-This manual is aimed at music publishing professionals. It explains how Django Music Publisher is used, but it does not explain how music publishing works.
+This is the user manual for Django Music Publisher, regardless if you installed it yourself or through a specialized platform-as-a-service provider for Django Music Publisher instances, e.g. `DMP Guru <https://dmp.guru>`_.
 
 This manual continues at the point where :ref:`StandaloneDeployment` ended, presuming that Django Music Publisher was installed, migrations performed, a superuser created, predefined permission groups added, and that Django Music Publisher is running.
 
+This manual is in a form of a walkthrough, covering all features. It presumes that the user understands the music industry terms and has already used some web-based tools.
 
 .. toctree::
    :maxdepth: 2

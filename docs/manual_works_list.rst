@@ -25,11 +25,15 @@ You may want to try using ``search field`` and ``filters``, the use should be pr
 Exporting and creating CWR
 ++++++++++++++++++++++++++
 
-Select several (or all) works in the ``work list view``, select the ``export selected works`` action and press on ``go``. A JSON file will be downloaded, containing all the information about your works. If you ever choose to stop using Django Music Publisher and move on, there is no lock-in. While the JSON format might be confusing, there re free online tools that will convert JSON to just about any other format you need. https://json-csv.com/ is the first one Google just came up with.
+Select several (or all) works in the ``work list view``, select the ``export selected works`` or ``export selected works (normalized)`` action and press on ``go``. A JSON file will be downloaded, containing all the information about your works. 
+
+The difference between these two formats is subtle and technical. Normalized data has less redundancy, but it is also more complicated to process.
+
+If you ever choose to stop using Django Music Publisher and move on, there is no lock-in. While the JSON format might be confusing, there re free online tools that will convert JSON to just about any other format you need. https://json-csv.com/ is the first one Google just came up with.
 
 .. figure:: /images/export.png
    :width: 100%
 
-   Save as new
+   Exporting works.
 
 Currently the only other available action is to ``create CWR from selected works``. Once you run it, you will be taken to ``add CWR export view``.

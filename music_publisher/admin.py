@@ -501,12 +501,12 @@ class WorkAdmin(MusicPublisherAdmin):
         response['Content-Disposition'] = cd
         return response
     create_json.short_description = \
-        'Export selected works to a streaming JSON format.'
+        'Export selected works.'
 
     def create_normalized_json(self, request, qs):
         return self.create_json(request, qs, normalized=True)
     create_normalized_json.short_description = \
-        'Export selected works to a normalized JSON format.'
+        'Export selected works (normalized).'
 
     actions = (create_cwr, create_json, create_normalized_json)
 
