@@ -585,8 +585,8 @@ class CWRExport(models.Model):
             'record_count': self.record_count + 4})
 
     def create_cwr(self, *args, **kwargs):
-        # if self.cwr:
-        #     return
+        if self.cwr:
+            return
         self.cwr = ''.join(self.yield_lines(self.works.all()))
         self.year = self.cwr[66:68]
         nr = type(self).objects.filter(year=self.year)

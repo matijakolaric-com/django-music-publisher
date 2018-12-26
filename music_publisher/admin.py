@@ -135,6 +135,9 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         """
         is_modification = self.instance.is_modification()
         super().clean()
+        if is_modification:
+            raise ValidationError(
+                'VALIDATION FOR MODIFICATIONS IS NOT IMPLEMENTED.')
         total = 0
         controlled = False
         has_composer = False
@@ -160,8 +163,9 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         if not has_composer:
             for form in self.forms:
                 form.add_error(
-                    'capacity', 
-                    'At least one writer must be Composer or Composer&Lyricist.')
+                    'capacity',
+                    'At least one writer must be Composer or '
+                    'Composer&Lyricist.')
             raise ValidationError(
                 'At least one writer must be Composer or Composer&Lyricist.')
         if not(Decimal(99.98) <= total <= Decimal(100.02)):
@@ -447,7 +451,10 @@ class WorkAdmin(MusicPublisherAdmin):
             'fields': (
                 'work_id',
                 ('title', 'iswc'),
-                ('original_title', 'version_type'))}),)
+                (
+                    ('original_title', 'version_type')
+                    if SETTINGS['allow_modifications'] else tuple()
+                ))}),)
 
     def save_model(self, request, obj, form, *args, **kwargs):
         if form.changed_data:

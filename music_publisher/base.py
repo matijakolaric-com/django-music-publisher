@@ -6,15 +6,24 @@ Attributes:
     CONTROLLED_WRITER_REQUIRED_FIELDS (list): List of required fields
     ENFORCE_IPI_NAME (bool): \
         Is IPI Name # a required field for controlled writers?
-    ENFORCE_PR_SOCIETY (TYPE): \
+    ENFORCE_PR_SOCIETY (bool): \
         Is PR Society Code a required field for controlled writers?
-    ENFORCE_PUBLISHER_FEE (TYPE): \
+    ENFORCE_PUBLISHER_FEE (bool): \
         Is Publisher Fee a required field for controlled writers?
-    ENFORCE_SAAN (TYPE): \
+    ENFORCE_SAAN (bool): \
         Is Society-assigned agreement number a required field for controlled \
         writers?
-    WORK_ID_PREFIX (TYPE): Prefix for Submitter Work ID, which is numerical
+    NAMES_CHARS (str): Characters allowed in CWR names
+    RE_IPI_BASE (str): Regex pattern for IPI Base
+    RE_ISNI (str): Regex pattern for ISNI
+    RE_ISRC (str): Regex pattern for ISRC (lax)
+    RE_ISWC (str): Regex pattern for ISWC
+    RE_NAME (str): Regex pattern for CWR names
+    RE_TITLE (str): Regex pattern for CWR titles
+    TITLES_CHARS (str): Characters allowed in CWR titles
+    WORK_ID_PREFIX (str): Prefix for Submitter Work ID, which is numerical
 """
+
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -88,25 +97,27 @@ except AttributeError:
 TITLES_CHARS = re.escape(
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
 )
-
 NAMES_CHARS = re.escape(
     "!#$%&'()+-./0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ`"
 )
 
 RE_TITLE = r'(^[{0}][ {0}]+$)'.format(TITLES_CHARS)
-
 RE_NAME = r'(^[{0}][ {0}]+$)'.format(NAMES_CHARS)
-
 RE_ISWC = re.compile(r'(^T\d{10}$)')
-
 RE_ISRC = re.compile(r'(^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$)')
-
 RE_ISNI = re.compile(r'(^[0-9]{15}[0-9X]$)')
-
 RE_IPI_BASE = re.compile(r'(I-\d{9}-\d)')
 
 
 def check_ean_digit(ean):
+    """EAN checksum validation.
+
+    Args:
+        ean (str): EAN
+
+    Raises:
+        ValidationError
+    """
     number = ean[:-1]
     ch = str(
         (10 - sum(
@@ -118,6 +129,15 @@ def check_ean_digit(ean):
 
 
 def check_iswc_digit(iswc, weight):
+    """ISWC / IPI Base checksum validation.
+
+    Args:
+        iswc (str): ISWC or IPI Base #
+        weight (int): 1 for ISWC, 2 for IPI Base #
+
+    Raises:
+        ValidationError
+    """
     digits = re.sub(r'\D', r'', iswc)
     sum = weight
     for i, d in enumerate(digits[:9]):
@@ -128,6 +148,14 @@ def check_iswc_digit(iswc, weight):
 
 
 def check_ipi_digit(all_digits):
+    """IPI Name checksum validation.
+
+    Args:
+        all_digits (str): IPI Name #
+
+    Raises:
+        ValidationError
+    """
     digits = all_digits[:-2]
     sum = 0
     for i, digit in enumerate(digits):
@@ -141,6 +169,14 @@ def check_ipi_digit(all_digits):
 
 
 def check_isni_digit(all_digits):
+    """ISNI checksum validation.
+
+    Args:
+        all_digits (str): ISNI
+
+    Raises:
+        ValidationError
+    """
     digits = all_digits[:-1]
     sum = 0
     for i, digit in enumerate(digits):
