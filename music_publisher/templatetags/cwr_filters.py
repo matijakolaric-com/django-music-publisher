@@ -48,7 +48,7 @@ register = template.Library()
 
 @register.filter(name='rjust')
 def rjust(value, length):
-    """Format and general numeric fields."""
+    """Format general numeric fields."""
 
     if value is None or value == '':
         value = '0'

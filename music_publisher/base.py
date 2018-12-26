@@ -144,7 +144,7 @@ def check_iswc_digit(iswc, weight):
         sum += (i + 1) * int(d)
     checksum = (10 - sum % 10) % 10
     if checksum != int(digits[9]):
-        raise ValidationError('Not a valid ISWC {}.'.format(iswc))
+        raise ValidationError('Not valid: {}.'.format(iswc))
 
 
 def check_ipi_digit(all_digits):
@@ -564,22 +564,21 @@ class IPIBase(models.Model):
             self._can_be_controlled &= bool(self.ipi_name)
         if enforce_pr_society:
             self._can_be_controlled &= bool(self.pr_society)
-        if not self._can_be_controlled and self.generally_controlled:
-            raise ValidationError({
-                'generally_controlled': error_msg})
-        if self.saan and not self.generally_controlled:
-            raise ValidationError({
-                'saan': 'Only for a general agreement.'})
-        if self.publisher_fee and not self.generally_controlled:
-            raise ValidationError({
-                'publisher_fee': 'Only for a general agreement.'})
-        if self.generally_controlled and enforce_saan and not self.saan:
-            raise ValidationError({
-                'saan': 'This field is required.'})
-        if (self.generally_controlled and enforce_publisher_fee and
-                not self.publisher_fee):
-            raise ValidationError({
-                'publisher_fee': 'This field is required.'})
+        d = {}
+        if not self.generally_controlled:
+            if self.saan:
+                d['saan'] = 'Only for a general agreement.'
+            if self.publisher_fee:
+                d['publisher_fee'] = 'Only for a general agreement.'
+        else:
+            if not self._can_be_controlled:
+                d['generally_controlled'] = error_msg
+            if enforce_saan and not self.saan:
+                d['saan'] = 'This field is required.'
+            if enforce_publisher_fee and not self.publisher_fee:
+                d['publisher_fee'] = 'This field is required.'
+        if d:
+            raise ValidationError(d)
 
 
 class ArtistBase(PersonBase, MusicPublisherBase):
