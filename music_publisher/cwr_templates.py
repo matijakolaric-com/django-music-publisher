@@ -55,6 +55,16 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}{{ publisher_id|ljust:9 }}'
         '{{ publisher_name|ljust:45 }}              {{ saan|ljust:14 }}'
         '{{ interested_party_number|ljust:9 }}\r\n'),
+    'OPU': Template(
+        '{% load cwr_filters %}OPU{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ sequence|rjust:2 }}' +
+        ' ' * 54 +
+        'YE 00000000000000000000              '
+        '   {{ share|prshare }}'
+        '   {{ share|mrshare }}'
+        '   {{ share|mrshare }}'
+        ' N                                             '
+        '\r\n'),
     'OWR': Template(
         '{% load cwr_filters %}OWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ interested_party_number|ljust:9 }}'

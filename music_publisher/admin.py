@@ -124,6 +124,7 @@ class WriterInWorkFormSet(BaseInlineFormSet):
     def clean(self):
         """Performs these checks:
             at least one writer must be controlled,
+            at least one writer music be Composer or Composer&Lyricist
             sum of relative shares must be ~100%
 
         Returns:
@@ -132,19 +133,41 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         Raises:
             ValidationError
         """
+        is_modification = self.instance.is_modification()
         super().clean()
         total = 0
         controlled = False
+        has_composer = False
+        writers = []
         for form in self.forms:
             if not form.is_valid():
                 return
             if form.cleaned_data and not form.cleaned_data.get('DELETE'):
+                writer = form.cleaned_data['writer']
+                if writer in writers and not SETTINGS['allow_multiple_ops']:
+                    form.add_error('writer', 'Writer already present.')
+                writers.append(writer)
                 total += form.cleaned_data['relative_share']
                 if form.cleaned_data['controlled']:
                     controlled = True
+                if form.cleaned_data['capacity'] in ['C ', 'CA']:
+                    has_composer = True
         if not controlled:
+            for form in self.forms:
+                form.add_error(
+                    'controlled', 'At least one writer must be controlled.')
             raise ValidationError('At least one writer must be controlled.')
+        if not has_composer:
+            for form in self.forms:
+                form.add_error(
+                    'capacity', 
+                    'At least one writer must be Composer or Composer&Lyricist.')
+            raise ValidationError(
+                'At least one writer must be Composer or Composer&Lyricist.')
         if not(Decimal(99.98) <= total <= Decimal(100.02)):
+            for form in self.forms:
+                form.add_error(
+                    'relative_share', 'Sum of relative shares must be 100%.')
             raise ValidationError('Sum of relative shares must be 100%.')
 
 
@@ -637,6 +660,27 @@ class CWRExportAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
 
+
+    def save_model(self, request, obj, form, change):
+        """Django splits the saving process int two parts, which does not
+            work in this case, so this is simply passing the main object
+            through to :meth:`save_related`.
+        """
+        if not (hasattr(self, 'obj') and self.obj.cwr):
+            super().save_model(request, obj, form, change)
+            self.obj = obj
+        elif hasattr(self, 'obj'):
+            del self.obj
+
+    def save_related(self, request, form, formsets, change):
+        """:meth:`save_model` passes the main object, which is needed to fetch
+            CWR form the external service, but only after related objects are
+            saved.
+        """
+        if hasattr(self, 'obj'):
+            super().save_related(request, form, formsets, change)
+            self.obj.create_cwr()
+            del self.obj
 
 class ACKImportForm(ModelForm):
 

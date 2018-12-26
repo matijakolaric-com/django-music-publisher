@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -7,6 +7,7 @@ from .base import *
 from .cwr_templates import *
 from datetime import datetime
 from django.template import Context
+from decimal import Decimal
 
 
 class Work(WorkBase):
@@ -466,30 +467,43 @@ class CWRExport(models.Model):
                 d['recorded_indicator'] = 'U'
             yield self.get_transaction_record('NWR', d)
             publishers = {}
+            other_publisher_share = None
+            controlled_writer_ids = []
+            controlled_writer_shares = defaultdict(Decimal)
             for wiw in work.writerinwork_set.all():
-                if not wiw.controlled:
-                    continue
-                d = wiw.writer.get_publisher_dict()
-                key = d['publisher_id']
-                if key in publishers:
-                    publishers[key]['share'] += wiw.relative_share
-                else:
-                    publishers[key] = d
-                    publishers[key]['share'] = wiw.relative_share
+                if wiw.controlled:
+                    controlled_writer_ids.append(wiw.writer_id)
+                    controlled_writer_shares[wiw.writer_id] += wiw.relative_share
+                    d = wiw.writer.get_publisher_dict()
+                    key = d['publisher_id']
+                    if key in publishers:
+                        publishers[key]['share'] += wiw.relative_share
+                    else:
+                        publishers[key] = d
+                        publishers[key]['share'] = wiw.relative_share
+                elif wiw.writer_id in controlled_writer_ids:
+                    controlled_writer_shares[wiw.writer_id] += wiw.relative_share
+                    if other_publisher_share is None:
+                        other_publisher_share = wiw.relative_share
+                    else:
+                        other_publisher_share += wiw.relative_share
             for i, (key, publisher) in enumerate(publishers.items()):
                 publisher['sequence'] = i + 1
                 yield self.get_transaction_record('SPU', publisher)
                 yield self.get_transaction_record('SPT', publisher)
-
+            if other_publisher_share:
+                yield self.get_transaction_record(
+                    'OPU', {
+                        'share': other_publisher_share,
+                        'sequence': len(publishers) + 1})
             for wiw in work.writerinwork_set.all():
                 if not wiw.controlled:
                     continue
                 w = wiw.writer
                 record = {
                     'capacity': wiw.capacity,
-                    'share': wiw.relative_share,
+                    'share': controlled_writer_shares[w.id],
                     'saan': wiw.saan or w.saan}
-
                 record['interested_party_number'] = 'W{:06d}'.format(w.id)
                 record['ipi_name'] = w.ipi_name
                 record['ipi_base'] = w.ipi_base
@@ -501,7 +515,7 @@ class CWRExport(models.Model):
                 record.update(w.get_publisher_dict())
                 yield self.get_transaction_record('PWR', record)
             for wiw in work.writerinwork_set.all():
-                if wiw.controlled:
+                if wiw.controlled or wiw.writer_id in controlled_writer_ids:
                     continue
                 record = {
                     'capacity': wiw.capacity,
@@ -570,9 +584,9 @@ class CWRExport(models.Model):
             'transaction_count': self.transaction_count,
             'record_count': self.record_count + 4})
 
-    def save(self, *args, **kwargs):
-        if self.cwr:
-            return
+    def create_cwr(self, *args, **kwargs):
+        # if self.cwr:
+        #     return
         self.cwr = ''.join(self.yield_lines(self.works.all()))
         self.year = self.cwr[66:68]
         nr = type(self).objects.filter(year=self.year)
