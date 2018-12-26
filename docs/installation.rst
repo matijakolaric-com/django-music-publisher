@@ -26,9 +26,9 @@ You will have to add this to the settings, replace with your data.
 
     MUSIC_PUBLISHER_SETTINGS = {
         'admin_show_publisher': False,  # Needed only in US version
-        'admin_show_saan': True,  # Needed only if societies assign agr. #
+        'admin_show_saan': True,  # Needed only if societies assign agreement #
         'allow_modifications': True,  # Only original works if False
-        'allow_multiple_ops': False,  # If set to True, writers can be partly contr.
+        'allow_multiple_ops': False,  # Writers can have multiple original pubs
 
         'enforce_saan': True,  # Agr. # is required in many societies
         'enforce_publisher_fee': True,  # False for self-publishers
@@ -61,7 +61,7 @@ and foreign societies. Then define publishers in other PROs.
         'admin_show_publisher': True,  # Needed in US version
         'admin_show_saan': False,  # Not used in US
         'allow_modifications': True,  # Only original works if False
-        'allow_multiple_ops': False,  # If set to True, writers can be partly contr.
+        'allow_multiple_ops': False,  # Writers can have multiple original pubs
 
         'enforce_saan': False,  # Not used in US
         'enforce_publisher_fee': True,  # False for self-publishers
@@ -111,7 +111,7 @@ Additional Societies
 ++++++++++++++++++++
 
 The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-setup, only 18 societies from 12 countries are present, as well as two 
+set-up, only 18 societies from 12 countries are present, as well as two 
 administrative agencies. If you need to add additional societies, do it with 
 this setting (and not in the ``models.py``).
 
@@ -120,7 +120,7 @@ All societies the original publisher and all writers are affiliated with must be
 Installing the Project (Standalone Deployment)
 ===============================================================================
 
-You can only install this project on a system that has Python 3 preinstalled. Supported versions are 3.5, 3.6 and 3.7. It might work with other Python 3 versions, but not with Python 2. It is advised you run this inside a virtual environment.
+You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7. It might work with other Python 3 versions, but not with Python 2. It is advised you run this inside a virtual environment.
 
 Do::
 
@@ -167,5 +167,5 @@ DMP Guru
 
 You only need to provide basic data about the publisher (e.g. name, IPI name #, collecting society (or societies)) and it will figure out the correct settings. 
 
-Your DMP instance will be properly maintained, regularily upgraded, data will be backed up daily, and you can export your data and move to another arrangement at any point.
+Your DMP instance will be properly maintained, regularly upgraded, data will be backed up daily, and you can export your data and move to another arrangement at any point.
 

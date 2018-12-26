@@ -13,7 +13,7 @@ Here are development cost breakdowns for several features that have been identif
 ======================================================= =========
 Task                                                    Cost
 ======================================================= =========
-Work model changes, new writer capacitie                   €250
+Work model changes, new writer capacities                  €250
 Validation rules spanning NWR/REV, VER, SWR, OWR rows      €250
 CWR validation in DMP                                      €500
 CWR generation in DMP                                     €1000
@@ -28,7 +28,7 @@ Previous releases of Django Music Publisher used an external service for data va
 
 Previous releases of Django Music Publisher had some limitations, inherited from the external CWR generation service it used. One such limitation was that it only allowed registration of original musical works, not modifications.
 
-Also, the core od royalty distribution has been implemented, please see next section for details.
+Also, the core royalty distribution has been implemented, please see next section for details.
 
 Features still missing
 ++++++++++++++++++++++
@@ -60,7 +60,7 @@ Please note that this feature will be a sub-project with a separate repository.
 Data import
 -----------
 
-Current releases do not support data imports from third party software solutions or spreadsheet data. So far the maintanier has been providing this as a paid service. However, it would be in public interest if people would be able to do it themselves.
+Current releases do not support data imports from third party software solutions or spreadsheet data. So far the maintainer has been providing this as a paid service. However, it would be in public interest if people would be able to do it themselves.
 
 There are several caveats here, the first one is related to internal work numbering. If imported data was already used for registrations via CWR or EBR or any format that has submitter work IDs, then they must be maintained. However, Django Music Publisher creates it's own work IDs and adding custom ones will create several new potential issues.
 
@@ -94,7 +94,7 @@ MWN (DDEX)
 
 MWN is a format that has similar data structure to CWR, though the underlying format is completely different. It requires a licence to be used, from which it is quite unclear whether it is legally possible to integrate the functionality into an open source solution.
 
-Implementing it is definitelly cheaper than paying for a legal interpretation.
+Implementing it is definitely cheaper than paying for a legal interpretation.
 
 Recording-related data and other DDEX formats
 ---------------------------------------------
@@ -105,10 +105,10 @@ Same thing.
 CWR Delivery service
 --------------------
 
-This is definitelly something that would be very helpful. There are three issues here:
+This is definitely something that would be very helpful. There are three issues here:
 
 * every society and/or administrative agency uses a slightly different delivery system
 * this requires some kind of background worker or at least a cron job, so it is a bit more complicated to deploy
-* we are deailing with sensitive data here, bad deployments might easily result in security issues, data loss or worse.
+* we are dealing with sensitive data here, bad deployments might easily result in security issues, data loss or worse.
 
-The solution exists, but it is not going into the open source code in the forseeable future.
+The solution exists, but it is not going into the open source code in the foreseeable future.

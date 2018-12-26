@@ -10,12 +10,12 @@ Some general guidelines along these lines are provided in this section. The tech
 Who could do it and why
 -----------------------
 
-Soocieties (PROs, MROs) or Administrative Agencies
+Societies (PROs, MROs) or Administrative Agencies
 ==================================================
 
 In an ideal world, societies would provide such a service for free. Most of them already provide some of this functionality through their web interfaces. Their existing services are dead ends, as any custom integration or extension is not possible.
 
-By providing Django Music Publisher, optionally customized and branded, to their affiliates for free, or at cost, would bnefit both. The main benefit for the societies is a very simple one: less user support. 
+By providing Django Music Publisher, optionally customized and branded, to their affiliates for free, or at cost, would benefit both. The main benefit for the societies is a very simple one: less user support. 
 
 Django Music Publisher offers superb data validation as users enter their data, so there would be far less user support by societies due to errors. They can simply skip the whole initial testing. And if delivery gets automated, maybe even directly, bypassing the CWR, it would decrease the need for user support even further.
 
@@ -34,7 +34,7 @@ Commercial Services
 
 One takes the code, wraps it in a SaaS, maybe adds few additional features and charges for it. There surely is a business model in there. And eventually, one can move to administration and/or sub-publishing.
 
-Another option is to provide hosting, installation, configuration and maintetance of Django Music Publisher as a specialised application PaaS.
+Another option is to provide hosting, installation, configuration and maintenance of Django Music Publisher as a specialised application PaaS.
 
 Techical issues
 ---------------
@@ -42,14 +42,14 @@ Techical issues
 Providing Custom Settings
 =========================
 
-The first and foremost question is how to provide custom settings for each of the clients. Most of the settings can be set through environment variables with the existing code, but not the definition of the publisher entity (or entities for the US). There are severaal good ways to do it, and there isn't a generally best option. Setting it through a JSON-encoded setting is the simplest solution.
+The first and foremost question is how to provide custom settings for each of the clients. Most of the settings can be set through environment variables with the existing code, but not the definition of the publisher entity (or entities for the US). There are several good ways to do it, and there isn't a generally best option. Setting it through a JSON-encoded setting is the simplest solution.
 
 Database and Upgrades
 =====================
 
-Django Music Publisher does not support multi-tenant database schema. Multiple schemas are certainly possible, but that is almost the same as multiple databases. One definitelly has to provide automated migrations for all clients, but this only requires a simple script.
+Django Music Publisher does not support multi-tenant database schema. Multiple schemas are certainly possible, but that is almost the same as multiple databases. One definitely has to provide automated migrations for all clients, but this only requires a simple script.
 
-However, creating a multi-tennant schema solution should be a straightforward procedure for an experienced Django developer. It has been done by the maintainer and all the prerequisits are there.
+However, creating a multi-tenant schema solution should be a straightforward procedure for an experienced Django developer. It has been done by the maintainer and all the prerequisites are there.
 
 Containers
 ==========
@@ -59,7 +59,7 @@ Using containers is the way to go in most cases.
 Central Application
 ===================
 
-There are no presumptions about the central application, used for client registration, general management and billing. One can definitelly start small, doing a lot of things manually, with services like Heroku and/or AWS and grow, or extend an existing application for client/affiliate management.
+There are no presumptions about the central application, used for client registration, general management and billing. One can definitely start small, doing a lot of things manually, with services like Heroku and/or AWS and grow, or extend an existing application for client/affiliate management.
 
 Existing service providers
 --------------------------
@@ -69,9 +69,9 @@ DMP Guru
 
 `DMP Guru <https://dmp.guru>`_ is a specialized platform-as-a-service provider for Django Music Publisher instances. Publishers can have one up and running in a minute.
 
-There is a central application that remotely manages DMP instances. Initial installation, and re-deployment due to change in settigns, as well as disabling and re-enabling due to payments (or lack of) are fully automatic. Upgrades can also be performed through the administration interface of the central application.
+There is a central application that remotely manages DMP instances. Initial installation, and re-deployment due to change in settings, as well as disabling and re-enabling due to payments (or lack of) are fully automatic. Upgrades can also be performed through the administration interface of the central application.
 
 Every DMP instance consists of two docker containers, one running Django and the other running PostgreSQL. Each DMP instance only has a single user, with credentials being shared with the central application.
 
-The whole solution applied as DMP Guru is on offer as a whitelabel solution to societies, majors, etc.
+The whole solution applied as DMP Guru is on offer as a white-label solution to societies, majors, etc.
 

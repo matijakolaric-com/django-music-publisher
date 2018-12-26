@@ -29,5 +29,5 @@ Minor Releases
 
 Minor releases are bugfix/security releases.
 
-They are released when a real security issue is detected in Django Music Publisher ot any of the dependencies. Bugfix releases are released as bugs get fixed, the speed of it depends on the severity of a bug.
+They are released when a real security issue is detected in Django Music Publisher or any of the dependencies. Bugfix releases are released as bugs get fixed, the speed of it depends on the severity of a bug.
 

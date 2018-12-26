@@ -3,7 +3,7 @@ Albums and Libraries
 
 So far, in this manual, we have created basic musical works and CWR registrations, without any data on recordings, albums and/or libraries.
 
-As it was mentioned in the section on adding and changing works, it is possible to add this information thorugh ``Add Work view``. That is the preferred way if information is available from the start of the input process. However, sometimes we want to register works before we have data on recordings. While opening every work and adding the data is definitelly an option, there is a faster way.
+As it was mentioned in the section on adding and changing works, it is possible to add this information through ``Add Work view``. That is the preferred way if information is available from the start of the input process. However, sometimes we want to register works before we have data on recordings. While opening every work and adding the data is definitely an option, there is a faster way.
 
 Press ``Add`` next to ``Albums and Library CDs``. The following interface appears:
 
@@ -26,7 +26,7 @@ If you leave this field empty, the work will not be marked as library work.
 Albums
 ++++++
 
-The second part of this view holds information about the album (or any other release). You may also use it as a placeholder. ``Album name`` is required, other data is optional.
+The second part of this view holds information about the album (or any other release). You may also use it as a place-holder. ``Album name`` is required, other data is optional.
 
 Tracks
 ++++++
@@ -40,7 +40,7 @@ The field ``release date`` is present both in album data and in track data. If b
 .. figure:: /images/tracks_added.png
    :width: 100%
 
-   Example with added tracks. Please note that the first track has an ealier release date.
+   Example with added tracks. Please note that the first track has an earlier release date.
 
 Registering revised works
 +++++++++++++++++++++++++

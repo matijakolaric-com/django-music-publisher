@@ -11,6 +11,6 @@ The maintainer of this project has made two tools freely available that may assi
 
 * `ACK Tool <https://matijakolaric.com/free/cwr-x-ack-tool>`_ that creates summaries of CWR acknowledgement files
 
-* `CWR Syntax Highlighter <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ that adds syntax highligting to uploaded acknowledgement files
+* `CWR Syntax Highlighter <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ that adds syntax highlighting to uploaded acknowledgement files
 
 Please note that acknowledgement files differ greatly from one society to the next, which makes it hard to create a general tool.

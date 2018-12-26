@@ -45,7 +45,7 @@ This is where you put in the information on composers and lyricists who created 
 
 * ``Society-assigned agreement number`` is a field where society-assigned agreement numbers for **specific agreements** are entered. For **general agreements**. they are set when defining the ``Writers``. If both exist, the **specific** one is used. This field can also be disabled in settings, as it is only used (and even required) in some societies. It may also be set as required for controlled writers. It should not be filled for other writers.
 
-* ``Publisher fee`` is the fee kept by the publisher, while the rest is forwarded to the writer. Please note that this is a preparation for the upcoming royalty statement processing feature. This field can also be disabled in the setttings. It may also be set as required for controlled writers. It should not be filled for other writers.
+* ``Publisher fee`` is the fee kept by the publisher, while the rest is forwarded to the writer. Please note that this is a preparation for the upcoming royalty statement processing feature. This field can also be disabled in the settings. It may also be set as required for controlled writers. It should not be filled for other writers.
 
 First Recording
 +++++++++++++++

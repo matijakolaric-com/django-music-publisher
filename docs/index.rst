@@ -29,8 +29,8 @@ It uses **Common Works Registration (CRW)** protocol for batch registration of m
 Latest release **19.1 Epiphany** was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
 
 
-General Documenation
-********************
+General Documentation
+*********************
 
 .. toctree::
    :maxdepth: 1
