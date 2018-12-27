@@ -590,6 +590,29 @@ class AllTest(TestCase):
         response = self.get(
             reverse('admin:music_publisher_work_add'),
             re_post={
+                'title': 'MODIFICATION',
+                'original_title': 'ORIGINAL',
+                'writerinwork_set-TOTAL_FORMS': 4,
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '25',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+                'writerinwork_set-1-writer': writer.id,
+                'writerinwork_set-1-capacity': 'CA',
+                'writerinwork_set-1-relative_share': '25',
+                'writerinwork_set-2-writer': writer3.id,
+                'writerinwork_set-2-relative_share': '25',
+                'writerinwork_set-3-relative_share': '25',
+                'artistinwork_set-TOTAL_FORMS': 1,
+                'artistinwork_set-0-artist': artist.id,
+            })
+        self.assertEqual(response.status_code, 302)
+        work3 = Work.objects.filter(title='MODIFICATION').first()
+        response = self.get(
+            reverse('admin:music_publisher_work_add'),
+            re_post={
                 'title': 'NO COMPOSER TITLE',
                 'writerinwork_set-0-writer': writer.id,
                 'writerinwork_set-0-capacity': 'A ',
@@ -620,7 +643,7 @@ class AllTest(TestCase):
             re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id]})
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
-            re_post={'nwr_rev': 'REV', 'works': [work.id, work2.id]})
+            re_post={'nwr_rev': 'REV', 'works': [work.id, work3.id]})
         cwr_export = CWRExport.objects.all().first()
         response = self.get(
             reverse(
