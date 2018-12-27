@@ -640,7 +640,7 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_work_change', args=(work.id,)))
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
-            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id]})
+            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id, work3.id]})
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'REV', 'works': [work.id, work3.id]})
