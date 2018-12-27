@@ -602,7 +602,7 @@ class CWRExport(models.Model):
     def create_cwr(self, *args, **kwargs):
         if self.cwr:
             return
-        self.cwr = ''.join(self.yield_lines(self.works.all()))
+        self.cwr = ''.join(self.yield_lines(self.works.order_by('id',)))
         self.year = self.cwr[66:68]
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
