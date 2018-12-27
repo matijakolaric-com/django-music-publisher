@@ -387,6 +387,13 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 302)
         writer3 = Writer.objects.filter(last_name='THIRD').first()
         response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'last_name': 'OTHER',
+            })
+        self.assertEqual(response.status_code, 302)
+        writer4 = Writer.objects.filter(last_name='OTHER').first()
+        response = self.get(
             reverse('admin:music_publisher_writer_changelist'))
         self.assertTrue(writer._can_be_controlled)
         response = self.get(
@@ -733,12 +740,10 @@ class AllTest(TestCase):
                 'writerinwork_set-0-controlled': '1',
                 'writerinwork_set-0-saan': '1LJ4V4',
                 'writerinwork_set-0-publisher_fee': '25',
-                'writerinwork_set-1-writer': writer2.id,
+                'writerinwork_set-1-writer': writer4.id,
                 'writerinwork_set-1-capacity': 'CA',
                 'writerinwork_set-1-relative_share': '50',
                 'writerinwork_set-1-controlled': '1',
-                'writerinwork_set-1-saan': '1LJ4V4',
-                'writerinwork_set-1-publisher_fee': '25',
                 'firstrecording-TOTAL_FORMS': 1,
                 'firstrecording-0-album_cd': albumcd.id,
                 'firstrecording-0-artist': artist.id,
@@ -755,7 +760,7 @@ class AllTest(TestCase):
                 'iswc': 'T1234567894',
                 'alternatetitle_set-TOTAL_FORMS': 1,
                 'alternatetitle_set-0-title': 'BETTER TITLE',
-                'writerinwork_set-TOTAL_FORMS': 2,
+                'writerinwork_set-TOTAL_FORMS': 3,
                 'writerinwork_set-0-writer': writer.id,
                 'writerinwork_set-0-capacity': 'CA',
                 'writerinwork_set-0-relative_share': '50',
@@ -764,8 +769,11 @@ class AllTest(TestCase):
                 'writerinwork_set-0-publisher_fee': '25',
                 'writerinwork_set-1-writer': writer2.id,
                 'writerinwork_set-1-capacity': 'CA',
-                'writerinwork_set-1-relative_share': '50',
+                'writerinwork_set-1-relative_share': '25',
                 'writerinwork_set-1-controlled': '',
+                'writerinwork_set-2-writer': writer4.id,
+                'writerinwork_set-2-saan': '1LJ4V4',
+                'writerinwork_set-2-publisher_fee': '25',
                 'firstrecording-TOTAL_FORMS': 1,
                 'firstrecording-0-album_cd': albumcd.id,
                 'firstrecording-0-artist': artist.id,

@@ -318,30 +318,33 @@ class WriterInWork(models.Model):
             raise ValidationError({
                 'controlled': 'Must be set for a generally controlled writer.'
             })
-        if self.controlled and not self.capacity:
-            raise ValidationError({
-                'capacity': 'Must be set for a controlled writer.'
-            })
-        if self.controlled and not self.writer:
-            raise ValidationError({
-                'writer': 'Must be set for a controlled writer.'
-            })
-        if (self.controlled and not self.writer._can_be_controlled):
-            raise ValidationError(CAN_NOT_BE_CONTROLLED_MSG)
-        if (ENFORCE_SAAN and self.controlled and
-                not self.writer.generally_controlled and not self.saan):
-            raise ValidationError({
-                'saan': 'Must be set. (controlled, no general agreement)'})
-        if (ENFORCE_PUBLISHER_FEE and self.controlled and
-                not self.writer.generally_controlled and
-                not self.publisher_fee):
-            raise ValidationError({
-                'publisher_fee': (
-                    'Must be set. (controlled, no general agreement)')})
-        if not self.controlled and self.saan:
-            raise ValidationError({'saan': 'Must not be set.'})
-        if not self.controlled and self.publisher_fee:
-            raise ValidationError({'publisher_fee': 'Must not be set.'})
+        d = {}
+        if self.controlled:
+            if not self.capacity:
+                d['capacity'] = 'Must be set for a controlled writer.'
+            if not self.writer:
+                d['writer'] = 'Must be set for a controlled writer.'
+            else:
+                if not self.writer._can_be_controlled:
+                    d['writer'] = CAN_NOT_BE_CONTROLLED_MSG
+                if (ENFORCE_SAAN and
+                        not self.writer.generally_controlled and
+                        not self.saan):
+                    d['saan'] = \
+                        'Must be set. (controlled, no general agreement)'
+                if (ENFORCE_PUBLISHER_FEE and
+                        not self.writer.generally_controlled and
+                        not self.publisher_fee):
+                    d['publisher_fee'] = \
+                        'Must be set. (controlled, no general agreement)'
+        else:
+            if self.saan:
+                d['saan'] = 'Must be empty if writer is not controlled.'
+            if self.publisher_fee:
+                d['publisher_fee'] = \
+                    'Must be empty if writer is not controlled.'
+        if d:
+            raise ValidationError(d)
 
     @property
     def json(self):
