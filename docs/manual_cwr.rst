@@ -24,7 +24,7 @@ You will be taken to the ``CWR export list view``, which may look familiar, as a
 
    CWR preview with syntax highlighting
 
-Please note that the example shown above the CWR file with syntax highlighting. This feature is not available in open source code, but requires the use of an external service. See :ref:`SyntaxHighlighting`.
+Please note that the example shown above the CWR file with syntax highlighting. This feature is not available in open source code, but requires the use of an external service.
 
 When you hover over the fields with your cursor, additional information is shown to help in solving issues with your society or any other receiver of the CWR file.
 
