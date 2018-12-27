@@ -1,6 +1,10 @@
 User Administration
 ===================
 
+This section is covering user administration. If you dont have the permission to manage other users, meaning you dont see the ``Authentication and Authorization`` module on your home screen, then just skip this section.
+
+If you do, then *read this very carefully!*
+
 Generally, it is a bad idea for superusers to do everyday tasks. Even if you are just one person, should create a "normal" user first.
 
 We do it by pressing on ``+ Add`` link for the ``Users`` in the ``Authentication and Authorization``. The following view is shown:

@@ -6,16 +6,24 @@ Attributes:
     CONTROLLED_WRITER_REQUIRED_FIELDS (list): List of required fields
     ENFORCE_IPI_NAME (bool): \
         Is IPI Name # a required field for controlled writers?
-    ENFORCE_PR_SOCIETY (TYPE): \
+    ENFORCE_PR_SOCIETY (bool): \
         Is PR Society Code a required field for controlled writers?
-    ENFORCE_PUBLISHER_FEE (TYPE): \
+    ENFORCE_PUBLISHER_FEE (bool): \
         Is Publisher Fee a required field for controlled writers?
-    ENFORCE_SAAN (TYPE): \
+    ENFORCE_SAAN (bool): \
         Is Society-assigned agreement number a required field for controlled \
         writers?
-    VALIDATE (TYPE): Are settings for remote validation service present?
-    WORK_ID_PREFIX (TYPE): Prefix for Submitter Work ID, which is numerical
+    NAMES_CHARS (str): Characters allowed in CWR names
+    RE_IPI_BASE (str): Regex pattern for IPI Base
+    RE_ISNI (str): Regex pattern for ISNI
+    RE_ISRC (str): Regex pattern for ISRC (lax)
+    RE_ISWC (str): Regex pattern for ISWC
+    RE_NAME (str): Regex pattern for CWR names
+    RE_TITLE (str): Regex pattern for CWR titles
+    TITLES_CHARS (str): Characters allowed in CWR titles
+    WORK_ID_PREFIX (str): Prefix for Submitter Work ID, which is numerical
 """
+
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -23,15 +31,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.deconstruct import deconstructible
 import re
-import requests
+import warnings
 
 
-# SETTINGS, strictly not required, except for validation and CWR generation
-
-if hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'):
-    SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-else:
-    SETTINGS = {}
+SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
 ENFORCE_SAAN = SETTINGS.get('enforce_saan')
 ENFORCE_PUBLISHER_FEE = SETTINGS.get('enforce_publisher_fee')
@@ -46,11 +49,6 @@ CAN_NOT_BE_CONTROLLED_MSG = (
     'Unsufficient data for a controlled writer, required fields are: {}.'
 ).format(', '.join(CONTROLLED_WRITER_REQUIRED_FIELDS))
 WORK_ID_PREFIX = SETTINGS.get('work_id_prefix') or ''
-VALIDATE = (
-    SETTINGS.get('validator_url') and
-    SETTINGS.get('highlighter_url') and
-    SETTINGS.get('generator_url') and
-    SETTINGS.get('token'))
 
 
 # Default only has 18 societies from 12 countries. These are G7, without Japan,
@@ -96,6 +94,99 @@ except AttributeError:
         ('707', 'Musicmark, Administrative Agency')]
 
 
+TITLES_CHARS = re.escape(
+    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
+)
+NAMES_CHARS = re.escape(
+    "!#$%&'()+-./0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ`"
+)
+
+RE_TITLE = r'(^[{0}][ {0}]+$)'.format(TITLES_CHARS)
+RE_NAME = r'(^[{0}][ {0}]+$)'.format(NAMES_CHARS)
+RE_ISWC = re.compile(r'(^T\d{10}$)')
+RE_ISRC = re.compile(r'(^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$)')
+RE_ISNI = re.compile(r'(^[0-9]{15}[0-9X]$)')
+RE_IPI_BASE = re.compile(r'(I-\d{9}-\d)')
+
+
+def check_ean_digit(ean):
+    """EAN checksum validation.
+
+    Args:
+        ean (str): EAN
+
+    Raises:
+        ValidationError
+    """
+    number = ean[:-1]
+    ch = str(
+        (10 - sum(
+            (3, 1)[i % 2] * int(n)
+            for i, n in enumerate(reversed(number))
+        )) % 10)
+    if ean[-1] != ch:
+        raise ValidationError('Invalid EAN.')
+
+
+def check_iswc_digit(iswc, weight):
+    """ISWC / IPI Base checksum validation.
+
+    Args:
+        iswc (str): ISWC or IPI Base #
+        weight (int): 1 for ISWC, 2 for IPI Base #
+
+    Raises:
+        ValidationError
+    """
+    digits = re.sub(r'\D', r'', iswc)
+    sum = weight
+    for i, d in enumerate(digits[:9]):
+        sum += (i + 1) * int(d)
+    checksum = (10 - sum % 10) % 10
+    if checksum != int(digits[9]):
+        raise ValidationError('Not valid: {}.'.format(iswc))
+
+
+def check_ipi_digit(all_digits):
+    """IPI Name checksum validation.
+
+    Args:
+        all_digits (str): IPI Name #
+
+    Raises:
+        ValidationError
+    """
+    digits = all_digits[:-2]
+    sum = 0
+    for i, digit in enumerate(digits):
+        sum += int(digit) * (10 - i)
+    sum = sum % 101
+    if sum != 0:
+        sum = (101 - sum) % 100
+    if '{:02d}'.format(sum) != all_digits[-2:]:
+        raise ValidationError('Not a valid IPI name number {}.'.format(
+            all_digits))
+
+
+def check_isni_digit(all_digits):
+    """ISNI checksum validation.
+
+    Args:
+        all_digits (str): ISNI
+
+    Raises:
+        ValidationError
+    """
+    digits = all_digits[:-1]
+    sum = 0
+    for i, digit in enumerate(digits):
+        sum = 2 * (sum + int(digit))
+    sum = (12 - (sum % 11)) % 11
+    sum = 'X' if sum == 10 else str(sum)
+    if sum != all_digits[-1]:
+        raise ValidationError('Not a valid ISNI {}.'.format(all_digits))
+
+
 def get_publisher_dict(pr_society):
     """Return publisher settings based on society code.
 
@@ -139,103 +230,67 @@ class CWRFieldValidator:
         self.field = field
 
     def __call__(self, value):
-        """Dummy call
+        """Use custom validation, based on the name of the field.
 
         Args:
-            value (): Not used, dummy call
+            value (): Input valie
 
         Returns:
-            None: dummy call
+            None: If all is well.
+
+        Raises:
+            ValidationError: If the valie does not pass the validation.
         """
-        return
+        name = self.field
+        if 'title' in name:
+            if not re.match(RE_TITLE, value.upper()):
+                raise ValidationError('Title contains invalid characters.')
+        elif name == 'isni':
+            if not re.match(RE_ISNI, value):
+                raise ValidationError('Value does not match ISNI format.')
+            check_isni_digit(value)
+        elif name == 'ean':
+            if not value.isnumeric() or len(value) != 13:
+                raise ValidationError('Value does not match EAN13 format.')
+            check_ean_digit(value)
+        elif name == 'iswc':
+            if not re.match(RE_ISWC, value):
+                raise ValidationError(
+                    'Value does not match TNNNNNNNNNC format.')
+            check_iswc_digit(value, weight=1)
+        elif name == 'isrc':
+            if not re.match(RE_ISRC, value):
+                raise ValidationError('Value does not match ISRC format.')
+        elif 'ipi_name' in name:
+            if not value.isnumeric():
+                raise ValidationError('Value must be numeric.')
+            check_ipi_digit(value)
+        elif 'ipi_base' in name:
+            if not re.match(RE_IPI_BASE, value):
+                raise ValidationError(
+                    'Value does not match I-NNNNNNNNN-C format.')
+            check_iswc_digit(value, weight=2)
+        elif ('name' in name or 'label' in name or name in [
+                'cd_identifier', 'saan']):
+            if not re.match(RE_NAME, value.upper()):
+                raise ValidationError('Name contains invalid characters.')
 
 
 class MusicPublisherBase(models.Model):
     """Abstract class for all top-level classes.
+
+    Not used any more, kept for backward-compatibility.
     """
 
     class Meta:
         abstract = True
+        ordering = ('-id', )
 
-    _cwr = models.BooleanField(
-        'CWR-Ready', editable=False, default=False)
-
-    def validate_fields(self, fields):
-        """Validate the fields with an external service.
-
-        Args:
-            fields (dict): dict of dicts, see :meth:`construct_field_dict`
-
-        Raises:
-            ValidationError: If remote validation is not successful
-        """
-
-        keys = list(fields.keys())
-        values = list(fields.values())
-        data = {'fields': values}
-        try:
-            response = requests.post(
-                SETTINGS.get('validator_url'),
-                headers={'Authorization': 'Token {}'.format(
-                    SETTINGS.get('token'))},
-                json=data, timeout=10)
-        except requests.exceptions.ConnectionError:
-            raise ValidationError('Network error', code='service')
-        if response.status_code != 200:
-            raise ValidationError('Validation failed', code='service')
-        errors = {}
-        rfields = response.json()['fields']
-        for i in range(len(fields)):
-            field_name = keys[i]
-            field_dict = rfields[i]
-            if not field_dict.get('conditionally_valid'):
-                errors[field_name] = (
-                    field_dict['error'] or 'Unknown Error')
-        if errors:
-            raise ValidationError(errors, code='invalid')
-        self._cwr = True
-
-    def construct_field_dict(self):
-        """Construct dictionary appropriate for external validation.
-
-        Returns:
-            dict: Dictionary with following structure:
-                {local_field_name: {
-                    'field': validator_field_name,
-                    'value': field-value}}
-        """
-        fields = {}
-        for field in self._meta.fields:
-            if not hasattr(self, field.name):
-                continue
-            value = getattr(self, field.name)
-            if not value:
-                continue
-            for validator in field.validators:
-                if isinstance(validator, CWRFieldValidator):
-                    fields[field.name] = {
-                        'field': validator.field,
-                        'value': value}
-        return fields
-
-    def clean_fields(self, *args, **kwargs):
-        """If external service is used, prepare the data for validation,
-        and perform the validation.
-        """
-
-        if not VALIDATE:  # external validation not active, just skip
-            self._cwr = False
-            return super().clean_fields(*args, **kwargs)
-
-        fields = self.construct_field_dict()
-        try:
-            self.validate_fields(fields)
-        except ValidationError as ve:
-            self._cwr = False
-            if 'service' not in ve.args:
-                # This means it is an unknown error
-                raise
-        return super().clean_fields(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "Might get depreciated in 19.7 release.",
+            PendingDeprecationWarning)
 
 
 class TitleBase(MusicPublisherBase):
@@ -248,7 +303,6 @@ class TitleBase(MusicPublisherBase):
 
     class Meta:
         abstract = True
-        ordering = ('-id',)
 
     title = models.CharField(
         max_length=60, db_index=True, validators=(
@@ -275,6 +329,15 @@ class WorkBase(TitleBase):
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('iswc'),))
+
+    original_title = models.CharField(
+        max_length=60, db_index=True, blank=True,
+        help_text='Use only for modification of existing works.',
+        validators=(
+            CWRFieldValidator('work_title'),))
+
+    def is_modification(self):
+        return bool(self.original_title)
 
     def clean_fields(self, *args, **kwargs):
         """Deal with various ways ISWC is written.
@@ -306,10 +369,10 @@ class AlbumCDBase(MusicPublisherBase):
         abstract = True
         verbose_name = 'Album and/or Library CD'
         verbose_name_plural = ' Albums and Library CDs'
-        ordering = ('album_title', 'cd_identifier')
+        ordering = ('album_title', 'cd_identifier', '-id')
 
     cd_identifier = models.CharField(
-        'CD Identifier',
+        'CD identifier',
         help_text='This will set the purpose to Library.',
         max_length=15, blank=True, null=True, unique=True, validators=(
             CWRFieldValidator('cd_identifier'),))
@@ -441,7 +504,7 @@ class IPIBase(models.Model):
         'IPI Base #', max_length=15, blank=True, null=True,
         validators=(CWRFieldValidator('writer_ipi_base'),))
     pr_society = models.CharField(
-        'Performing Rights Society', max_length=3, blank=True, null=True,
+        'Performing rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
         choices=SOCIETIES)
     saan = models.CharField(
@@ -452,7 +515,7 @@ class IPIBase(models.Model):
 
     _can_be_controlled = models.BooleanField(editable=False, default=False)
     generally_controlled = models.BooleanField(
-        'General Agreement', default=False)
+        'General agreement', default=False)
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
@@ -500,22 +563,21 @@ class IPIBase(models.Model):
             self._can_be_controlled &= bool(self.ipi_name)
         if enforce_pr_society:
             self._can_be_controlled &= bool(self.pr_society)
-        if not self._can_be_controlled and self.generally_controlled:
-            raise ValidationError({
-                'generally_controlled': error_msg})
-        if self.saan and not self.generally_controlled:
-            raise ValidationError({
-                'saan': 'Only for a general agreement.'})
-        if self.publisher_fee and not self.generally_controlled:
-            raise ValidationError({
-                'publisher_fee': 'Only for a general agreement.'})
-        if self.generally_controlled and enforce_saan and not self.saan:
-            raise ValidationError({
-                'saan': 'This field is required.'})
-        if (self.generally_controlled and enforce_publisher_fee and
-                not self.publisher_fee):
-            raise ValidationError({
-                'publisher_fee': 'This field is required.'})
+        d = {}
+        if not self.generally_controlled:
+            if self.saan:
+                d['saan'] = 'Only for a general agreement.'
+            if self.publisher_fee:
+                d['publisher_fee'] = 'Only for a general agreement.'
+        else:
+            if not self._can_be_controlled:
+                d['generally_controlled'] = error_msg
+            if enforce_saan and not self.saan:
+                d['saan'] = 'This field is required.'
+            if enforce_publisher_fee and not self.publisher_fee:
+                d['publisher_fee'] = 'This field is required.'
+        if d:
+            raise ValidationError(d)
 
 
 class ArtistBase(PersonBase, MusicPublisherBase):
@@ -535,6 +597,11 @@ class ArtistBase(PersonBase, MusicPublisherBase):
         max_length=16, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('isni'),))
 
+    def clean_fields(self, *args, **kwargs):
+        if self.isni:
+            self.isni = self.isni.rjust(16, '0').upper()
+        return models.Model.clean_fields(self, *args, **kwargs)
+
 
 class WriterBase(PersonBase, IPIBase, MusicPublisherBase):
     """Base class for writers, the second most important top-level class.
@@ -542,11 +609,8 @@ class WriterBase(PersonBase, IPIBase, MusicPublisherBase):
 
     class Meta:
         abstract = True
-        ordering = ('last_name', 'first_name', 'ipi_name')
+        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
         verbose_name_plural = ' Writers'
-
-    _cwr = models.BooleanField(
-        'CWR-Compliance', editable=False, default=False)
 
     def get_publisher_dict(self):
         """Return data on publisher.

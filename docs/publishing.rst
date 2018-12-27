@@ -1,7 +1,7 @@
 Introduction for Developers and Sysadmins
 #########################################
 
-This is a very brief introduction to for software developers and system administrators, as music rights are quite complex and often counter-intuitive. It is using a techie language, publishers beware.
+This is a very brief introduction for software developers and system administrators. It is required as music rights are quite complex and often counter-intuitive and available information can be misleading.
 
 Music Publishing
 ****************
@@ -10,11 +10,13 @@ Music publishing started with publishing of sheet music, and first music *perfor
 
 Although sheet music is not in the focus any more, *composers and lyricists (writers)* still have contracts with *music publishers*. When a (co-)writer has a contract about a musical work with a publisher, this publisher is original publisher of the work in question. Usually 50% of performing and 100% of mechanical and synchronization rights are transferred to the original publishers. Each writer can have a different publisher, or even multiple ones, or not have one at all.
 
+Django Music Publisher only supports the simpest and most common case with one original publisher per controlled writer and usual 50%/100%/100% publisher shares.
+
 Please note that *musical work means composition and lyrics*, this has nothing to do with sound.
 
-Writers and publishers who are in the chain of agreements that includes the sender of the CWR file are referred to as *controlled*. 
+Writers and publishers who are in the chain of agreements that includes the sender of the CWR file are referred to as *controlled*.
 
-Each original publisher has, among others, a fiduciary obligation to register client’s shares, when they register their own at collecting organizations they are affiliated with.
+Each original publisher has a fiduciary obligation to register client’s shares, when they register their own at collecting organizations they are affiliated with.
 
 Royalties for collecting rights are payed, based on registrations. There is a popular belief among writers that by registering in their home societies, other societies will somehow magically know about that. While some collecting organizations share data among themselves, most of them do not.
 
@@ -27,9 +29,9 @@ In the context of registrations, basically there are three roles:
 * *administrators* to whom some OPs have entrusted all or some activities regarding musical works
 * *sub-publishers* to whom OPs or admins have entrusted all or some activieties in foreign countries
 
-Django Music Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of modifications of musical works, composite works and some other rare cases.
+Django Music Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of composite works and some other rare cases.
 
-Please note that the term *self-publisher* means original publisher with a single signed writer - usually the owner, or sometimes all members of a band.
+Please note that the term *self-publisher* is used for an original publisher with a single signed writer - usually the owner, or sometimes all members of a band. They usually do not require royalty statement processing.
 
 Publisher Size
 **************
@@ -38,23 +40,9 @@ In the software context, the size of a publisher is completely irrelevant. There
 
 In the context of Django Music Publisher, original publishers with up to about 1000 works, effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows.
 
-Extending Django Music Publisher
-********************************
+Contributing to Django Music Publisher
+***************************************
 
-The maintainer of this project also leads a propriatery project that actually extends Django Music Publisher, and has worked on several other projects in the field in different roles.
+Django Music Publisher is activelly developed, though the speed of development partly depends on sponsors, for details please see :doc:`features`.
 
-There are generally speaking five tiers of complexity in music publishing. And they do not follow the logic publishers have. Based on years of experience:
-
-* Tier 1 would be unpublished writers (writers with no publishers). 
-
-* Django Music Publisher currently coveres most of the tier two. To cover the rest, support for modified works should be added, as well as some other improvements.
-
-* Tier 3 has two sub-tiers, in the first, the uncontrolled original publishers should be added. Three more database tables in a normalized database. Then one has to add administrators, which turns one of these tables into a forest. And this is without multiple affiliations, which turns some many-to-one relations into many-to-many.
-
-* Tier 4 includes any feature dealing with multiple territories, most notably sub-publishing.
-
-* Tier 5 includes special features, most notably share changes across territories.
-
-The data structure for tiers 4 and 5 get really weird. Surely, there are some denormalizations that make things simpler, but as any denormalization, it limits further development.
-
-While there is still a lot of room for improvement on Tier 2, if you are considering moving to Tier 3+, you are hereby warned: **Everybody falls the first time!**
+While the maintainer hopes that this project will be community-driven, only pull requests of sufficient quality will be accepted.

@@ -133,22 +133,13 @@ STATICFILES_DIRS = [
 MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': True,
     'admin_show_saan': True,
+    'allow_modifications': True,
+    'allow_multiple_ops': True,
 
     'enforce_saan': True,
     'enforce_publisher_fee': True,
     'enforce_pr_society': True,
     'enforce_ipi_name': True,
-
-    'token': os.getenv('TOKEN', '8bf5027ed99ddcc5cbeea8391bea6a369a2f9e0a'),
-    'validator_url': os.getenv(
-        'VALIDATOR_URL',
-        'https://matijakolaric.com/api/v1/cwr/original/field/multi/'),
-    'generator_url': os.getenv(
-        'GENERATOR_URL',
-        'https://matijakolaric.com/api/v1/cwr/original/creator/'),
-    'highlighter_url': os.getenv(
-        'HIGHLIGHTER_URL',
-        'https://matijakolaric.com/api/v1/cwr/highlighter/'),
 
     'work_id_prefix': os.getenv('WORK_ID_PREFIX', ''),
 

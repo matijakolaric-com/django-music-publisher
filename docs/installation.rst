@@ -1,7 +1,10 @@
-Installation
-************
+Installation and Configuration
+******************************
 
-Django Music Publisher can be installed either as a Django app, or as a stand-alone project.
+Django Music Publisher can be installed either as a Django app, or as a stand-alone project. 
+
+There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>`_ that simplifies the process for a moderate subscription fee.
+
 
 Installing the App
 ===============================================================================
@@ -23,17 +26,16 @@ You will have to add this to the settings, replace with your data.
 
     MUSIC_PUBLISHER_SETTINGS = {
         'admin_show_publisher': False,  # Needed only in US version
-        'admin_show_saan': True,  # Needed only if societies assign agr. #
+        'admin_show_saan': True,  # Needed only if societies assign agreement #
+        'allow_modifications': True,  # Only original works if False
+        'allow_multiple_ops': False,  # Writers can have multiple original pubs
 
         'enforce_saan': True,  # Agr. # is required in many societies
         'enforce_publisher_fee': True,  # False for self-publishers
         'enforce_pr_society': True,  # Strictly not required, but good practice
         'enforce_ipi_name': True,  # Strictly not required, but good practice
 
-        'token': None,  # See below
-        'validator_url': None,  # See below
-        'generator_url': None,  # See below
-        'highlighter_url': None,  # See below
+        'allow_modifications': True  # If set to False, only original works
 
         'work_id_prefix': 'TOP',  # Makes work IDs somewhat unique
         
@@ -58,16 +60,13 @@ and foreign societies. Then define publishers in other PROs.
     MUSIC_PUBLISHER_SETTINGS = {
         'admin_show_publisher': True,  # Needed in US version
         'admin_show_saan': False,  # Not used in US
+        'allow_modifications': True,  # Only original works if False
+        'allow_multiple_ops': False,  # Writers can have multiple original pubs
 
         'enforce_saan': False,  # Not used in US
         'enforce_publisher_fee': True,  # False for self-publishers
         'enforce_pr_society': True,  # Strictly not required, but good practice
         'enforce_ipi_name': True,  # Strictly not required, but good practice
-
-        'token': None,  # See below
-        'validator_url': None,  # See below
-        'generator_url': None,  # See below
-        'highlighter_url': None,  # See below
 
         'work_id_prefix': 'FOO',  # Makes work IDs somewhat unique
         
@@ -102,22 +101,26 @@ and foreign societies. Then define publishers in other PROs.
         'label': 'FOO BAR MUSIC',  # Use only if you are also a label
     }
 
-When you apply for a free 15-day demo licence for the external service that
-validates the data and generates CWR, additional documentation will be
-provided, as well as ``token``, ``validator_url``, ``creator_url`` and
-``highlighter_url`` values.
 
-More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_.
+More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
 
 .. _StandaloneDeployment:
+
+
+Additional Societies
+++++++++++++++++++++
+
+The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
+set-up, only 18 societies from 12 countries are present, as well as two 
+administrative agencies. If you need to add additional societies, do it with 
+this setting (and not in the ``models.py``).
+
+All societies the original publisher and all writers are affiliated with must be present.
 
 Installing the Project (Standalone Deployment)
 ===============================================================================
 
-You can only install this project on a system that has Python 3 preinstalled.
-Supported versions are 3.5, 3.6 and 3.7. 
-It might work with other Python 3 versions, but not with Python 2. It is 
-advised you run this inside a virtual environment.
+You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7. It might work with other Python 3 versions, but not with Python 2. It is advised you run this inside a virtual environment.
 
 Do::
 
@@ -137,7 +140,7 @@ Then::
     python manage.py migrate
     python manage.py createsuperuser
 
-If you wish to add two predefined permission groups, run::
+If you wish to add two predefined permission groups (recommended), run::
     
     python manage.py loaddata publishing_staff.json
     
@@ -151,43 +154,18 @@ credentials you provided in a previous step. For instructions on permanent
 deployment, please use official 
 `Django documentation <https://www.djangoproject.com/>`_.
 
-Heroku
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Deployment on Heroku / Dokku
+==============================================================================
 
-If you would like to try Django Music Publisher, Heroku is a good choice. The
-free PostgreSQL tier can have up to 10.000 rows, which translates to about
-1.000 works. 
+``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var. The recommended way to do this is to create a custom Django project in a private repository that uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
 
-Master branch, after it passes the CI, is deployed on Heroku automatically.
-The following Config Vars are all that is required for that:
 
-* ALLOWED_HOSTS set to the correct host name
-* DATABASE_URL was set by PostgreSQL add-on
-* TOKEN is set in order to use the external CWR generation, validation and
-  syntax highlighting service.
+DMP Guru
+==============================================================================
 
-* SECRET_KEY is auto-generated on every deployment, which may 
-  be fine for testing, but for production it should be set as well
+`DMP Guru <https://dmp.guru/>`_ is a commercial hosting service for Django Music Publisher. Your instance of Django Music Publisher can be deployed in a minute. 
 
-Static files are automatically collected and served with Whitenoise. Waitress
-is used instead of more usual uwsgi/gunicorn.
+You only need to provide basic data about the publisher (e.g. name, IPI name #, collecting society (or societies)) and it will figure out the correct settings. 
 
-Societies
-===============================================================================
+Your DMP instance will be properly maintained, regularly upgraded, data will be backed up daily, and you can export your data and move to another arrangement at any point.
 
-The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-setup, only 18 societies from 12 countries are present, as well as two 
-administrative agencies. If you need to add additional societies, do it with 
-this setting (and not in the ``models.py``).
-
-All societies the original publisher and all writers are affiliated with, as well as all societies and agencies whose acknowledgement files are being imported, must be present.
-
-Validation and CWR Generation Service
-===============================================================================
-
-As stated above, this tool uses an external service for data validation and
-generation of CWR files, which is a part of
-`CWR Developer Toolset <https://matijakolaric.com/development/cwr-toolset/>`_.
-
-Free 15 day demo licence is available upon requests. Contact us through this 
-`Contact Page <https://matijakolaric.com/z_contact/>`_. 
