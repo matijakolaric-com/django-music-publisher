@@ -490,9 +490,9 @@ class WorkAdmin(MusicPublisherAdmin):
             key, j = work.json
             if normalized:
                 writers.update(j.pop('writers'))
-                albums.update(j.pop('albums'))
-                artists.update(j.pop('artists'))
-                libraries.update(j.pop('libraries'))
+                albums.update(j.pop('albums', {}))
+                artists.update(j.pop('artists', {}))
+                libraries.update(j.pop('libraries', {}),)
             else:
                 pr_societies = set()
                 for writer in j['writers'].values():
@@ -564,17 +564,11 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     actions = None
 
-    def cwr_ready(self, obj):
-        """Is CWR created?"""
-        return obj.cwr != ''
-    cwr_ready.boolean = True
-
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
 
         return obj._work_count or obj.works__count
-    cwr_ready.boolean = True
 
     def get_preview(self, obj):
         """Get CWR preview.
@@ -607,7 +601,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('works', )
     list_display = (
-        'filename', 'nwr_rev', 'work_count', 'cwr_ready', 'view_link',
+        'filename', 'nwr_rev', 'work_count', 'view_link',
         'download_link')
 
     list_filter = ('nwr_rev', 'year')
@@ -667,7 +661,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
 
-
     def save_model(self, request, obj, form, change):
         """Django splits the saving process int two parts, which does not
             work in this case, so this is simply passing the main object
@@ -676,8 +669,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         if not (hasattr(self, 'obj') and self.obj.cwr):
             super().save_model(request, obj, form, change)
             self.obj = obj
-        elif hasattr(self, 'obj'):
-            del self.obj
 
     def save_related(self, request, form, formsets, change):
         """:meth:`save_model` passes the main object, which is needed to fetch
@@ -688,6 +679,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             super().save_related(request, form, formsets, change)
             self.obj.create_cwr()
             del self.obj
+
 
 class ACKImportForm(ModelForm):
 
@@ -713,7 +705,7 @@ class ACKImportForm(ModelForm):
         cd = self.cleaned_data
         ack = cd.get('acknowledgement_file')
         filename = ack.name
-        if not (len(filename) in [18, 19] and filename[-5:].upper() != '.V21'):
+        if not (len(filename) in [18, 19] and filename[-4:].upper() == '.V21'):
             raise ValidationError('Wrong file name format.')
         self.cleaned_data['filename'] = filename
         content = ack.file.read().decode('latin1')
@@ -809,7 +801,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         return report
 
     def save_model(self, request, obj, form, change):
-        """Custom save_model, it ignores changes, validates the for for new
+        """Custom save_model, it ignores changes, validates the form for new
             instances, if valid, it processes the file and, upon success,
             calls ``super().save_model``."""
         if change:
@@ -855,11 +847,6 @@ class AlbumCDAdmin(MusicPublisherAdmin):
             }),
         )
         return fieldsets
-
-    def label_not_set(self, obj=None):
-        """Return the text if label is not set"""
-        return 'NOT SET'
-    label_not_set.short_description = 'Label'
 
     list_display = (
         '__str__',

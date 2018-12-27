@@ -19,7 +19,7 @@ from django.urls import reverse
 from music_publisher.admin import *
 from music_publisher.models import *
 from io import StringIO
-
+import json
 
 class AllTest(TestCase):
     """All Tests in a sibgle class.
@@ -296,6 +296,7 @@ class AllTest(TestCase):
             reverse('admin:app_list', args=('music_publisher',)))
         self.assertEqual(response.status_code, 200)
 
+    @override_settings()
     def test_2_works(self):
         self.client.force_login(self.user)
         response = self.get(reverse('admin:music_publisher_work_changelist',))
@@ -377,6 +378,15 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 302)
         writer2 = Writer.objects.filter(pr_society='010').first()
         response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'last_name': 'THIRD',
+                'ipi_name': '395',
+                'pr_society': '010',
+            })
+        self.assertEqual(response.status_code, 302)
+        writer3 = Writer.objects.filter(last_name='THIRD').first()
+        response = self.get(
             reverse('admin:music_publisher_writer_changelist'))
         self.assertTrue(writer._can_be_controlled)
         response = self.get(
@@ -416,13 +426,19 @@ class AllTest(TestCase):
                 albumcd.id,)),
             re_post={
                 'cd_identifier': 'C00L',
+                'release_date': '2018-01-01',
+                'ean': '4006381333931',
             })
         self.assertEqual(response.status_code, 302)
         albumcd = AlbumCD.objects.all().first()
+        response = self.get(
+            reverse('admin:music_publisher_albumcd_changelist'))
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(str(albumcd), 'VERY COOL (C00L)')
         response = self.get(
             reverse('admin:music_publisher_artist_add'),
             re_post={
+                'first_name': 'VERY',
                 'last_name': 'VERY COOL',
                 'isni': '1234567890123',
             })
@@ -437,11 +453,16 @@ class AllTest(TestCase):
         response = self.get(
             reverse('admin:music_publisher_artist_add',),
             re_post={
+                'first_name': 'VERY',
                 'last_name': 'VERY COOL',
                 'isni': '1X',
             })
         self.assertEqual(response.status_code, 302)
         artist = Artist.objects.all().first()
+        response = self.get(
+            reverse('admin:music_publisher_artist_changelist'))
+        self.assertEqual(response.status_code, 200)
+
         response = self.get(
             reverse('admin:music_publisher_work_add'),
             re_post={
@@ -485,10 +506,228 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_work_add'),
             re_post={
                 'title': 'GOOD TITLE',
+                'iswc': 'T1234567894',
+                'alternatetitle_set-TOTAL_FORMS': 1,
+                'alternatetitle_set-0-title': 'BETTER TITLE',
+                'writerinwork_set-TOTAL_FORMS': 5,
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '25',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+                'writerinwork_set-1-writer': writer2.id,
+                'writerinwork_set-1-capacity': 'CA',
+                'writerinwork_set-1-relative_share': '11.66',
+                'writerinwork_set-1-controlled': '1',
+                'writerinwork_set-2-writer': writer3.id,
+                'writerinwork_set-2-capacity': 'A ',
+                'writerinwork_set-2-relative_share': '33.33',
+                'writerinwork_set-2-controlled': '1',
+                'writerinwork_set-2-saan': '1LJ4V4',
+                'writerinwork_set-2-publisher_fee': '25',
+                'writerinwork_set-3-writer': writer.id,
+                'writerinwork_set-3-capacity': 'CA',
+                'writerinwork_set-3-relative_share': '25',
+                'writerinwork_set-4-writer': writer3.id,
+                'writerinwork_set-4-relative_share': '5',
+                'firstrecording-TOTAL_FORMS': 1,
+                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-artist': artist.id,
+                'firstrecording-0-isrc': 'USX1X1234567',
+                'firstrecording-0-duration': '01:23',
+                'firstrecording-0-release_date': '2018-01-31',
+            })
+        self.assertEqual(response.status_code, 302)
+        work = Work.objects.all().first()
+        settings.MUSIC_PUBLISHER_SETTINGS['allow_multiple_ops'] = False
+        response = self.get(
+            reverse('admin:music_publisher_work_add'),
+            re_post={
+                'title': 'ANOTHER TITLE',
+                'writerinwork_set-TOTAL_FORMS': 2,
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '50',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+                'writerinwork_set-1-writer': writer.id,
+                'writerinwork_set-1-capacity': 'CA',
+                'writerinwork_set-1-relative_share': '50',
+            })
+        self.assertEqual(response.status_code, 200)
+        settings.MUSIC_PUBLISHER_SETTINGS['allow_multiple_ops'] = True
+        response = self.get(
+            reverse('admin:music_publisher_work_add'),
+            re_post={
+                'title': 'ANOTHER TITLE',
+                'writerinwork_set-TOTAL_FORMS': 4,
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '25',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+                'writerinwork_set-1-writer': writer.id,
+                'writerinwork_set-1-capacity': 'CA',
+                'writerinwork_set-1-relative_share': '25',
+                'writerinwork_set-2-writer': writer3.id,
+                'writerinwork_set-2-relative_share': '25',
+                'writerinwork_set-3-relative_share': '25',
+                'artistinwork_set-TOTAL_FORMS': 1,
+                'artistinwork_set-0-artist': artist.id,
+            })
+        self.assertEqual(response.status_code, 302)
+        work2 = Work.objects.filter(title='ANOTHER TITLE').first()
+        response = self.get(
+            reverse('admin:music_publisher_work_add'),
+            re_post={
+                'title': 'NO COMPOSER TITLE',
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'A ',
+                'writerinwork_set-0-relative_share': '100',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+            })
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_work_add'),
+            re_post={
+                'title': 'OVER 100 PERCENT',
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '101',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+            })
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_work_changelist'))
+        response = self.get(
+            reverse('admin:music_publisher_work_change', args=(work.id,)))
+        response = self.get(
+            reverse('admin:music_publisher_cwrexport_add'),
+            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id]})
+        response = self.get(
+            reverse('admin:music_publisher_cwrexport_add'),
+            re_post={'nwr_rev': 'REV', 'works': [work.id, work2.id]})
+        cwr_export = CWRExport.objects.all().first()
+        response = self.get(
+            reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(cwr_export.id,)),
+            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id]})
+        response = self.get(
+            '{}?download=1'.format(
+                reverse(
+                    'admin:music_publisher_work_change',
+                    args=(cwr_export.id,))))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_cwr', 'select_across': 1,
+                'index': 0, '_selected_action': work.id})
+        response = self.get(
+            reverse('admin:music_publisher_cwrexport_changelist'))
+        self.assertEqual(response.status_code, 200)
+        response = self.get(reverse(
+            'admin:music_publisher_cwrexport_change', args=(cwr_export.id,)))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(cwr_export.id,)) + '?download=true',)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(cwr_export.id,)) + '?preview=true',)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.get(
+            reverse('admin:music_publisher_work_changelist',) +
+            '?has_iswc=N&has_rec=Y')
+        self.assertEqual(response.status_code, 200)
+        self.get(
+            reverse('admin:music_publisher_work_changelist',) +
+            '?has_iswc=Y&has_rec=N&q=01')
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_artist_add') + '?_popup=1')
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_albumcd_add') + '?_popup=1')
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_work_add') + '?_popup=1')
+        self.assertEqual(response.status_code, 200)
+        mock = StringIO()
+        mock.write(CONTENT)
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        response = self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
+        self.assertEqual(response.status_code, 302)
+        ackimport = ACKImport.objects.first()
+        # open and repost
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        response = self.get(reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,)),
+            re_post={'acknowledgement_file': mockfile})
+        self.assertEqual(response.status_code, 302)
+        # second pass, same thing
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        response = self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
+        self.assertEqual(response.status_code, 302)
+        # incorrect filename
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V22',
+            'text', 0, None)
+        response = self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
+        self.assertEqual(response.status_code, 200)
+        # incorrect header
+        mock.seek(3)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        response = self.get(
+            reverse('admin:music_publisher_ackimport_add'),
+            re_post={'acknowledgement_file': mockfile})
+        self.assertEqual(response.status_code, 200)
+        # Removing needed data from controlled writer
+        response = self.get(
+            reverse('admin:music_publisher_writer_change', args=(
+                writer.id,)),
+            re_post={
+                'pr_society': ''
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('controlled in at least', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_work_change', args=(work.id,)),
+            re_post={
+                'title': 'GOOD TITLE',
+                'iswc': 'T1234567894',
                 'alternatetitle_set-TOTAL_FORMS': 1,
                 'alternatetitle_set-0-title': 'BETTER TITLE',
                 'writerinwork_set-TOTAL_FORMS': 2,
-                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-writer': '',
                 'writerinwork_set-0-capacity': 'CA',
                 'writerinwork_set-0-relative_share': '50',
                 'writerinwork_set-0-controlled': '1',
@@ -502,18 +741,53 @@ class AllTest(TestCase):
                 'writerinwork_set-1-publisher_fee': '25',
                 'firstrecording-TOTAL_FORMS': 1,
                 'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-artist': artist.id,
                 'firstrecording-0-isrc': 'USX1X1234567',
+                'firstrecording-0-duration': '01:23',
+                'firstrecording-0-release_date': '2018-01-31',
             })
-        self.assertEqual(response.status_code, 302)
-        work = Work.objects.all().first()
-        # self.assertEqual(str(work), 'GOOD TITLE')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Must be set for', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_work_changelist'))
-        response = self.get(
-            reverse('admin:music_publisher_work_change', args=(work.id,)))
-        response = self.get(
-            reverse('admin:music_publisher_cwrexport_add'),
-            re_post={'nwr_rev': 'NWR', 'works': [work.id]})
+            reverse('admin:music_publisher_work_change', args=(work.id,)),
+            re_post={
+                'title': 'GOOD TITLE',
+                'iswc': 'T1234567894',
+                'alternatetitle_set-TOTAL_FORMS': 1,
+                'alternatetitle_set-0-title': 'BETTER TITLE',
+                'writerinwork_set-TOTAL_FORMS': 2,
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '50',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+                'writerinwork_set-1-writer': writer2.id,
+                'writerinwork_set-1-capacity': 'CA',
+                'writerinwork_set-1-relative_share': '50',
+                'writerinwork_set-1-controlled': '',
+                'firstrecording-TOTAL_FORMS': 1,
+                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-artist': artist.id,
+                'firstrecording-0-isrc': 'USX1X1234567',
+                'firstrecording-0-duration': '01:23',
+                'firstrecording-0-release_date': '2018-01-31',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Must be set for', response.content.decode())
+        # JSON must be at the end, so the export is complete
+        response = self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_normalized_json', 'select_across': 1,
+                'index': 0, '_selected_action': work.id})
+        response = self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': work.id})
+        self.assertEqual(str(WorkAcknowledgement.objects.first()), 'RA')
+
 #     @override_settings()
 #     def test_admin(self):
 #         """Integration tests for admin interface.
@@ -662,7 +936,7 @@ class AllTest(TestCase):
 
 CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
-ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001                          20180607AS
+ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607RA
 ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607AS
 ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607NP
 ACK0000000300000000201805160910510000100000003NWRX                                                           0000000000000X                          20180607NP

@@ -380,7 +380,8 @@ class WriterInWork(models.Model):
             data['publishers_for_writer'] = [pwr]
             data['writer']['publisher_dict'] = {
                 'name': publisher.get('publisher_name'),
-                'publisher_id': publisher.get('publisher_id')
+                'publisher_id': publisher.get('publisher_id'),
+                'pr_society': publisher.get('pr_society'),
             }
             if self.saan:
                 agr = {'saan': self.saan, 'type': 'OS'}
