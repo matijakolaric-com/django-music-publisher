@@ -284,6 +284,7 @@ class MusicPublisherBase(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ('-id', )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -368,7 +369,7 @@ class AlbumCDBase(MusicPublisherBase):
         abstract = True
         verbose_name = 'Album and/or Library CD'
         verbose_name_plural = ' Albums and Library CDs'
-        ordering = ('album_title', 'cd_identifier')
+        ordering = ('album_title', 'cd_identifier', '-id')
 
     cd_identifier = models.CharField(
         'CD identifier',
@@ -608,7 +609,7 @@ class WriterBase(PersonBase, IPIBase, MusicPublisherBase):
 
     class Meta:
         abstract = True
-        ordering = ('last_name', 'first_name', 'ipi_name')
+        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
         verbose_name_plural = ' Writers'
 
     def get_publisher_dict(self):

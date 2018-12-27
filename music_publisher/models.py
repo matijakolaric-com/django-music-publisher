@@ -481,7 +481,8 @@ class CWRExport(models.Model):
             other_publisher_share = None
             controlled_writer_ids = []
             controlled_writer_shares = defaultdict(Decimal)
-            for wiw in work.writerinwork_set.order_by('-controlled'):
+            for wiw in work.writerinwork_set.order_by(
+                    '-controlled', 'id'):
                 if wiw.controlled:
                     controlled_writer_ids.append(wiw.writer_id)
                     controlled_writer_shares[wiw.writer_id] += \
@@ -509,7 +510,8 @@ class CWRExport(models.Model):
                     'OPU', {
                         'share': other_publisher_share,
                         'sequence': len(publishers) + 1})
-            for wiw in work.writerinwork_set.all():
+            for wiw in work.writerinwork_set.order_by(
+                    '-controlled', 'id'):
                 if not wiw.controlled:
                     continue
                 w = wiw.writer
@@ -527,7 +529,8 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('SWT', record)
                 record.update(w.get_publisher_dict())
                 yield self.get_transaction_record('PWR', record)
-            for wiw in work.writerinwork_set.all():
+            for wiw in work.writerinwork_set.order_by(
+                    '-controlled', 'id'):
                 if wiw.controlled or wiw.writer_id in controlled_writer_ids:
                     continue
                 record = {
@@ -545,13 +548,14 @@ class CWRExport(models.Model):
                     record['writer_unknown_indicator'] = 'Y'
                 yield self.get_transaction_record('OWR', record)
 
-            for record in work.alternatetitle_set.all():
+            for record in work.alternatetitle_set.order_by('title'):
                 yield self.get_transaction_record('ALT', {
                     'alternate_title': record.title})
             if work.is_modification():
                 yield self.get_transaction_record('VER', {
                     'original_title': work.original_title})
-            for artist in work.artists.all():
+            for artist in work.artists.order_by(
+                    'last_name', 'first_name', 'id'):
                 yield self.get_transaction_record('PER', {
                     'first_name': artist.first_name,
                     'last_name': artist.last_name,
