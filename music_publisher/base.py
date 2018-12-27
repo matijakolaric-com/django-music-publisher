@@ -325,7 +325,7 @@ class WorkBase(TitleBase):
     class Meta:
         abstract = True
         verbose_name_plural = '  Works'
-        ordering = ('-id',)
+        ordering = ('id',)
 
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
