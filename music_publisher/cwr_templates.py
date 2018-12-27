@@ -22,7 +22,8 @@ TEMPLATES_21 = {
         '{{ work_title|ljust:60 }}  {{ work_id|ljust:14 }}'
         '{{ iswc|ljust:11 }}00000000            UNC'
         '{{ duration|date:"His"|default:"000000" }}{{ recorded_indicator }}'
-        '      ORI           ' + ' ' * (40) + 'N00000000000' + ' ' * 51 + 'N'
+        '      {{ version_type }}  ' + ' ' * (40) + 'N00000000000' +
+        ' ' * 51 + 'N'
         '\r\n'),
     'SPU': Template(
         '{% load cwr_filters %}SPU{{ transaction_sequence|rjust:8 }}'
@@ -78,6 +79,11 @@ TEMPLATES_21 = {
     'ALT': Template(
         '{% load cwr_filters %}ALT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}AT  \r\n'),
+    'VER': Template(
+        '{% load cwr_filters %}VER{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ original_title|ljust:60 }}' +
+        ' ' * (11 + 2 + 45 + 30 + 60 + 11 + 13 + 45 + 30 + 11 + 13 + 14) +
+        '\r\n'),
     'PER': Template(
         '{% load cwr_filters %}PER{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ last_name|ljust:45 }}'
@@ -99,5 +105,5 @@ TEMPLATES_21 = {
         '{{ record_count|rjust:8 }}   0000000000\r\n'),
     'TRL': Template(
         '{% load cwr_filters %}TRL00001{{ transaction_count|rjust:8 }}'
-        '{{ record_count|rjust:8 }}\r\n'),
+        '{{ record_count|rjust:8 }}'),
 }

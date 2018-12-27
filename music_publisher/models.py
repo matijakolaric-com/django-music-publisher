@@ -290,9 +290,12 @@ class WriterInWork(models.Model):
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(max_digits=5, decimal_places=2)
     capacity = models.CharField(max_length=2, blank=True, choices=(
+        ('CA', 'Composer&Lyricist'),
         ('C ', 'Composer'),
         ('A ', 'Lyricist'),
-        ('CA', 'Composer&Lyricist'),
+        ('AR', 'Arranger'),
+        ('AD', 'Adaptor'),
+        ('TR', 'Translator'),
     ))
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
@@ -469,6 +472,9 @@ class CWRExport(models.Model):
                 d['recorded_indicator'] = 'Y'
             except ObjectDoesNotExist:
                 d['recorded_indicator'] = 'U'
+            d['version_type'] = (
+                'MOD   UNSUNS' if work.is_modification() else
+                'ORI         ')
             yield self.get_transaction_record('NWR', d)
             publishers = {}
             other_publisher_share = None
@@ -477,7 +483,8 @@ class CWRExport(models.Model):
             for wiw in work.writerinwork_set.all():
                 if wiw.controlled:
                     controlled_writer_ids.append(wiw.writer_id)
-                    controlled_writer_shares[wiw.writer_id] += wiw.relative_share
+                    controlled_writer_shares[wiw.writer_id] += \
+                        wiw.relative_share
                     d = wiw.writer.get_publisher_dict()
                     key = d['publisher_id']
                     if key in publishers:
@@ -486,7 +493,8 @@ class CWRExport(models.Model):
                         publishers[key] = d
                         publishers[key]['share'] = wiw.relative_share
                 elif wiw.writer_id in controlled_writer_ids:
-                    controlled_writer_shares[wiw.writer_id] += wiw.relative_share
+                    controlled_writer_shares[wiw.writer_id] += \
+                        wiw.relative_share
                     if other_publisher_share is None:
                         other_publisher_share = wiw.relative_share
                     else:
@@ -539,6 +547,9 @@ class CWRExport(models.Model):
             for record in work.alternatetitle_set.all():
                 yield self.get_transaction_record('ALT', {
                     'alternate_title': record.title})
+            if work.is_modification():
+                yield self.get_transaction_record('VER', {
+                    'original_title': work.original_title})
             for artist in work.artists.all():
                 yield self.get_transaction_record('PER', {
                     'first_name': artist.first_name,
