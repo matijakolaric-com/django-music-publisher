@@ -476,7 +476,7 @@ class CWRExport(models.Model):
                 'MOD   UNSUNS' if work.is_modification() else
                 'ORI         ')
             yield self.get_transaction_record('NWR', d)
-            publishers = {}
+            publishers = OrderedDict()
             other_publisher_share = None
             controlled_writer_ids = []
             controlled_writer_shares = defaultdict(Decimal)
