@@ -346,7 +346,7 @@ class WorkAdmin(MusicPublisherAdmin):
         """This is a standard way how writers are shown in other apps."""
 
         return ' / '.join(
-            writer.last_name.upper() for writer in obj.writers.all())
+            writer.last_name.upper() for writer in obj.writers.distinct())
     writer_last_names.short_description = 'Writers\' last names'
     writer_last_names.admin_order_field = 'writers__last_name'
 
