@@ -134,10 +134,10 @@ class WriterInWorkFormSet(BaseInlineFormSet):
             ValidationError
         """
         is_modification = self.instance.is_modification()
+        print(self.instance.title, is_modification)
         super().clean()
         if is_modification:
-            raise ValidationError(
-                'VALIDATION FOR MODIFICATIONS IS NOT IMPLEMENTED.')
+            pass
         total = 0
         controlled = False
         has_composer = False

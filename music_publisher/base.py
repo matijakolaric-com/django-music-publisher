@@ -337,8 +337,7 @@ class WorkBase(TitleBase):
             CWRFieldValidator('work_title'),))
 
     def is_modification(self):
-        if self.id:
-            return bool(self.original_title)
+        return bool(self.original_title)
 
     def clean_fields(self, *args, **kwargs):
         """Deal with various ways ISWC is written.

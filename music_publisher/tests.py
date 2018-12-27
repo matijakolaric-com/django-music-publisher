@@ -640,10 +640,13 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_work_change', args=(work.id,)))
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
-            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id, work3.id]})
+            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id]})
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
-            re_post={'nwr_rev': 'REV', 'works': [work.id, work3.id]})
+            re_post={'nwr_rev': 'REV', 'works': [work.id, work2.id]})
+        response = self.get(
+            reverse('admin:music_publisher_cwrexport_add'),
+            re_post={'nwr_rev': 'REV', 'works': [work3.id]})
         cwr_export = CWRExport.objects.all().first()
         response = self.get(
             reverse(
@@ -969,6 +972,7 @@ CONTENT = """HDRSO000000021BMI                                          01.10201
 GRHACK0000102.100020180607
 ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607RA
 ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607AS
-ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607NP
-ACK0000000300000000201805160910510000100000003NWRX                                                           0000000000000X                          20180607NP
+ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607AS
+ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
+ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
 TRL000010000008000000839"""
