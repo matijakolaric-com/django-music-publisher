@@ -276,7 +276,8 @@ class WriterInWork(models.Model):
     class Meta:
         verbose_name_plural = 'Writers in Work'
         unique_together = (('work', 'writer', 'controlled'),)
-        ordering = ('-controlled', 'writer__last_name', 'writer__first_name')
+        ordering = (
+            '-controlled', 'writer__last_name', 'writer__first_name', '-id')
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
@@ -480,7 +481,7 @@ class CWRExport(models.Model):
             other_publisher_share = None
             controlled_writer_ids = []
             controlled_writer_shares = defaultdict(Decimal)
-            for wiw in work.writerinwork_set.all():
+            for wiw in work.writerinwork_set.order_by('-controlled'):
                 if wiw.controlled:
                     controlled_writer_ids.append(wiw.writer_id)
                     controlled_writer_shares[wiw.writer_id] += \

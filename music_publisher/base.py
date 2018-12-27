@@ -302,7 +302,6 @@ class TitleBase(MusicPublisherBase):
 
     class Meta:
         abstract = True
-        ordering = ('-id',)
 
     title = models.CharField(
         max_length=60, db_index=True, validators=(
@@ -325,7 +324,6 @@ class WorkBase(TitleBase):
     class Meta:
         abstract = True
         verbose_name_plural = '  Works'
-        ordering = ('id',)
 
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
