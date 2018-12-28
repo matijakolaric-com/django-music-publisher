@@ -5,14 +5,14 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='18.11.post3',
+    version='19.1a1',
     author='Matija Kolarić',
-    author_email='i@matijakolaric.com',
+    author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
-    description='Django App for Music Publishers',
+    description='Django App for original music publishers',
     long_description=long_description,
     long_description_content_type='text/x-rst',
-    url='https://django-music-publisher.readthedocs.io/en/stable/',
+    url='https://django-music-publisher.readthedocs.io',
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
         'Django>=2.1.4',
