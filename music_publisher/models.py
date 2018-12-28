@@ -307,6 +307,15 @@ class WriterInWork(models.Model):
         return str(self.writer)
 
     def clean_fields(self, *args, **kwargs):
+        """Turn SAAN into uppercase.
+
+        Args:
+            *args: passing through
+            **kwargs: passing through
+
+        Returns:
+            TYPE: Description
+        """
         if self.saan:
             self.saan = self.saan.upper()
         return super().clean_fields(*args, **kwargs)
@@ -432,6 +441,11 @@ class CWRExport(models.Model):
 
     @property
     def filename(self):
+        """REturn proper CWR filename.
+
+        Returns:
+            str: CWR file name
+        """
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
@@ -441,10 +455,30 @@ class CWRExport(models.Model):
         return self.filename
 
     def get_record(self, key, record):
+        """Create CWR record (row) from the key and dict.
+
+        Args:
+            key (str): type of record
+            record (dict): field values
+
+        Returns:
+            str: CWR record (row)
+        """
         template = TEMPLATES_21.get(key)
         return template.render(Context(record)).upper()
 
     def get_transaction_record(self, key, record):
+        """Create CWR transaction record (row) from the key and dict.
+
+        This methods adds transaction and record sequences.
+
+        Args:
+            key (str): type of record
+            record (dict): field values
+
+        Returns:
+            str: CWR record (row)
+        """
         record['transaction_sequence'] = self.transaction_count
         record['record_sequence'] = self.record_sequence
         line = self.get_record(key, record)
@@ -453,6 +487,14 @@ class CWRExport(models.Model):
         return line
 
     def yield_lines(self, works):
+        """Yield CWR transaction records (rows/lines) for works
+
+        Args:
+            works (query): :class:`.models.Work` query
+
+        Yields:
+            str: CWR recors (row/line)
+        """
         self.record_count = self.record_sequence = self.transaction_count = 0
         yield self.get_record('HDR', {
             'creation_date': datetime.now(),
@@ -604,7 +646,9 @@ class CWRExport(models.Model):
             'transaction_count': self.transaction_count,
             'record_count': self.record_count + 4})
 
-    def create_cwr(self, *args, **kwargs):
+    def create_cwr(self):
+        """Create CWR and save.
+        """
         if self.cwr:
             return
         self.cwr = ''.join(self.yield_lines(self.works.order_by('id',)))
@@ -615,7 +659,7 @@ class CWRExport(models.Model):
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
-        super().save(*args, **kwargs)
+        super().save()
 
 
 class WorkAcknowledgement(models.Model):
