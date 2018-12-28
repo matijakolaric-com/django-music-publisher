@@ -5,7 +5,7 @@ Django Music Publisher is an open source software for original music publishers.
 
 Django Music Publisher is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing**.
 
-It uses **Common Works Registration (CRW)** protocol for batch registrations of musical works. 
+It uses **Common Works Registration (CWR)** protocol for batch registrations of musical works.
 
 Built by an experienced developer with over 12 years of experience in music publishing, it focuses on doing several crucial tasks in music publishing effectively and integrates well with similar tools.
 
@@ -23,26 +23,26 @@ Multiple writers, both controlled and uncontrolled, are covered, with minor limi
 
 This translates to the following CWR 2.x / 3.0 transaction record types:
 
-======================================  =====================================
+======================================  ======================================
 CWR 2.1 / 2.2                           CWR 3.0 (still in draft)
-======================================  =====================================
+======================================  ======================================
 NWR/REV                                 WRK, XRF
 SPU, SPT (just World)                   SPU, SPT
 SWR, SWT (just World), PWR, OWR         SWR, SWT (just World), PWR, OWR, OWT
-ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC (single), ORN (only LIB) 
-======================================  =====================================
+ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC (single), ORN (only LIB)
+======================================  ======================================
 
 Please note that **CWR 3.0 has not yet been released**. It will be implemented as
 soon as the official documentation gets published.
 
-Basic publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers and for a simple royalty distribution processing. 
+Basic publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers and for a simple royalty distribution processing.
 
 It can take data from a spreadsheet (CSV or Excel) file and augment this data with the data from the database. This data can be used in pivot tables for creation of client statements and for accounting.
 
 Presumptions and Limitations
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-It is presumed that writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by publishers. While there are exceptions, this is how most publishers work. 
+It is presumed that writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by publishers. While there are exceptions, this is how most publishers work.
 
 It skips a lot of rarely used fields, leaving the values blank. When the fields are required in CWR, it uses reasonable defaults, e.g.:
 
