@@ -497,9 +497,12 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_work_changelist'))
         response = self.get(
             reverse('admin:music_publisher_work_change', args=(work.id,)))
+        PREFIX = settings.MUSIC_PUBLISHER_SETTINGS['work_id_prefix']
+        settings.MUSIC_PUBLISHER_SETTINGS['work_id_prefix'] = ''
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id, work3.id]})
+        settings.MUSIC_PUBLISHER_SETTINGS['work_id_prefix'] = PREFIX
         cwr_export = CWRExport.objects.all().first()
         self.assertEqual(cwr_export.cwr[86:], CWR_CONTENT[86:])
         response = self.get(
