@@ -86,7 +86,7 @@ class Work(WorkBase):
         """
         if self.id is None:
             return ''
-        return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
+        return '{}{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
 
     def __str__(self):
         return '{} {} ({})'.format(

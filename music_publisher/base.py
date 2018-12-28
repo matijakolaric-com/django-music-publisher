@@ -21,7 +21,6 @@ Attributes:
     RE_NAME (str): Regex pattern for CWR names
     RE_TITLE (str): Regex pattern for CWR titles
     TITLES_CHARS (str): Characters allowed in CWR titles
-    WORK_ID_PREFIX (str): Prefix for Submitter Work ID, which is numerical
 """
 
 
@@ -48,7 +47,6 @@ if ENFORCE_IPI_NAME:
 CAN_NOT_BE_CONTROLLED_MSG = (
     'Unsufficient data for a controlled writer, required fields are: {}.'
 ).format(', '.join(CONTROLLED_WRITER_REQUIRED_FIELDS))
-WORK_ID_PREFIX = SETTINGS.get('work_id_prefix') or ''
 
 
 # Default only has 18 societies from 12 countries. These are G7, without Japan,

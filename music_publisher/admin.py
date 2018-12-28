@@ -24,9 +24,9 @@ from django.utils.html import mark_safe
 from django.utils.timezone import now
 # from django.views.decorators.csrf import csrf_protect
 from .models import (
+    SETTINGS,
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
-    Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement,
-    WORK_ID_PREFIX)
+    Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement)
 import re
 import requests
 
@@ -560,7 +560,8 @@ class WorkAdmin(MusicPublisherAdmin):
             }
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
-        name = '{}{}'.format(WORK_ID_PREFIX, datetime.now().toordinal())
+        name = '{}{}'.format(
+            SETTINGS.get('work_id_prefix', ''), datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
