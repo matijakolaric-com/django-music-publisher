@@ -29,7 +29,7 @@ author = 'Matija Kolarić'
 # The short X.Y version
 version = '18.11'
 # The full version, including alpha/beta/rc tags
-release = '18.11'
+release = '18.11post4'
 
 
 # -- General configuration ---------------------------------------------------
