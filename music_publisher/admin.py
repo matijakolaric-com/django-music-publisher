@@ -147,7 +147,8 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                 return
             if form.cleaned_data and not form.cleaned_data.get('DELETE'):
                 writer = form.cleaned_data['writer']
-                if writer in writers and not SETTINGS['allow_multiple_ops']:
+                if writer in writers and not SETTINGS.get(
+                        'allow_multiple_ops'):
                     form.add_error('writer', 'Writer already present.')
                 writers.append(writer)
                 total += form.cleaned_data['relative_share']
@@ -486,7 +487,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 ('title', 'iswc'),
                 (
                     ('original_title', 'version_type')
-                    if SETTINGS['allow_modifications'] else tuple()
+                    if SETTINGS.get('allow_modifications') else tuple()
                 ))}),)
 
     def save_model(self, request, obj, form, *args, **kwargs):
