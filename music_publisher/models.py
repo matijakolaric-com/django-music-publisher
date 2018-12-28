@@ -297,6 +297,10 @@ class WriterInWork(models.Model):
         ('AR', 'Arranger'),
         ('AD', 'Adaptor'),
         ('TR', 'Translator'),
+    ) if SETTINGS.get('allow_modifications') else (
+        ('CA', 'Composer&Lyricist'),
+        ('C ', 'Composer'),
+        ('A ', 'Lyricist'),
     ))
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,

@@ -1,8 +1,7 @@
 """Tests for :mod:`music_publisher`.
 
-Tests are the weakest link in the package. They do test that things do not break, which makes a grat difference, but they do not test how things work.
-
-A major re-write is required.
+Please note that all these tests are functional
+(integration) tests, not unit tests.
 
 Attributes:
     CONTENT (str): CWR ACK file contents
@@ -15,6 +14,7 @@ from django.urls import reverse
 from music_publisher.admin import *
 from music_publisher.models import *
 from io import StringIO
+import os
 
 
 class AllTest(TestCase):
@@ -689,4 +689,6 @@ ACK0000000300000000201805160910510000100000003NWRTHREE                          
 ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
 TRL000010000008000000839"""
 
-CWR_CONTENT = open('music_publisher/cwrexample.txt', 'rb').read().decode()
+PATH = os.path.join(
+    os.path.dirname(__file__), 'cwrexample.txt')
+CWR_CONTENT = open(PATH, 'rb').read().decode()
