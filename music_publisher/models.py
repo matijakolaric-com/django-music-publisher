@@ -10,6 +10,11 @@ from django.template import Context
 from decimal import Decimal
 
 
+class WorkManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('writers')
+
+
 class Work(WorkBase):
     """Concrete class, with references to foreign objects.
 
@@ -22,6 +27,8 @@ class Work(WorkBase):
         writers (django.db.models.ManyToManyField):
             Writers who created the work
     """
+
+    objects = WorkManager()
 
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
     writers = models.ManyToManyField('Writer', through='WriterInWork')
@@ -490,7 +497,7 @@ class CWRExport(models.Model):
         self.record_sequence += 1
         return line
 
-    def yield_lines(self, works):
+    def yield_lines(self):
         """Yield CWR transaction records (rows/lines) for works
 
         Args:
@@ -499,6 +506,15 @@ class CWRExport(models.Model):
         Yields:
             str: CWR recors (row/line)
         """
+        works = self.works.order_by('id',)
+        works = works.select_related('firstrecording')
+        works = works.prefetch_related('firstrecording__artist')
+        works = works.prefetch_related('firstrecording__album_cd')
+        works = works.prefetch_related(models.Prefetch(
+            'writerinwork_set',
+            queryset=WriterInWork.objects.order_by(
+                '-controlled', 'id').prefetch_related('writer'),
+            to_attr='wiws'))
         self.record_count = self.record_sequence = self.transaction_count = 0
         yield self.get_record('HDR', {
             'creation_date': datetime.now(),
@@ -527,8 +543,7 @@ class CWRExport(models.Model):
             other_publisher_share = None
             controlled_writer_ids = []
             controlled_writer_shares = defaultdict(Decimal)
-            for wiw in work.writerinwork_set.order_by(
-                    '-controlled', 'id'):
+            for wiw in work.wiws:
                 if wiw.controlled:
                     controlled_writer_ids.append(wiw.writer_id)
                     controlled_writer_shares[wiw.writer_id] += \
@@ -556,8 +571,7 @@ class CWRExport(models.Model):
                     'OPU', {
                         'share': other_publisher_share,
                         'sequence': len(publishers) + 1})
-            for wiw in work.writerinwork_set.order_by(
-                    '-controlled', 'id'):
+            for wiw in work.wiws:
                 if not wiw.controlled:
                     continue
                 w = wiw.writer
@@ -575,8 +589,7 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('SWT', record)
                 record.update(w.get_publisher_dict())
                 yield self.get_transaction_record('PWR', record)
-            for wiw in work.writerinwork_set.order_by(
-                    '-controlled', 'id'):
+            for wiw in work.wiws:
                 if wiw.controlled or wiw.writer_id in controlled_writer_ids:
                     continue
                 record = {
@@ -655,7 +668,7 @@ class CWRExport(models.Model):
         """
         if self.cwr:
             return
-        self.cwr = ''.join(self.yield_lines(self.works.order_by('id',)))
+        self.cwr = ''.join(self.yield_lines())
         self.year = self.cwr[66:68]
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
