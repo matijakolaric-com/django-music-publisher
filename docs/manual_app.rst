@@ -13,4 +13,4 @@ Music Publishing App
 * ``Change`` - view for changing the work, includes delete button
 * ``History`` - view where changes to a work are shown
 
-All top-level models have these views. They are also inter-connected, so you will mostly start with pressing on ``Works``, to access the ``Work list`` view, or you will star by clicking on ``+Add`` in the ``Works`` model. As the list is empty, lets star with adding a new musical work.
+All top-level models have these views. They are also inter-connected, so you will mostly start with pressing on ``Works``, to access the ``Work list`` view, or you will start by clicking on ``+Add`` in the ``Works`` model. As the list is empty, lets star with adding a new musical work.
