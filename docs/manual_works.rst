@@ -50,7 +50,7 @@ This is where you put in the information on composers and lyricists who created 
 First Recording
 +++++++++++++++
 
-Django Music Publisher can only hold data on the first recording/release of a musical work, not all of them. This is caused by the fact that not all societies world-wide have removed a long obsolete rule in CWR. This may change in future releases.
+Django Music Publisher can only hold data on the first recording/release of a musical work, not all of them. This is caused by the fact that not all societies and well-known sub-publishers have removed a long obsolete limit in CWR to one recording per work. This may change in future releases.
 
 .. figure:: /images/first_recording.png
    :width: 100%
