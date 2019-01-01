@@ -42,9 +42,11 @@ It can take data from a spreadsheet (CSV or Excel) file and augment this data wi
 Presumptions and Limitations
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-It is presumed that writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by publishers. While there are exceptions, this is how most publishers work.
+Django Music Publisher is aiming to be a simple tool that is good enough for most original publishers. Being simple does come with some presumptions and limitations.
 
-It skips a lot of rarely used fields, leaving the values blank. When the fields are required in CWR, it uses reasonable defaults, e.g.:
+As already stated, it does not hold data on "other" publishers. It is presumed that controlled writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by publishers. While there are exceptions, this is how most publishers work.
+
+When creating CWR, a lot of fields are left with blank values. When the fields are required in CWR, it uses reasonable defaults, e.g.:
 
 * Musical Work Distribution is set to Unclassified
 * Recorded indicator is set to Unknown if no recording has been entered and to Yes if it has been entered
@@ -53,7 +55,7 @@ It skips a lot of rarely used fields, leaving the values blank. When the fields 
 * First Recording Refusal Indicator is set to No
 * Work for Hire is left empty
 
-Virtually all original publishers in production music and vast majority of small ones in commercial music work this way.
+Only data on the first recording can be entered.
 
 If this is not how you work, then this is not the tool for you, but you are free to extend it for your needs.
 
