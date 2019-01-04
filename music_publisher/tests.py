@@ -9,7 +9,7 @@ Attributes:
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.test import TestCase, override_settings
+from django.test import TestCase, modify_settings
 from django.urls import reverse
 from music_publisher.admin import *
 from music_publisher.models import *
@@ -93,7 +93,8 @@ class AllTest(TestCase):
             reverse('admin:app_list', args=('music_publisher',)))
         self.assertEqual(response.status_code, 200)
 
-    @override_settings()
+    @modify_settings(MUSIC_PUBLISHER_SETTINGS={
+        'work_id_prefix': ''})
     def test_2_works(self):
         self.client.force_login(self.user)
         response = self.get(reverse('admin:music_publisher_work_changelist',))
