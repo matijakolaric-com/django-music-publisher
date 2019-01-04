@@ -141,7 +141,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'enforce_pr_society': True,
     'enforce_ipi_name': True,
 
-    'work_id_prefix': os.getenv('WORK_ID_PREFIX', ''),
+    'work_id_prefix': '',
 
     'publisher_id': 'XXX',
     'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
