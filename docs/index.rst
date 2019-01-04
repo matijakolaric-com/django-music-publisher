@@ -22,7 +22,7 @@ It uses **Common Works Registration (CWR)** protocol for batch registration of m
 
 .. image:: images/add_work.png
 
-* Docs: https://django-music-publisher.readthedocs.io/en/latest/
+* Docs: https://django-music-publisher.readthedocs.io/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
