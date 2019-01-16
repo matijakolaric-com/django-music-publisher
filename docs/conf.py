@@ -23,7 +23,7 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = 'Django Music Publisher'
-copyright = '2018, Matija Kolarić'
+copyright = '2018-2019, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
