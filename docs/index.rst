@@ -1,5 +1,3 @@
-.. image:: images/dmp.png
-
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
@@ -14,6 +12,10 @@
     :alt: License
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
+
+
+.. image:: images/dmp.png
+
 
 
 Django Music Publisher
