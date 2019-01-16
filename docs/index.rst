@@ -1,3 +1,5 @@
+.. image:: images/dmp.png
+
 Django Music Publisher
 ++++++++++++++++++++++
 
