@@ -22,8 +22,6 @@ Django Music Publisher is an open source software for original music publishers.
 
 It uses **Common Works Registration (CWR)** protocol for batch registration of musical works.
 
-.. image:: images/add_work.png
-
 * Docs: https://django-music-publisher.readthedocs.io/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
