@@ -1,3 +1,6 @@
+Django Music Publisher
+++++++++++++++++++++++
+
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
@@ -13,13 +16,11 @@
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 
-
-Django Music Publisher
-++++++++++++++++++++++
-
 Django Music Publisher is an open source software for original music publishers. It is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing**. 
 
 It uses **Common Works Registration (CWR)** protocol for batch registration of musical works.
+
+.. image:: images/add_work.png
 
 * Docs: https://django-music-publisher.readthedocs.io/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
