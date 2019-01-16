@@ -14,10 +14,6 @@
     :target: https://pypi.org/project/django-music-publisher/
 
 
-.. image:: images/dmp.png
-
-
-
 Django Music Publisher
 ++++++++++++++++++++++
 
