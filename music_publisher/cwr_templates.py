@@ -90,7 +90,8 @@ TEMPLATES_21 = {
         '{{ first_name|ljust:30 }}                        \r\n'),
     'REC': Template(
         '{% load cwr_filters %}REC{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ release_date|date:"Ymd" }}' +
+        '{{ record_sequence|rjust:8 }}'
+        '{{ release_date|date:"Ymd"|default:"00000000" }}' +
         ' ' * 60 + '{{ duration|date:"His"|default:"000000" }}     '
         '{{ album_title|ljust:60 }}'
         '{{ album_label|ljust:60 }}                  {{ ean|ljust:13 }}'
