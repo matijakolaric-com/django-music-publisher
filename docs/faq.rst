@@ -70,7 +70,7 @@ Export Common Works Registration (CWR) files and process acknowledgements?
 	Yes.
 
 Export Electronic Batch Registration (EBR) files?
-	No. EBR is officially accepted bu MusicMark (ASCAP, BMI, SOCAN) and 
+	No. EBR is officially accepted by MusicMark (ASCAP, BMI, SOCAN) and 
 	unofficially also by a few other societies. All of them also accept CWR.
 
 Export MWN (DDEX) or any other DDEX format?
