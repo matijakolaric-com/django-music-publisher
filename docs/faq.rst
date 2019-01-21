@@ -74,12 +74,12 @@ Export Electronic Batch Registration (EBR) files?
 	unofficially also by a few other societies. All of them also accept CWR.
 
 Export MWN (DDEX) or any other DDEX format?
-	No. MWN is on the roadmap, you are welcome to sponsor the development. Other 
+	No. MWN is on the roadmap, you are welcome to sponsor the development (See :ref:`Sponsored Features`). Other 
 	DDEX formats may follow.
 
 Export some other format specified by someone?
 	No. There are, actually, two JSON-based export formats. They are created by the maintainer of this project and used in several projects, but it is work in progress, and is still unspecified.
 
 Import?
-	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. Importing data is important and is on the roadmap. You are welcome to sponsor the development.
+	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. Importing data is important and is on the roadmap. You are welcome to sponsor the development (See :ref:`Sponsored Features`).
 
