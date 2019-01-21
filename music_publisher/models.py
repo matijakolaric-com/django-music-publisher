@@ -398,7 +398,7 @@ class WriterInWork(models.Model):
                 data['writer']['pr_society'] = self.writer.pr_society
 
         if self.capacity:
-            data['capacity'] = self.capacity,
+            data['capacity'] = self.capacity
         if self.controlled:
             publisher = self.writer.get_publisher_dict()
             pwr = {
