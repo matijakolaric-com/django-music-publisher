@@ -603,7 +603,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
 
-        return obj._work_count or obj.works__count
+        return obj.works__count
 
     def get_preview(self, obj):
         """Get CWR preview.
@@ -637,7 +637,8 @@ class CWRExportAdmin(admin.ModelAdmin):
     autocomplete_fields = ('works', )
     list_display = (
         'filename', 'nwr_rev', 'work_count', 'view_link',
-        'download_link')
+        'download_link', 'description')
+    list_editable = ('description', )
 
     list_filter = ('nwr_rev', 'year')
     search_fields = ('works__title',)
