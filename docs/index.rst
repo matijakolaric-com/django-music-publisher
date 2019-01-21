@@ -50,6 +50,14 @@ User manual
 
    manual
 
+Frequently Asked Questions
+**************************
+
+.. toctree::
+   :maxdepth: 2
+
+   faq
+
 For Developers
 ********************
 

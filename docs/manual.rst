@@ -20,6 +20,5 @@ This manual is in a form of a walk-through, covering all features. It presumes t
    manual_cwr
    manual_ack
    manual_albumcd
-   faq
 
 
