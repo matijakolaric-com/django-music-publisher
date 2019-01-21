@@ -13,7 +13,7 @@ General
 
 This part contains the fields ``Title`` and ``ISWC``, as well as read-only field ``Work ID``, which is set automatically upon first save. Please note that the label ``Title`` is bold, representing that this field is required. So, lets put a title in.
 
-If ``allow_modifications`` is set, two more fields are shown, ``original title`` and ``version type``, with only the former being editable. My filling out this field, the ``version type`` will be set to ``modification`` and a significantly more complex set of validation rules will apply.
+If ``allow_modifications`` is set, two more fields are shown, ``original title`` and ``version type``, with only the former being editable. By filling out this field, the ``version type`` will be set to ``modification`` and a significantly more complex set of validation rules will apply.
 
 Alternate Titles
 ++++++++++++++++
@@ -50,7 +50,7 @@ This is where you put in the information on composers and lyricists who created 
 First Recording
 +++++++++++++++
 
-Django Music Publisher can only hold data on the first recording/release of a musical work, not all of them. This is caused by the fact that not all societies and well-known sub-publishers have removed a long obsolete limit in CWR to one recording per work. This may change in future releases.
+Django Music Publisher can only hold data on the first recording/release of a musical work, not all of them. This is caused by the fact that not all societies and well-known sub-publishers have removed a long obsolete limit in CWR to one recording per work. This will change in future releases.
 
 .. figure:: /images/first_recording.png
    :width: 100%
@@ -58,6 +58,8 @@ Django Music Publisher can only hold data on the first recording/release of a mu
    Data on the first recording of the work
 
 All fields are self-explanatory. Please note that fields ``Album / Library CD`` and ``Recording Artist`` behave in the same way the described field ``Writer`` does. Let us presume that our first work has not been recorded yet and remove this form.
+
+Please read the part on ``Albums and/or Library CDs`` for details on albums and music libraries.
 
 Artists Performing Works
 ++++++++++++++++++++++++

@@ -19,9 +19,11 @@ Production music library
 
 Library refers to production music library. Please note that if ``LIBRARY`` is not present in settings, the field ``CD Identifier`` will not be present either. Django Music Publisher does not support multiple libraries. It also does not support other origins, such as film, theatre, television etc.
 
-If you wish to mark a work as a library work, you must enter ``CD Indentifier``, the CWR documentation recommends to put in ``INTERNET`` if you do not care about identifiers, though some societies use this field for identification and royalty distribution. Please contact your society for details.
+If you wish to mark a work as a library work, you must enter a value for ``CD Indentifier`` and the work must be referenced in the ``Tracks`` section. This will enable the CWR ``Origin (ORN)`` record and set the source to ``library (LIB)``.
 
-If you leave this field empty, the work will not be marked as library work.
+The CWR documentation recommends to put ``INTERNET`` in ``CD Identifier`` field if you do not care about identifiers, though some societies use this field for identification and royalty distribution. Please contact your society for details.
+
+If you leave ``CD Identifier`` field empty, the work will not be marked as library work.
 
 Albums
 ++++++

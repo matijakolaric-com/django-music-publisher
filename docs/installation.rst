@@ -104,9 +104,6 @@ and foreign societies. Then define publishers in other PROs.
 
 More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
 
-.. _StandaloneDeployment:
-
-
 Additional Societies
 ++++++++++++++++++++
 
@@ -116,6 +113,8 @@ administrative agencies. If you need to add additional societies, do it with
 this setting (and not in the ``models.py``).
 
 All societies the original publisher and all writers are affiliated with must be present.
+
+.. _StandaloneDeployment:
 
 Installing the Project (Standalone Deployment)
 ===============================================================================
