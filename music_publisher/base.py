@@ -99,8 +99,8 @@ NAMES_CHARS = re.escape(
     "!#$%&'()+-./0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ`"
 )
 
-RE_TITLE = r'(^[{0}][ {0}]+$)'.format(TITLES_CHARS)
-RE_NAME = r'(^[{0}][ {0}]+$)'.format(NAMES_CHARS)
+RE_TITLE = r'(^[{0}][ {0}]*$)'.format(TITLES_CHARS)
+RE_NAME = r'(^[{0}][ {0}]*$)'.format(NAMES_CHARS)
 RE_ISWC = re.compile(r'(^T\d{10}$)')
 RE_ISRC = re.compile(r'(^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$)')
 RE_ISNI = re.compile(r'(^[0-9]{15}[0-9X]$)')
