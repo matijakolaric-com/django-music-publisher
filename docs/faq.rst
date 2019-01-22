@@ -12,10 +12,10 @@ Should I read the documentation before reading FAQ?
 	Yes. All of it.
 
 Should I read the documentation and the FAQ before asking for support?
-	Yes.
+	Yes. ALL of it.
 
 Can I search through the documentation?
-	Yes.
+	Yes. Please do.
 
 
 Django Music Publisher is not
@@ -80,6 +80,40 @@ Export MWN (DDEX) or any other DDEX format?
 Export some other format specified by someone?
 	No. There are, actually, two JSON-based export formats. They are created by the maintainer of this project and used in several projects, but it is work in progress, and is still unspecified.
 
-Import?
+Import CWR acknowledgements?
+	Yes. However, if it contains additional information, thet one needs to use an external tool. The maintainer has two freely available:
+
+	* `ACK Tools <https://matijakolaric.com/free/cwr-x-ack-tool/>`_	
+	* `Visual CWR <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_	
+
+Import metadata from other sources?
 	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. Importing data is important and is on the roadmap. You are welcome to sponsor the development (See :ref:`Sponsored Features`).
+
+
+Various Questions
+++++++++++++++++++++++++++++++++
+
+My work has several recording versions. How do I put it in?
+	Django Music Publisher only supports a single (first) recording per work.
+	This also means that one ISWC can only have one ISRC assigned to it.
+	In many cases, it is eanough to use ``Alternate Titles``. However, if ISRC or some other data is required for additional rerordings, then Django Music Publisher is not the right solution for you. 
+
+Where do I put the duration of the composition?
+	Compositions do not really have a duration, recordings do. So, it is only possible to assign duration to the ``First Recording``.
+
+What is ``relative share`` exactly?
+	When writers (composers and lyricists) create a work, they split the shares among them. This is ``relative share``. A writer may then have a publisher, which would be you in this case. They usually transfer 50% of performance and 100% of mechanical and synchronization rights to the publisher. If this is not the case, then Django Music Publisher is not the tool for you.
+
+What is ``publisher fee`` exactly?
+	This field is **not used for registrations**. In some cases the publisher has to pay part of their revenues to the writer. The **kept** percentage of it is referred to as ``publisher fee``.
+
+Does ``publisher fee`` apply to performance, as well as to mechanical and syncronization royalties?
+	This depends on options selected during the import of processing statements.
+
+I dont have ISWC codes. What do I do?
+	You can enter other data and then add ISWCs later on. You should ask your society how to apply. Some will assing them automatically once you register by CWR. If that is the case, then you will be able to import them from acknowledgement files.
+
+Is there any way of auto-filling the works?
+	There is a simple way to add similar works. Open a work that you want to use as a template, enter the changes and then press on ``Save as new``. The new work will be saved and opened. Repeat for all works.
+
 
