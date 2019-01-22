@@ -541,7 +541,7 @@ class AllTest(TestCase):
 
         response = self.get(
             reverse('admin:music_publisher_work_changelist',) +
-            '?has_iswc=N&has_rec=Y')
+            '?has_iswc=N&has_rec=Y&in_cwr=Y')
         self.assertEqual(response.status_code, 200)
         self.get(
             reverse('admin:music_publisher_work_changelist',) +

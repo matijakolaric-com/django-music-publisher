@@ -417,6 +417,29 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = qs.annotate(models.Count('cwr_exports'))
         return qs
 
+    class InCWRListFilter(admin.SimpleListFilter):
+        """Custom list filter on the presence of ISWC.
+        """
+
+        title = 'In CWR'
+        parameter_name = 'in_cwr'
+
+        def lookups(self, request, model_admin):
+            """Simple Yes/No filter
+            """
+            return (
+                ('Y', 'Yes'),
+                ('N', 'No'),
+            )
+
+        def queryset(self, request, queryset):
+            """Filter on presence of :attr:`.iswc`.
+            """
+            if self.value() == 'Y':
+                return queryset.exclude(cwr_exports__count=0)
+            elif self.value() == 'N':
+                return queryset.filter(cwr_exports__count=0)
+
     class HasISWCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISWC.
         """
@@ -465,6 +488,7 @@ class WorkAdmin(MusicPublisherAdmin):
     list_filter = (
         HasISWCListFilter,
         HasRecordingListFilter,
+        InCWRListFilter,
         ('firstrecording__album_cd', admin.RelatedOnlyFieldListFilter),
         'last_change',
     )
