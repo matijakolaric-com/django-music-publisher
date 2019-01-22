@@ -60,8 +60,18 @@ What is an **original** music publisher?
 What other kinds are there?
 	Publishers also can sign agreements with other publishers. The most important roles are **administrator** and **sub-publisher**.
 
-What is the difference?
+What is the difference between original publishers, administrators and sub-publishers?
 	That would be beyond the scope of this document. What is important is that both require significantly more complex data structure and therefore also a far more complex user interface. Django Music Publisher does not support anything beyond the role of original publisher.
+
+What is ``relative share`` exactly?
+	When writers (composers and lyricists) create a work, they split the shares among them. This is ``relative share``. A writer may then have a publisher, which would be you in this case. They usually transfer 50% of performance and 100% of mechanical and synchronization rights to the publisher. If this is not the case, then Django Music Publisher is not the tool for you.
+
+What is ``publisher fee`` exactly?
+	This field is **not used for registrations**. In some cases the publisher has to pay part of their revenues to the writer. The **kept** percentage of it is referred to as ``publisher fee``.
+
+Does ``publisher fee`` apply to performance, as well as to mechanical and syncronization royalties?
+	This depends on options selected during the import of processing statements.
+
 
 Does it ...?
 +++++++++++++++
@@ -100,15 +110,6 @@ My work has several recording versions. How do I put it in?
 
 Where do I put the duration of the composition?
 	Compositions do not really have a duration, recordings do. So, it is only possible to assign duration to the ``First Recording``.
-
-What is ``relative share`` exactly?
-	When writers (composers and lyricists) create a work, they split the shares among them. This is ``relative share``. A writer may then have a publisher, which would be you in this case. They usually transfer 50% of performance and 100% of mechanical and synchronization rights to the publisher. If this is not the case, then Django Music Publisher is not the tool for you.
-
-What is ``publisher fee`` exactly?
-	This field is **not used for registrations**. In some cases the publisher has to pay part of their revenues to the writer. The **kept** percentage of it is referred to as ``publisher fee``.
-
-Does ``publisher fee`` apply to performance, as well as to mechanical and syncronization royalties?
-	This depends on options selected during the import of processing statements.
 
 I dont have ISWC codes. What do I do?
 	You can enter other data and then add ISWCs later on. You should ask your society how to apply. Some will assing them automatically once you register by CWR. If that is the case, then you will be able to import them from acknowledgement files.
