@@ -671,7 +671,8 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Read-only fields differ if CWR has been completed."""
         if obj and obj.cwr:
             return (
-                'nwr_rev', 'works', 'filename', 'view_link', 'download_link')
+                'nwr_rev', 'description', 'works', 'filename', 'view_link',
+                'download_link')
         else:
             return ()
 
@@ -679,9 +680,10 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Shown fields differ if CWR has been completed."""
         if obj and obj.cwr:
             return (
-                'nwr_rev', 'works', 'filename', 'view_link', 'download_link')
+                'nwr_rev', 'description', 'works', 'filename', 'view_link',
+                'download_link')
         else:
-            return ('nwr_rev', 'works')
+            return ('nwr_rev', 'description', 'works')
 
     def has_delete_permission(self, request, obj=None, **kwargs):
         """If CWR has been created, it can no longer be deleted, as it may

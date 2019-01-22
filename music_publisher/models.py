@@ -447,7 +447,7 @@ class CWRExport(models.Model):
         max_length=2, db_index=True, editable=False, blank=True)
     num_in_year = models.PositiveSmallIntegerField(default=0)
     works = models.ManyToManyField(Work, related_name='cwr_exports')
-    description = models.CharField(blank=True, max_length=60)
+    description = models.CharField('Internal Note', blank=True, max_length=60)
 
     @property
     def filename(self):
