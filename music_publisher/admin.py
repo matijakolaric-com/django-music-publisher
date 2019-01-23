@@ -451,12 +451,15 @@ class WorkAdmin(MusicPublisherAdmin):
         def lookups(self, request, model_admin):
             """Simple Yes/No filter
             """
-            SDICT = dict(SOCIETIES)
+            SDICT = dict()
+            for key, value in SOCIETIES:
+                key1 = key.lstrip('0')
+                key2 = key.rjust(3, '0')
+                SDICT[key1] = value
+                SDICT[key2] = value
             codes = WorkAcknowledgement.objects.values_list(
                 'society_code', flat=True).distinct()
-            return [
-                (code, SDICT.get(code.rjust(3, '0'), code))
-                for code in codes]
+            return [(code, SDICT.get(code, code)) for code in codes]
 
         def queryset(self, request, queryset):
             """Filter on presence of :attr:`.iswc`.

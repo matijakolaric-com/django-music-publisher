@@ -63,6 +63,9 @@ What other kinds are there?
 What is the difference between original publishers, administrators and sub-publishers?
 	That would be beyond the scope of this document. What is important is that both require significantly more complex data structure and therefore also a far more complex user interface. Django Music Publisher does not support anything beyond the role of original publisher.
 
+What is Common Works Registration (CWR)?
+	CWR is a specification of a process and a file format for registering musical works with collecting societies worldwide.
+
 What is ``relative share`` exactly?
 	When writers (composers and lyricists) create a work, they split the shares among them. This is ``relative share``. A writer may then have a publisher, which would be you in this case. They usually transfer 50% of performance and 100% of mechanical and synchronization rights to the publisher. If this is not the case, then Django Music Publisher is not the tool for you.
 
