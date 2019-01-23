@@ -87,7 +87,7 @@ Export Electronic Batch Registration (EBR) files?
 	unofficially also by a few other societies. All of them also accept CWR.
 
 Export MWN (DDEX) or any other DDEX format?
-	No. MWN is on the roadmap, you are welcome to sponsor the development (See :ref:`Sponsored Features`). Other 
+	No. MWN is on the roadmap, you are welcome to sponsor the development (See :doc:`Sponsored Features <features>`). Other 
 	DDEX formats may follow.
 
 Export some other format specified by someone?
@@ -100,7 +100,7 @@ Import CWR acknowledgements?
 	* `Visual CWR <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_	
 
 Import metadata from other sources?
-	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. Importing data is important and is on the roadmap. You are welcome to sponsor the development (See :ref:`Sponsored Features`).
+	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. Importing data is important and is on the roadmap. You are welcome to sponsor the development (See :doc:`Sponsored Features <features>`).
 
 
 Various Questions
