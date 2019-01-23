@@ -116,5 +116,3 @@ I dont have ISWC codes. What do I do?
 
 Is there any way of auto-filling the works?
 	There is a simple way to add similar works. Open a work that you want to use as a template, enter the changes and then press on ``Save as new``. The new work will be saved and opened. Repeat for all works.
-
-

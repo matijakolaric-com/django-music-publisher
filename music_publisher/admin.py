@@ -24,7 +24,7 @@ from django.utils.html import mark_safe
 from django.utils.timezone import now
 # from django.views.decorators.csrf import csrf_protect
 from .models import (
-    SETTINGS,
+    SETTINGS, SOCIETIES,
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement)
 import re
@@ -440,6 +440,49 @@ class WorkAdmin(MusicPublisherAdmin):
             elif self.value() == 'N':
                 return queryset.filter(cwr_exports__count=0)
 
+    class ACKSocietyListFilter(admin.SimpleListFilter):
+        """Custom list filter on the presence of ISWC.
+        """
+
+        title = 'Acknowledgement society'
+        parameter_name = 'ack_society'
+
+        def lookups(self, request, model_admin):
+            """Simple Yes/No filter
+            """
+            SDICT = dict(SOCIETIES)
+            codes = WorkAcknowledgement.objects.values_list(
+                'society_code', flat=True).distinct()
+            return [(code, SDICT.get(code, code)) for code in codes]
+
+        def queryset(self, request, queryset):
+            """Filter on presence of :attr:`.iswc`.
+            """
+            if self.value():
+                return queryset.filter(
+                    workacknowledgement__society_code=self.value()).distinct()
+            return queryset
+
+    class ACKStatusListFilter(admin.SimpleListFilter):
+        """Custom list filter on the presence of ISWC.
+        """
+
+        title = 'Acknowledgement status'
+        parameter_name = 'ack_status'
+
+        def lookups(self, request, model_admin):
+            """Simple Yes/No filter
+            """
+            return WorkAcknowledgement.TRANSACTION_STATUS_CHOICES
+
+        def queryset(self, request, queryset):
+            """Filter on presence of :attr:`.iswc`.
+            """
+            if self.value():
+                return queryset.filter(
+                    workacknowledgement__status=self.value()).distinct()
+            return queryset
+
     class HasISWCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISWC.
         """
@@ -488,9 +531,11 @@ class WorkAdmin(MusicPublisherAdmin):
     list_filter = (
         HasISWCListFilter,
         HasRecordingListFilter,
-        InCWRListFilter,
         ('firstrecording__album_cd', admin.RelatedOnlyFieldListFilter),
         'last_change',
+        InCWRListFilter,
+        ACKStatusListFilter,
+        ACKSocietyListFilter,
     )
 
     search_fields = (
