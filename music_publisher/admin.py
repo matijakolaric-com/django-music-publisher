@@ -24,9 +24,10 @@ from django.utils.html import mark_safe
 from django.utils.timezone import now
 # from django.views.decorators.csrf import csrf_protect
 from .models import (
-    SETTINGS, SOCIETIES,
+    SETTINGS,
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement)
+from .base import SOCIETIES
 import re
 import requests
 
@@ -453,7 +454,9 @@ class WorkAdmin(MusicPublisherAdmin):
             SDICT = dict(SOCIETIES)
             codes = WorkAcknowledgement.objects.values_list(
                 'society_code', flat=True).distinct()
-            return [(code, SDICT.get(code, code)) for code in codes]
+            return [
+                (code, SDICT.get(code.rjust(3, '0'), code))
+                for code in codes]
 
         def queryset(self, request, queryset):
             """Filter on presence of :attr:`.iswc`.
