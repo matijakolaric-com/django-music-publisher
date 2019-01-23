@@ -9,7 +9,7 @@ setuptools.setup(
     author='Matija Kolarić',
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
-    description='Django App for original music publishers',
+    description='Django app/project for original music publishers',
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://django-music-publisher.readthedocs.io',
