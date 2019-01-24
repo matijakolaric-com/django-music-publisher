@@ -632,6 +632,7 @@ class CWRExport(models.Model):
                 release_date = rec.release_date
                 record_label = rec.record_label
                 album_title = ''
+                album_label = ''
                 if rec.album_cd:
                     release_date = release_date or rec.album_cd.release_date
                     album_title = album_title or rec.album_cd.album_title
