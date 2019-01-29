@@ -1,7 +1,7 @@
 Release Policy
 ##############
 
-Django Music Publisher release policy defines how and when new versions are released, as well as their naming. We have major and minor releases. Major releases have two segments in version identifier, the year and the month of the release. It may also have a name. Current major release is **19.1 Epiphany**.
+Django Music Publisher release policy defines how and when new versions are released, as well as their naming. We have major and minor releases. Major releases have two segments in version identifier, the year and the month of the release. It may also have a name. Current major release is |version|.
 
 Minor releases have three segments, the first two are the same as the current major release, while the third is incremental numbering.
 

@@ -1,6 +1,8 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
+.. |ProjectVersion| replace:: {release}
+
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
@@ -26,7 +28,7 @@ It uses **Common Works Registration (CWR)** protocol for batch registration of m
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
-Latest release **19.1 Epiphany** was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
+Version |version| was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
 
 
 General Documentation
