@@ -1,6 +1,13 @@
 language: python
 matrix:
   include:
+    - name: "Django 2.2a1 Py3.7 PostgreSQL9.6"
+      python: "3.7-dev"
+      env: DATABASE_URL="postgres://postgres@localhost/dmp"
+      addons:
+        postgresql: "9.6"
+      install:
+        - pip install -r requirements.txt Django>=2.2a1
     - name: "Py3.5 PostgreSQL9.4"
       python: "3.5"
       addons:
