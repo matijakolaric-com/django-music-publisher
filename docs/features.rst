@@ -3,7 +3,7 @@ Sponsored Features
 
 Django Music Publisher is free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell. It can only be developed further with the help of sponsors.
 
-Latest release **19.1 Epiphany** was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
+Version |version| was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
 
 Features added in this release
 ++++++++++++++++++++++++++++++
@@ -112,3 +112,8 @@ This is definitely something that would be very helpful. There are three issues 
 * we are dealing with sensitive data here, bad deployments might easily result in security issues, data loss or worse.
 
 The solution exists, but it is not going into the open source code in the foreseeable future.
+
+Multiple Recordings per Work
+----------------------------
+
+When CWR 3.0 specification is released, details will be released.

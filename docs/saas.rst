@@ -1,7 +1,7 @@
 Offering DMP as a Service
 #########################
 
-The idea behind Django Music Publisher is to give small publishers an opportunity to compete. With the **19.1 Epiphany** release, sponsored by DMP Guru, Django Music Publisher is finally is up to the task. 
+The idea behind Django Music Publisher is to give small publishers an opportunity to compete. With the version |version|, sponsored by DMP Guru, Django Music Publisher is finally is up to the task. 
 
 The code is released under MIT licence, which allows anyone, without any limitations, to provide a commercial or a free service based on it, potentially with some extensions. 
 
