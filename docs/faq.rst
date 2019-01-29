@@ -9,7 +9,7 @@ Should I read the documentation? Which parts?
 	Yes. All of it.
 
 Should I read the documentation before reading FAQ?
-	Yes. All of it.
+	Yes. At least the user manual.
 
 Should I read the documentation and the FAQ before asking for support?
 	Yes. ALL of it.
@@ -18,10 +18,44 @@ Can I search through the documentation?
 	Yes. Please do.
 
 
+Open Source / Free
+++++++++++++++++++
+
+Does "free" mean "free of charge"?
+	Yes. If you install if from the official repository, then you can use it free of charge. 
+	But anyone is also free to sell it, so it may not be free of charge elsewhere.
+
+What is open source?
+	Open source means that the whole source for this program is freely available.
+
+Is `DMP Guru <https://dmp.guru>`_ charging for the use of this software?
+	No. DMP Guru is a specialised application platform-as-a-service. They install, host and 
+	maintain **your app instance** of Django Music Publisher and charge for this service.
+
+Is there a difference? I am still paying for it?
+	Yes, there is a difference. There is no lock-in. You can download the database backup, install 
+	Django Music Publisher somewhere else, import the database data, and keep using it. There will
+	be no significant differences. You are paying for the convenience.
+
+Are there other services that use Django Music Publisher in some way?
+	Yes. None has so far chosen to advertise this fact, and the maintainer respects this choice, so
+	they will not be named here.
+
+When my society says I should ask the vendor about some issue, who do I ask?
+	Regardless if you installed Django Muisc Publisher yourself, or are using DMP Guru, the
+	software vendor in their meaning of the word is you, as you have accepted the MIT licence,
+	which makes clear that the software comes 'as is'. 
+
+	DMP Guru provides support for their service, but issues raised by societies have nothing to do
+	with them. 
+
+	Having said that, you are welcome to report any potential bugs to the repository. The maintainer 
+	may choose to help you. Or not.
+
 Django Music Publisher is not
 +++++++++++++++++++++++++++++
 
-Django Music Publisher is an open source software for original music publishers.
+Django Music Publisher is an **open source software for original music publishers**.
 
 Is it for administrators (who may or may not also be original publishers)?
 	No.
@@ -44,7 +78,7 @@ Can it be used to stream music?
 Is it a music library?
 	No.
 
-Made by aliens (ancient or not)?
+Made by aliens (ancient or contemporary)?
 	No.
 
 
@@ -94,13 +128,13 @@ Export some other format specified by someone?
 	No. There are, actually, two JSON-based export formats. They are created by the maintainer of this project and used in several projects, but it is work in progress, and is still unspecified.
 
 Import CWR acknowledgements?
-	Yes. However, if it contains additional information, thet one needs to use an external tool. The maintainer has two freely available:
+	Yes. However, if it contains additional information, then you must use an external tool. The maintainer has two freely available:
 
 	* `ACK Tools <https://matijakolaric.com/free/cwr-x-ack-tool/>`_	
 	* `Visual CWR <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_	
 
 Import metadata from other sources?
-	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. Importing data is important and is on the roadmap. You are welcome to sponsor the development (See :doc:`Sponsored Features <features>`).
+	Formats used by Django's ``loaddata`` are, naturally, supported, but nothing else at the moment. (If you dont understand, it means **No** in Geek.) Importing data is important and is on the roadmap. You are welcome to sponsor the development (See :doc:`Sponsored Features <features>`).
 
 
 Various Questions
@@ -109,7 +143,7 @@ Various Questions
 My work has several recording versions. How do I put it in?
 	Django Music Publisher only supports a single (first) recording per work.
 	This also means that one ISWC can only have one ISRC assigned to it.
-	In many cases, it is eanough to use ``Alternate Titles``. However, if ISRC or some other data is required for additional rerordings, then Django Music Publisher is not the right solution for you. 
+	In many cases, it is eanough to use ``Alternate Titles``. However, if ISRC or some other data is required for additional rerordings, then Django Music Publisher is not the right solution for you. Yet.
 
 Where do I put the duration of the composition?
 	Compositions do not really have a duration, recordings do. So, it is only possible to assign duration to the ``First Recording``.
@@ -119,3 +153,7 @@ I dont have ISWC codes. What do I do?
 
 Is there any way of auto-filling the works?
 	There is a simple way to add similar works. Open a work that you want to use as a template, enter the changes and then press on ``Save as new``. The new work will be saved and opened. Repeat for all works.
+
+DMP Guru and other services based on Django Music Publisher
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
