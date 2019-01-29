@@ -7,6 +7,7 @@ matrix:
       addons:
         postgresql: "9.6"
       install:
+        - pip install -r requirements.txt
         - pip install -U Django>=2.2a1
     - name: "Py3.5 PostgreSQL9.4"
       python: "3.5"
