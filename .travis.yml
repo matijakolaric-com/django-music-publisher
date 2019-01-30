@@ -22,11 +22,6 @@ matrix:
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
         postgresql: "9.5"
-    - name: "Py3.7 PostgreSQL9.6"
-      python: "3.7-dev"
-      env: DATABASE_URL="postgres://postgres@localhost/dmp"
-      addons:
-        postgresql: "9.6"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
