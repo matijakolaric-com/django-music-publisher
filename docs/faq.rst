@@ -193,7 +193,7 @@ Where do I put the duration of the composition?
 	Compositions do not really have a duration, recordings do. So, it is only possible to assign duration to the ``First Recording``.
 
 I dont have ISWC codes. What do I do?
-	You can enter other data and then add ISWCs later on. You should ask your society how to apply. Some will assing them automatically once you register by CWR. If that is the case, then you will be able to import them from acknowledgement files.
+	You can enter other data and then add ISWCs later on. You should ask your society how to apply. Some will assing them automatically once you register by CWR. If that is the case, then you may be able to import them from acknowledgement files.
 
 Is there any way of auto-filling the works?
 	There is a simple way to add similar works. Open a work that you want to use as a template, enter the changes and then press on ``Save as new``. The new work will be saved and opened. Repeat for all works.
