@@ -181,8 +181,7 @@ What is ``publisher fee`` exactly?
 	This field is **not used for registrations**. In some cases the publisher has to pay part of their revenues to the writer. The **kept** percentage of it is referred to as ``publisher fee``.
 
 Does ``publisher fee`` apply to performance, as well as to mechanical and syncronization royalties?
-	This depends on options selected during the import of processing statements.
-
+	This depends on options selected during the import of royalty statements.
 
 My work has several recording versions. How do I put it in?
 	Django Music Publisher only supports a single (first) recording per work.
@@ -196,7 +195,7 @@ I dont have ISWC codes. What do I do?
 	You can enter other data and then add ISWCs later on. You should ask your society how to apply. Some will assing them automatically once you register by CWR. If that is the case, then you may be able to import them from acknowledgement files.
 
 Is there any way of auto-filling the works?
-	There is a simple way to add similar works. Open a work that you want to use as a template, enter the changes and then press on ``Save as new``. The new work will be saved and opened. Repeat for all works.
+	There is a simple way to add similar works. Open a work that you want to use as a template, enter the changes and then press on ``Save as new``. The new work will be saved and opened. Repeat for all works. See :doc:`Adding, Changing and Deleting Musical Works <manual_works>` for details.
 
 How do I enter multiple original publishers per one writer?
 	This is described in :doc:`Adding, Changing and Deleting Musical Works <manual_works>`.
