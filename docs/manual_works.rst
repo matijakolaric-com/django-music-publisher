@@ -47,6 +47,8 @@ This is where you put in the information on composers and lyricists who created 
 
 * ``Publisher fee`` is the fee kept by the publisher, while the rest is forwarded to the writer. **This field is not used in registrations.** It is used only for royalty statement processing. This field can also be disabled in the settings. It may also be set as required for controlled writers. It should not be filled for other writers. `DMP Guru <https://dmp.guru>`_ sets this field as required for controlled writers. If it is set as a part of a general agreement in ``Writers``, it does not have to be set in ``Writer in Work``. If it is set in both places, the one from ``Writer in Work`` has precedence.
 
+Setting ``allow_multiple_ops`` enables the option to cover the case with multiple original publishers per writer. As stated in many places, the data on other publishers can not be entered. So, in case of multiple original publishers, one of which is you, enter two ``Writer in Work`` rows with the same ``Writer`` and ``Capacity``, one controlled (with your share) and one for the other publisher(s).
+
 First Recording
 +++++++++++++++
 

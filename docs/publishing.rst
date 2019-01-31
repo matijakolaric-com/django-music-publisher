@@ -10,15 +10,15 @@ Music publishing started with publishing of sheet music, and first music *perfor
 
 Although sheet music is not in the focus any more, *composers and lyricists (writers)* still have contracts with *music publishers*. When a (co-)writer has a contract about a musical work with a publisher, this publisher is original publisher of the work in question. Usually 50% of performing and 100% of mechanical and synchronization rights are transferred to the original publishers. Each writer can have a different publisher, or even multiple ones, or not have one at all.
 
-Django Music Publisher only supports the simpest and most common case with one original publisher per controlled writer and usual 50%/100%/100% publisher shares.
+Writers and publishers who are in the chain of agreements that includes the sender of the CWR file are referred to as *controlled*.
+
+Django Music Publisher allows for multiple original publishers, However, as other publishers can not be entered, then they must be combined in a single recors. It only supports usual 50% perf. / 100% mech. / 100% sync. publisher share splits.
 
 Please note that *musical work means composition and lyrics*, this has nothing to do with sound.
 
-Writers and publishers who are in the chain of agreements that includes the sender of the CWR file are referred to as *controlled*.
-
 Each original publisher has a fiduciary obligation to register client’s shares, when they register their own at collecting organizations they are affiliated with.
 
-Royalties for collecting rights are payed, based on registrations. There is a popular belief among writers that by registering in their home societies, other societies will somehow magically know about that. While some collecting organizations share data among themselves, most of them do not.
+Royalties for collecting rights are paid, based on registrations. There is a popular belief among writers that by registering in their home societies, other societies will somehow magically know about that. While some collecting organizations share data among themselves, most of them do not.
 
 Publishing Roles
 ****************
