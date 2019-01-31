@@ -12,7 +12,7 @@ Although sheet music is not in the focus any more, *composers and lyricists (wri
 
 Writers and publishers who are in the chain of agreements that includes the sender of the CWR file are referred to as *controlled*.
 
-Django Music Publisher allows for multiple original publishers, However, as other publishers can not be entered, then they must be combined in a single recors. It only supports usual 50% perf. / 100% mech. / 100% sync. publisher share splits.
+Django Music Publisher allows for multiple original publishers. It only supports usual 50% perf. / 100% mech. / 100% sync. publisher share splits.
 
 Please note that *musical work means composition and lyrics*, this has nothing to do with sound.
 
