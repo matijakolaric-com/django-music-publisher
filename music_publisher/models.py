@@ -1,8 +1,6 @@
 from collections import OrderedDict, defaultdict
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-import requests
 from .base import *
 from .cwr_templates import *
 from datetime import datetime
@@ -37,7 +35,7 @@ class Work(WorkBase):
 
     @property
     def json(self):
-        """Create a data structure that can be serielized as JSON.
+        """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
@@ -82,7 +80,7 @@ class Work(WorkBase):
                 'society_code', 'remote_work_id').distinct():
             wa['society_code'] = wa['society_code'].lstrip('0')
             data['society_work_codes'].append(wa)
-        return (self.work_id, data)
+        return self.work_id, data
 
     @property
     def work_id(self):
@@ -103,7 +101,7 @@ class Work(WorkBase):
 
 
 class AlternateTitle(TitleBase):
-    """Conrete class for alternate titles.
+    """Concrete class for alternate titles.
 
     Attributes:
         work (django.db.models.ForeignKey): Foreign key to Work model
@@ -175,6 +173,7 @@ class FirstRecording(RecordingBase):
         Returns:
             dict: JSON-serializable data structure
         """
+        artist_id = album_id = None
         data = OrderedDict()
         if self.duration:
             data['first_release_duration'] = self.duration.strftime('%H%M%S')
@@ -236,9 +235,9 @@ class ArtistInWork(models.Model):
 
     @property
     def json(self):
-        data = {}
-        data['artist_id'] = 'A{:06d}'.format(self.artist.id)
-        data['artist'] = self.artist.json
+        data = {
+            'artist_id': 'A{:06d}'.format(self.artist.id),
+            'artist': self.artist.json}
         return data
 
 
@@ -464,7 +463,8 @@ class CWRExport(models.Model):
     def __str__(self):
         return self.filename
 
-    def get_record(self, key, record):
+    @staticmethod
+    def get_record(key, record):
         """Create CWR record (row) from the key and dict.
 
         Args:
@@ -574,10 +574,9 @@ class CWRExport(models.Model):
                 if not wiw.controlled:
                     continue
                 w = wiw.writer
-                record = {
-                    'capacity': wiw.capacity,
-                    'share': controlled_writer_shares[w.id],
-                    'saan': wiw.saan or w.saan}
+                record = dict(capacity=wiw.capacity,
+                              share=controlled_writer_shares[w.id],
+                              saan=wiw.saan or w.saan)
                 record['interested_party_number'] = 'W{:06d}'.format(w.id)
                 record['ipi_name'] = w.ipi_name
                 record['ipi_base'] = w.ipi_base

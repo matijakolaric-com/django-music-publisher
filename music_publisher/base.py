@@ -22,7 +22,7 @@ Attributes:
     RE_TITLE (str): Regex pattern for CWR titles
     TITLES_CHARS (str): Characters allowed in CWR titles
 """
-
+from datetime import date
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -93,10 +93,10 @@ except AttributeError:
 
 
 TITLES_CHARS = re.escape(
-    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
+    r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
 )
 NAMES_CHARS = re.escape(
-    "!#$%&'()+-./0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ`"
+    r"!#$%&'()+-./0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ`"
 )
 
 RE_TITLE = r'(^[{0}][ {0}]*$)'.format(TITLES_CHARS)
@@ -126,6 +126,7 @@ def check_ean_digit(ean):
         raise ValidationError('Invalid EAN.')
 
 
+# noinspection PyShadowingBuiltins
 def check_iswc_digit(iswc, weight):
     """ISWC / IPI Base checksum validation.
 
@@ -374,7 +375,7 @@ class AlbumCDBase(MusicPublisherBase):
         help_text='This will set the purpose to Library.',
         max_length=15, blank=True, null=True, unique=True, validators=(
             CWRFieldValidator('cd_identifier'),))
-    release_date = models.DateField(
+    release_date: date = models.DateField(
         help_text='Can be overridden by recording data.',
         blank=True, null=True)
     album_title = models.CharField(

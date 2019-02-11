@@ -19,17 +19,13 @@ from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-# from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.timezone import now
-# from django.views.decorators.csrf import csrf_protect
 from .models import (
-    SETTINGS,
     AlbumCD, AlternateTitle, Artist, ArtistInWork, FirstRecording, Work,
     Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement)
 from .base import SOCIETIES
 import re
-import requests
 
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
@@ -85,7 +81,8 @@ class WriterAdmin(MusicPublisherAdmin):
     )
     actions = None
 
-    def original_publisher(self, obj):
+    @staticmethod
+    def original_publisher(obj):
         """Return the original publisher.
 
         This makes sense only in the US context."""
@@ -337,8 +334,6 @@ class WorkAdmin(MusicPublisherAdmin):
 
     form = WorkForm
 
-    readonly_fields = ('version_type')
-
     inlines = (
         AlternateTitleInline, WriterInWorkInline,
         RecordingInline, ArtistInWorkInline,
@@ -588,12 +583,11 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
-        if normalized:
-            publishers = {}
-            writers = {}
-            albums = {}
-            artists = {}
-            libraries = {}
+        publishers = {}
+        writers = {}
+        albums = {}
+        artists = {}
+        libraries = {}
         qs = qs.prefetch_related('writers')
         for work in qs:
             key, j = work.json
@@ -736,13 +730,13 @@ class CWRExportAdmin(admin.ModelAdmin):
         else:
             return ('nwr_rev', 'description', 'works')
 
-    def has_delete_permission(self, request, obj=None, **kwargs):
+    def has_delete_permission(self, request, obj=None):
         """If CWR has been created, it can no longer be deleted, as it may
         have been sent. This may change once the delivery is automated."""
 
         if obj and obj.cwr:
             return None
-        return super().has_delete_permission(request, obj, **kwargs)
+        return super().has_delete_permission(request, obj)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with two sub-views defined by GET parameters:
