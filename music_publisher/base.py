@@ -375,7 +375,7 @@ class AlbumCDBase(MusicPublisherBase):
         help_text='This will set the purpose to Library.',
         max_length=15, blank=True, null=True, unique=True, validators=(
             CWRFieldValidator('cd_identifier'),))
-    release_date: date = models.DateField(
+    release_date = models.DateField(
         help_text='Can be overridden by recording data.',
         blank=True, null=True)
     album_title = models.CharField(
