@@ -25,7 +25,7 @@ TEMPLATES_21 = {
         '{{ work_title|ljust:60 }}  {{ work_id|ljust:14 }}'
         '{{ iswc|ljust:11 }}00000000            UNC'
         '{{ duration|date:"His"|default:"000000" }}{{ recorded_indicator }}'
-        '      {{ version_type }}  ' + ' ' * (40) + 'N00000000000' +
+        '      {{ version_type }}  ' + ' ' * 40 + 'N00000000000' +
         ' ' * 51 + 'N'
         '\r\n{% endautoescape %}'),
     'SPU': Template(

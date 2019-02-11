@@ -10,7 +10,6 @@ Attributes:
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import TestCase
-from django.urls import reverse
 from music_publisher.admin import *
 from music_publisher.models import *
 from io import StringIO
@@ -33,7 +32,7 @@ class AllTest(TestCase):
         self.user.save()
         self.user.groups.add(1)
 
-    def get(self, path, re_post=False):
+    def get(self, path, re_post=None):
         """A helper method that similates opening of view and then simulates
             manual changes and save.
         """
