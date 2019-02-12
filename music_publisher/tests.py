@@ -685,6 +685,11 @@ class AllTest(TestCase):
                 'action': 'create_json', 'select_across': 1,
                 'index': 0, '_selected_action': work.id})
         self.assertEqual(str(WorkAcknowledgement.objects.first()), 'RA')
+        # Moved to the end, after the ACK file has been imported
+        self.get(
+            reverse('admin:music_publisher_work_changelist',) +
+            '?ack_society=21')
+
 
 
 ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
