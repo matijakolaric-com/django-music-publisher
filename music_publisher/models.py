@@ -108,22 +108,30 @@ class AlternateTitle(TitleBase):
     """
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
+    suffix = models.BooleanField(
+        default=False,
+        help_text='Use this field if it is to be added to the title')
 
     class Meta:
         unique_together = (('work', 'title'),)
 
     @property
     def json(self):
-        """Create a data structure that can be serielized as JSON.
+        """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
         """
-        return {'alternate_title': self.title}
+        return {'alternate_title': str(self)}
+
+    def __str__(self):
+        if self.suffix:
+            return '{} {}'.format(self.work.title, self.title)
+        return super().__str__()
 
 
 class AlbumCD(AlbumCDBase):
-    """Conrete class for album / CD."""
+    """Concrete class for album / CD."""
     pass
 
 
@@ -132,7 +140,7 @@ class Artist(ArtistBase):
 
     @property
     def json(self):
-        """Create a data structure that can be serielized as JSON.
+        """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
@@ -168,7 +176,7 @@ class FirstRecording(RecordingBase):
 
     @property
     def json(self):
-        """Create a data structure that can be serielized as JSON.
+        """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
@@ -190,7 +198,7 @@ class FirstRecording(RecordingBase):
             data['album_id'] = album_id
         if self.release_date:
             data['release_date'] = self.release_date.strftime('%Y%m%d')
-        data = {'recordings': [data]}
+        data = {'recordings': {'R{:06d}'.format(self.id): data}}
         if self.artist:
             data['artists'] = {artist_id: self.artist.json}
         if self.album_cd and self.album_cd.album_title:
@@ -371,7 +379,7 @@ class WriterInWork(models.Model):
 
     @property
     def json(self):
-        """Create a data structure that can be serielized as JSON.
+        """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
@@ -607,7 +615,7 @@ class CWRExport(models.Model):
 
             for record in work.alternatetitle_set.order_by('title'):
                 yield self.get_transaction_record('ALT', {
-                    'alternate_title': record.title})
+                    'alternate_title': str(record)})
             if work.is_modification():
                 yield self.get_transaction_record('VER', {
                     'original_title': work.original_title})

@@ -105,6 +105,15 @@ class AlternateTitleInline(admin.TabularInline):
     """
     model = AlternateTitle
     extra = 0
+    readonly_fields = ('complete_alt_title',)
+
+    def complete_alt_title(self, obj):
+        return str(obj)
+
+    def get_fields(self, request, obj=None):
+        if SETTINGS.get('admin_show_alt_suffix'):
+            return ('title', 'suffix', 'complete_alt_title')
+        return ('title',)
 
 
 class ArtistInWorkInline(admin.TabularInline):
@@ -847,7 +856,7 @@ class ACKImportAdmin(admin.ModelAdmin):
 
     add_fields = ('acknowledgement_file',)
 
-    def get_fields(self, reqest, obj=None):
+    def get_fields(self, request, obj=None):
         """Return different fields for add vs change.
         """
         if obj:

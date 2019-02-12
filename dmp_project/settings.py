@@ -133,6 +133,7 @@ STATICFILES_DIRS = [
 MUSIC_PUBLISHER_SETTINGS = {
     'admin_show_publisher': True,
     'admin_show_saan': True,
+    'admin_show_alt_suffix': True,
     'allow_modifications': True,
     'allow_multiple_ops': True,
 
