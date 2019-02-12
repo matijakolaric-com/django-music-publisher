@@ -127,7 +127,7 @@ class AlternateTitle(TitleBase):
     def __str__(self):
         if self.suffix:
             return '{} {}'.format(self.work.title, self.title)
-        return super().__str__()
+        return self.title
 
 
 class AlbumCD(AlbumCDBase):
