@@ -688,7 +688,7 @@ class AllTest(TestCase):
         # Moved to the end, after the ACK file has been imported
         self.get(
             reverse('admin:music_publisher_work_changelist',) +
-            '?ack_society=21')
+            '?ack_society=21&ack_status=AS')
 
 
 

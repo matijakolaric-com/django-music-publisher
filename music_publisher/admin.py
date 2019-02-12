@@ -477,7 +477,7 @@ class WorkAdmin(MusicPublisherAdmin):
             return queryset
 
     class ACKStatusListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
+        """Custom list filter on ACK status.
         """
 
         title = 'Acknowledgement status'
@@ -489,7 +489,7 @@ class WorkAdmin(MusicPublisherAdmin):
             return WorkAcknowledgement.TRANSACTION_STATUS_CHOICES
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
+            """Filter on ACK status.
             """
             if self.value():
                 return queryset.filter(
