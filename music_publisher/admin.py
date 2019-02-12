@@ -116,6 +116,7 @@ class AlternateTitleInline(admin.TabularInline):
         if SETTINGS.get('admin_show_alt_suffix'):
             lst.append('suffix')
             lst.append('complete_alt_title')
+        return lst
 
 
 class ArtistInWorkInline(admin.TabularInline):
