@@ -310,8 +310,10 @@ class AllTest(TestCase):
             re_post={
                 'title': 'GOOD TITLE',
                 'iswc': 'T1234567894',
-                'alternatetitle_set-TOTAL_FORMS': 1,
+                'alternatetitle_set-TOTAL_FORMS': 2,
                 'alternatetitle_set-0-title': 'BETTER TITLE',
+                'alternatetitle_set-1-suffix': '1',
+                'alternatetitle_set-1-title': 'WITH SUFFIX',
                 'writerinwork_set-TOTAL_FORMS': 5,
                 'writerinwork_set-0-writer': writer.id,
                 'writerinwork_set-0-capacity': 'CA',
