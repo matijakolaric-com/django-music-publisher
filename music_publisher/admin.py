@@ -111,9 +111,11 @@ class AlternateTitleInline(admin.TabularInline):
         return str(obj)
 
     def get_fields(self, request, obj=None):
+        """Allow title suffixes if allowed"""
+        lst = ['title']
         if SETTINGS.get('admin_show_alt_suffix'):
-            return ('title', 'suffix', 'complete_alt_title')
-        return ('title',)
+            lst.append('suffix')
+            lst.append('complete_alt_title')
 
 
 class ArtistInWorkInline(admin.TabularInline):
