@@ -546,7 +546,10 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.get(
             reverse('admin:music_publisher_work_changelist',) +
-            '?has_iswc=Y&has_rec=N&q=01')
+            '?has_iswc=Y&has_rec=N&in_cwr=N&q=01')
+        self.get(
+            reverse('admin:music_publisher_work_changelist',) +
+            '?ack_society=021')
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_artist_add') + '?_popup=1')

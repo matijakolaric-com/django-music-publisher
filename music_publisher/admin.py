@@ -426,7 +426,7 @@ class WorkAdmin(MusicPublisherAdmin):
         return qs
 
     class InCWRListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
+        """Custom list filter if work is included in any of CWR files.
         """
 
         title = 'In CWR'
@@ -441,7 +441,7 @@ class WorkAdmin(MusicPublisherAdmin):
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
+            """Filter if in any of CWR files.
             """
             if self.value() == 'Y':
                 return queryset.exclude(cwr_exports__count=0)
@@ -449,7 +449,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 return queryset.filter(cwr_exports__count=0)
 
     class ACKSocietyListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
+        """Custom list filter on societies that sent ACK files.
         """
 
         title = 'Acknowledgement society'
@@ -469,7 +469,7 @@ class WorkAdmin(MusicPublisherAdmin):
             return [(code, SDICT.get(code, code)) for code in codes]
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
+            """Filter on society sending ACKs.
             """
             if self.value():
                 return queryset.filter(
