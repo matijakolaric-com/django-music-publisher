@@ -105,6 +105,18 @@ class AlternateTitleInline(admin.TabularInline):
     """
     model = AlternateTitle
     extra = 0
+    readonly_fields = ('complete_alt_title',)
+
+    def complete_alt_title(self, obj):
+        return str(obj)
+
+    def get_fields(self, request, obj=None):
+        """Allow title suffixes if allowed"""
+        lst = ['title']
+        if SETTINGS.get('admin_show_alt_suffix'):
+            lst.append('suffix')
+            lst.append('complete_alt_title')
+        return lst
 
 
 class ArtistInWorkInline(admin.TabularInline):
@@ -414,7 +426,7 @@ class WorkAdmin(MusicPublisherAdmin):
         return qs
 
     class InCWRListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
+        """Custom list filter if work is included in any of CWR files.
         """
 
         title = 'In CWR'
@@ -429,7 +441,7 @@ class WorkAdmin(MusicPublisherAdmin):
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
+            """Filter if in any of CWR files.
             """
             if self.value() == 'Y':
                 return queryset.exclude(cwr_exports__count=0)
@@ -437,7 +449,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 return queryset.filter(cwr_exports__count=0)
 
     class ACKSocietyListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
+        """Custom list filter on societies that sent ACK files.
         """
 
         title = 'Acknowledgement society'
@@ -457,7 +469,7 @@ class WorkAdmin(MusicPublisherAdmin):
             return [(code, SDICT.get(code, code)) for code in codes]
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
+            """Filter on society sending ACKs.
             """
             if self.value():
                 return queryset.filter(
@@ -465,7 +477,7 @@ class WorkAdmin(MusicPublisherAdmin):
             return queryset
 
     class ACKStatusListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
+        """Custom list filter on ACK status.
         """
 
         title = 'Acknowledgement status'
@@ -477,7 +489,7 @@ class WorkAdmin(MusicPublisherAdmin):
             return WorkAcknowledgement.TRANSACTION_STATUS_CHOICES
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
+            """Filter on ACK status.
             """
             if self.value():
                 return queryset.filter(
@@ -583,8 +595,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
-        publishers = {}
         writers = {}
+        publishers = {}
         albums = {}
         artists = {}
         libraries = {}
@@ -593,6 +605,7 @@ class WorkAdmin(MusicPublisherAdmin):
             key, j = work.json
             if normalized:
                 writers.update(j.pop('writers'))
+                publishers.update(j.pop('publishers'))
                 albums.update(j.pop('albums', {}))
                 artists.update(j.pop('artists', {}))
                 libraries.update(j.pop('libraries', {}),)
@@ -616,8 +629,8 @@ class WorkAdmin(MusicPublisherAdmin):
                     publisher_id = publisher.pop('publisher_id')
                     publishers[publisher_id] = publisher
             j = {
-                'publishers': publishers,
                 'writers': writers,
+                'publishers': publishers,
                 'albums': albums,
                 'artists': artists,
                 'libraries': libraries,
@@ -635,12 +648,12 @@ class WorkAdmin(MusicPublisherAdmin):
         response['Content-Disposition'] = cd
         return response
     create_json.short_description = \
-        'Export selected works.'
+        'Export selected works (JSON).'
 
     def create_normalized_json(self, request, qs):
         return self.create_json(request, qs, normalized=True)
     create_normalized_json.short_description = \
-        'Export selected works (normalized).'
+        'Export selected works (normalized JSON).'
 
     actions = (create_cwr, create_json, create_normalized_json)
 
@@ -847,7 +860,7 @@ class ACKImportAdmin(admin.ModelAdmin):
 
     add_fields = ('acknowledgement_file',)
 
-    def get_fields(self, reqest, obj=None):
+    def get_fields(self, request, obj=None):
         """Return different fields for add vs change.
         """
         if obj:

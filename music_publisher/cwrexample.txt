@@ -16,9 +16,10 @@ SWR0000000000000012W000003  THIRD                                               
 SWT0000000000000013W000003  019160000000000I2136N001
 PWR0000000000000014XXXA     DJANGO MUSIC PUBLISHING ASCAP PUB                          1LJ4V4        W000003  
 ALT0000000000000015BETTER TITLE                                                AT  
-PER0000000000000016VERY COOL                                    VERY                                                  
-REC000000000000001720180131                                                            000123     VERY COOL                                                   FOO BAR MUSIC                                                                              USX1X1234567     
-ORN0000000000000018LIB                                                            C00L           0000FOO BAR MUSIC LIBRARY                                                                                                                                                             0000                  
+ALT0000000000000016GOOD TITLE WITH SUFFIX                                      AT  
+PER0000000000000017VERY COOL                                    VERY                                                  
+REC000000000000001820180131                                                            000123     VERY COOL                                                   FOO BAR MUSIC                                                                              USX1X1234567     
+ORN0000000000000019LIB                                                            C00L           0000FOO BAR MUSIC LIBRARY                                                                                                                                                             0000                  
 NWR0000000100000000ANOTHER TITLE                                                 000002                   00000000            UNC000000U      ORI                                                   N00000000000                                                   N
 SPU000000010000000101XXX      DJANGO MUSIC PUBLISHING DEMO APP              E 00000000000000000199              0710125003402500   02500 N                                             
 SPT0000000100000002XXX            012500250002500I2136N001
@@ -40,5 +41,5 @@ OWR0000000200000007W000003  THIRD                                               
 OWR0000000200000008                                                                                    Y  00000000000000000000   02500   02500   02500                              
 VER0000000200000009ORIGINAL                                                                                                                                                                                                                                                                                                                                                 
 PER0000000200000010VERY COOL                                    VERY                                                  
-GRT000010000000300000042   0000000000
-TRL000010000000300000044
+GRT000010000000300000043   0000000000
+TRL000010000000300000045
