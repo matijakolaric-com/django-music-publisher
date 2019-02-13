@@ -595,8 +595,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
-        publishers = {}
         writers = {}
+        publishers = {}
         albums = {}
         artists = {}
         libraries = {}
@@ -605,6 +605,7 @@ class WorkAdmin(MusicPublisherAdmin):
             key, j = work.json
             if normalized:
                 writers.update(j.pop('writers'))
+                publishers.update(j.pop('publishers'))
                 albums.update(j.pop('albums', {}))
                 artists.update(j.pop('artists', {}))
                 libraries.update(j.pop('libraries', {}),)
@@ -628,8 +629,8 @@ class WorkAdmin(MusicPublisherAdmin):
                     publisher_id = publisher.pop('publisher_id')
                     publishers[publisher_id] = publisher
             j = {
-                'publishers': publishers,
                 'writers': writers,
+                'publishers': publishers,
                 'albums': albums,
                 'artists': artists,
                 'libraries': libraries,
