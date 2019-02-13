@@ -345,7 +345,7 @@ class AllTest(TestCase):
             })
         self.assertEqual(response.status_code, 302)
         work = Work.objects.all().first()
-        self.assertEqual(str(work), 'GOOD TITLE')
+        self.assertEqual(str(work.alternatetitle_set.first()), 'BETTER TITLE')
         settings.MUSIC_PUBLISHER_SETTINGS['allow_multiple_ops'] = False
         response = self.get(
             reverse('admin:music_publisher_work_add'),

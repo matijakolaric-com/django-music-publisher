@@ -149,7 +149,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_ipi_name': '00000000199',
     'publisher_pr_society': '071',
     'publisher_mr_society': '034',
-    'publisher_sr_society': '044',
+    'publisher_sr_society': None,
 
     'us_publisher_override': {
         'ASCAP': {
