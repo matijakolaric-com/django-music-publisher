@@ -201,7 +201,7 @@ def get_publisher_dict(pr_society):
     us_publisher_override = SETTINGS.get('us_publisher_override', {})
     pub = us_publisher_override.get(key)
     if pub:
-        pub['pr_society'] = pr_society
+        pub['publisher_pr_society'] = pr_society
         return pub
     return SETTINGS
 

@@ -415,8 +415,15 @@ class WriterInWork(models.Model):
             data['writer']['publisher_dict'] = {
                 'name': publisher.get('publisher_name'),
                 'publisher_id': publisher.get('publisher_id'),
-                'pr_society': publisher.get('pr_society'),
+                'ipi_name': publisher.get('publisher_ipi_name'),
+                'pr_society': publisher.get('publisher_pr_society'),
             }
+            if publisher.get('publisher_ipi_base'):
+                data['writer']['publisher_dict']['ipi_base'] = publisher['publisher_ipi_base']
+            if publisher.get('publisher_mr_society'):
+                data['writer']['publisher_dict']['mr_society'] = publisher['publisher_mr_society']
+            if publisher.get('publisher_sr_society'):
+                data['writer']['publisher_dict']['mr_society'] = publisher['publisher_sr_society']
             if self.saan:
                 agr = {'saan': self.saan, 'type': 'OS'}
                 data['publishers_for_writer'][0]['agreement'] = agr
