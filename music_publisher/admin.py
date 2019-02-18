@@ -100,10 +100,42 @@ class WriterAdmin(MusicPublisherAdmin):
             qs.update(last_change=now())
 
 
+class AlternateTitleFormSet(BaseInlineFormSet):
+    """Formset for :class:`AlternateTitleInline`.
+    """
+
+    orig_cap = ['C ', 'A ', 'CA']
+
+    def clean(self):
+        """Performs these checks:
+            if suffix is used, then validates the total length
+
+        Returns:
+            None
+
+        Raises:
+            ValidationError
+        """
+        work_title_len = len(self.instance.title)
+        for form in self.forms:
+            if not form.is_valid():
+                return
+            if form.cleaned_data and not form.cleaned_data.get('DELETE'):
+                if not form.cleaned_data['suffix']:
+                    continue
+                title_suffix_len = len(form.cleaned_data['title'])
+                if work_title_len + title_suffix_len > 59:  # 60 - 1 for space
+                    form.add_error(
+                        'title',
+                        'Too long for suffix, work title plus suffix must be '
+                        '59 characters or less.')
+
+
 class AlternateTitleInline(admin.TabularInline):
     """Inline interface for :class:`.models.AlternateTitle`.
     """
     model = AlternateTitle
+    formset = AlternateTitleFormSet
     extra = 0
     readonly_fields = ('complete_alt_title',)
 
