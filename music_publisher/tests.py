@@ -21,6 +21,7 @@ ALTERNATE_MUSIC_PUBLISHER_SETTINGS = {
     'publisher_id': 'XXX',
     'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
     'publisher_ipi_name': '00000000199',
+    'publisher_ipi_base': 'T1234567893',
     'publisher_pr_society': '052',
     'publisher_mr_society': '044',
     'publisher_sr_society': '044',
@@ -730,11 +731,6 @@ class AllTest(TestCase):
         response = self.client.post(
             reverse('admin:music_publisher_work_changelist'),
             data={
-                'action': 'create_normalized_json', 'select_across': 1,
-                'index': 0, '_selected_action': work.id})
-        response = self.client.post(
-            reverse('admin:music_publisher_work_changelist'),
-            data={
                 'action': 'create_json', 'select_across': 1,
                 'index': 0, '_selected_action': work.id})
         self.assertEqual(str(WorkAcknowledgement.objects.first()), 'RA')
@@ -999,6 +995,11 @@ class AllTest(TestCase):
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
             re_post={'nwr_rev': 'NWR', 'works': [work.id]})
+        response = self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_normalized_json', 'select_across': 1,
+                'index': 0, '_selected_action': work.id})
 
 
 ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
