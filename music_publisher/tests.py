@@ -741,6 +741,7 @@ class AllTest(TestCase):
 
     @override_settings(MUSIC_PUBLISHER_SETTINGS=ALTERNATE_MUSIC_PUBLISHER_SETTINGS)
     def test_3_works(self):
+        SETTINGS = ALTERNATE_MUSIC_PUBLISHER_SETTINGS
         self.client.force_login(self.user)
         response = self.get(reverse('admin:music_publisher_work_changelist',))
         self.assertEqual(response.status_code, 200)
