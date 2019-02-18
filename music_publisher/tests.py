@@ -15,18 +15,6 @@ from music_publisher.models import *
 from io import StringIO
 import os
 
-ALTERNATE_MUSIC_PUBLISHER_SETTINGS = {
-    'work_id_prefix': 'XXX',
-
-    'publisher_id': 'XXX',
-    'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
-    'publisher_ipi_name': '00000000199',
-    'publisher_ipi_base': 'T1234567893',
-    'publisher_pr_society': '052',
-    'publisher_mr_society': '044',
-    'publisher_sr_society': '044',
-}
-
 
 class AllTest(TestCase):
     """All Tests in a sibgle class.
@@ -739,9 +727,7 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_work_changelist',) +
             '?ack_society=21&ack_status=AS')
 
-    @override_settings(MUSIC_PUBLISHER_SETTINGS=ALTERNATE_MUSIC_PUBLISHER_SETTINGS)
     def test_3_works(self):
-        SETTINGS = ALTERNATE_MUSIC_PUBLISHER_SETTINGS
         self.client.force_login(self.user)
         response = self.get(reverse('admin:music_publisher_work_changelist',))
         self.assertEqual(response.status_code, 200)
