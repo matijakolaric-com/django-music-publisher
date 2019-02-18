@@ -34,9 +34,9 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}{{ sequence|rjust:2 }}'
         '{{ publisher_id|ljust:9 }}{{ publisher_name|ljust:45 }}'
         ' E 000000000{{ publisher_ipi_name|rjust:11 }}              '
-        '{{ publisher_pr_society|ljust:3 }}{{ share|prshare }}'
-        '{{ publisher_mr_society|ljust:3 }}{{ share|mrshare }}'
-        '{{ publisher_sr_society|ljust:3 }}{{ share|mrshare }}'
+        '{{ publisher_pr_society|soc }}{{ share|prshare }}'
+        '{{ publisher_mr_society|soc }}{{ share|mrshare }}'
+        '{{ publisher_sr_society|soc }}{{ share|mrshare }}'
         ' N {{ publisher_ipi_base|ljust:13 }}                               '
         '\r\n{% endautoescape %}'),
     'SPT': Template(
@@ -51,7 +51,7 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}{{ interested_party_number|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }} '
         '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
-        '{{ pr_society|ljust:3 }}{{ share|prshare }}'
+        '{{ pr_society|soc }}{{ share|prshare }}'
         '   00000   00000 N  {{ ipi_base|ljust:13 }}             \r\n'
         '{% endautoescape %}'),
     'SWT': Template(
@@ -83,9 +83,9 @@ TEMPLATES_21 = {
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}'
         '{{ writer_unknown_indicator|default:" "}}'
         '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
-        '{{ pr_society|ljust:3 }}{{ share|mrshare }}'
-        '{{ mr_society|ljust:3 }}{{ share|mrshare }}'
-        '{{ sr_society|ljust:3 }}{{ share|mrshare }}    '
+        '{{ pr_society|soc }}{{ share|mrshare }}'
+        '{{ mr_society|soc }}{{ share|mrshare }}'
+        '{{ sr_society|soc }}{{ share|mrshare }}    '
         '{{ ipi_base|ljust:13 }}             \r\n{% endautoescape %}'),
     'ALT': Template(
         '{% load cwr_filters %}{% autoescape off %}'

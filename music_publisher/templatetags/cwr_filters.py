@@ -37,6 +37,15 @@ def ljust(value, length):
     return value
 
 
+@register.filter(name='soc')
+def soc(value):
+    """Format society fields."""
+
+    if not value:
+        return '   '
+    value = value.rjust(3, '0')
+    return value
+
 @register.filter(name='prshare')
 def prshare(value):
     """Format and validate fields containing shares."""
