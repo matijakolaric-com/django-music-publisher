@@ -18,10 +18,12 @@ If ``allow_modifications`` is set, two more fields are shown, ``original title``
 Alternate Titles
 ++++++++++++++++
 
-This part is pretty self-explanatory. Press on ``Add another Alternate Title`` and put the title in the field. Please note the icon for deleting the row.
+Press on ``Add another Alternate Title`` and put the title in the field. Please note the icon for deleting the row.
 
 .. figure:: /images/alternate_title.png
    :width: 100%
+
+Setting ``admin_show_alt_suffix`` adds two more columns to this section. If you choose to mark the alt title as ``suffix``, then it will be appended to the ``Work title``, and the result will be displayed in the last column. Please note that the limit of 60 characters applies to the whole alternate title.
 
 Writers in Work
 +++++++++++++++

@@ -32,7 +32,7 @@ Is it for sub-publishers (who may or may not also be original publishers)?
 Is it for unpublished writers?
 	No.
 
-Is it a used to create music?
+Is it used to create music?
 	No.
 
 Is it used for music notation?
@@ -87,8 +87,7 @@ Is there a difference? I am still paying for it?
 	be no significant differences. You are paying for the convenience.
 
 Are there other services that use Django Music Publisher in some way?
-	Yes. None has so far chosen to advertise this fact, and the maintainer respects this choice, so
-	they will not be named here.
+	Yes. None has so far chosen to advertise this fact, and the maintainer respects this choice, so they will not be named here.
 
 
 Who is ...?
@@ -96,14 +95,11 @@ Who is ...?
 
 When my society says I should ask the vendor about some issue, who do I ask?
 	Regardless if you installed Django Music Publisher yourself, or are using DMP Guru, the
-	software vendor in their meaning of the word is **you**, as you have accepted the MIT licence,
-	which makes clear that the software comes 'as is'.
+	software vendor in their meaning of the word is **you**, as you have accepted the MIT licence, which makes clear that the software comes 'as is'.
 
-	Having said that, you are welcome to report any potential bugs to the repository. The maintainer 
-	may choose to help you. Or not.
+	Having said that, you are welcome to report any potential bugs to the repository. The maintainer may choose to help you. Or not.
 
-	DMP Guru provides support for their service, but issues raised by societies have nothing to do
-	with hosting and maintenance, but they will report the bug to the maintainer if there is a bug.
+	DMP Guru provides support for their service, but issues raised by societies have nothing to do with hosting and maintenance, but they will report the bug to the maintainer if there is a bug.
 
 
 Does it ...?
@@ -117,8 +113,7 @@ Export Electronic Batch Registration (EBR) files?
 	unofficially also by a few other societies. All of them also accept CWR.
 
 Export MWN (DDEX) or any other DDEX format?
-	No. MWN is on the roadmap, you are welcome to sponsor the development (See :doc:`Sponsored Features <features>`). Other 
-	DDEX formats may follow.
+	No. MWN is on the roadmap, you are welcome to sponsor the development (See :doc:`Sponsored Features <features>`). Other DDEX formats may follow.
 
 Export some other format specified by someone?
 	No. There are, actually, two JSON-based export formats. They are created by the maintainer of this project and used in several projects, but it is work in progress, and is still unspecified.

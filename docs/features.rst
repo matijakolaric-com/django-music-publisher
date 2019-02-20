@@ -5,10 +5,10 @@ Django Music Publisher is free to use, copy, modify, merge, publish, distribute,
 
 Version |version| was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
 
-Features added in this release
-++++++++++++++++++++++++++++++
+Features added in this release (including minor releases)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Here are development cost breakdowns for several features that have been identified as previously missing, which have been added in this release.
+Here are development cost breakdowns for several features that have been identified as previously missing, which have been added in this major release.
 
 ======================================================= =========
 Task                                                    Cost
@@ -22,6 +22,19 @@ Integration tests                                          €500
 Documentation update                                       €250
 Major release                                              €100
 **Total**                                               **€3600**
+======================================================= =========
+
+The following features were added in minor releases.
+
+======================================================= =========
+Task                                                    Cost
+======================================================= =========
+Alternate titles as suffixes                               €200
+CWR internal note                                           €50
+New filters for Work                                        €50
+Integration tests                                           €50
+Documentation update                                        €50
+**Total**                                                **€400**
 ======================================================= =========
 
 Previous releases of Django Music Publisher used an external service for data validation, CWR generation and syntax highlighting. Django Music Publisher began as a proof of concept for this service. However, data validation and CWR generation are the most important features of Django Music Publisher.
