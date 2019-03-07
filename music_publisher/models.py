@@ -662,7 +662,7 @@ class CWRExport(models.Model):
                 pass
             try:
                 album = work.firstrecording.album_cd
-                if album.cd_identifier:
+                if album and album.cd_identifier:
                     yield self.get_transaction_record('ORN', {
                         'library': album.library,
                         'cd_identifier': album.cd_identifier})
