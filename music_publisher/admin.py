@@ -795,9 +795,9 @@ class CWRExportAdmin(admin.ModelAdmin):
     def add_view(self, request, form_url='', extra_context=None, work_ids=None):
         """Added work_ids as default for wizard from
         :meth:`WorkAdmin.create_cwr`."""
-
-        self.work_ids = work_ids
-        request.method = 'GET'
+        if work_ids:
+            self.work_ids = work_ids
+            request.method = 'GET'
         return super().add_view(request, form_url, extra_context)
 
 
