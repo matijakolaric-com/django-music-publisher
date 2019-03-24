@@ -614,9 +614,10 @@ class WorkAdmin(MusicPublisherAdmin):
         :class:`CWRExportAdmin` with selected works.
         """
         url = reverse('admin:music_publisher_cwrexport_add')
-        ids = qs.values_list('id', flat=True)
-        return HttpResponseRedirect(
-            '{}?works={}'.format(url, ','.join(str(i) for i in ids)))
+        work_ids = qs.values_list('id', flat=True)
+        view = CWRExportAdmin(CWRExport, admin.site).add_view(
+            request, url, work_ids=work_ids)
+        return view
     create_cwr.short_description = 'Create CWR from selected works.'
 
     def create_json(self, request, qs, normalized=False):
@@ -782,6 +783,23 @@ class CWRExportAdmin(admin.ModelAdmin):
         if obj and obj.cwr:
             return None
         return super().has_delete_permission(request, obj)
+
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if hasattr(self, 'work_ids'):
+            form.base_fields['works'].initial = self.work_ids
+        return form
+
+
+    def add_view(self, request, form_url='', extra_context=None, work_ids=None):
+        """Added work_ids as default for wizard from
+        :meth:`WorkAdmin.create_cwr`."""
+
+        self.work_ids = work_ids
+        request.method = 'GET'
+        return super().add_view(request, form_url, extra_context)
+
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with two sub-views defined by GET parameters:
