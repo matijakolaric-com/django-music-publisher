@@ -394,7 +394,7 @@ class AlbumCDBase(MusicPublisherBase):
         if self.cd_identifier and self.album_title:
             return '{} ({})'.format(
                 self.album_title or '', self.cd_identifier).upper()
-        return (self.album_title or self.cd_identifier).upper()
+        return (self.album_title or self.cd_identifier or '').upper()
 
     @property
     def library(self):
