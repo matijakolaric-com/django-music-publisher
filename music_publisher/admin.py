@@ -121,7 +121,7 @@ class AlternateTitleFormSet(BaseInlineFormSet):
             if not form.is_valid():
                 return
             if form.cleaned_data and not form.cleaned_data.get('DELETE'):
-                if not form.cleaned_data['suffix']:
+                if not form.cleaned_data.get('suffix'):
                     continue
                 title_suffix_len = len(form.cleaned_data['title'])
                 if work_title_len + title_suffix_len > 59:  # 60 - 1 for space
