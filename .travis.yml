@@ -1,7 +1,16 @@
 language: python
 matrix:
   include:
-    - name: "Ubuntu 18.04 Pg11"
+    - name: "Ubuntu 18.04 PG 11"
+      dist: bionic
+      python: "3.7"
+      addons:
+        postgresql: "11"
+        apt:
+          packages:
+          - postgresql-11
+          - postgresql-client-11
+    - name: "Ubuntu 18.04 PG 10"
       dist: bionic
       python: "3.7"
       addons:
@@ -10,9 +19,6 @@ matrix:
           packages:
           - postgresql-10
           - postgresql-client-10
-    - name: "Ubuntu 18.04"
-      dist: bionic
-      python: "3.7"
     - name: "Ubuntu 16.04"
       dist: xenial
       python: "3.6"
