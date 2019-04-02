@@ -1,33 +1,12 @@
 language: python
 matrix:
   include:
-    - name: "Py3.7 PostgreSQL11"
+    - name: "Ubuntu 18.04"
       dist: bionic
-      python: "3.7"
-      addons:
-        postgresql: "11"
-        apt:
-          packages:
-          - postgresql-11
-          - postgresql-client-11
-    - name: "Py3.7 PostgreSQL10"
-      python: "3.7"
+    - name: "Ubuntu 16.04"
       dist: xenial
-      addons:
-        postgresql: "10"
-        apt:
-          packages:
-          - postgresql-10
-          - postgresql-client-10
     - name: "Py3.6 PostgreSQL9.6"
-      python: "3.6"
-      addons:
-        postgresql: "9.6"
-    - name: "Py3.5 PostgreSQL9.4"
-      dist: xenial
-      python: "3.5"
-      addons:
-        postgresql: "9.4"
+      dist: precise
 env: DATABASE_URL="postgres://postgres@localhost/dmp"
 # command to install dependencies
 install:
