@@ -1,29 +1,28 @@
 language: python
 matrix:
   include:
-    - name: "Django 2.2 Py3.7 PostgreSQL9.6"
+    - name: "Py3.7 PostgreSQL10"
       python: "3.7-dev"
+      env: 
+        - DATABASE_URL="postgres://postgres@localhost/dmp"
+        - global:
+          PGPORT=5433
+      addons:
+        postgresql: "10"
+        apt:
+          packages:
+          - postgresql-10
+          - postgresql-client-10
+    - name: "Py3.6 PostgreSQL9.6"
+      python: "3.6"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
         postgresql: "9.6"
-      install:
-        - pip install -r requirements.txt
-        - pip install -U Django>=2.2a1
     - name: "Py3.5 PostgreSQL9.4"
       python: "3.5"
       addons:
         postgresql: "9.4"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
-    - name: "Py3.6 PostgreSQL9.5"
-      python: "3.6"
-      env: DATABASE_URL="postgres://postgres@localhost/dmp"
-      addons:
-        postgresql: "9.5"
-    - name: "Py3.6 SQLite3"
-      python: "3.6"
-      env: DATABASE_URL="sqlite:///db.sqlite3"
-      install:
-        - pip install -U pysqlite3
 # command to install dependencies
 install:
   - pip install -r requirements.txt
