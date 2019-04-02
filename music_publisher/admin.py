@@ -718,7 +718,14 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
 
-        return obj.works__count
+        count = obj.works__count
+
+        url = reverse('admin:music_publisher_work_changelist')
+        url += '?cwr_exports__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
+    work_count.short_description = 'Works'
+    work_count.admin_order_field = 'works__count'
 
     def get_preview(self, obj):
         """Get CWR preview.
