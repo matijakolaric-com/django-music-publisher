@@ -130,7 +130,9 @@ Do::
     cd django-music-publisher
     pip install -r requirements.txt
 
-The next step is to create ``dmp_project/local_settings.py`` or set the 
+On Windows: instead of ``source bin/activate``, run ``Scripts\activate``.
+
+The next step is to create ``dmp_project/local_settings.py`` or set the
 appropriate environment variables. ``SECRET_KEY``, ``ALLOWED_HOSTS``, and 
 ``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. 
 
