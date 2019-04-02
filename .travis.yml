@@ -3,9 +3,12 @@ matrix:
   include:
     - name: "Ubuntu 18.04"
       dist: bionic
+      python: "3.7"
     - name: "Ubuntu 16.04"
       dist: xenial
+      python: "3.6"
     - name: "Py3.6 PostgreSQL9.6"
+      python: "3.5"
       dist: precise
 env: DATABASE_URL="postgres://postgres@localhost/dmp"
 # command to install dependencies
