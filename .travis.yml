@@ -1,4 +1,5 @@
 language: python
+dist: xenial
 matrix:
   include:
     - name: "Py3.7 PostgreSQL10"
