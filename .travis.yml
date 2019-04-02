@@ -2,12 +2,7 @@ language: python
 matrix:
   include:
     - name: "Py3.7 PostgreSQL10"
-      python: "3.7-dev"
-      env:
-        local:
-        - DATABASE_URL="postgres://postgres@localhost/dmp"
-        global:
-        - PGPORT=5433
+      python: "3.7"
       addons:
         postgresql: "10"
         apt:
@@ -16,14 +11,13 @@ matrix:
           - postgresql-client-10
     - name: "Py3.6 PostgreSQL9.6"
       python: "3.6"
-      env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
         postgresql: "9.6"
     - name: "Py3.5 PostgreSQL9.4"
       python: "3.5"
       addons:
         postgresql: "9.4"
-      env: DATABASE_URL="postgres://postgres@localhost/dmp"
+env: DATABASE_URL="postgres://postgres@localhost/dmp"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
