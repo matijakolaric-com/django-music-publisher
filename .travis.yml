@@ -1,9 +1,18 @@
 language: python
-dist: xenial
 matrix:
   include:
+    - name: "Py3.7 PostgreSQL11"
+      dist: bionic
+      python: "3.7"
+      addons:
+        postgresql: "11"
+        apt:
+          packages:
+          - postgresql-11
+          - postgresql-client-11
     - name: "Py3.7 PostgreSQL10"
       python: "3.7"
+      dist: xenial
       addons:
         postgresql: "10"
         apt:
@@ -15,6 +24,7 @@ matrix:
       addons:
         postgresql: "9.6"
     - name: "Py3.5 PostgreSQL9.4"
+      dist: xenial
       python: "3.5"
       addons:
         postgresql: "9.4"
