@@ -3,10 +3,11 @@ matrix:
   include:
     - name: "Py3.7 PostgreSQL10"
       python: "3.7-dev"
-      env: 
+      env:
+        local:
         - DATABASE_URL="postgres://postgres@localhost/dmp"
-        - global:
-          PGPORT=5433
+        global:
+        - PGPORT=5433
       addons:
         postgresql: "10"
         apt:
