@@ -1,19 +1,31 @@
 language: python
 matrix:
   include:
+    - name: "Ubuntu 18.04 Pg11"
+      dist: bionic
+      python: "3.7"
+      addons:
+        postgresql: "10"
+        apt:
+          packages:
+          - postgresql-10
+          - postgresql-client-10
     - name: "Ubuntu 18.04"
       dist: bionic
       python: "3.7"
     - name: "Ubuntu 16.04"
       dist: xenial
       python: "3.6"
-    - name: "Py3.6 PostgreSQL9.6"
+    - name: "Ubuntu 14.04"
       python: "3.5"
-      dist: precise
-env: DATABASE_URL="postgres://postgres@localhost/dmp"
-# command to install dependencies
+      dist: trusty
+services:
+  - postgresql
+env: 
+  - DATABASE_URL="postgres://postgres@localhost/dmp"
 install:
   - pip install -r requirements.txt
 script:
   - coverage run --source='music_publisher' manage.py test 
 after_success: coveralls
+
