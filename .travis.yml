@@ -1,7 +1,12 @@
 language: python
 matrix:
   include:
-    - name: "Django 2.2a1 Py3.7 PostgreSQL9.6"
+    - name: "Py3.6 SQLite3"
+      python: "3.6"
+      env: DATABASE_URL="sqlite:///db.sqlite3"
+      install:
+        - pip install -U sqlite3
+    - name: "Django 2.2 Py3.7 PostgreSQL9.6"
       python: "3.7-dev"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
       addons:
@@ -14,9 +19,6 @@ matrix:
       addons:
         postgresql: "9.4"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
-    - name: "Py3.6 SQLite3"
-      python: "3.6"
-      env: DATABASE_URL="sqlite:///db.sqlite3"
     - name: "Py3.6 PostgreSQL9.5"
       python: "3.6"
       env: DATABASE_URL="postgres://postgres@localhost/dmp"
