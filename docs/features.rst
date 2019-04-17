@@ -1,14 +1,20 @@
 Sponsored Features
 ##################
 
-Django Music Publisher is free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell. It can only be developed further with the help of sponsors.
+Django Music Publisher is free to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell. It can only be developed further with the
+help of sponsors.
 
-Version |version| was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
+Version |version| was sponsored by `DMP Guru <https://dmp.guru>`_, a
+specialized application platform-as-a-service provider for Django Music
+Publisher instances. You can have your own DMP instance set up and running in a
+minute. First 30 days are free.
 
 Features added in this release (including minor releases)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Here are development cost breakdowns for several features that have been identified as previously missing, which have been added in this major release.
+Here are development cost breakdowns for several features that have been
+identified as previously missing, which have been added in this major release.
 
 ======================================================= =========
 Task                                                    Cost
