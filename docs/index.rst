@@ -30,7 +30,7 @@ A series of videos about Django Music Publisher are available on `YouTube <https
 
 .. raw:: html
 
-   <iframe width="704" height="396" src="https://www.youtube.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
 **We are looking for sponsors for version 19.7!** 
 
