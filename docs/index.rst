@@ -29,7 +29,7 @@ It uses **Common Works Registration (CWR)** protocol for batch registration of m
 .. raw:: html
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
-   These videos are delivered from a cookieless domain, which enhanves your privacy, but links in videos do not work.<br/>
+   These videos are delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.<br/>
 
 A series of videos about Django Music Publisher are available on `YouTube <https://www.youtube.com/watch?v=P57hoY9wwH4&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP>`_.
 
