@@ -18,19 +18,24 @@ Django Music Publisher
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 
-Django Music Publisher is an open source software for original music publishers. It is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing**. 
+Django Music Publisher is open source software for original music publishers. It is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing**. 
 
 It uses **Common Works Registration (CWR)** protocol for batch registration of musical works.
-
-.. image:: images/add_work.png
 
 * Docs: https://django-music-publisher.readthedocs.io/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
-Version |version| was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances. You can have your own DMP instance set up and running in a minute. First 30 days are free.
-
 A series of videos about Django Music Publisher are available on `YouTube <https://www.youtube.com/watch?v=P57hoY9wwH4&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP>`_.
+
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+
+**We are looking for sponsors for version 19.7!** 
+
+Current stable version 19.1 was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances.
+
 
 General Documentation
 *********************
