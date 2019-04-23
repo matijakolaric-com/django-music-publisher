@@ -113,7 +113,7 @@ MWN (DDEX)
 
 MWN is a format that has similar data structure to CWR, though the underlying format is completely different. It requires a licence to be used, from which it is quite unclear whether it is legally possible to integrate the functionality into an open source solution.
 
-Implementing it is definitely cheaper than paying for a legal interpretation.
+The maintainer is in contact with DDEX, trying to clarify the issue.
 
 Recording-related data and other DDEX formats
 ---------------------------------------------
@@ -135,4 +135,4 @@ The solution exists, but it is not going into the open source code in the forese
 Multiple Recordings per Work
 ----------------------------
 
-When CWR 3.0 specification is released, details will be released.
+This will be added in the next major version.

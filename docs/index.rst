@@ -30,10 +30,11 @@ It uses **Common Works Registration (CWR)** protocol for batch registration of m
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
    <p>These videos are delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
+   <p>The first five are general videos, followed by four tutorial videos, and then later additions.</p>
 
 The videos about Django Music Publisher are available on `YouTube <https://www.youtube.com/watch?v=P57hoY9wwH4&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP>`_.
 
-**We are looking for sponsors for version 19.7!** 
+**We are looking for sponsors for version 19.7! See** :doc:`Sponsored Features <features>` **for details.**
 
 Current stable version 19.1 was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances.
 
