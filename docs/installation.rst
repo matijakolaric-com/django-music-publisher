@@ -6,6 +6,7 @@ Django Music Publisher can be installed either as a Django app, or as a stand-al
 There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>`_ that simplifies the process for a moderate subscription fee.
 
 
+
 Installing the App
 ===============================================================================
 
