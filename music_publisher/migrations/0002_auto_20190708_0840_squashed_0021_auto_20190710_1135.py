@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import music_publisher.base
+from django.conf import settings
 
 def move_key_to_work(apps, schema_editor):
     Work = apps.get_model('music_publisher', 'Work')
