@@ -126,24 +126,24 @@
                 "cwrexport"
             ],
             [
-                "add_firstrecording",
+                "add_recording",
                 "music_publisher",
-                "firstrecording"
+                "recording"
             ],
             [
-                "change_firstrecording",
+                "change_recording",
                 "music_publisher",
-                "firstrecording"
+                "recording"
             ],
             [
-                "delete_firstrecording",
+                "delete_recording",
                 "music_publisher",
-                "firstrecording"
+                "recording"
             ],
             [
-                "view_firstrecording",
+                "view_recording",
                 "music_publisher",
-                "firstrecording"
+                "recording"
             ],
             [
                 "add_work",
@@ -250,9 +250,9 @@
                 "cwrexport"
             ],
             [
-                "view_firstrecording",
+                "view_recording",
                 "music_publisher",
-                "firstrecording"
+                "recording"
             ],
             [
                 "view_work",
