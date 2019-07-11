@@ -8,12 +8,36 @@ from django.template import Context
 from decimal import Decimal
 
 
+class Library(models.Model):
+    class Meta:
+        verbose_name_plural = 'Music Libraries'
+
+
+    name = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('library'),))
+
+    def __str__(self):
+        return self.name
+
+class Label(models.Model):
+    class Meta:
+        verbose_name_plural = 'Music Labels'
+
+    name = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('label'),))
+
+    def __str__(self):
+        return self.name
+
+
 class WorkManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().prefetch_related('writers')
 
 
-class Work(WorkBase):
+class Work(TitleBase):
     """Concrete class, with references to foreign objects.
 
     Attributes:
@@ -26,12 +50,59 @@ class Work(WorkBase):
             Writers who created the work
     """
 
-    objects = WorkManager()
+    class Meta:
+        verbose_name_plural = '   Works'
+
+    iswc = models.CharField(
+        'ISWC', max_length=15, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('iswc'),))
+    original_title = models.CharField(
+        max_length=60, db_index=True, blank=True,
+        help_text='Use only for modification of existing works.',
+        validators=(
+            CWRFieldValidator('work_title'),))
+    library_release = models.ForeignKey(
+        'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
+        related_name='works',
+        verbose_name='Library Release')
+
+    last_change = models.DateTimeField(
+        'Last Edited', editable=False, null=True)
 
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
     writers = models.ManyToManyField('Writer', through='WriterInWork')
-    last_change = models.DateTimeField(
-        'Last Edited', editable=False, null=True)
+
+    objects = WorkManager()
+
+    @property
+    def work_id(self):
+        """Create Work ID used in registrations
+
+        Returns:
+            str: Internal Work ID
+        """
+        if self.id is None:
+            return ''
+        return '{}{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
+
+    def is_modification(self):
+        return bool(self.original_title)
+
+    def clean_fields(self, *args, **kwargs):
+        """Deal with various ways ISWC is written.
+        """
+        if self.iswc:
+            # CWR 2.x holds ISWC in TNNNNNNNNNC format
+            # CWR 3.0 holds ISWC in T-NNNNNNNNN-C format
+            # sometimes it comes in T-NNN.NNN.NNN-C format
+            self.iswc = self.iswc.replace('-', '').replace('.', '')
+        return super().clean_fields(*args, **kwargs)
+
+    def __str__(self):
+        return '{} {} ({})'.format(
+            self.work_id,
+            self.title.upper(),
+            ' / '.join(w.last_name.upper() for w in self.writers.all()))
 
     @property
     def json(self):
@@ -82,23 +153,6 @@ class Work(WorkBase):
             data['society_work_codes'].append(wa)
         return self.work_id, data
 
-    @property
-    def work_id(self):
-        """Create Work ID used in registrations
-
-        Returns:
-            str: Internal Work ID
-        """
-        if self.id is None:
-            return ''
-        return '{}{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
-
-    def __str__(self):
-        return '{} {} ({})'.format(
-            self.work_id,
-            self.title.upper(),
-            ' / '.join(w.last_name.upper() for w in self.writers.all()))
-
 
 class AlternateTitle(TitleBase):
     """Concrete class for alternate titles.
@@ -110,7 +164,7 @@ class AlternateTitle(TitleBase):
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     suffix = models.BooleanField(
         default=False,
-        help_text='Use this field if it is to be added to the title')
+        help_text='Select if this title is only a suffix to the main title.')
 
     class Meta:
         unique_together = (('work', 'title'),)
@@ -130,49 +184,203 @@ class AlternateTitle(TitleBase):
         return self.title
 
 
-class AlbumCD(AlbumCDBase):
-    """Concrete class for album / CD."""
-    pass
+class Release(models.Model):
+    class Meta:
+        ordering = ('release_title', 'cd_identifier', '-id')
+
+    cd_identifier = models.CharField(
+        'CD identifier',
+        max_length=15, blank=True, null=True, unique=True, validators=(
+            CWRFieldValidator('cd_identifier'),))
+    library = models.ForeignKey(
+        Library, null=True, blank=True, on_delete=models.PROTECT)
+    release_date = models.DateField(
+        help_text='Can be overridden by recording data.',
+        blank=True, null=True)
+    release_title = models.CharField(
+        'Release (album) title ',
+        max_length=60, blank=True, null=True, unique=True, validators=(
+            CWRFieldValidator('release_title'),))
+    ean = models.CharField(
+        'Release (album) EAN',
+        max_length=13, blank=True, null=True, unique=True, validators=(
+            CWRFieldValidator('ean'),))
+    release_label = models.ForeignKey(
+        Label,
+        verbose_name='Release (album) label',
+        null=True, blank=True,
+        on_delete=models.PROTECT
+    )
+    def __str__(self):
+        if self.cd_identifier:
+            if self.release_title:
+                return '{}: {} ({})'.format(
+                    self.cd_identifier,
+                    self.release_title.upper(),
+                    self.library)
+            else:
+                return '{} ({})'.format(
+                    self.cd_identifier, self.library)
+        else:
+            return self.release_title.upper()
 
 
-class Artist(ArtistBase):
-    """Concrete class for performing artists."""
+    def clean(self):
+        if not self.cd_identifier and not self.release_title:
+            raise ValidationError({
+                'cd_identifier': 'Required if Album Title is not set.',
+                'release_title': 'Required if CD Identifier is not set.'})
+        if (self.ean or self.release_date) and not self.release_title:
+            raise ValidationError({
+                'release_title': 'Required if EAN or release date is set.'})
 
-    @property
-    def json(self):
-        """Create a data structure that can be serialized as JSON.
 
-        Returns:
-            dict: JSON-serializable data structure
+class LibraryReleaseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(cd_identifier__isnull=False)
+
+
+class LibraryRelease(Release):
+    class Meta:
+        proxy = True
+    objects = LibraryReleaseManager()
+
+
+class CommercialReleaseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(cd_identifier__isnull=True)
+
+
+class CommercialRelease(Release):
+    class Meta:
+        proxy = True
+    objects = CommercialReleaseManager()
+
+
+class Artist(PersonBase, models.Model):
+        """Concrete class for performing artists.
+
+        Attributes:
+            isni (django.db.models.CharField):
+                International Standard Name Identifier
         """
-        j = {'last_name': self.last_name}
-        if self.first_name:
-            j['first_name'] = self.first_name
-        if self.isni:
-            j['isni'] = self.isni
-        return j
+
+        class Meta:
+            verbose_name = 'Performing Artist'
+            verbose_name_plural = ' Performing Artists'
+
+        isni = models.CharField(
+            'ISNI',
+            max_length=16, blank=True, null=True, unique=True,
+            validators=(CWRFieldValidator('isni'),))
+
+        def clean_fields(self, *args, **kwargs):
+            if self.isni:
+                self.isni = self.isni.rjust(16, '0').upper()
+            return models.Model.clean_fields(self, *args, **kwargs)
+
+        @property
+        def json(self):
+            """Create a data structure that can be serialized as JSON.
+
+            Returns:
+                dict: JSON-serializable data structure
+            """
+            j = {'last_name': self.last_name}
+            if self.first_name:
+                j['first_name'] = self.first_name
+            if self.isni:
+                j['isni'] = self.isni
+            return j
 
 
-class FirstRecording(RecordingBase):
-    """Concrete class for first recording.
+class Recording(models.Model):
+    """Holds data on first recording.
+
+    Note that the CWR 2.x limitation of just one REC record per work has been
+    removed in the specs, but some societies still complain about it,
+    so only a single instance is allowed.
 
     Attributes:
-        album_cd (django.db.models.ForeignKey): FK to Album/CD
-        artist (django.db.models.ForeignKey):
-            FK to Artist, in this context, it is a recording artist
-        work (django.db.models.OneToOneField): One to One field to Work
+        duration (django.db.models.TimeField): Recording Duration
+        isrc (django.db.models.CharField):
+            International Standard Recording Code
+        record_label (django.db.models.CharField): Record Label
+        release_date (django.db.models.DateField): Recording Release Date
     """
 
-    work = models.OneToOneField(Work, on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural = '  Recordings'
+
+    recording_title = models.CharField(
+        blank=True,
+        max_length=60, validators=(
+            CWRFieldValidator('work_title'),))
+    recording_title_suffix = models.BooleanField(
+        default=False,
+        help_text='A suffix to the WORK title.')
+    version_title = models.CharField(
+        blank=True,
+        max_length=60, validators=(
+            CWRFieldValidator('work_title'),))
+    version_title_suffix = models.BooleanField(
+        default=False,
+        help_text='A suffix to the RECORDING title.')
+    release_date = models.DateField(blank=True, null=True)
+    duration = models.TimeField(blank=True, null=True)
+    isrc = models.CharField(
+        'ISRC', max_length=15, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('isrc'),))
+    record_label = models.ForeignKey(
+        Label,
+        verbose_name='Record label',
+        null=True, blank=True,
+        on_delete=models.PROTECT
+    )
+    work = models.ForeignKey(Work, on_delete=models.CASCADE, related_name='recordings')
     artist = models.ForeignKey(
         Artist, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Recording Artist')
     album_cd = models.ForeignKey(
-        AlbumCD, on_delete=models.PROTECT, blank=True, null=True,
+        Release, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Album / Library CD')
 
+    def clean_fields(self, *args, **kwargs):
+        if self.isrc:
+            # Removing all characters added for readability
+            self.isrc = self.isrc.replace('-', '').replace('.', '')
+        return super().clean_fields(*args, **kwargs)
+
+    @property
+    def complete_recording_title(self):
+        if self.recording_title_suffix:
+            return '{} {}'.format(self.work.title, self.recording_title)
+        return self.recording_title
+
+    @property
+    def complete_version_title(self):
+        if self.version_title_suffix:
+            return '{} {}'.format(
+                self.complete_recording_title or self.work.title,
+                self.version_title)
+        return self.version_title
+
     def __str__(self):
-        return str(self.work)
+        return (
+            self.complete_version_title or
+            self.recording_title or
+            self.work.title)
+
+    @property
+    def recording_id(self):
+        """Create Recording ID used in registrations
+
+        Returns:
+            str: Internal Recording ID
+        """
+        if self.id is None:
+            return ''
+        return '{}R{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
 
     @property
     def json(self):
@@ -190,7 +398,7 @@ class FirstRecording(RecordingBase):
         if self.artist:
             artist_id = 'A{:06d}'.format(self.artist.id)
             data['artist_id'] = artist_id
-        if self.album_cd and self.album_cd.album_title:
+        if self.album_cd and self.album_cd.release_title:
             if self.album_cd.release_date:
                 data['release_date'] = (
                     self.album_cd.release_date.strftime('%Y%m%d'))
@@ -201,9 +409,9 @@ class FirstRecording(RecordingBase):
         data = {'recordings': {'R{:06d}'.format(self.id): data}}
         if self.artist:
             data['artists'] = {artist_id: self.artist.json}
-        if self.album_cd and self.album_cd.album_title:
+        if self.album_cd and self.album_cd.release_title:
             album = {
-                'title': self.album_cd.album_title
+                'title': self.album_cd.release_title
             }
             if self.album_cd.release_date:
                 album['release_date'] = (
@@ -234,8 +442,8 @@ class ArtistInWork(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name = 'Artist performing work'
-        verbose_name_plural = 'Artists performing works'
+        verbose_name = 'Performing artist'
+        verbose_name_plural = 'Performing artists (not mentioned in recordings section)'
         unique_together = (('work', 'artist'),)
 
     def __str__(self):
@@ -249,9 +457,19 @@ class ArtistInWork(models.Model):
         return data
 
 
-class Writer(WriterBase):
-    """Concrete class for writers.
+class Writer(PersonBase, IPIBase, models.Model):
+    """Base class for writers, the second most important top-level class.
     """
+
+    class Meta:
+        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
+        verbose_name_plural = ' Writers'
+
+    def __str__(self):
+        name = super().__str__()
+        if self.generally_controlled:
+            return name + ' (*)'
+        return name
 
     def clean(self, *args, **kwargs):
         super().clean(*args, **kwargs)
@@ -311,10 +529,6 @@ class WriterInWork(models.Model):
         ('AR', 'Arranger'),
         ('AD', 'Adaptor'),
         ('TR', 'Translator'),
-    ) if SETTINGS.get('allow_modifications') else (
-        ('CA', 'Composer&Lyricist'),
-        ('C ', 'Composer'),
-        ('A ', 'Lyricist'),
     ))
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
@@ -645,18 +859,18 @@ class CWRExport(models.Model):
                 rec = work.firstrecording
                 release_date = rec.release_date
                 record_label = rec.record_label
-                album_title = ''
-                album_label = ''
+                release_title = ''
+                release_label = ''
                 if rec.album_cd:
                     release_date = release_date or rec.album_cd.release_date
-                    album_title = album_title or rec.album_cd.album_title
-                    album_label = rec.album_cd.album_label or record_label
+                    release_title = release_title or rec.album_cd.release_title
+                    release_label = rec.album_cd.release_label or record_label
                 yield self.get_transaction_record('REC', {
                     'isrc': rec.isrc,
                     'duration': rec.duration,
                     'release_date': release_date,
-                    'album_title': album_title,
-                    'album_label': album_label
+                    'release_title': release_title,
+                    'release_label': release_label
                 })
             except ObjectDoesNotExist:
                 pass

@@ -32,22 +32,22 @@ from django.utils.deconstruct import deconstructible
 import re
 import warnings
 
-
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 
 ENFORCE_SAAN = SETTINGS.get('enforce_saan')
 ENFORCE_PUBLISHER_FEE = SETTINGS.get('enforce_publisher_fee')
 ENFORCE_PR_SOCIETY = SETTINGS.get('enforce_pr_society')
 ENFORCE_IPI_NAME = SETTINGS.get('enforce_ipi_name')
+
 CONTROLLED_WRITER_REQUIRED_FIELDS = ['Last Name']
 if ENFORCE_PR_SOCIETY:
     CONTROLLED_WRITER_REQUIRED_FIELDS.append('Performing Rights Society')
 if ENFORCE_IPI_NAME:
     CONTROLLED_WRITER_REQUIRED_FIELDS.append('IPI Name #')
+
 CAN_NOT_BE_CONTROLLED_MSG = (
     'Unsufficient data for a controlled writer, required fields are: {}.'
 ).format(', '.join(CONTROLLED_WRITER_REQUIRED_FIELDS))
-
 
 # Default only has 18 societies from 12 countries. These are G7, without Japan,
 # where we have no information about CWR use and all other societies covered
@@ -91,7 +91,6 @@ except AttributeError:
         ('319', 'ICE Services, Administrative Agency'),
         ('707', 'Musicmark, Administrative Agency')]
 
-
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
 )
@@ -126,7 +125,6 @@ def check_ean_digit(ean):
         raise ValidationError('Invalid EAN.')
 
 
-# noinspection PyShadowingBuiltins
 def check_iswc_digit(iswc, weight):
     """ISWC / IPI Base checksum validation.
 
@@ -186,33 +184,9 @@ def check_isni_digit(all_digits):
         raise ValidationError('Not a valid ISNI {}.'.format(all_digits))
 
 
-def get_publisher_dict(pr_society):
-    """Return publisher settings based on society code.
-
-    Args:
-        pr_society (str): CISAC Society code, 3-digit format with leading zero.
-
-    Returns:
-        dict: Data on publisher in question, default one if not found.
-    """
-
-    mapping = {'010': 'ASCAP', '021': 'BMI', '071': 'SESAC'}
-    key = mapping.get(pr_society)
-    us_publisher_override = SETTINGS.get('us_publisher_override', {})
-    pub = us_publisher_override.get(key)
-    if pub:
-        pub['publisher_pr_society'] = pr_society
-        return pub
-    return SETTINGS
-
-
 @deconstructible
 class CWRFieldValidator:
     """Validate fields for CWR compliance.
-
-    This validator that does not really validate, it just sets the correct
-    field type.
-    Fields are validated in batches in :meth:`MusicPublisherBase.clean_fields`.
 
     Attributes:
         field (str): Validation service name of the field being validated
@@ -224,7 +198,7 @@ class CWRFieldValidator:
         """Initialize the validator.
 
         Args:
-            field (str): Validation service name of the field being validated
+            field (str): field name for the field being validated
         """
         self.field = field
 
@@ -232,14 +206,15 @@ class CWRFieldValidator:
         """Use custom validation, based on the name of the field.
 
         Args:
-            value (): Input valie
+            value (): Input value
 
         Returns:
             None: If all is well.
 
         Raises:
-            ValidationError: If the valie does not pass the validation.
+            ValidationError: If the value does not pass the validation.
         """
+
         name = self.field
         if 'title' in name:
             if not re.match(RE_TITLE, value.upper()):
@@ -270,29 +245,12 @@ class CWRFieldValidator:
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
         elif ('name' in name or 'label' in name or name in [
-                'cd_identifier', 'saan']):
+            'cd_identifier', 'saan', 'library']):
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
 
 
-class MusicPublisherBase(models.Model):
-    """Abstract class for all top-level classes.
-
-    Not used any more, kept for backward-compatibility.
-    """
-
-    class Meta:
-        abstract = True
-        ordering = ('-id', )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        warnings.warn(
-            "Might get depreciated in 19.7 release.",
-            PendingDeprecationWarning)
-
-
-class TitleBase(MusicPublisherBase):
+class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
 
     Attributes:
@@ -311,145 +269,6 @@ class TitleBase(MusicPublisherBase):
 
     def __str__(self):
         return self.title.upper()
-
-
-class WorkBase(TitleBase):
-    """Abstract class for musical works, most important top-level class.
-
-    Attributes:
-        iswc (django.db.models.CharField):
-            ISWC - International Standard Work Code
-    """
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = '  Works'
-
-    iswc = models.CharField(
-        'ISWC', max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('iswc'),))
-
-    original_title = models.CharField(
-        max_length=60, db_index=True, blank=True,
-        help_text='Use only for modification of existing works.',
-        validators=(
-            CWRFieldValidator('work_title'),))
-
-    def is_modification(self):
-        return bool(self.original_title)
-
-    def clean_fields(self, *args, **kwargs):
-        """Deal with various ways ISWC is written.
-        """
-        if self.iswc:
-            # CWR 2.x holds ISWC in TNNNNNNNNNC format
-            # CWR 3.0 holds ISWC in T-NNNNNNNNN-C format
-            # sometimes it comes in T-NNN.NNN.NNN-C format
-            self.iswc = self.iswc.replace('-', '').replace('.', '')
-        return super().clean_fields(*args, **kwargs)
-
-
-class AlbumCDBase(MusicPublisherBase):
-    """Abstract class that deals with albums and music liibrary data.
-
-    Note that label and library are set in the settings, serving as defualts.
-
-    Attributes:
-        album_label (django.db.models.CharField): Album Label
-        album_title (django.db.models.CharField): Album Title
-        cd_identifier (django.db.models.CharField):
-            CD Indetifier (for Library works)
-        ean (django.db.models.CharField): Album (or other release) EAN
-        release_date (django.db.models.DateField):
-            The date of the album release, can be overridden in recordings
-    """
-
-    class Meta:
-        abstract = True
-        verbose_name = 'Album and/or Library CD'
-        verbose_name_plural = ' Albums and Library CDs'
-        ordering = ('album_title', 'cd_identifier', '-id')
-
-    cd_identifier = models.CharField(
-        'CD identifier',
-        help_text='This will set the purpose to Library.',
-        max_length=15, blank=True, null=True, unique=True, validators=(
-            CWRFieldValidator('cd_identifier'),))
-    release_date = models.DateField(
-        help_text='Can be overridden by recording data.',
-        blank=True, null=True)
-    album_title = models.CharField(
-        max_length=60, blank=True, null=True, unique=True, validators=(
-            CWRFieldValidator('first_album_title'),))
-    ean = models.CharField(
-        'EAN',
-        max_length=13, blank=True, null=True, unique=True, validators=(
-            CWRFieldValidator('ean'),))
-    album_label = models.CharField(
-        default=SETTINGS.get('label') or '',
-        max_length=60, blank=True, validators=(
-            CWRFieldValidator('first_album_label'),))
-
-    def __str__(self):
-        if self.cd_identifier and self.album_title:
-            return '{} ({})'.format(
-                self.album_title or '', self.cd_identifier).upper()
-        return (self.album_title or self.cd_identifier or '').upper()
-
-    @property
-    def library(self):
-        """Return Library name if cd_identifier is present
-
-        Returns:
-            str: Name of the library, or None
-        """
-        if self.cd_identifier:
-            return SETTINGS.get('library')
-
-    def clean(self):
-        if not self.cd_identifier and not self.album_title:
-            raise ValidationError({
-                'cd_identifier': 'Required if Album Title is not set.',
-                'album_title': 'Required if CD Identifier is not set.'})
-        if (self.ean or self.release_date) and not self.album_title:
-            raise ValidationError({
-                'album_title': 'Required if EAN or release date is set.'})
-
-
-class RecordingBase(MusicPublisherBase):
-    """Holds data on first recording.
-
-    Note that the CWR 2.x limitation of just one REC record per work has been
-    removed in the specs, but some societies still complain about it,
-    so only a single instance is allowed.
-
-    Attributes:
-        duration (django.db.models.TimeField): Recording Duration
-        isrc (django.db.models.CharField):
-            International Standard Recording Code
-        record_label (django.db.models.CharField): Record Label
-        release_date (django.db.models.DateField): Recording Release Date
-    """
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = 'First recording of the work'
-
-    release_date = models.DateField(blank=True, null=True)
-    duration = models.TimeField(blank=True, null=True)
-    isrc = models.CharField(
-        'ISRC', max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('isrc'),))
-    record_label = models.CharField(
-        default=SETTINGS.get('label') or '',
-        max_length=60, blank=True, validators=(
-            CWRFieldValidator('first_album_label'),))
-
-    def clean_fields(self, *args, **kwargs):
-        if self.isrc:
-            # Removing all characters added for readability
-            self.isrc = self.isrc.replace('-', '').replace('.', '')
-        return super().clean_fields(*args, **kwargs)
 
 
 class PersonBase(models.Model):
@@ -491,6 +310,13 @@ class IPIBase(models.Model):
             Society-assigned agreement number, in this context it is used for
             general agreements, for specific agreements use
             :attr:`.models.WriterInWork.saan`.
+        _can_be_controlled (django.db.models.BooleanField):
+            used to determine if there is enough data for a writer
+            to be controlled.
+        generally_controlled (django.db.models.BooleanField):
+            flags if a writer is generally controlled (in all works)
+        publisher_fee (django.db.models.DecimalField):
+            this field is used in calculating publishing fees
     """
 
     class Meta:
@@ -521,8 +347,12 @@ class IPIBase(models.Model):
         help_text='Percentage of royalties kept by the publisher')
 
     def clean_fields(self, *args, **kwargs):
+        """
+        Data cleanup, allowing various import formats to be converted into
+        consistently formatted data.
+        """
         if self.saan:
-            self.saan = self.saan.upper()
+            self.saan = self.saan.upper()  # only in CWR, uppercase anyway
         if self.ipi_name:
             self.ipi_name = self.ipi_name.rjust(11, '0')
         if self.ipi_base:
@@ -577,54 +407,3 @@ class IPIBase(models.Model):
                 d['publisher_fee'] = 'This field is required.'
         if d:
             raise ValidationError(d)
-
-
-class ArtistBase(PersonBase, MusicPublisherBase):
-    """Concrete class for performing artists.
-
-    Attributes:
-        isni (django.db.models.CharField):
-            International Standard Name Identifier
-    """
-    class Meta:
-        abstract = True
-        verbose_name = 'Performing Artist'
-        verbose_name_plural = ' Performing Artists'
-
-    isni = models.CharField(
-        'ISNI',
-        max_length=16, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('isni'),))
-
-    def clean_fields(self, *args, **kwargs):
-        if self.isni:
-            self.isni = self.isni.rjust(16, '0').upper()
-        return models.Model.clean_fields(self, *args, **kwargs)
-
-
-class WriterBase(PersonBase, IPIBase, MusicPublisherBase):
-    """Base class for writers, the second most important top-level class.
-    """
-
-    class Meta:
-        abstract = True
-        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name_plural = ' Writers'
-
-    def get_publisher_dict(self):
-        """Return data on publisher.
-
-        This is the default publisher, except in cases when the writer
-        is affiliated with one of the US PROs and this publisher's data
-        is set in 'us_publisher_override' of the MUSIC_PUBLISHER_SETTINGS.
-
-        Returns:
-            dict: Data on publisher
-        """
-        return get_publisher_dict(self.pr_society)
-
-    def __str__(self):
-        name = super().__str__()
-        if self.generally_controlled:
-            return name + ' (*)'
-        return name

@@ -131,48 +131,21 @@ STATICFILES_DIRS = [
 ]
 
 MUSIC_PUBLISHER_SETTINGS = {
-    'admin_show_publisher': True,
-    'admin_show_saan': True,
-    'admin_show_alt_suffix': True,
-    'allow_modifications': True,
-    'allow_multiple_ops': True,
-
     'enforce_saan': True,
     'enforce_publisher_fee': True,
     'enforce_pr_society': True,
     'enforce_ipi_name': True,
 
-    'work_id_prefix': '',
+    'work_id_prefix': 'DMP',
 
-    'publisher_id': 'XXX',
+    'publisher_id': 'DMP',
     'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
     'publisher_ipi_name': '00000000199',
-    'publisher_pr_society': '071',
-    'publisher_mr_society': '034',
+    'publisher_pr_society': 71,
+    'publisher_mr_society': 34,
     'publisher_sr_society': None,
 
-    'us_publisher_override': {
-        'ASCAP': {
-            'publisher_id': 'XXXA',
-            'publisher_name': 'DJANGO MUSIC PUBLISHING ASCAP PUB',
-            'publisher_ipi_name': '00000000493',
-            'publisher_pr_society': '010',
-            'publisher_mr_society': '034',
-            'publisher_sr_society': None,
-        },
-        'BMI': {
-            'publisher_id': 'XXXB',
-            'publisher_name': 'DJANGO MUSIC PUBLISHING BMI PUB',
-            'publisher_ipi_name': '00000000395',
-            'publisher_pr_society': '021',
-            'publisher_mr_society': '044',
-            'publisher_sr_society': None,
-        },
-        'SESAC': None,
-    },
-
     'library': 'FOO BAR MUSIC LIBRARY',
-    'label': 'FOO BAR MUSIC',
 }
 
 TIME_INPUT_FORMATS = [

@@ -26,24 +26,24 @@
                 "ackimport"
             ],
             [
-                "add_albumcd",
+                "add_release",
                 "music_publisher",
-                "albumcd"
+                "release"
             ],
             [
-                "change_albumcd",
+                "change_release",
                 "music_publisher",
-                "albumcd"
+                "release"
             ],
             [
-                "delete_albumcd",
+                "delete_release",
                 "music_publisher",
-                "albumcd"
+                "release"
             ],
             [
-                "view_albumcd",
+                "view_release",
                 "music_publisher",
-                "albumcd"
+                "release"
             ],
             [
                 "add_alternatetitle",
@@ -225,9 +225,9 @@
                 "ackimport"
             ],
             [
-                "view_albumcd",
+                "view_release",
                 "music_publisher",
-                "albumcd"
+                "release"
             ],
             [
                 "view_alternatetitle",

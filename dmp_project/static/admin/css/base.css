@@ -1,14 +1,15 @@
 /*
     DJANGO Admin styles
 */
-
 @import url(fonts.css);
 
 #changelist-filter li.selected a, #changelist-filter li a:hover {
     color: #d50000 !important;
 }
 
-.inline-group .tabular tr.has_original td {padding: 8px !important}
+.inline-group .tabular tr.has_original td {
+    padding: 8px !important
+}
 
 .submit-row a.deletelink {
     color: white !important;
@@ -44,7 +45,7 @@ body {
     margin: 0;
     padding: 0;
     font-size: 16px;
-    font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+    font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
     color: #333;
     background: #fff;
     font-weight: 200;
@@ -82,7 +83,7 @@ p {
     line-height: 140%;
 }
 
-h1,h2,h3,h4,h5 {
+h1, h2, h3, h4, h5 {
     font-weight: 200 !important;
     text-transform: uppercase;
 }
@@ -223,7 +224,7 @@ p.mini {
 }
 
 div.help ul {
-     margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .help-tooltip {
@@ -444,6 +445,7 @@ input, textarea, select, .form-row p, form .button {
     font-weight: normal;
     font-size: 13px;
 }
+
 .form-row div.help {
     padding: 2px 3px;
 }
@@ -460,6 +462,10 @@ input[type=number], input[type=tel], textarea, select, .vTextField {
     margin-top: 0;
 }
 
+.inline-related:not(.tabular) input[type=text] {
+    width: 20em;
+}
+
 input[type=text]:focus, input[type=password]:focus, input[type=email]:focus,
 input[type=url]:focus, input[type=number]:focus, input[type=tel]:focus,
 textarea:focus, select:focus, .vTextField:focus {
@@ -467,7 +473,8 @@ textarea:focus, select:focus, .vTextField:focus {
 }
 
 select {
-    height: 30px;
+    height: 18px;
+    box-sizing: content-box;
 }
 
 select[multiple] {
@@ -563,6 +570,11 @@ input[type=button][disabled].default {
 
 .module table {
     border-collapse: collapse;
+}
+
+.app-music_publisher.module tr.model-work th,
+.app-music_publisher.module tr.model-recording th {
+    font-size: 18px;
 }
 
 /* MESSAGES & ERRORS */
@@ -687,13 +699,13 @@ div.breadcrumbs {
 /* ACTION ICONS */
 
 .addlink {
-     padding-left: 16px; 
-     background: url(../img/icon-addlink.svg) 0 1px no-repeat; 
+    padding-left: 16px;
+    background: url(../img/icon-addlink.svg) 0 1px no-repeat;
 }
 
 .changelink, .inlinechangelink {
-     padding-left: 16px; 
-     background: url(../img/icon-changelink.svg) 0 1px no-repeat; 
+    padding-left: 16px;
+    background: url(../img/icon-changelink.svg) 0 1px no-repeat;
 }
 
 .deletelink {
@@ -744,16 +756,16 @@ a.deletelink:focus, a.deletelink:hover {
     border-radius: 4px;
     color: #fff;
     background: #d50000;
-    cursor: pointer;s
-    display: block;
+    cursor: pointer;
+    s display: block;
     float: left;
 }
 
-.object-tools a:focus{
+.object-tools a:focus {
     text-decoration: underline;
 }
 
-.object-tools a.viewsitelink, .object-tools a.golink,.object-tools a.addlink {
+.object-tools a.viewsitelink, .object-tools a.golink, .object-tools a.addlink {
     background-repeat: no-repeat;
     background-position: right 7px center;
     padding-right: 26px;
@@ -851,7 +863,7 @@ table#change-history tbody th {
     color: #fff;
 }
 
-#header a:focus , #header a:hover {
+#header a:focus, #header a:hover {
     text-decoration: underline;
 }
 

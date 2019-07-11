@@ -193,7 +193,7 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_writer_changelist'))
         self.assertTrue(writer._can_be_controlled)
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'album_title': 'VERY COOL',
                 'ean': '199',
@@ -201,7 +201,7 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('does not match EAN13 format', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'ean': '1234567890123',
             })
@@ -209,7 +209,7 @@ class AllTest(TestCase):
         self.assertIn('Invalid EAN.', response.content.decode())
         self.assertIn('Required if Album Title ', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'cd_identifier': 'C00L',
                 'ean': '1234567890123',
@@ -217,27 +217,27 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Required if EAN or release ', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'album_title': 'VERY COOL',
             })
         self.assertEqual(response.status_code, 302)
-        albumcd = AlbumCD.objects.all().first()
-        self.assertEqual(str(albumcd), 'VERY COOL')
+        release = AlbumCD.objects.all().first()
+        self.assertEqual(str(release), 'VERY COOL')
         response = self.get(
-            reverse('admin:music_publisher_albumcd_change', args=(
-                albumcd.id,)),
+            reverse('admin:music_publisher_release_change', args=(
+                release.id,)),
             re_post={
                 'cd_identifier': 'C00L',
                 'release_date': '2018-01-01',
                 'ean': '4006381333931',
             })
         self.assertEqual(response.status_code, 302)
-        albumcd = AlbumCD.objects.all().first()
+        release = AlbumCD.objects.all().first()
         response = self.get(
-            reverse('admin:music_publisher_albumcd_changelist'))
+            reverse('admin:music_publisher_release_changelist'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(str(albumcd), 'VERY COOL (C00L)')
+        self.assertEqual(str(release), 'VERY COOL (C00L)')
         response = self.get(
             reverse('admin:music_publisher_artist_add'),
             re_post={
@@ -299,7 +299,7 @@ class AllTest(TestCase):
                 'writerinwork_set-1-saan': '',
                 'writerinwork_set-1-publisher_fee': '',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-isrc': 'USX1X12345',
             })
         self.assertEqual(response.status_code, 200)
@@ -339,7 +339,7 @@ class AllTest(TestCase):
                 'writerinwork_set-4-writer': writer3.id,
                 'writerinwork_set-4-relative_share': '5',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-artist': artist.id,
                 'firstrecording-0-isrc': 'USX1X1234567',
                 'firstrecording-0-duration': '01:23',
@@ -378,7 +378,7 @@ class AllTest(TestCase):
                 'writerinwork_set-4-writer': writer3.id,
                 'writerinwork_set-4-relative_share': '5',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-artist': artist.id,
                 'firstrecording-0-isrc': 'USX1X1234567',
                 'firstrecording-0-duration': '01:23',
@@ -597,7 +597,7 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_artist_add') + '?_popup=1')
         self.assertEqual(response.status_code, 200)
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add') + '?_popup=1')
+            reverse('admin:music_publisher_release_add') + '?_popup=1')
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_work_add') + '?_popup=1')
@@ -677,7 +677,7 @@ class AllTest(TestCase):
                 'writerinwork_set-1-relative_share': '50',
                 'writerinwork_set-1-controlled': '1',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-artist': artist.id,
                 'firstrecording-0-isrc': 'USX1X1234567',
                 'firstrecording-0-duration': '01:23',
@@ -707,7 +707,7 @@ class AllTest(TestCase):
                 'writerinwork_set-2-saan': '1LJ4V4',
                 'writerinwork_set-2-publisher_fee': '25',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-artist': artist.id,
                 'firstrecording-0-isrc': 'USX1X1234567',
                 'firstrecording-0-duration': '01:23',
@@ -827,7 +827,7 @@ class AllTest(TestCase):
             reverse('admin:music_publisher_writer_changelist'))
         self.assertTrue(writer._can_be_controlled)
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'album_title': 'VERY COOL',
                 'ean': '199',
@@ -835,7 +835,7 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('does not match EAN13 format', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'ean': '1234567890123',
             })
@@ -843,7 +843,7 @@ class AllTest(TestCase):
         self.assertIn('Invalid EAN.', response.content.decode())
         self.assertIn('Required if Album Title ', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'cd_identifier': 'C00L',
                 'ean': '1234567890123',
@@ -851,27 +851,27 @@ class AllTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Required if EAN or release ', response.content.decode())
         response = self.get(
-            reverse('admin:music_publisher_albumcd_add'),
+            reverse('admin:music_publisher_release_add'),
             re_post={
                 'album_title': 'VERY COOL',
             })
         self.assertEqual(response.status_code, 302)
-        albumcd = AlbumCD.objects.all().first()
-        self.assertEqual(str(albumcd), 'VERY COOL')
+        release = AlbumCD.objects.all().first()
+        self.assertEqual(str(release), 'VERY COOL')
         response = self.get(
-            reverse('admin:music_publisher_albumcd_change', args=(
-                albumcd.id,)),
+            reverse('admin:music_publisher_release_change', args=(
+                release.id,)),
             re_post={
                 'cd_identifier': 'C00L',
                 'release_date': '2018-01-01',
                 'ean': '4006381333931',
             })
         self.assertEqual(response.status_code, 302)
-        albumcd = AlbumCD.objects.all().first()
+        release = AlbumCD.objects.all().first()
         response = self.get(
-            reverse('admin:music_publisher_albumcd_changelist'))
+            reverse('admin:music_publisher_release_changelist'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(str(albumcd), 'VERY COOL (C00L)')
+        self.assertEqual(str(release), 'VERY COOL (C00L)')
         response = self.get(
             reverse('admin:music_publisher_artist_add'),
             re_post={
@@ -933,7 +933,7 @@ class AllTest(TestCase):
                 'writerinwork_set-1-saan': '',
                 'writerinwork_set-1-publisher_fee': '',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-isrc': 'USX1X12345',
             })
         self.assertEqual(response.status_code, 200)
@@ -971,7 +971,7 @@ class AllTest(TestCase):
                 'writerinwork_set-4-writer': writer3.id,
                 'writerinwork_set-4-relative_share': '5',
                 'firstrecording-TOTAL_FORMS': 1,
-                'firstrecording-0-album_cd': albumcd.id,
+                'firstrecording-0-album_cd': release.id,
                 'firstrecording-0-artist': artist.id,
                 'firstrecording-0-isrc': 'USX1X1234567',
                 'firstrecording-0-duration': '01:23',
