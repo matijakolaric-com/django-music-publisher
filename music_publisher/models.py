@@ -567,7 +567,7 @@ class Recording(models.Model):
         null=True, blank=True,
         on_delete=models.PROTECT
     )
-    work = models.ForeignKey(Work, on_delete=models.CASCADE)
+    work = models.ForeignKey(Work, on_delete=models.CASCADE, related_name='recordings')
     artist = models.ForeignKey(
         Artist, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Recording Artist')

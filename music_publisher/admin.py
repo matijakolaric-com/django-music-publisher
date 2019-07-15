@@ -25,9 +25,9 @@ from django.utils.timezone import now
 
 from .base import SOCIETIES
 from .models import (
-    ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport, Label, Library,
-    LibraryRelease, Recording, Release, Track, Work, WorkAcknowledgement,
-    Writer, WriterInWork)
+    ACKImport, AlternateTitle, Artist, ArtistInWork, CommercialRelease,
+    CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
+    WorkAcknowledgement, Writer, WriterInWork)
 
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
@@ -48,7 +48,8 @@ class ArtistInWorkInline(admin.TabularInline):
     autocomplete_fields = ('artist', 'work')
     model = ArtistInWork
     extra = 0
-    verbose_name_plural = 'Performing Artists (not mentioned in "recordings" section)'
+    verbose_name_plural = \
+        'Performing Artists (not mentioned in "recordings" section)'
 
 
 class RecordingInline(admin.StackedInline):
@@ -57,12 +58,15 @@ class RecordingInline(admin.StackedInline):
     """
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = ('complete_recording_title', 'complete_version_title')
+    show_change_link = True
     fieldsets = (
         (None, {
             'fields': (
                 'work',
-                ('recording_title', 'recording_title_suffix', 'complete_recording_title'),
-                ('version_title', 'version_title_suffix', 'complete_version_title'),
+                ('recording_title', 'recording_title_suffix',
+                 'complete_recording_title'),
+                ('version_title', 'version_title_suffix',
+                 'complete_version_title'),
                 ('isrc', 'artist', 'record_label'),
                 ('duration', 'release_date'),
                 # ('album_cd', )
@@ -137,7 +141,7 @@ class LibraryAdmin(MusicPublisherAdmin):
 
 class TrackInline(admin.TabularInline):
     model = Track
-    autocomplete_fields = ('release',)
+    autocomplete_fields = ('release', 'recording')
     extra = 0
 
 
@@ -146,21 +150,18 @@ class ReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Release`.
     """
 
-    def get_fieldsets(self, request, obj=None):
-        """Fields depend on settings.
-        """
-        fieldsets = (
-            ('Library', {
-                'fields': (
-                    ('cd_identifier', 'library'),)
-            }),
-            ('Release (album)', {
-                'fields': (
-                    ('release_title', 'release_label'),
-                    ('ean', 'release_date'))
-            }),
-        )
-        return fieldsets
+    fieldsets = (
+        ('Library', {
+            'fields': (
+                ('cd_identifier', 'library'),)
+        }),
+        ('Release (album)', {
+            'fields': (
+                ('release_title', 'release_label'),
+                ('ean', 'release_date'))
+        }),
+    )
+
 
     list_display = (
         '__str__',
@@ -190,6 +191,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
     form = LibraryReleaseForm
     inlines = [TrackInline]
+    autocomplete_fields = ('release_label', 'library')
 
     def get_fieldsets(self, request, obj=None):
         """Fields depend on settings.
@@ -220,6 +222,39 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         if form.changed_data:
             qs = Work.objects.filter(recordings__album_cd=obj)
             qs.update(last_change=now())
+
+
+@admin.register(CommercialRelease)
+class CommercialReleaseAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.AlbumCD`.
+    """
+
+    inlines = [TrackInline]
+    autocomplete_fields = ('release_label',)
+
+    list_display = (
+        'release_title',
+        'release_label'
+    )
+
+    list_filter = ('release_label',)
+    search_fields = ('release_title',)
+    actions = None
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('release_title', 'release_label'),
+                ('ean', 'release_date'))
+        }),
+    )
+
+    def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
+
 
 
 @admin.register(Writer)
@@ -513,11 +548,11 @@ class WorkAdmin(MusicPublisherAdmin):
     library_release.short_description = 'Album / Library CD'
     library_release.admin_order_field = 'library_release__name'
 
-    def isrcs(self, obj):
-        return [r.isrc for r in obj.recordings.all()]
-
-    isrcs.short_description = 'ISRCs'
-    isrcs.admin_order_field = 'recordings__isrc'
+    # def isrcs(self, obj):
+    #     return [r.isrc for r in obj.recordings.all()]
+    #
+    # isrcs.short_description = 'ISRCs'
+    # isrcs.admin_order_field = 'recordings__isrc'
 
     def cwr_export_count(self, obj):
         """Return the count of CWR exports with the link to the filtered
@@ -535,7 +570,7 @@ class WorkAdmin(MusicPublisherAdmin):
         """Return the count of CWR exports with the link to the filtered
         changelist view for :class:`CWRExportAdmin`."""
 
-        count = obj.recording__count
+        count = obj.recordings__count
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?work__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
@@ -564,9 +599,9 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('writerinwork_set')
         qs = qs.prefetch_related('writers')
-        qs = qs.prefetch_related('library_release')
-        qs = qs.annotate(models.Count('cwr_exports'))
-        qs = qs.annotate(models.Count('recording'))
+        qs = qs.prefetch_related('library_release__library')
+        qs = qs.annotate(models.Count('cwr_exports', distinct=True))
+        qs = qs.annotate(models.Count('recordings', distinct=True))
         return qs
 
     class InCWRListFilter(admin.SimpleListFilter):
