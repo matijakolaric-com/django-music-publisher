@@ -58,35 +58,35 @@ try:
     SOCIETIES = settings.MUSIC_PUBLISHER_SOCIETIES
 except AttributeError:
     SOCIETIES = [
-        ('055', 'SABAM, Belgium'),
+        ('55', 'SABAM, Belgium'),
 
         ('101', 'SOCAN, Canada'),
-        ('088', 'CMRRA, Canada'),
+        ('88', 'CMRRA, Canada'),
 
-        ('040', 'KODA, Denmark'),
+        ('40', 'KODA, Denmark'),
 
-        ('089', 'TEOSTO, Finland'),
+        ('89', 'TEOSTO, Finland'),
 
-        ('058', 'SACEM, France'),
+        ('58', 'SACEM, France'),
 
-        ('035', 'GEMA, Germany'),
+        ('35', 'GEMA, Germany'),
 
-        ('074', 'SIAE, Italy'),
+        ('74', 'SIAE, Italy'),
 
-        ('023', 'BUMA, Netherlands'),
-        ('078', 'STEMRA, Netherlands'),
+        ('23', 'BUMA, Netherlands'),
+        ('78', 'STEMRA, Netherlands'),
 
-        ('090', 'TONO, Norway'),
+        ('90', 'TONO, Norway'),
 
-        ('079', 'STIM, Sweden'),
+        ('79', 'STIM, Sweden'),
 
-        ('052', 'PRS, United Kingdom'),
-        ('044', 'MCPS, United Kingdom'),
+        ('52', 'PRS, United Kingdom'),
+        ('44', 'MCPS, United Kingdom'),
 
-        ('010', 'ASCAP, United States'),
-        ('021', 'BMI, United States'),
-        ('071', 'SESAC Inc., United States'),
-        ('034', 'HFA, United States'),
+        ('10', 'ASCAP, United States'),
+        ('21', 'BMI, United States'),
+        ('71', 'SESAC Inc., United States'),
+        ('34', 'HFA, United States'),
 
         ('319', 'ICE Services, Administrative Agency'),
         ('707', 'Musicmark, Administrative Agency')]

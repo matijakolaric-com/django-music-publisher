@@ -5,47 +5,56 @@ import django.db.models.deletion
 import music_publisher.base
 from django.conf import settings
 
+
+def add_tracks(apps, schema_edito):
+    """Create Label objects and link to """
+    Track = apps.get_model('music_publisher', 'Track')
+    Release = apps.get_model('music_publisher', 'Release')
+    Recording = apps.get_model('music_publisher', 'Recording')
+    for id, release_id in Recording.objects.all().values_list('id', 'album_cd_id'):
+        if not release_id:
+            continue
+        track = Track.objects.get_or_create(
+            release_id = release_id, recording_id=id)
+
+
 def move_key_to_work(apps, schema_editor):
-    Work = apps.get_model('music_publisher', 'Work')
-    for work in Work.objects.filter(recording__album_cd__cd_identifier__isnull = False):
-        release = work.recording.album_cd
-        work.library_release = release
-        work.save()
-        work.recording.album_cd = None
-        work.recording.save()
+    """Move FK to LibraryRelease to the work."""
+    Recording = apps.get_model('music_publisher', 'Recording')
+    for recording in Recording.objects.filter(album_cd__cd_identifier__isnull = False):
+        release = recording.album_cd
+        recording.work.library_release = release
+        recording.work.save()
+        recording.album_cd = None
+        recording.save()
+
 
 def import_library_from_settings(apps, schema_edito):
+    """Create Library objects and link"""
     LibraryRelease = apps.get_model('music_publisher', 'LibraryRelease')
     Library = apps.get_model('music_publisher', 'Library')
     library_name = settings.MUSIC_PUBLISHER_SETTINGS.get('library')
     if not library_name:
-        raise Exception()
+        return
     library, created = Library.objects.get_or_create(name=library_name)
     for release in LibraryRelease.objects.all():
         release.library = library
         release.save()
 
+
 def release_labels_to_table(apps, schema_edito):
+    """Create Label objects and link to """
     Label = apps.get_model('music_publisher', 'Label')
     LibraryRelease = apps.get_model('music_publisher', 'LibraryRelease')
-    for release in LibraryRelease.objects.all():
-        if not release.release_label:
+    for id, release_label in LibraryRelease.objects.all().values_list('id', 'release_label'):
+        if not release_label:
             continue
         label, created = Label.objects.get_or_create(
-            name=release.release_label)
-        release._release_label = label
-        release.save()
+            name=release_label)
+        LibraryRelease.objects.filter(id=id).update(_release_label_id=label.id)
 
-# Functions from the following migrations need manual copying.
-# Move them and any dependencies into this file, then update the
-# RunPython operations to refer to the local versions:
-# music_publisher.migrations.0004_auto_20190708_0933
-# music_publisher.migrations.0012_release_library
-# music_publisher.migrations.0013_auto_20190709_0854
 
 class Migration(migrations.Migration):
-
-    replaces = [('music_publisher', '0002_auto_20190708_0840'), ('music_publisher', '0003_auto_20190708_0843'), ('music_publisher', '0004_auto_20190708_0933'), ('music_publisher', '0005_auto_20190708_1044'), ('music_publisher', '0006_auto_20190708_1050'), ('music_publisher', '0007_auto_20190708_1221'), ('music_publisher', '0008_auto_20190708_1223'), ('music_publisher', '0009_auto_20190708_1235'), ('music_publisher', '0010_commercialrelease'), ('music_publisher', '0011_auto_20190709_0822'), ('music_publisher', '0012_release_library'), ('music_publisher', '0013_auto_20190709_0854'), ('music_publisher', '0014_remove_release_release_label'), ('music_publisher', '0015_auto_20190709_0855'), ('music_publisher', '0016_auto_20190709_1138'), ('music_publisher', '0017_remove_recording_record_label'), ('music_publisher', '0018_auto_20190709_1140'), ('music_publisher', '0019_auto_20190710_0958'), ('music_publisher', '0020_auto_20190710_0959'), ('music_publisher', '0021_auto_20190710_1135')]
 
     dependencies = [
         ('music_publisher', '0001_squashed_0023_auto_20190212_0907'),
@@ -60,6 +69,101 @@ class Migration(migrations.Migration):
             old_name='AlbumCD',
             new_name='Release',
         ),
+        migrations.CreateModel(
+            name='Track',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('cut_number',
+                 models.PositiveSmallIntegerField(blank=True, null=True,
+                                                  validators=[
+                                                      django.core.validators.MinValueValidator(
+                                                          1),
+                                                      django.core.validators.MaxValueValidator(
+                                                          9999)])),
+            ],
+        ),
+        migrations.AlterField(
+            model_name='recording',
+            name='work',
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to='music_publisher.Work'),
+        ),
+        migrations.AlterField(
+            model_name='workacknowledgement',
+            name='society_code',
+            field=models.CharField(
+                choices=[('55', 'SABAM, Belgium'), ('101', 'SOCAN, Canada'),
+                         ('88', 'CMRRA, Canada'), ('40', 'KODA, Denmark'),
+                         ('89', 'TEOSTO, Finland'), ('58', 'SACEM, France'),
+                         ('35', 'GEMA, Germany'), ('74', 'SIAE, Italy'),
+                         ('23', 'BUMA, Netherlands'),
+                         ('78', 'STEMRA, Netherlands'), ('90', 'TONO, Norway'),
+                         ('79', 'STIM, Sweden'), ('52', 'PRS, United Kingdom'),
+                         ('44', 'MCPS, United Kingdom'),
+                         ('10', 'ASCAP, United States'),
+                         ('21', 'BMI, United States'),
+                         ('71', 'SESAC Inc., United States'),
+                         ('34', 'HFA, United States'),
+                         ('319', 'ICE Services, Administrative Agency'),
+                         ('707', 'Musicmark, Administrative Agency')],
+                max_length=3, verbose_name='Society'),
+        ),
+        migrations.AlterField(
+            model_name='writer',
+            name='pr_society',
+            field=models.CharField(blank=True,
+                                   choices=[('55', 'SABAM, Belgium'),
+                                            ('101', 'SOCAN, Canada'),
+                                            ('88', 'CMRRA, Canada'),
+                                            ('40', 'KODA, Denmark'),
+                                            ('89', 'TEOSTO, Finland'),
+                                            ('58', 'SACEM, France'),
+                                            ('35', 'GEMA, Germany'),
+                                            ('74', 'SIAE, Italy'),
+                                            ('23', 'BUMA, Netherlands'),
+                                            ('78', 'STEMRA, Netherlands'),
+                                            ('90', 'TONO, Norway'),
+                                            ('79', 'STIM, Sweden'),
+                                            ('52', 'PRS, United Kingdom'),
+                                            ('44', 'MCPS, United Kingdom'),
+                                            ('10', 'ASCAP, United States'),
+                                            ('21', 'BMI, United States'), (
+                                            '71', 'SESAC Inc., United States'),
+                                            ('34', 'HFA, United States'), (
+                                            '319',
+                                            'ICE Services, Administrative Agency'),
+                                            ('707',
+                                             'Musicmark, Administrative Agency')],
+                                   max_length=3, null=True, validators=[
+                    music_publisher.base.CWRFieldValidator(
+                        'writer_pr_society')],
+                                   verbose_name='Performing rights society'),
+        ),
+        migrations.AddField(
+            model_name='track',
+            name='recording',
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='music_publisher.Recording'),
+        ),
+        migrations.AddField(
+            model_name='track',
+            name='release',
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                to='music_publisher.Release'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='track',
+            unique_together={('recording', 'release')},
+        ),
+        migrations.RunPython(
+            code=add_tracks,
+        ),
+
+
         migrations.CreateModel(
             name='LibraryRelease',
             fields=[
@@ -257,12 +361,16 @@ class Migration(migrations.Migration):
             name='suffix',
             field=models.BooleanField(default=False, help_text='Select if this title is only a suffix to the main title.'),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='recording',
-            name='record_label',
+            name='_record_label',
             field=models.ForeignKey(blank=True, null=True,
                                     on_delete=django.db.models.deletion.PROTECT,
                                     to='music_publisher.Label',
                                     verbose_name='Record label'),
+        ),
+        migrations.RemoveField(
+            model_name='recording',
+            name='album_cd',
         ),
     ]

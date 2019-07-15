@@ -8,28 +8,29 @@ Attributes:
 from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
+import re
+
 from django import forms
 from django.conf import settings
-from django.contrib import admin
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import ModelForm, FileField
+from django.forms import FileField, ModelForm
 from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
-from .models import (
-    LibraryRelease, Label, Library, Recording,
-    Release, AlternateTitle, Artist, ArtistInWork, Recording, Work,
-    Writer, WriterInWork, CWRExport, ACKImport, WorkAcknowledgement)
+
 from .base import SOCIETIES
-import re
+from .models import (
+    ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport, Label, Library,
+    LibraryRelease, Recording, Release, Track, Work, WorkAcknowledgement,
+    Writer, WriterInWork)
+
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
 
@@ -41,14 +42,184 @@ class MusicPublisherAdmin(admin.ModelAdmin):
     save_as = True
 
 
-@admin.register(Library)
-class LibraryAdmin(MusicPublisherAdmin):
-    search_fields = ('name', )
+class ArtistInWorkInline(admin.TabularInline):
+    """Inline interface for :class:`.models.ArtistInWork`.
+    """
+    autocomplete_fields = ('artist', 'work')
+    model = ArtistInWork
+    extra = 0
+    verbose_name_plural = 'Performing Artists (not mentioned in "recordings" section)'
+
+
+class RecordingInline(admin.StackedInline):
+    """Inline interface for :class:`.models.Recording`,
+        used in :class:`WorkAdmin` and :class:`ArtistAdmin`.
+    """
+    autocomplete_fields = ('artist', 'work', 'record_label')
+    readonly_fields = ('complete_recording_title', 'complete_version_title')
+    fieldsets = (
+        (None, {
+            'fields': (
+                'work',
+                ('recording_title', 'recording_title_suffix', 'complete_recording_title'),
+                ('version_title', 'version_title_suffix', 'complete_version_title'),
+                ('isrc', 'artist', 'record_label'),
+                ('duration', 'release_date'),
+                # ('album_cd', )
+            ),
+        }),
+    )
+    formfield_overrides = {
+        models.TimeField: {'widget': forms.TimeInput},
+    }
+    verbose_name_plural = 'Recordings (with recording artists and labels)'
+    model = Recording
+    extra = 0
+
+    def complete_recording_title(selfSelf, obj):
+        return obj.complete_recording_title
+
+    def complete_version_title(selfSelf, obj):
+        return obj.complete_version_title
+
+
+@admin.register(Artist)
+class ArtistAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Artist`.
+    """
+
+    list_display = ('last_or_band', 'first_name', 'isni')
+    search_fields = ('last_name', 'isni',)
+    inlines = [RecordingInline, ArtistInWorkInline]
+    fieldsets = (
+        ('Name', {
+            'fields': (
+                ('first_name', 'last_name'),)}),
+        ('ISNI', {
+            'fields': (
+                'isni',),
+        }),
+    )
+
+    def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
+
+    def last_or_band(self, obj):
+        """Placeholder for :attr:`.models.Artist.last_name`."""
+        return obj.last_name
+
+    last_or_band.short_description = 'Last or band name'
+    last_or_band.admin_order_field = 'last_name'
+
+    actions = None
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        """Save, then update ``last_change`` of the corresponding works.
+        """
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(artistinwork__artist=obj)
+            qs.update(last_change=now())
 
 
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
     search_fields = ('name', )
+
+
+@admin.register(Library)
+class LibraryAdmin(MusicPublisherAdmin):
+    search_fields = ('name', )
+
+
+class TrackInline(admin.TabularInline):
+    model = Track
+    autocomplete_fields = ('release',)
+    extra = 0
+
+
+@admin.register(Release)
+class ReleaseAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Release`.
+    """
+
+    def get_fieldsets(self, request, obj=None):
+        """Fields depend on settings.
+        """
+        fieldsets = (
+            ('Library', {
+                'fields': (
+                    ('cd_identifier', 'library'),)
+            }),
+            ('Release (album)', {
+                'fields': (
+                    ('release_title', 'release_label'),
+                    ('ean', 'release_date'))
+            }),
+        )
+        return fieldsets
+
+    list_display = (
+        '__str__',
+    )
+
+    search_fields = ('release_title', '^cd_identifier')
+    actions = None
+
+    def has_module_permission(self, request):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+
+class LibraryReleaseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cd_identifier'].required = True
+        self.fields['library'].required = True
+
+
+@admin.register(LibraryRelease)
+class LibraryReleaseAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.AlbumCD`.
+    """
+
+    form = LibraryReleaseForm
+    inlines = [TrackInline]
+
+    def get_fieldsets(self, request, obj=None):
+        """Fields depend on settings.
+        """
+        return ReleaseAdmin.get_fieldsets(self, request, obj)
+
+    list_display = (
+        'cd_identifier',
+        'library',
+        'release_title',
+        'release_label'
+    )
+
+    list_filter = ('release_label', 'library')
+    search_fields = ('release_title', '^cd_identifier')
+    actions = None
+
+    def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        """Save, then update ``last_change`` of the corresponding works.
+        """
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(recordings__album_cd=obj)
+            qs.update(last_change=now())
 
 
 @admin.register(Writer)
@@ -58,16 +229,6 @@ class WriterAdmin(MusicPublisherAdmin):
 
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
                     '_can_be_controlled', 'generally_controlled')
-
-    def get_list_display(self, *args, **kwargs):
-        """Return the list of fields based on settings.
-
-        Original Publisher is important for the US."""
-
-        lst = list(self.list_display)
-        if SETTINGS.get('admin_show_publisher'):
-            lst.append('original_publisher')
-        return lst
 
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
@@ -154,13 +315,6 @@ class AlternateTitleInline(admin.TabularInline):
         return str(obj)
 
 
-class ArtistInWorkInline(admin.TabularInline):
-    """Inline interface for :class:`.models.ArtistInWork`.
-    """
-    autocomplete_fields = ('artist', 'work')
-    model = ArtistInWork
-    extra = 0
-    verbose_name_plural = 'Performing Artists (not mentioned in "recordings" section)'
 
 class WriterInWorkFormSet(BaseInlineFormSet):
     """Formset for :class:`WriterInWorkInline`.
@@ -263,97 +417,6 @@ class WriterInWorkInline(admin.TabularInline):
     fields = (
         'writer', 'capacity', 'relative_share', 'controlled', 'saan',
         'publisher_fee')
-
-
-class RecordingInline(admin.StackedInline):
-    """Inline interface for :class:`.models.Recording`,
-        used in :class:`WorkAdmin` and :class:`ArtistAdmin`.
-    """
-    autocomplete_fields = ('album_cd', 'artist', 'work', 'record_label')
-    readonly_fields = ('complete_recording_title', 'complete_version_title')
-    fieldsets = (
-        (None, {
-            'fields': (
-                'work',
-                ('recording_title', 'recording_title_suffix', 'complete_recording_title'),
-                ('version_title', 'version_title_suffix', 'complete_version_title'),
-                ('isrc', 'artist', 'record_label'),
-                ('duration', 'release_date'),
-                # ('album_cd', )
-            ),
-        }),
-    )
-    formfield_overrides = {
-        models.TimeField: {'widget': forms.TimeInput},
-    }
-    verbose_name_plural = 'Recordings (with recording artists and labels)'
-    model = Recording
-    extra = 0
-
-    def complete_recording_title(selfSelf, obj):
-        return obj.complete_recording_title
-
-    def complete_version_title(selfSelf, obj):
-        return obj.complete_version_title
-
-
-class TrackInline(admin.StackedInline):
-    """Inline interface for :class:`.models.Recording`,
-        used in :class:`AlbumCDAdmin`.
-    """
-
-    autocomplete_fields = ('work', 'artist')
-    fieldsets = (
-        (None, {
-            'fields': (
-                ('work',),
-                ('record_label', 'artist'),
-                ('isrc', 'duration', 'release_date'),
-            ),
-        }),
-    )
-    model = Recording
-    formfield_overrides = {
-        models.TimeField: {'widget': forms.TimeInput},
-    }
-    verbose_name_plural = 'Tracks'
-    extra = 0
-
-
-class LibraryWorkInline(admin.TabularInline):
-    """Inline interface for :class:`.models.Recording`,
-        used in :class:`AlbumCDAdmin`.
-    """
-
-    fields = ('work_id_link', 'title', 'iswc', 'writer_last_names')
-    readonly_fields = fields
-    model = Work
-    verbose_name_plural = 'Works'
-    extra = 0
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def work_id_link(self, obj):
-        url = reverse('admin:music_publisher_work_change', args=(obj.id,))
-        link = '<a href="{}">{}</a>'.format(url, obj.work_id)
-        return mark_safe(link)
-
-    work_id_link.short_description = 'Work ID'
-
-    def writer_last_names(self, obj):
-        """This is a standard way how writers are shown in other apps."""
-
-        return ' / '.join(
-            writer.last_name.upper() for writer in set(obj.writers.all()))
-
-    writer_last_names.short_description = 'Writers\' last names'
 
 
 class WorkAcknowledgementInline(admin.TabularInline):
@@ -472,7 +535,7 @@ class WorkAdmin(MusicPublisherAdmin):
         """Return the count of CWR exports with the link to the filtered
         changelist view for :class:`CWRExportAdmin`."""
 
-        count = obj.recordings__count
+        count = obj.recording__count
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?work__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
@@ -503,7 +566,7 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = qs.prefetch_related('writers')
         qs = qs.prefetch_related('library_release')
         qs = qs.annotate(models.Count('cwr_exports'))
-        qs = qs.annotate(models.Count('recordings'))
+        qs = qs.annotate(models.Count('recording'))
         return qs
 
     class InCWRListFilter(admin.SimpleListFilter):
@@ -766,6 +829,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
 @admin.register(Recording)
 class RecordingAdmin(MusicPublisherAdmin):
+    inlines = [TrackInline]
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
         'record_label')
@@ -795,7 +859,7 @@ class RecordingAdmin(MusicPublisherAdmin):
 
     list_filter = (HasISRCListFilter, 'artist', 'record_label')
     search_fields = ('work__title', 'recording_title', 'version_title')
-    autocomplete_fields = ('album_cd', 'artist', 'work', 'record_label')
+    autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
         'complete_recording_title', 'complete_version_title', 'title',
         'work_link', 'artist_link')
@@ -1138,171 +1202,3 @@ class ACKImportAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(Release)
-class ReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Release`.
-    """
-
-    readonly_fields = ('library',)
-    inlines = [TrackInline]
-
-    def get_fieldsets(self, request, obj=None):
-        """Fields depend on settings.
-        """
-        fieldsets = (
-            (None, {
-                'fields': (
-                    ('release_title', 'release_label'),
-                    ('ean', 'release_date'),
-                )
-            }),
-        )
-        return fieldsets
-
-    list_display = (
-        '__str__',
-    )
-
-    def get_list_display(self, *args, **kwargs):
-        """The list of fields depends on settings.
-        """
-        lst = list(self.list_display)
-        if SETTINGS.get('label'):
-            lst.append('release_label')
-        lst.append('release_title')
-        lst.append('release_date')
-        lst.append('ean')
-        if SETTINGS.get('library'):
-            lst.append('library')
-            lst.append('cd_identifier')
-        return lst
-
-    search_fields = ('release_title', '^cd_identifier')
-    actions = None
-
-    def has_module_permission(self, request):
-        return False
-
-    def get_inline_instances(self, request, obj=None):
-        """Limit inlines in popups."""
-        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return []
-        return super().get_inline_instances(request)
-
-    def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
-        """
-        super().save_model(request, obj, form, *args, **kwargs)
-        if form.changed_data:
-            qs = Work.objects.filter(recordings__album_cd=obj)
-            qs.update(last_change=now())
-
-
-class LibraryReleaseForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['cd_identifier'].required = True
-        self.fields['library'].required = True
-
-
-@admin.register(LibraryRelease)
-class LibraryReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.AlbumCD`.
-    """
-
-    inlines = [LibraryWorkInline, RecordingInline]
-    form = LibraryReleaseForm
-
-    def get_fieldsets(self, request, obj=None):
-        """Fields depend on settings.
-        """
-        fieldsets = (
-            ('Library', {
-                'fields': (
-                    ('cd_identifier', 'library'),)
-            }) if SETTINGS.get('library') else (
-                'Library not set', {'fields': ()}),
-            ('Release (album)', {
-                'fields': (
-                    ('release_title', 'release_label'),
-                    ('ean', 'release_date'))
-            }),
-        )
-        return fieldsets
-
-    list_display = (
-        '__str__',
-    )
-
-    def get_list_display(self, *args, **kwargs):
-        """The list of fields depends on settings.
-        """
-        lst = list(self.list_display)
-        if SETTINGS.get('label'):
-            lst.append('release_label')
-        lst.append('release_title')
-        lst.append('release_date')
-        lst.append('ean')
-        if SETTINGS.get('library'):
-            lst.append('library')
-            lst.append('cd_identifier')
-        return lst
-
-    search_fields = ('release_title', '^cd_identifier')
-    actions = None
-
-    def get_inline_instances(self, request, obj=None):
-        """Limit inlines in popups."""
-        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return []
-        return super().get_inline_instances(request)
-
-    def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
-        """
-        super().save_model(request, obj, form, *args, **kwargs)
-        if form.changed_data:
-            qs = Work.objects.filter(recordings__album_cd=obj)
-            qs.update(last_change=now())
-
-
-@admin.register(Artist)
-class ArtistAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Artist`.
-    """
-
-    list_display = ('last_or_band', 'first_name', 'isni')
-    search_fields = ('last_name', 'isni',)
-    inlines = [RecordingInline, ArtistInWorkInline]
-    fieldsets = (
-        ('Name', {
-            'fields': (
-                ('first_name', 'last_name'),)}),
-        ('ISNI', {
-            'fields': (
-                'isni',),
-        }),
-    )
-
-    def get_inline_instances(self, request, obj=None):
-        """Limit inlines in popups."""
-        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return []
-        return super().get_inline_instances(request)
-
-    def last_or_band(self, obj):
-        """Placeholder for :attr:`.models.Artist.last_name`."""
-        return obj.last_name
-
-    last_or_band.short_description = 'Last or band name'
-    last_or_band.admin_order_field = 'last_name'
-
-    actions = None
-
-    def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
-        """
-        super().save_model(request, obj, form, *args, **kwargs)
-        if form.changed_data:
-            qs = Work.objects.filter(artistinwork__artist=obj)
-            qs.update(last_change=now())
