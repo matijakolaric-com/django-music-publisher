@@ -141,8 +141,8 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_id': 'DMP',
     'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
     'publisher_ipi_name': '00000000199',
-    'publisher_pr_society': 71,
-    'publisher_mr_society': 34,
+    'publisher_pr_society': '71',
+    'publisher_mr_society': '34',
     'publisher_sr_society': None,
 
     'library': 'FOO BAR MUSIC LIBRARY',

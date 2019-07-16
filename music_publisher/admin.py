@@ -587,7 +587,7 @@ class WorkAdmin(MusicPublisherAdmin):
     duration.admin_order_field = 'recordings__duration'
 
     readonly_fields = (
-        'writer_last_names', 'work_id', 'json', 'cwr_export_count')
+        'writer_last_names', 'work_id', 'cwr_export_count')
     list_display = (
         'work_id', 'title', 'iswc', 'writer_last_names',
         'percentage_controlled', 'duration', 'library_release',
@@ -773,7 +773,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_cwr.short_description = 'Create CWR from selected works.'
 
-    def create_json(self, request, qs, normalized=False):
+    def create_json(self, request, qs, normalize=False):
         """Batch action that downloads a JSON file containing selected works.
 
         Returns:
@@ -781,19 +781,23 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
+        artists = {}
+        labels = {}
+        libraries = {}
+        organizations = {}
         writers = {}
         publishers = {}
-        albums = {}
-        artists = {}
-        libraries = {}
         qs = qs.prefetch_related('writers')
         for work in qs:
-            key, j = work.json
-            if normalized:
+            work_data = work.get_dict(normalize=normalize)
+            key = next(iter(work_data))
+            j = work_data[key]
+            if normalize:
                 writers.update(j.pop('writers'))
                 publishers.update(j.pop('publishers'))
-                albums.update(j.pop('albums', {}))
                 artists.update(j.pop('artists', {}))
+                labels.update(j.pop('labels', {}))
+                organizations.update(j.pop('organizations', {}))
                 libraries.update(j.pop('libraries', {}), )
             else:
                 pr_societies = set()
@@ -806,20 +810,14 @@ class WorkAdmin(MusicPublisherAdmin):
                         j['publishers'][publisher_id] = publisher
             works[key] = j
         pr_societies = set()
-        if normalized:
-            for writer in writers.values():
-                publisher = writer.pop('publisher_dict', {})
-                pr_society = publisher.get('pr_society')
-                if pr_society and pr_society not in pr_societies:
-                    pr_societies.add(pr_society)
-                    publisher_id = publisher.pop('publisher_id')
-                    publishers[publisher_id] = publisher
+        if normalize:
             j = {
-                'writers': writers,
-                'publishers': publishers,
-                'albums': albums,
                 'artists': artists,
+                'labels': labels,
                 'libraries': libraries,
+                'organizations': organizations,
+                'publishers': publishers,
+                'writers': writers,
                 'works': works,
             }
         else:
@@ -838,7 +836,7 @@ class WorkAdmin(MusicPublisherAdmin):
         'Export selected works (JSON).'
 
     def create_normalized_json(self, request, qs):
-        return self.create_json(request, qs, normalized=True)
+        return self.create_json(request, qs, normalize=True)
 
     create_normalized_json.short_description = \
         'Export selected works (normalized JSON).'

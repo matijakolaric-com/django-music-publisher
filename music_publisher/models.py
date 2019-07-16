@@ -18,7 +18,7 @@ class Artist(PersonBase, models.Model):
 
     class Meta:
         verbose_name = 'Performing Artist'
-        verbose_name_plural = ' Performing Artists'
+        verbose_name_plural = '  Performing Artists'
         ordering = ('last_name', 'first_name', '-id')
 
     isni = models.CharField(
@@ -31,24 +31,27 @@ class Artist(PersonBase, models.Model):
             self.isni = self.isni.rjust(16, '0').upper()
         return models.Model.clean_fields(self, *args, **kwargs)
 
-    @property
-    def json(self):
+    def get_dict(self):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
         """
-        j = {'last_name': self.last_name}
-        if self.first_name:
-            j['first_name'] = self.first_name
-        if self.isni:
-            j['isni'] = self.isni
-        return j
+        j = {
+            'last_name': self.last_name,
+            'first_name': self.first_name or None,
+            'isni': self.isni or None,
+        }
+        return {self.artist_id: j}
+
+    @property
+    def artist_id(self):
+        return 'A{:06d}'.format(self.id)
 
 
 class Label(models.Model):
     class Meta:
-        verbose_name_plural = 'Music Labels'
+        verbose_name_plural = ' Music Labels'
         ordering = ('name', )
 
     name = models.CharField(
@@ -58,10 +61,22 @@ class Label(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def label_id(self):
+        return 'LA{:06d}'.format(self.id)
+
+    def get_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
+        return {self.label_id: {'name': self.name}}
+
 
 class Library(models.Model):
     class Meta:
-        verbose_name_plural = 'Music Libraries'
+        verbose_name_plural = ' Music Libraries'
         ordering = ('name',)
 
     name = models.CharField(
@@ -70,6 +85,18 @@ class Library(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def library_id(self):
+        return 'LI{:06d}'.format(self.id)
+
+    def get_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
+        return {self.library_id: {'name': self.name}}
 
 
 class Release(models.Model):
@@ -83,7 +110,6 @@ class Release(models.Model):
     library = models.ForeignKey(
         Library, null=True, blank=True, on_delete=models.PROTECT)
     release_date = models.DateField(
-        help_text='Can be overridden by recording data.',
         blank=True, null=True)
     release_title = models.CharField(
         'Release (album) title ',
@@ -128,6 +154,25 @@ class Release(models.Model):
             raise ValidationError({
                 'release_title': 'Required if EAN or release date is set.'})
 
+    @property
+    def release_id(self):
+        return 'RE{:06d}'.format(self.id)
+
+    def get_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
+        j = {
+            release_title: self.release_title or None,
+            release_date: self.release_date.strftime('%Y%m%d') or None,
+            release_label: (self.release_label.get_dict() if self.release_label
+                            else None),
+            ean: self.ean,
+        }
+        return {self.release_id: j}
+
 
 class LibraryReleaseManager(models.Manager):
     def get_queryset(self):
@@ -137,7 +182,24 @@ class LibraryReleaseManager(models.Manager):
 class LibraryRelease(Release):
     class Meta:
         proxy = True
+        verbose_name_plural = ' Library Releases'
     objects = LibraryReleaseManager()
+
+    def get_origin_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
+        j = {
+            'type': {
+                'code': 'LIB',
+                'name': 'Library Work'
+            },
+            'cd_identifier': self.cd_identifier,
+            'library': self.library.get_dict()
+        }
+        return {'OR{:06d}'.format(self.id): j}
 
 
 class CommercialReleaseManager(models.Manager):
@@ -148,6 +210,7 @@ class CommercialReleaseManager(models.Manager):
 class CommercialRelease(Release):
     class Meta:
         proxy = True
+        verbose_name_plural = ' Commercial Releases'
     objects = CommercialReleaseManager()
 
 
@@ -157,7 +220,7 @@ class Writer(PersonBase, IPIBase, models.Model):
 
     class Meta:
         ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name_plural = ' Writers'
+        verbose_name_plural = '  Writers'
 
     def __str__(self):
         name = super().__str__()
@@ -175,6 +238,39 @@ class Writer(PersonBase, IPIBase, models.Model):
             raise ValidationError(
                 'This writer is controlled in at least one work. ' +
                 CAN_NOT_BE_CONTROLLED_MSG)
+
+    @property
+    def writer_id(self):
+        return 'WR{:06d}'.format(self.id)
+
+    def get_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
+
+        j = {
+            'first_name': self.first_name or None,
+            'last_name': self.last_name or None,
+            'ipi_name': self.ipi_name or None,
+            'ipi_base': self.ipi_base or None,
+            'affiliations': [{
+                'organization': {
+                    'code': self.pr_society,
+                    'name': self.get_pr_society_display().split(',')[0]
+                },
+                'type': {
+                    'code': 'PR',
+                    'name': 'Performance Rights Organization'
+                },
+                'territory': {
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            }]
+        }
+        return {'WR{:06d}'.format(self.id): j}
 
 
 class WorkManager(models.Manager):
@@ -196,7 +292,7 @@ class Work(TitleBase):
     """
 
     class Meta:
-        verbose_name_plural = '   Works'
+        verbose_name_plural = '    Works'
         ordering = ('-id', )
 
     iswc = models.CharField(
@@ -250,38 +346,91 @@ class Work(TitleBase):
             self.title.upper(),
             ' / '.join(w.last_name.upper() for w in self.writers.all()))
 
-    @property
-    def json(self):
+
+    def get_dict(self, normalize=True):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
         """
 
-        data = OrderedDict()
-        data['work_title'] = self.title
-        if self.original_title:
-            data['version_type'] = 'modification'
-            data['original_title'] = self.original_title
-        else:
-            data['version_type'] = 'original'
-        if self.iswc:
-            data['iswc'] = self.iswc
-        data['alternate_titles'] = [
-            at.json for at in self.alternatetitle_set.all()]
-        data['publishers'] = {}
-        data['writers'] = {}
+        j = {
+            'work_title': self.title,
+            'version_type': {
+                'code': 'MOD',
+                'name': 'Modified Version of a musical work',
+                'original_work': {
+                    'work_title': self.original_title,
+                }
+            } if self.original_title else {
+                'code': 'ORI',
+                'name': 'Original Work',
+            },
+            'iswc': self.iswc,
+            'other_titles': [
+                at.get_dict() for at in self.alternatetitle_set.all()],
+            'artists': {},
+            'labels': {},
+            'libraries': {},
+            'organizations': {},
+            'publishers': {
+                SETTINGS['publisher_id'] : {
+                    'name' : SETTINGS['publisher_name'],
+                    'ipi_name': SETTINGS['publisher_ipi_name'],
 
-        data['writers_for_work'] = []
+                }
+            },
+            'writers': {},
+            'origin': (
+                self.library_release.get_origin_dict() if self.library_release
+                else None),
+            'recordings': {},
+            'writers_for_work': [],
+            'artists_for_work': [],
+        }
+        if normalize and self.library_release:
+            key = next(iter(j['origin']))
+            l = j['origin'][key]['library']
+            j['libraries'].update(j['origin'][key]['library'])
+            j['origin'][key]['library'] = \
+                next(iter(j['origin'][key]['library']))
+
+        for wiw in self.artistinwork_set.all():
+            d = wiw.get_dict()
+            a = d.get('artist', None)
+            if normalize:
+                d['artist'] = next(iter(a))
+                j['artists'].update(a)
+            j['artists_for_work'].append(d)
+
         for wiw in self.writerinwork_set.all():
-            j = wiw.json
-            writer = j.pop('writer', None)
-            if writer:
-                id = writer.pop('writer_id')
-                data['writers'][id] = writer
-            data['writers_for_work'].append(j)
-        data['albums'] = {}
-        data['artists'] = {}
+            d = wiw.get_dict()
+            w = d.get('writer', None)
+            for aff in w[next(iter(w))]['affiliations']:
+                org = aff.get('organization')
+                if not org:
+                    continue
+                if normalize:
+                    j['organizations'].update(
+                        {org['code']: {'name': org['name']}})
+                    aff['organization'] = org['code']
+            if normalize:
+                d['writer'] = next(iter(w))
+                for pwr in d.get('publishers_for_writer', []):
+                    agreement = pwr.get('agreement')
+                    if not agreement:
+                        continue
+                    org = agreement['recipient_organization']
+                    j['organizations'].update(
+                        {org['code']: {'name': org['name']}})
+                    agreement['recipient_organization'] = \
+                        agreement['recipient_organization']['code']
+
+            if normalize:
+                j['writers'].update(w)
+            j['writers_for_work'].append(d)
+        return {self.work_id: j}
+
         try:
             data.update(self.firstrecording.json)
         except ObjectDoesNotExist:
@@ -316,14 +465,20 @@ class AlternateTitle(TitleBase):
         unique_together = (('work', 'title'),)
         ordering = ('-suffix', 'title')
 
-    @property
-    def json(self):
+    def get_dict(self):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
         """
-        return {'alternate_title': str(self)}
+        return {
+            'alternate_title': str(self),
+            'title_type': {
+                'code': 'AT',
+                'name': 'Alternative Title',
+            },
+        }
+
 
     def __str__(self):
         if self.suffix:
@@ -351,12 +506,8 @@ class ArtistInWork(models.Model):
     def __str__(self):
         return str(self.artist)
 
-    @property
-    def json(self):
-        data = {
-            'artist_id': 'A{:06d}'.format(self.artist.id),
-            'artist': self.artist.json}
-        return data
+    def get_dict(self):
+        return {'artist': self.artist.get_dict()}
 
 
 class WriterInWork(models.Model):
@@ -467,60 +618,47 @@ class WriterInWork(models.Model):
         if d:
             raise ValidationError(d)
 
-    @property
-    def json(self):
+    def get_dict(self):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
         """
-        data = OrderedDict()
-        data.update({
+
+        j = {
+            'writer': self.writer.get_dict() if self.writer else None,
             'controlled': self.controlled,
             'relative_share': str(self.relative_share / 100),
-        })
-        if self.writer:
-            data['writer_id'] = 'W{:06d}'.format(self.writer.id)
-            data['writer'] = {
-                'writer_id': data['writer_id'],
-                'last_name': self.writer.last_name
-            }
-            if self.writer.first_name:
-                data['writer']['first_name'] = self.writer.first_name
-            if self.writer.ipi_name:
-                data['writer']['ipi_name'] = self.writer.ipi_name
-            if self.writer.ipi_base:
-                data['writer']['ipi_base'] = self.writer.ipi_base
-            if self.writer.pr_society:
-                data['writer']['pr_society'] = self.writer.pr_society
-
-        if self.capacity:
-            data['capacity'] = self.capacity
-        if self.controlled:
-            publisher = self.writer.get_publisher_dict()
-            pwr = {
-                'publisher_id': publisher.get('publisher_id'),
-            }
-            data['publishers_for_writer'] = [pwr]
-            data['writer']['publisher_dict'] = {
-                'name': publisher.get('publisher_name'),
-                'publisher_id': publisher.get('publisher_id'),
-                'ipi_name': publisher.get('publisher_ipi_name'),
-                'pr_society': publisher.get('publisher_pr_society'),
-            }
-            if publisher.get('publisher_ipi_base'):
-                data['writer']['publisher_dict']['ipi_base'] = publisher['publisher_ipi_base']
-            if publisher.get('publisher_mr_society'):
-                data['writer']['publisher_dict']['mr_society'] = publisher['publisher_mr_society']
-            if publisher.get('publisher_sr_society'):
-                data['writer']['publisher_dict']['mr_society'] = publisher['publisher_sr_society']
-            if self.saan:
-                agr = {'saan': self.saan, 'type': 'OS'}
-                data['publishers_for_writer'][0]['agreement'] = agr
-            elif self.writer.saan:
-                agr = {'saan': self.writer.saan, 'type': 'OG'}
-                data['publishers_for_writer'][0]['agreement'] = agr
-        return data
+            'capacity': {
+                'code': self.capacity,
+                'name': self.get_capacity_display()
+            } if self.capacity else None,
+            'publishers_for_writer': [{
+                'publisher_id': SETTINGS['publisher_id'],
+                'agreement': {
+                    'recipient_organization': {
+                        'code': SETTINGS['publisher_pr_society'],
+                        'name': SOCIETY_DICT[SETTINGS['publisher_pr_society']].split(',')[0],
+                    },
+                    'recipient_agreement_number': self.saan,
+                    'type': {
+                        'code': 'OS',
+                        'name': 'Original Specific',
+                    }
+                } if self.saan else {
+                    'recipient_organization': {
+                        'code': SETTINGS['publisher_pr_society'],
+                        'name': SOCIETY_DICT[SETTINGS['publisher_pr_society']].split(',')[0],
+                    },
+                    'recipient_agreement_number': self.writer.saan,
+                    'type': {
+                        'code': 'OG',
+                        'name': 'Original General',
+                    }
+                } if self.writer.saan else None
+            }] if self.controlled else [],
+        }
+        return j
 
 
 class Recording(models.Model):
@@ -539,7 +677,7 @@ class Recording(models.Model):
     """
 
     class Meta:
-        verbose_name_plural = '  Recordings'
+        verbose_name_plural = '   Recordings'
         ordering = ('-id',)
 
     recording_title = models.CharField(
@@ -557,7 +695,7 @@ class Recording(models.Model):
         default=False,
         help_text='A suffix to the RECORDING title.')
     release_date = models.DateField(blank=True, null=True)
-    duration = models.TimeField(blank=True, null=True)
+    duration = models.DurationField(blank=True, null=True)
     isrc = models.CharField(
         'ISRC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('isrc'),))
@@ -612,52 +750,28 @@ class Recording(models.Model):
             return ''
         return '{}R{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
 
-    @property
-    def json(self):
+
+    def get_dict(self):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
             dict: JSON-serializable data structure
         """
-        artist_id = album_id = None
-        data = OrderedDict()
-        if self.duration:
-            data['first_release_duration'] = self.duration.strftime('%H%M%S')
-        data['isrc'] = self.isrc or ''
-        data['record_label'] = self.record_label
-        if self.artist:
-            artist_id = 'A{:06d}'.format(self.artist.id)
-            data['artist_id'] = artist_id
-        if self.album_cd and self.album_cd.release_title:
-            if self.album_cd.release_date:
-                data['release_date'] = (
-                    self.album_cd.release_date.strftime('%Y%m%d'))
-            album_id = 'AL{:03d}'.format(self.album_cd.id)
-            data['album_id'] = album_id
-        if self.release_date:
-            data['release_date'] = self.release_date.strftime('%Y%m%d')
-        data = {'recordings': {'R{:06d}'.format(self.id): data}}
-        if self.artist:
-            data['artists'] = {artist_id: self.artist.json}
-        if self.album_cd and self.album_cd.release_title:
-            album = {
-                'title': self.album_cd.release_title
-            }
-            if self.album_cd.release_date:
-                album['release_date'] = (
-                    self.album_cd.release_date.strftime('%Y%m%d'))
-            if self.album_cd.album_label:
-                album['label'] = self.album_cd.album_label
-            if self.album_cd.ean:
-                album['ean'] = self.album_cd.ean
-            data['albums'] = {album_id: album}
-        if self.album_cd and self.album_cd.library:
-            data['libraries'] = {'L001': {'name': self.album_cd.library}}
-            data['source'] = {
-                'type': 'library',
-                'library_id': 'L001',
-                'cd_identifier': self.album_cd.cd_identifier}
-        return data
+        j = {
+            'recording_title': (
+                self.complete_recording_title or self.work.title),
+            'version_title': self.complete_version_title,
+            'release_date': (
+                self.release_date.strftime('%Y%m%d') if self.release_date
+                else None),
+            'duration': self.duration.strftime('%H%M%S') if self.duration
+                else None,
+            'isrc': self.isrc,
+            'recording_artist': self.artist.artist_id if self.artist else None,
+            'record_label': (
+                self.record_label.label_id if self.record_label else None),
+        }
+        return {self.recording_id: j}
 
 
 class Track(models.Model):

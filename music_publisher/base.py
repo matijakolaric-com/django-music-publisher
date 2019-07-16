@@ -91,6 +91,8 @@ except AttributeError:
         ('319', 'ICE Services, Administrative Agency'),
         ('707', 'Musicmark, Administrative Agency')]
 
+SOCIETY_DICT = dict(SOCIETIES)
+
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
 )
