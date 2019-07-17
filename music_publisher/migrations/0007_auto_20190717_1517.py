@@ -6,7 +6,7 @@ def remove_leading_zeros(apps, schema_edito):
     """Create Label objects and link to """
     Writer = apps.get_model('music_publisher', 'Writer')
     for writer in Writer.objects.all():
-        if not self.pr_society:
+        if not writer.pr_society:
             continue
         writer.pr_society = writer.pr_society.lstrip('0')
         writer.save()
