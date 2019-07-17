@@ -781,11 +781,11 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
+        affiliation_types = {}
         agreement_types = {}
         artists = {}
         labels = {}
         libraries = {}
-        organization_types = {}
         organizations = {}
         territories = {}
         writers = {}
@@ -807,15 +807,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 publishers.update(j.pop('publishers'))
             artists.update(j.pop('artists', {}))
             labels.update(j.pop('labels', {}))
-            orgs = j.pop('organizations', {})
-            for k, org in orgs.items():
-                typ = org.get('organization_type')
-                if not typ:
-                   continue
-                tc = typ.pop('code')
-                org['organization_type'] = tc
-                organization_types.update({tc: typ})
-            organizations.update(orgs)
+            organizations.update(j.pop('organizations', {}))
             territories.update(j.pop('territories', {}), )
             libraries.update(j.pop('libraries', {}), )
             works[key] = j
@@ -825,7 +817,6 @@ class WorkAdmin(MusicPublisherAdmin):
                 'artists': artists,
                 'labels': labels,
                 'libraries': libraries,
-                'organization_types': organization_types,
                 'organizations': organizations,
                 'territories': territories,
                 'publishers': publishers,

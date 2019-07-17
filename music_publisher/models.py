@@ -267,10 +267,10 @@ class Writer(PersonBase, IPIBase, models.Model):
                 'organization': {
                     'code': self.pr_society,
                     'name': self.get_pr_society_display().split(',')[0],
-                    'organization_type': {
-                        'code': 'PR',
-                        'name': 'Performance Rights Organization'
-                    },
+                },
+                'affiliation_type': {
+                    'code': 'PR',
+                    'name': 'Performance Rights'
                 },
                 'territory': {
                     'code': '2136',
@@ -379,6 +379,7 @@ class Work(TitleBase):
             'other_titles': [
                 at.get_dict() for at in self.alternatetitle_set.all()],
 
+            'affiliation_types': {},
             'agreement_types': {},
             'artists': {},
             'labels': {},
@@ -396,10 +397,10 @@ class Work(TitleBase):
                             'name': SOCIETY_DICT.get(
                                 SETTINGS['publisher_pr_society']
                             ).split(',')[0],
-                            'organization_type': {
-                                'code': 'PR',
-                                'name': 'Performance Rights Organization'
-                            },
+                        },
+                        'affiliation_type': {
+                            'code': 'PR',
+                            'name': 'Performance Rights'
                         },
                         'territory': {
                             'code': '2136',
@@ -424,10 +425,10 @@ class Work(TitleBase):
                     'name': SOCIETY_DICT.get(
                         SETTINGS['publisher_mr_society']
                     ).split(',')[0],
-                    'organization_type': {
-                        'code': 'MR',
-                        'name': 'Mechanical Rights Organization'
-                    },
+                },
+                'affiliation_type': {
+                    'code': 'MR',
+                    'name': 'Mechanical Rights'
                 },
                 'territory': {
                     'code': '2136',
@@ -442,10 +443,10 @@ class Work(TitleBase):
                     'name': SOCIETY_DICT.get(
                         SETTINGS['publisher_sr_society']
                     ).split(',')[0],
-                    'organization_type': {
-                        'code': 'SR',
-                        'name': 'Synchronization Rights Organization'
-                    },
+                },
+                'affiliation_type': {
+                    'code': 'SR',
+                    'name': 'Synchronization Rights'
                 },
                 'territory': {
                     'code': '2136',
@@ -459,6 +460,11 @@ class Work(TitleBase):
                 org = aff['organization']
                 code = org.pop('code')
                 j['organizations'].update(
+                    {code: org})
+                aff['organization'] = code
+                typ = aff['affiliation_type']
+                code = typ.pop('code')
+                j['affiliation_types'].update(
                     {code: org})
                 aff['organization'] = code
                 ter = aff['territory']
@@ -735,10 +741,6 @@ class WriterInWork(models.Model):
                     'recipient_organization': {
                         'code': SETTINGS['publisher_pr_society'],
                         'name': SOCIETY_DICT[SETTINGS['publisher_pr_society']].split(',')[0],
-                        'organization_type': {
-                            'code': 'PR',
-                            'name': 'Performance Rights Organization'
-                        },
                     },
                     'recipient_agreement_number': self.saan,
                     'agreement_type': {
