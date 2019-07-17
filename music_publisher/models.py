@@ -277,7 +277,7 @@ class Writer(PersonBase, IPIBase, models.Model):
                     'tis_code': '2136',
                     'name': 'World'
                 }
-            }]
+            }] if self.pr_society else []
         }
         return {'WR{:06d}'.format(self.id): j}
 
