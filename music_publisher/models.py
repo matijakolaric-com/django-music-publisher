@@ -486,7 +486,7 @@ class Work(TitleBase):
         for wiw in self.writerinwork_set.all():
             d = wiw.get_dict()
             w = d.get('writer', None)
-            for aff in w[next(iter(w))]['affiliations']:
+            for aff in w[next(iter(w))].get('affiliations', []):
                 org = aff.get('organization')
                 if not org:
                     continue
