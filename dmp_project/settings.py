@@ -143,7 +143,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_ipi_name': '00000000199',
     'publisher_pr_society': '71',
     'publisher_mr_society': '34',
-    'publisher_sr_society': None,
+    'publisher_sr_society': '52',
 
     'library': 'FOO BAR MUSIC LIBRARY',
 }

@@ -781,41 +781,53 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         works = OrderedDict()
+        agreement_types = {}
         artists = {}
         labels = {}
         libraries = {}
+        organization_types = {}
         organizations = {}
+        territories = {}
         writers = {}
         publishers = {}
-        qs = qs.prefetch_related('writers')
+        qs = qs.prefetch_related('alternatetitle_set')
+        qs = qs.prefetch_related('writerinwork_set__writer')
+        qs = qs.prefetch_related('artistinwork_set__artist')
+        qs = qs.prefetch_related('recordings__record_label')
+        qs = qs.prefetch_related('recordings__artist')
+        qs = qs.prefetch_related('recordings__tracks__release__library')
+        qs = qs.prefetch_related('recordings__tracks__release__release_label')
         for work in qs:
             work_data = work.get_dict(normalize=normalize)
             key = next(iter(work_data))
             j = work_data[key]
+            agreement_types.update(j.pop('agreement_types'))
+            writers.update(j.pop('writers'))
             if normalize:
-                writers.update(j.pop('writers'))
                 publishers.update(j.pop('publishers'))
-                artists.update(j.pop('artists', {}))
-                labels.update(j.pop('labels', {}))
-                organizations.update(j.pop('organizations', {}))
-                libraries.update(j.pop('libraries', {}), )
-            else:
-                pr_societies = set()
-                for writer in j['writers'].values():
-                    publisher = writer.pop('publisher_dict', {})
-                    pr_society = publisher.get('pr_society')
-                    if pr_society and pr_society not in pr_societies:
-                        pr_societies.add(pr_society)
-                        publisher_id = publisher.pop('publisher_id')
-                        j['publishers'][publisher_id] = publisher
+            artists.update(j.pop('artists', {}))
+            labels.update(j.pop('labels', {}))
+            orgs = j.pop('organizations', {})
+            for k, org in orgs.items():
+                typ = org.get('organization_type')
+                if not typ:
+                   continue
+                tc = typ.pop('code')
+                org['organization_type'] = tc
+                organization_types.update({tc: typ})
+            organizations.update(orgs)
+            territories.update(j.pop('territories', {}), )
+            libraries.update(j.pop('libraries', {}), )
             works[key] = j
-        pr_societies = set()
         if normalize:
             j = {
+                'agreement_types': agreement_types,
                 'artists': artists,
                 'labels': labels,
                 'libraries': libraries,
+                'organization_types': organization_types,
                 'organizations': organizations,
+                'territories': territories,
                 'publishers': publishers,
                 'writers': writers,
                 'works': works,

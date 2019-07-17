@@ -127,7 +127,7 @@ class Release(models.Model):
     )
 
     recordings = models.ManyToManyField(
-        'Recording', related_name='recordings', through='Track')
+        'Recording', through='Track')
 
     def __str__(self):
         if self.cd_identifier:
@@ -150,7 +150,8 @@ class Release(models.Model):
             raise ValidationError({
                 'cd_identifier': 'Required if Album Title is not set.',
                 'release_title': 'Required if CD Identifier is not set.'})
-        if (self.ean or self.release_date) and not self.release_title:
+        if ((self.ean or self.release_date or self.release_label)
+                and not self.release_title):
             raise ValidationError({
                 'release_title': 'Required if EAN or release date is set.'})
 
@@ -164,12 +165,19 @@ class Release(models.Model):
         Returns:
             dict: JSON-serializable data structure
         """
+        if not (self.release_title or
+                self.release_label or
+                self.release_date or
+                self.ean):
+            return None
         j = {
-            release_title: self.release_title or None,
-            release_date: self.release_date.strftime('%Y%m%d') or None,
-            release_label: (self.release_label.get_dict() if self.release_label
-                            else None),
-            ean: self.ean,
+            'release_title': self.release_title or None,
+            'release_date':
+                self.release_date.strftime('%Y%m%d') if self.release_date
+                else None,
+            'release_label':
+                self.release_label.get_dict() if self.release_label else None,
+            'ean': self.ean,
         }
         return {self.release_id: j}
 
@@ -192,7 +200,7 @@ class LibraryRelease(Release):
             dict: JSON-serializable data structure
         """
         j = {
-            'type': {
+            'origin_type': {
                 'code': 'LIB',
                 'name': 'Library Work'
             },
@@ -258,13 +266,14 @@ class Writer(PersonBase, IPIBase, models.Model):
             'affiliations': [{
                 'organization': {
                     'code': self.pr_society,
-                    'name': self.get_pr_society_display().split(',')[0]
-                },
-                'type': {
-                    'code': 'PR',
-                    'name': 'Performance Rights Organization'
+                    'name': self.get_pr_society_display().split(',')[0],
+                    'organization_type': {
+                        'code': 'PR',
+                        'name': 'Performance Rights Organization'
+                    },
                 },
                 'territory': {
+                    'code': '2136',
                     'tis_code': '2136',
                     'name': 'World'
                 }
@@ -369,15 +378,35 @@ class Work(TitleBase):
             'iswc': self.iswc,
             'other_titles': [
                 at.get_dict() for at in self.alternatetitle_set.all()],
+
+            'agreement_types': {},
             'artists': {},
             'labels': {},
             'libraries': {},
             'organizations': {},
+            'territories': {},
             'publishers': {
-                SETTINGS['publisher_id'] : {
+                SETTINGS['publisher_id']: {
                     'name' : SETTINGS['publisher_name'],
                     'ipi_name': SETTINGS['publisher_ipi_name'],
-
+                    'ipi_base': SETTINGS.get('publisher_ipi_base'),
+                    'affiliations': [{
+                        'organization': {
+                            'code': SETTINGS['publisher_pr_society'],
+                            'name': SOCIETY_DICT.get(
+                                SETTINGS['publisher_pr_society']
+                            ).split(',')[0],
+                            'organization_type': {
+                                'code': 'PR',
+                                'name': 'Performance Rights Organization'
+                            },
+                        },
+                        'territory': {
+                            'code': '2136',
+                            'tis_code': '2136',
+                            'name': 'World'
+                        }
+                    }]
                 }
             },
             'writers': {},
@@ -388,6 +417,57 @@ class Work(TitleBase):
             'writers_for_work': [],
             'artists_for_work': [],
         }
+        if SETTINGS.get('publisher_mr_society'):
+            j['publishers'][SETTINGS['publisher_id']]['affiliations'].append({
+                'organization': {
+                    'code': SETTINGS['publisher_mr_society'],
+                    'name': SOCIETY_DICT.get(
+                        SETTINGS['publisher_mr_society']
+                    ).split(',')[0],
+                    'organization_type': {
+                        'code': 'MR',
+                        'name': 'Mechanical Rights Organization'
+                    },
+                },
+                'territory': {
+                    'code': '2136',
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            })
+        if SETTINGS.get('publisher_sr_society'):
+            j['publishers'][SETTINGS['publisher_id']]['affiliations'].append({
+                'organization': {
+                    'code': SETTINGS['publisher_sr_society'],
+                    'name': SOCIETY_DICT.get(
+                        SETTINGS['publisher_sr_society']
+                    ).split(',')[0],
+                    'organization_type': {
+                        'code': 'SR',
+                        'name': 'Synchronization Rights Organization'
+                    },
+                },
+                'territory': {
+                    'code': '2136',
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            })
+
+        if normalize:
+            for aff in j['publishers'][SETTINGS['publisher_id']]['affiliations']:
+                org = aff['organization']
+                code = org.pop('code')
+                j['organizations'].update(
+                    {code: org})
+                aff['organization'] = code
+                ter = aff['territory']
+                code = ter.pop('code')
+                j['territories'].update(
+                    {code: ter})
+                aff['territory'] = code
+
+
         if normalize and self.library_release:
             key = next(iter(j['origin']))
             l = j['origin'][key]['library']
@@ -411,9 +491,10 @@ class Work(TitleBase):
                 if not org:
                     continue
                 if normalize:
+                    code = org.pop('code')
                     j['organizations'].update(
-                        {org['code']: {'name': org['name']}})
-                    aff['organization'] = org['code']
+                        {code: org})
+                    aff['organization'] = code
             if normalize:
                 d['writer'] = next(iter(w))
                 for pwr in d.get('publishers_for_writer', []):
@@ -425,28 +506,41 @@ class Work(TitleBase):
                         {org['code']: {'name': org['name']}})
                     agreement['recipient_organization'] = \
                         agreement['recipient_organization']['code']
+                    agreement_type = agreement['agreement_type']
+                    code = agreement_type['code']
+                    agreement['agreement_type'] = agreement_type.pop('code')
+                    j['agreement_types'].update({
+                        code: agreement_type})
 
             if normalize:
                 j['writers'].update(w)
             j['writers_for_work'].append(d)
-        return {self.work_id: j}
 
-        try:
-            data.update(self.firstrecording.json)
-        except ObjectDoesNotExist:
-            pass
-        data['live_artists'] = []
-        for aiw in self.artistinwork_set.all():
-            j = aiw.json
-            data['artists'][j['artist_id']] = j.pop('artist')
-            data['live_artists'].append(j)
-        data['society_work_codes'] = []
-        for wa in self.workacknowledgement_set.filter(
-                remote_work_id__gt='').values(
-                'society_code', 'remote_work_id').distinct():
-            wa['society_code'] = wa['society_code'].lstrip('0')
-            data['society_work_codes'].append(wa)
-        return self.work_id, data
+        for recording in self.recordings.all():
+            d = recording.get_dict(with_releases=True)
+            if normalize:
+                key = next(iter(d))
+                rec = d[key]
+                artist = rec['recording_artist']
+                if artist:
+                    j['artists'].update(artist)
+                    d[key]['recording_artist'] = next(iter(artist))
+                label = rec['record_label']
+                if label:
+                    j['labels'].update(label)
+                    d[key]['record_label'] = next(iter(label))
+                tracks = rec['tracks']
+                for track in tracks:
+                    rel = track['release']
+                    rel_key = next(iter(rel))
+                    label = rel[rel_key]['release_label']
+                    if label:
+                        j['labels'].update(label)
+                        rel[rel_key]['release_label'] = next(iter(label))
+
+        j['recordings'].update(d)
+
+        return {self.work_id: j}
 
 
 class AlternateTitle(TitleBase):
@@ -630,28 +724,32 @@ class WriterInWork(models.Model):
             'controlled': self.controlled,
             'relative_share': str(self.relative_share / 100),
             'capacity': {
-                'code': self.capacity,
+                'code': self.capacity.strip(),
                 'name': self.get_capacity_display()
             } if self.capacity else None,
             'publishers_for_writer': [{
-                'publisher_id': SETTINGS['publisher_id'],
+                'publisher': SETTINGS['publisher_id'],
                 'agreement': {
                     'recipient_organization': {
                         'code': SETTINGS['publisher_pr_society'],
                         'name': SOCIETY_DICT[SETTINGS['publisher_pr_society']].split(',')[0],
+                        'organization_type': {
+                            'code': 'PR',
+                            'name': 'Performance Rights Organization'
+                        },
                     },
                     'recipient_agreement_number': self.saan,
-                    'type': {
+                    'agreement_type': {
                         'code': 'OS',
                         'name': 'Original Specific',
                     }
-                } if self.saan else {
+                } if (self.saan and self.saan != self.writer.saan) else {
                     'recipient_organization': {
                         'code': SETTINGS['publisher_pr_society'],
                         'name': SOCIETY_DICT[SETTINGS['publisher_pr_society']].split(',')[0],
                     },
                     'recipient_agreement_number': self.writer.saan,
-                    'type': {
+                    'agreement_type': {
                         'code': 'OG',
                         'name': 'Original General',
                     }
@@ -710,8 +808,7 @@ class Recording(models.Model):
         Artist, on_delete=models.PROTECT, blank=True, null=True,
         verbose_name='Recording Artist')
 
-    releases = models.ManyToManyField(
-        Release, related_name='releases', through='Track')
+    releases = models.ManyToManyField(Release, through='Track')
 
     def clean_fields(self, *args, **kwargs):
         if self.isrc:
@@ -751,7 +848,7 @@ class Recording(models.Model):
         return '{}R{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
 
 
-    def get_dict(self):
+    def get_dict(self, with_releases=False):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
@@ -767,10 +864,20 @@ class Recording(models.Model):
             'duration': self.duration.strftime('%H%M%S') if self.duration
                 else None,
             'isrc': self.isrc,
-            'recording_artist': self.artist.artist_id if self.artist else None,
+            'recording_artist': self.artist.get_dict() if self.artist else None,
             'record_label': (
-                self.record_label.label_id if self.record_label else None),
+                self.record_label.get_dict() if self.record_label else None),
         }
+        if with_releases:
+            j['tracks'] = []
+            for track in self.tracks.all():
+                d = track.release.get_dict()
+                if not d:
+                    continue
+                j['tracks'].append({
+                    'cut_number': track.cut_number,
+                    'release': d,
+                })
         return {self.recording_id: j}
 
 
@@ -779,8 +886,10 @@ class Track(models.Model):
         unique_together = (('recording', 'release'), ('release', 'cut_number'))
         ordering = ('release', 'cut_number',)
 
-    recording = models.ForeignKey(Recording, on_delete=models.PROTECT)
-    release = models.ForeignKey(Release, on_delete=models.PROTECT)
+    recording = models.ForeignKey(
+        Recording, on_delete=models.PROTECT, related_name='tracks')
+    release = models.ForeignKey(
+        Release, on_delete=models.PROTECT, related_name='tracks')
     cut_number = models.PositiveSmallIntegerField(
         blank=True, null=True,
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
