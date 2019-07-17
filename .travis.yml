@@ -25,7 +25,8 @@ env:
   - DATABASE_URL="postgres://postgres@localhost/dmp"
 install:
   - pip install -r requirements.txt
-#script:
+script:
+   - coverage run --source='music_publisher' manage.py migrate
 #  - coverage run --source='music_publisher' manage.py test
 after_success: coveralls
 
