@@ -417,6 +417,7 @@ class Work(TitleBase):
             'recordings': {},
             'writers_for_work': [],
             'artists_for_work': [],
+            'cross_refferences': []
         }
         if SETTINGS.get('publisher_mr_society'):
             j['publishers'][SETTINGS['publisher_id']]['affiliations'].append({
@@ -457,16 +458,22 @@ class Work(TitleBase):
 
         if normalize:
             for aff in j['publishers'][SETTINGS['publisher_id']]['affiliations']:
+
+                # Organization
                 org = aff['organization']
                 code = org.pop('code')
                 j['organizations'].update(
                     {code: org})
                 aff['organization'] = code
+
+                # Affiliation Type
                 typ = aff['affiliation_type']
                 code = typ.pop('code')
                 j['affiliation_types'].update(
-                    {code: org})
-                aff['organization'] = code
+                    {code: typ})
+                aff['affiliation_type'] = code
+
+                # Territory
                 ter = aff['territory']
                 code = ter.pop('code')
                 j['territories'].update(
@@ -499,10 +506,26 @@ class Work(TitleBase):
                 if not org:
                     continue
                 if normalize:
+                    # Organization
+                    org = aff['organization']
                     code = org.pop('code')
                     j['organizations'].update(
                         {code: org})
                     aff['organization'] = code
+
+                    # Affiliation Type
+                    typ = aff['affiliation_type']
+                    code = typ.pop('code')
+                    j['affiliation_types'].update(
+                        {code: typ})
+                    aff['affiliation_type'] = code
+
+                    # Territory
+                    ter = aff['territory']
+                    code = ter.pop('code')
+                    j['territories'].update(
+                        {code: ter})
+                    aff['territory'] = code
             if normalize:
                 d['writer'] = next(iter(w))
                 for pwr in d.get('publishers_for_writer', []):
@@ -547,6 +570,18 @@ class Work(TitleBase):
                         rel[rel_key]['release_label'] = next(iter(label))
 
         j['recordings'].update(d)
+
+        for wa in self.workacknowledgement_set.filter(
+                remote_work_id__gt='').distinct():
+            d = wa.get_dict()
+            if normalize:
+                # Organization
+                org = d['organization']
+                code = org.pop('code')
+                j['organizations'].update(
+                    {code: org})
+                d['organization'] = code
+            j['cross_refferences'].append(d)
 
         return {self.work_id: j}
 
@@ -865,7 +900,7 @@ class Recording(models.Model):
             'release_date': (
                 self.release_date.strftime('%Y%m%d') if self.release_date
                 else None),
-            'duration': self.duration.strftime('%H%M%S') if self.duration
+            'duration': str(self.duration) if self.duration
                 else None,
             'isrc': self.isrc,
             'recording_artist': self.artist.get_dict() if self.artist else None,
@@ -1195,6 +1230,18 @@ class WorkAcknowledgement(models.Model):
 
     def __str__(self):
         return self.status
+
+    def get_dict(self):
+        if not self.remote_work_id:
+            return None
+        j = {
+            'organization': {
+                'code': self.society_code,
+                'name': self.get_society_code_display().split(',')[0],
+            },
+            'identifier': self.remote_work_id,
+        }
+        return j
 
 
 class ACKImport(models.Model):

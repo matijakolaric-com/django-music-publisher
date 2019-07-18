@@ -801,6 +801,7 @@ class WorkAdmin(MusicPublisherAdmin):
             work_data = work.get_dict(normalize=normalize)
             key = next(iter(work_data))
             j = work_data[key]
+            affiliation_types.update(j.pop('affiliation_types'))
             agreement_types.update(j.pop('agreement_types'))
             writers.update(j.pop('writers'))
             if normalize:
@@ -813,6 +814,7 @@ class WorkAdmin(MusicPublisherAdmin):
             works[key] = j
         if normalize:
             j = {
+                'affiliation_types': affiliation_types,
                 'agreement_types': agreement_types,
                 'artists': artists,
                 'labels': labels,

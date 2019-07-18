@@ -5,11 +5,17 @@ from django.db import migrations
 def remove_leading_zeros(apps, schema_edito):
     """Create Label objects and link to """
     Writer = apps.get_model('music_publisher', 'Writer')
+    WorkAcknowledgement = apps.get_model('music_publisher', 'WorkAcknowledgement')
     for writer in Writer.objects.all():
         if not writer.pr_society:
             continue
         writer.pr_society = writer.pr_society.lstrip('0')
         writer.save()
+    for wack in WorkAcknowledgement.objects.all():
+        if not wack.society_code:
+            continue
+        wack.society_code = wack.society_code.lstrip('0')
+        wack.save()
 
 class Migration(migrations.Migration):
 
@@ -19,6 +25,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            code=remove_leading_zeros,
+            code=remove_leading_zeros, reverse_code=migrations.RunPython.noop
         ),
     ]
