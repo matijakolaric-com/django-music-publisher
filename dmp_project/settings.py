@@ -145,7 +145,8 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_mr_society': '34',
     'publisher_sr_society': '52',
 
-    'library': 'FOO BAR MUSIC LIBRARY',
+    # NOTE: 'library' is only used for migrations to 19.7
+    # 'library': 'FOO BAR MUSIC LIBRARY',
 }
 
 TIME_INPUT_FORMATS = [

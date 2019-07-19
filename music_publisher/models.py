@@ -144,17 +144,6 @@ class Release(models.Model):
                 return '{} ({})'.format(self.release_label, self.release_title.upper())
             return self.release_title.upper()
 
-
-    def clean(self):
-        if not self.cd_identifier and not self.release_title:
-            raise ValidationError({
-                'cd_identifier': 'Required if Album Title is not set.',
-                'release_title': 'Required if CD Identifier is not set.'})
-        if ((self.ean or self.release_date or self.release_label)
-                and not self.release_title):
-            raise ValidationError({
-                'release_title': 'Required if EAN or release date is set.'})
-
     @property
     def release_id(self):
         return 'RE{:06d}'.format(self.id)
@@ -192,6 +181,12 @@ class LibraryRelease(Release):
         proxy = True
         verbose_name_plural = ' Library Releases'
     objects = LibraryReleaseManager()
+
+    def clean(self):
+        if ((self.ean or self.release_date or self.release_label)
+                and not self.release_title):
+            raise ValidationError({
+                'release_title': 'Required if other release data is set.'})
 
     def get_origin_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -1022,9 +1017,8 @@ class CWRExport(models.Model):
             str: CWR recors (row/line)
         """
         works = self.works.order_by('id',)
-        works = works.select_related('firstrecording')
-        works = works.prefetch_related('firstrecording__artist')
-        works = works.prefetch_related('firstrecording__album_cd')
+        works = works.select_related('library_release')
+        works = works.prefetch_related('recordings__artist')
         works = works.prefetch_related(models.Prefetch(
             'writerinwork_set',
             queryset=WriterInWork.objects.order_by(

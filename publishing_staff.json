@@ -46,6 +46,46 @@
                 "release"
             ],
             [
+                "add_libraryrelease",
+                "music_publisher",
+                "libraryrelease"
+            ],
+            [
+                "change_libraryrelease",
+                "music_publisher",
+                "libraryrelease"
+            ],
+            [
+                "delete_libraryrelease",
+                "music_publisher",
+                "libraryrelease"
+            ],
+            [
+                "view_libraryrelease",
+                "music_publisher",
+                "libraryrelease"
+            ],
+            [
+                "add_commercialrelease",
+                "music_publisher",
+                "commercialrelease"
+            ],
+            [
+                "change_commercialrelease",
+                "music_publisher",
+                "commercialrelease"
+            ],
+            [
+                "delete_commercialrelease",
+                "music_publisher",
+                "commercialrelease"
+            ],
+            [
+                "view_commercialrelease",
+                "music_publisher",
+                "commercialrelease"
+            ],
+            [
                 "add_alternatetitle",
                 "music_publisher",
                 "alternatetitle"

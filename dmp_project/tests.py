@@ -24,16 +24,10 @@ class DMPTestCase(TestCase):
 
         self.assertTrue(hasattr(settings, 'MUSIC_PUBLISHER_SETTINGS'))
         SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
-        self.assertTrue(SETTINGS.get('admin_show_publisher'))
-        self.assertTrue(SETTINGS.get('admin_show_saan'))
-        self.assertTrue(SETTINGS.get('allow_multiple_ops'))
-        self.assertTrue(SETTINGS.get('allow_modifications'))
         self.assertTrue(SETTINGS.get('enforce_saan'))
         self.assertTrue(SETTINGS.get('enforce_publisher_fee'))
         self.assertTrue(SETTINGS.get('enforce_ipi_name'))
         self.assertTrue(SETTINGS.get('enforce_pr_society'))
-        self.assertTrue(SETTINGS.get('library'))
-        self.assertTrue(SETTINGS.get('label'))
         self.assertTrue(SETTINGS.get('publisher_id'))
         self.assertTrue(SETTINGS.get('publisher_name'))
         self.assertTrue(SETTINGS.get('publisher_ipi_name'))
