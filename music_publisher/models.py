@@ -1,15 +1,21 @@
 from collections import OrderedDict, defaultdict
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
-from .base import *
-from .cwr_templates import *
 from datetime import datetime
-from django.template import Context
 from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+from django.template import Context
+
+from .base import (IPIBase, PersonBase, TitleBase)
+from .const import (CAN_NOT_BE_CONTROLLED_MSG, ENFORCE_PUBLISHER_FEE,
+                    ENFORCE_SAAN, SETTINGS, SOCIETIES, WORK_ID_PREFIX)
+from .cwr_templates import *
+from .validators import CWRFieldValidator
 
 
 class Artist(PersonBase, models.Model):
-    """Concrete class for performing artists.
+    """Performing artists.
 
     Attributes:
         isni (django.db.models.CharField):
@@ -27,6 +33,7 @@ class Artist(PersonBase, models.Model):
         validators=(CWRFieldValidator('isni'),))
 
     def clean_fields(self, *args, **kwargs):
+        """ISNI cleanup"""
         if self.isni:
             self.isni = self.isni.rjust(16, '0').upper()
         return models.Model.clean_fields(self, *args, **kwargs)
@@ -46,10 +53,17 @@ class Artist(PersonBase, models.Model):
 
     @property
     def artist_id(self):
+        """Artist identifier"""
         return 'A{:06d}'.format(self.id)
 
 
 class Label(models.Model):
+    """Music Label.
+
+    Attributes:
+        name (django.db.models.CharField): Label Name
+        """
+
     class Meta:
         verbose_name_plural = ' Music Labels'
         ordering = ('name', )
@@ -63,6 +77,7 @@ class Label(models.Model):
 
     @property
     def label_id(self):
+        """Label identifier"""
         return 'LA{:06d}'.format(self.id)
 
     def get_dict(self):
@@ -75,6 +90,12 @@ class Label(models.Model):
 
 
 class Library(models.Model):
+    """Music Library.
+
+    Attributes:
+        name (django.db.models.CharField): Library Name
+        """
+
     class Meta:
         verbose_name_plural = ' Music Libraries'
         ordering = ('name',)
@@ -88,6 +109,7 @@ class Library(models.Model):
 
     @property
     def library_id(self):
+        """Library identifier"""
         return 'LI{:06d}'.format(self.id)
 
     def get_dict(self):
@@ -100,6 +122,9 @@ class Library(models.Model):
 
 
 class Release(models.Model):
+    """Music Release (album / other product)
+
+    """
     class Meta:
         ordering = ('release_title', 'cd_identifier', '-id')
 
@@ -146,6 +171,7 @@ class Release(models.Model):
 
     @property
     def release_id(self):
+        """Release identifier."""
         return 'RE{:06d}'.format(self.id)
 
     def get_dict(self):
@@ -173,6 +199,11 @@ class Release(models.Model):
 
 class LibraryReleaseManager(models.Manager):
     def get_queryset(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
 
@@ -183,6 +214,9 @@ class LibraryRelease(Release):
     objects = LibraryReleaseManager()
 
     def clean(self):
+        """
+
+        """
         if ((self.ean or self.release_date or self.release_label)
                 and not self.release_title):
             raise ValidationError({
@@ -207,6 +241,11 @@ class LibraryRelease(Release):
 
 class CommercialReleaseManager(models.Manager):
     def get_queryset(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
 
@@ -232,6 +271,15 @@ class Writer(PersonBase, IPIBase, models.Model):
         return name
 
     def clean(self, *args, **kwargs):
+        """
+
+        :param args:
+        :type args:
+        :param kwargs:
+        :type kwargs:
+        :return:
+        :rtype:
+        """
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
@@ -244,6 +292,11 @@ class Writer(PersonBase, IPIBase, models.Model):
 
     @property
     def writer_id(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return 'WR{:06d}'.format(self.id)
 
     def get_dict(self):
@@ -279,6 +332,11 @@ class Writer(PersonBase, IPIBase, models.Model):
 
 class WorkManager(models.Manager):
     def get_queryset(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return super().get_queryset().prefetch_related('writers')
 
 
@@ -329,9 +387,14 @@ class Work(TitleBase):
         """
         if self.id is None:
             return ''
-        return '{}{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
+        return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
 
     def is_modification(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return bool(self.original_title)
 
     def clean_fields(self, *args, **kwargs):
@@ -639,6 +702,11 @@ class ArtistInWork(models.Model):
         return str(self.artist)
 
     def get_dict(self):
+        """
+
+        :return:
+        :rtype:
+        """
         return {'artist': self.artist.get_dict()}
 
 
@@ -845,6 +913,15 @@ class Recording(models.Model):
     releases = models.ManyToManyField(Release, through='Track')
 
     def clean_fields(self, *args, **kwargs):
+        """
+
+        :param args:
+        :type args:
+        :param kwargs:
+        :type kwargs:
+        :return:
+        :rtype:
+        """
         if self.isrc:
             # Removing all characters added for readability
             self.isrc = self.isrc.replace('-', '').replace('.', '')
@@ -852,12 +929,22 @@ class Recording(models.Model):
 
     @property
     def complete_recording_title(self):
+        """
+
+        :return:
+        :rtype:
+        """
         if self.recording_title_suffix:
             return '{} {}'.format(self.work.title, self.recording_title)
         return self.recording_title
 
     @property
     def complete_version_title(self):
+        """
+
+        :return:
+        :rtype:
+        """
         if self.version_title_suffix:
             return '{} {}'.format(
                 self.complete_recording_title or self.work.title,
@@ -1042,7 +1129,7 @@ class CWRExport(models.Model):
                 d['isrc'] = work.firstrecording.isrc
                 d['duration'] = work.firstrecording.duration
                 d['recorded_indicator'] = 'Y'
-            except ObjectDoesNotExist:
+            except django.core.exceptions.ObjectDoesNotExist:
                 d['recorded_indicator'] = 'U'
             d['version_type'] = (
                 'MOD   UNSUNS' if work.is_modification() else
@@ -1134,7 +1221,7 @@ class CWRExport(models.Model):
                         'first_name': artist.first_name,
                         'last_name': artist.last_name,
                     })
-            except ObjectDoesNotExist:
+            except django.core.exceptions.ObjectDoesNotExist:
                 pass
             try:
                 rec = work.firstrecording
@@ -1153,7 +1240,7 @@ class CWRExport(models.Model):
                     'release_title': release_title,
                     'release_label': release_label
                 })
-            except ObjectDoesNotExist:
+            except django.core.exceptions.ObjectDoesNotExist:
                 pass
             try:
                 album = work.firstrecording.album_cd
@@ -1161,7 +1248,7 @@ class CWRExport(models.Model):
                     yield self.get_transaction_record('ORN', {
                         'library': album.library,
                         'cd_identifier': album.cd_identifier})
-            except ObjectDoesNotExist:
+            except django.core.exceptions.ObjectDoesNotExist:
                 pass
             self.transaction_count += 1
 
@@ -1226,6 +1313,11 @@ class WorkAcknowledgement(models.Model):
         return self.status
 
     def get_dict(self):
+        """
+
+        :return:
+        :rtype:
+        """
         if not self.remote_work_id:
             return None
         j = {

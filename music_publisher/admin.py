@@ -23,7 +23,7 @@ from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
-from .base import SOCIETIES
+from .const import SOCIETIES
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
