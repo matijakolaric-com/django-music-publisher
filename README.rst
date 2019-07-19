@@ -4,11 +4,11 @@ Django Music Publisher
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
-.. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=latest
-    :target: https://django-music-publisher.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=19.1
+    :target: https://django-music-publisher.readthedocs.io/en/latest/?badge=19.1
     :alt: Documentation Status
 .. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=master
-    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
+    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=19.1
     :alt: Coverage Status
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
