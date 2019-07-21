@@ -3,14 +3,14 @@ Django Music Publisher
 
 .. |ProjectVersion| replace:: {release}
 
-.. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
+.. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=19.1
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
-.. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=latest
-    :target: https://django-music-publisher.readthedocs.io/
+.. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=stable
+    :target: https://django-music-publisher.readthedocs.io/en/stable/?badge=stable
     :alt: Documentation Status
-.. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=master
-    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
+.. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=19.1
+    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=19.1
     :alt: Coverage Status
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
@@ -18,11 +18,14 @@ Django Music Publisher
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 
+* This documentation is for 19.1 branch. This code is stable and available via PYPI (aka pip).
+For the development version, see https://django-music-publisher.readthedocs.io/en/latest/
+
 Django Music Publisher is open source software for original music publishers. It is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing**. 
 
 It uses **Common Works Registration (CWR)** protocol for batch registration of musical works.
 
-* Docs: https://django-music-publisher.readthedocs.io/
+* Docs: https://django-music-publisher.readthedocs.io/en/stable/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
