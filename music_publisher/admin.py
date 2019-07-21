@@ -1095,7 +1095,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         """
         if hasattr(self, 'obj'):
             super().save_related(request, form, formsets, change)
-            self.obj.create_cwr()
+            # self.obj.create_cwr()
             del self.obj
 
 

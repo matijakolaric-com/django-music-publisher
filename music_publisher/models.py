@@ -9,7 +9,8 @@ from django.template import Context
 
 from .base import (IPIBase, PersonBase, TitleBase)
 from .const import (CAN_NOT_BE_CONTROLLED_MSG, ENFORCE_PUBLISHER_FEE,
-                    ENFORCE_SAAN, SETTINGS, SOCIETIES, WORK_ID_PREFIX)
+                    ENFORCE_SAAN, SETTINGS, SOCIETIES, SOCIETY_DICT,
+                    WORK_ID_PREFIX)
 from .cwr_templates import *
 from .validators import CWRFieldValidator
 
@@ -118,7 +119,9 @@ class Library(models.Model):
         Returns:
             dict: JSON-serializable data structure
         """
-        return {self.library_id: {'name': self.name}}
+        return {
+            'code': self.library_id,
+            'name': self.name}
 
 
 class Release(models.Model):
@@ -228,7 +231,7 @@ class LibraryRelease(Release):
         Returns:
             dict: JSON-serializable data structure
         """
-        j = {
+        return {
             'origin_type': {
                 'code': 'LIB',
                 'name': 'Library Work'
@@ -236,7 +239,6 @@ class LibraryRelease(Release):
             'cd_identifier': self.cd_identifier,
             'library': self.library.get_dict()
         }
-        return {'OR{:06d}'.format(self.id): j}
 
 
 class CommercialReleaseManager(models.Manager):
@@ -414,6 +416,106 @@ class Work(TitleBase):
             ' / '.join(w.last_name.upper() for w in self.writers.all()))
 
 
+    def get_publishers_dict(self):
+        """Create a data structure for the publisher.
+
+        Returns:
+            dict: JSON-serializable data structure
+        """
+        j = {
+            SETTINGS['publisher_id']: {
+                'name' : SETTINGS['publisher_name'],
+                'ipi_name': SETTINGS['publisher_ipi_name'],
+                'ipi_base': SETTINGS.get('publisher_ipi_base'),
+                'affiliations': [{
+                    'organization': {
+                        'code': SETTINGS['publisher_pr_society'],
+                        'name': SOCIETY_DICT.get(
+                            SETTINGS['publisher_pr_society']
+                        ).split(',')[0],
+                    },
+                    'affiliation_type': {
+                        'code': 'PR',
+                        'name': 'Performance Rights'
+                    },
+                    'territory': {
+                        'code': '2136',
+                        'tis_code': '2136',
+                        'name': 'World'
+                    }
+                }]
+            }
+        }
+
+        # append MR data to affiliations id needed
+        if SETTINGS.get('publisher_mr_society'):
+            j[SETTINGS['publisher_id']]['affiliations'].append({
+                'organization': {
+                    'code': SETTINGS['publisher_mr_society'],
+                    'name': SOCIETY_DICT.get(
+                        SETTINGS['publisher_mr_society']
+                    ).split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'MR',
+                    'name': 'Mechanical Rights'
+                },
+                'territory': {
+                    'code': '2136',
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            })
+
+        # append SR data to affiliations id needed
+        if SETTINGS.get('publisher_sr_society'):
+            j[SETTINGS['publisher_id']]['affiliations'].append({
+                'organization': {
+                    'code': SETTINGS['publisher_sr_society'],
+                    'name': SOCIETY_DICT.get(
+                        SETTINGS['publisher_sr_society']
+                    ).split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'SR',
+                    'name': 'Synchronization Rights'
+                },
+                'territory': {
+                    'code': '2136',
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            })
+
+        return j
+
+    @staticmethod
+    def normalize_publisher_affiliations(j):
+        pid = SETTINGS['publisher_id']
+        for aff in j['publishers'][pid]['affiliations']:
+
+            # Organization
+            org = aff['organization']
+            code = org.pop('code')
+            j['organizations'].update(
+                {code: org})
+            aff['organization'] = code
+
+            # Affiliation Type
+            typ = aff['affiliation_type']
+            code = typ.pop('code')
+            j['affiliation_types'].update(
+                {code: typ})
+            aff['affiliation_type'] = code
+
+            # Territory
+            ter = aff['territory']
+            code = ter.pop('code')
+            j['territories'].update(
+                {code: ter})
+            aff['territory'] = code
+
+
     def get_dict(self, normalize=True):
         """Create a data structure that can be serialized as JSON.
 
@@ -444,30 +546,7 @@ class Work(TitleBase):
             'libraries': {},
             'organizations': {},
             'territories': {},
-            'publishers': {
-                SETTINGS['publisher_id']: {
-                    'name' : SETTINGS['publisher_name'],
-                    'ipi_name': SETTINGS['publisher_ipi_name'],
-                    'ipi_base': SETTINGS.get('publisher_ipi_base'),
-                    'affiliations': [{
-                        'organization': {
-                            'code': SETTINGS['publisher_pr_society'],
-                            'name': SOCIETY_DICT.get(
-                                SETTINGS['publisher_pr_society']
-                            ).split(',')[0],
-                        },
-                        'affiliation_type': {
-                            'code': 'PR',
-                            'name': 'Performance Rights'
-                        },
-                        'territory': {
-                            'code': '2136',
-                            'tis_code': '2136',
-                            'name': 'World'
-                        }
-                    }]
-                }
-            },
+            'publishers': self.get_publishers_dict(),
             'writers': {},
             'origin': (
                 self.library_release.get_origin_dict() if self.library_release
@@ -477,74 +556,16 @@ class Work(TitleBase):
             'artists_for_work': [],
             'cross_refferences': []
         }
-        if SETTINGS.get('publisher_mr_society'):
-            j['publishers'][SETTINGS['publisher_id']]['affiliations'].append({
-                'organization': {
-                    'code': SETTINGS['publisher_mr_society'],
-                    'name': SOCIETY_DICT.get(
-                        SETTINGS['publisher_mr_society']
-                    ).split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'MR',
-                    'name': 'Mechanical Rights'
-                },
-                'territory': {
-                    'code': '2136',
-                    'tis_code': '2136',
-                    'name': 'World'
-                }
-            })
-        if SETTINGS.get('publisher_sr_society'):
-            j['publishers'][SETTINGS['publisher_id']]['affiliations'].append({
-                'organization': {
-                    'code': SETTINGS['publisher_sr_society'],
-                    'name': SOCIETY_DICT.get(
-                        SETTINGS['publisher_sr_society']
-                    ).split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'SR',
-                    'name': 'Synchronization Rights'
-                },
-                'territory': {
-                    'code': '2136',
-                    'tis_code': '2136',
-                    'name': 'World'
-                }
-            })
 
         if normalize:
-            for aff in j['publishers'][SETTINGS['publisher_id']]['affiliations']:
-
-                # Organization
-                org = aff['organization']
-                code = org.pop('code')
-                j['organizations'].update(
-                    {code: org})
-                aff['organization'] = code
-
-                # Affiliation Type
-                typ = aff['affiliation_type']
-                code = typ.pop('code')
-                j['affiliation_types'].update(
-                    {code: typ})
-                aff['affiliation_type'] = code
-
-                # Territory
-                ter = aff['territory']
-                code = ter.pop('code')
-                j['territories'].update(
-                    {code: ter})
-                aff['territory'] = code
+            self.normalize_publisher_affiliations(j)
 
 
         if normalize and self.library_release:
-            key = next(iter(j['origin']))
-            l = j['origin'][key]['library']
-            j['libraries'].update(j['origin'][key]['library'])
-            j['origin'][key]['library'] = \
-                next(iter(j['origin'][key]['library']))
+            # Normalize origin data
+            code = j['origin']['library'].pop('code')
+            j['libraries'].update({code: j['origin']['library']})
+            j['origin']['library'] = code
 
         for wiw in self.artistinwork_set.all():
             d = wiw.get_dict()
@@ -1061,218 +1082,219 @@ class CWRExport(models.Model):
     def __str__(self):
         return self.filename
 
-    @staticmethod
-    def get_record(key, record):
-        """Create CWR record (row) from the key and dict.
-
-        Args:
-            key (str): type of record
-            record (dict): field values
-
-        Returns:
-            str: CWR record (row)
-        """
-        template = TEMPLATES_21.get(key)
-        return template.render(Context(record)).upper()
-
-    def get_transaction_record(self, key, record):
-        """Create CWR transaction record (row) from the key and dict.
-
-        This methods adds transaction and record sequences.
-
-        Args:
-            key (str): type of record
-            record (dict): field values
-
-        Returns:
-            str: CWR record (row)
-        """
-        record['transaction_sequence'] = self.transaction_count
-        record['record_sequence'] = self.record_sequence
-        line = self.get_record(key, record)
-        self.record_count += 1
-        self.record_sequence += 1
-        return line
-
-    def yield_lines(self):
-        """Yield CWR transaction records (rows/lines) for works
-
-        Args:
-            works (query): :class:`.models.Work` query
-
-        Yields:
-            str: CWR recors (row/line)
-        """
-        works = self.works.order_by('id',)
-        works = works.select_related('library_release')
-        works = works.prefetch_related('recordings__artist')
-        works = works.prefetch_related(models.Prefetch(
-            'writerinwork_set',
-            queryset=WriterInWork.objects.order_by(
-                '-controlled', 'id').prefetch_related('writer'),
-            to_attr='wiws'))
-        self.record_count = self.record_sequence = self.transaction_count = 0
-        yield self.get_record('HDR', {
-            'creation_date': datetime.now(),
-            **SETTINGS
-        })
-        yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
-
-        for work in works:
-            self.record_sequence = 0
-            d = {
-                'record_type': self.nwr_rev,
-                'work_id': work.work_id,
-                'work_title': work.title,
-                'iswc': work.iswc}
-            try:
-                d['isrc'] = work.firstrecording.isrc
-                d['duration'] = work.firstrecording.duration
-                d['recorded_indicator'] = 'Y'
-            except django.core.exceptions.ObjectDoesNotExist:
-                d['recorded_indicator'] = 'U'
-            d['version_type'] = (
-                'MOD   UNSUNS' if work.is_modification() else
-                'ORI         ')
-            yield self.get_transaction_record('NWR', d)
-            publishers = OrderedDict()
-            other_publisher_share = None
-            controlled_writer_ids = []
-            controlled_writer_shares = defaultdict(Decimal)
-            for wiw in work.wiws:
-                if wiw.controlled:
-                    controlled_writer_ids.append(wiw.writer_id)
-                    controlled_writer_shares[wiw.writer_id] += \
-                        wiw.relative_share
-                    d = wiw.writer.get_publisher_dict()
-                    key = d['publisher_id']
-                    if key in publishers:
-                        publishers[key]['share'] += wiw.relative_share
-                    else:
-                        publishers[key] = d
-                        publishers[key]['share'] = wiw.relative_share
-                elif wiw.writer_id in controlled_writer_ids:
-                    controlled_writer_shares[wiw.writer_id] += \
-                        wiw.relative_share
-                    if other_publisher_share is None:
-                        other_publisher_share = wiw.relative_share
-                    else:
-                        other_publisher_share += wiw.relative_share
-            for i, (key, publisher) in enumerate(publishers.items()):
-                publisher['sequence'] = i + 1
-                yield self.get_transaction_record('SPU', publisher)
-                yield self.get_transaction_record('SPT', publisher)
-            if other_publisher_share:
-                yield self.get_transaction_record(
-                    'OPU', {
-                        'share': other_publisher_share,
-                        'sequence': len(publishers) + 1})
-            for wiw in work.wiws:
-                if not wiw.controlled:
-                    continue
-                w = wiw.writer
-                record = dict(capacity=wiw.capacity,
-                              share=controlled_writer_shares[w.id],
-                              saan=wiw.saan or w.saan)
-                record['interested_party_number'] = 'W{:06d}'.format(w.id)
-                record['ipi_name'] = w.ipi_name
-                record['ipi_base'] = w.ipi_base
-                record['last_name'] = w.last_name
-                record['first_name'] = w.first_name
-                record['pr_society'] = w.pr_society
-                yield self.get_transaction_record('SWR', record)
-                yield self.get_transaction_record('SWT', record)
-                record.update(w.get_publisher_dict())
-                yield self.get_transaction_record('PWR', record)
-            for wiw in work.wiws:
-                if wiw.controlled or wiw.writer_id in controlled_writer_ids:
-                    continue
-                record = {
-                    'capacity': wiw.capacity,
-                    'share': wiw.relative_share}
-                if wiw.writer:
-                    w = wiw.writer
-                    record['interested_party_number'] = 'W{:06d}'.format(w.id)
-                    record['ipi_name'] = w.ipi_name
-                    record['ipi_base'] = w.ipi_base
-                    record['last_name'] = w.last_name
-                    record['first_name'] = w.first_name
-                    record['pr_society'] = w.pr_society
-                else:
-                    record['writer_unknown_indicator'] = 'Y'
-                yield self.get_transaction_record('OWR', record)
-
-            for record in work.alternatetitle_set.order_by('title'):
-                yield self.get_transaction_record('ALT', {
-                    'alternate_title': str(record)})
-            if work.is_modification():
-                yield self.get_transaction_record('VER', {
-                    'original_title': work.original_title})
-            for artist in work.artists.order_by(
-                    'last_name', 'first_name', 'id'):
-                yield self.get_transaction_record('PER', {
-                    'first_name': artist.first_name,
-                    'last_name': artist.last_name,
-                })
-            try:
-                artist = work.firstrecording.artist
-                if artist:
-                    yield self.get_transaction_record('PER', {
-                        'first_name': artist.first_name,
-                        'last_name': artist.last_name,
-                    })
-            except django.core.exceptions.ObjectDoesNotExist:
-                pass
-            try:
-                rec = work.firstrecording
-                release_date = rec.release_date
-                record_label = rec.record_label
-                release_title = ''
-                release_label = ''
-                if rec.album_cd:
-                    release_date = release_date or rec.album_cd.release_date
-                    release_title = release_title or rec.album_cd.release_title
-                    release_label = rec.album_cd.release_label or record_label
-                yield self.get_transaction_record('REC', {
-                    'isrc': rec.isrc,
-                    'duration': rec.duration,
-                    'release_date': release_date,
-                    'release_title': release_title,
-                    'release_label': release_label
-                })
-            except django.core.exceptions.ObjectDoesNotExist:
-                pass
-            try:
-                album = work.firstrecording.album_cd
-                if album and album.cd_identifier:
-                    yield self.get_transaction_record('ORN', {
-                        'library': album.library,
-                        'cd_identifier': album.cd_identifier})
-            except django.core.exceptions.ObjectDoesNotExist:
-                pass
-            self.transaction_count += 1
-
-        yield self.get_record('GRT', {
-            'transaction_count': self.transaction_count,
-            'record_count': self.record_count + 2})
-        yield self.get_record('TRL', {
-            'transaction_count': self.transaction_count,
-            'record_count': self.record_count + 4})
-
-    def create_cwr(self):
-        """Create CWR and save.
-        """
-        if self.cwr:
-            return
-        self.cwr = ''.join(self.yield_lines())
-        self.year = self.cwr[66:68]
-        nr = type(self).objects.filter(year=self.year)
-        nr = nr.order_by('-num_in_year').first()
-        if nr:
-            self.num_in_year = nr.num_in_year + 1
-        else:
-            self.num_in_year = 1
-        super().save()
+    #
+    # @staticmethod
+    # def get_record(key, record):
+    #     """Create CWR record (row) from the key and dict.
+    #
+    #     Args:
+    #         key (str): type of record
+    #         record (dict): field values
+    #
+    #     Returns:
+    #         str: CWR record (row)
+    #     """
+    #     template = TEMPLATES_21.get(key)
+    #     return template.render(Context(record)).upper()
+    #
+    # def get_transaction_record(self, key, record):
+    #     """Create CWR transaction record (row) from the key and dict.
+    #
+    #     This methods adds transaction and record sequences.
+    #
+    #     Args:
+    #         key (str): type of record
+    #         record (dict): field values
+    #
+    #     Returns:
+    #         str: CWR record (row)
+    #     """
+    #     record['transaction_sequence'] = self.transaction_count
+    #     record['record_sequence'] = self.record_sequence
+    #     line = self.get_record(key, record)
+    #     self.record_count += 1
+    #     self.record_sequence += 1
+    #     return line
+    #
+    # def yield_lines(self):
+    #     """Yield CWR transaction records (rows/lines) for works
+    #
+    #     Args:
+    #         works (query): :class:`.models.Work` query
+    #
+    #     Yields:
+    #         str: CWR recors (row/line)
+    #     """
+    #     works = self.works.order_by('id',)
+    #     works = works.select_related('library_release')
+    #     works = works.prefetch_related('recordings__artist')
+    #     works = works.prefetch_related(models.Prefetch(
+    #         'writerinwork_set',
+    #         queryset=WriterInWork.objects.order_by(
+    #             '-controlled', 'id').prefetch_related('writer'),
+    #         to_attr='wiws'))
+    #     self.record_count = self.record_sequence = self.transaction_count = 0
+    #     yield self.get_record('HDR', {
+    #         'creation_date': datetime.now(),
+    #         **SETTINGS
+    #     })
+    #     yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
+    #
+    #     for work in works:
+    #         self.record_sequence = 0
+    #         d = {
+    #             'record_type': self.nwr_rev,
+    #             'work_id': work.work_id,
+    #             'work_title': work.title,
+    #             'iswc': work.iswc}
+    #         try:
+    #             d['isrc'] = work.firstrecording.isrc
+    #             d['duration'] = work.firstrecording.duration
+    #             d['recorded_indicator'] = 'Y'
+    #         except django.core.exceptions.ObjectDoesNotExist:
+    #             d['recorded_indicator'] = 'U'
+    #         d['version_type'] = (
+    #             'MOD   UNSUNS' if work.is_modification() else
+    #             'ORI         ')
+    #         yield self.get_transaction_record('NWR', d)
+    #         publishers = OrderedDict()
+    #         other_publisher_share = None
+    #         controlled_writer_ids = []
+    #         controlled_writer_shares = defaultdict(Decimal)
+    #         for wiw in work.wiws:
+    #             if wiw.controlled:
+    #                 controlled_writer_ids.append(wiw.writer_id)
+    #                 controlled_writer_shares[wiw.writer_id] += \
+    #                     wiw.relative_share
+    #                 d = wiw.writer.get_publisher_dict()
+    #                 key = d['publisher_id']
+    #                 if key in publishers:
+    #                     publishers[key]['share'] += wiw.relative_share
+    #                 else:
+    #                     publishers[key] = d
+    #                     publishers[key]['share'] = wiw.relative_share
+    #             elif wiw.writer_id in controlled_writer_ids:
+    #                 controlled_writer_shares[wiw.writer_id] += \
+    #                     wiw.relative_share
+    #                 if other_publisher_share is None:
+    #                     other_publisher_share = wiw.relative_share
+    #                 else:
+    #                     other_publisher_share += wiw.relative_share
+    #         for i, (key, publisher) in enumerate(publishers.items()):
+    #             publisher['sequence'] = i + 1
+    #             yield self.get_transaction_record('SPU', publisher)
+    #             yield self.get_transaction_record('SPT', publisher)
+    #         if other_publisher_share:
+    #             yield self.get_transaction_record(
+    #                 'OPU', {
+    #                     'share': other_publisher_share,
+    #                     'sequence': len(publishers) + 1})
+    #         for wiw in work.wiws:
+    #             if not wiw.controlled:
+    #                 continue
+    #             w = wiw.writer
+    #             record = dict(capacity=wiw.capacity,
+    #                           share=controlled_writer_shares[w.id],
+    #                           saan=wiw.saan or w.saan)
+    #             record['interested_party_number'] = 'W{:06d}'.format(w.id)
+    #             record['ipi_name'] = w.ipi_name
+    #             record['ipi_base'] = w.ipi_base
+    #             record['last_name'] = w.last_name
+    #             record['first_name'] = w.first_name
+    #             record['pr_society'] = w.pr_society
+    #             yield self.get_transaction_record('SWR', record)
+    #             yield self.get_transaction_record('SWT', record)
+    #             record.update(w.get_publisher_dict())
+    #             yield self.get_transaction_record('PWR', record)
+    #         for wiw in work.wiws:
+    #             if wiw.controlled or wiw.writer_id in controlled_writer_ids:
+    #                 continue
+    #             record = {
+    #                 'capacity': wiw.capacity,
+    #                 'share': wiw.relative_share}
+    #             if wiw.writer:
+    #                 w = wiw.writer
+    #                 record['interested_party_number'] = 'W{:06d}'.format(w.id)
+    #                 record['ipi_name'] = w.ipi_name
+    #                 record['ipi_base'] = w.ipi_base
+    #                 record['last_name'] = w.last_name
+    #                 record['first_name'] = w.first_name
+    #                 record['pr_society'] = w.pr_society
+    #             else:
+    #                 record['writer_unknown_indicator'] = 'Y'
+    #             yield self.get_transaction_record('OWR', record)
+    #
+    #         for record in work.alternatetitle_set.order_by('title'):
+    #             yield self.get_transaction_record('ALT', {
+    #                 'alternate_title': str(record)})
+    #         if work.is_modification():
+    #             yield self.get_transaction_record('VER', {
+    #                 'original_title': work.original_title})
+    #         for artist in work.artists.order_by(
+    #                 'last_name', 'first_name', 'id'):
+    #             yield self.get_transaction_record('PER', {
+    #                 'first_name': artist.first_name,
+    #                 'last_name': artist.last_name,
+    #             })
+    #         try:
+    #             artist = work.firstrecording.artist
+    #             if artist:
+    #                 yield self.get_transaction_record('PER', {
+    #                     'first_name': artist.first_name,
+    #                     'last_name': artist.last_name,
+    #                 })
+    #         except django.core.exceptions.ObjectDoesNotExist:
+    #             pass
+    #         try:
+    #             rec = work.firstrecording
+    #             release_date = rec.release_date
+    #             record_label = rec.record_label
+    #             release_title = ''
+    #             release_label = ''
+    #             if rec.album_cd:
+    #                 release_date = release_date or rec.album_cd.release_date
+    #                 release_title = release_title or rec.album_cd.release_title
+    #                 release_label = rec.album_cd.release_label or record_label
+    #             yield self.get_transaction_record('REC', {
+    #                 'isrc': rec.isrc,
+    #                 'duration': rec.duration,
+    #                 'release_date': release_date,
+    #                 'release_title': release_title,
+    #                 'release_label': release_label
+    #             })
+    #         except django.core.exceptions.ObjectDoesNotExist:
+    #             pass
+    #         try:
+    #             album = work.firstrecording.album_cd
+    #             if album and album.cd_identifier:
+    #                 yield self.get_transaction_record('ORN', {
+    #                     'library': album.library,
+    #                     'cd_identifier': album.cd_identifier})
+    #         except django.core.exceptions.ObjectDoesNotExist:
+    #             pass
+    #         self.transaction_count += 1
+    #
+    #     yield self.get_record('GRT', {
+    #         'transaction_count': self.transaction_count,
+    #         'record_count': self.record_count + 2})
+    #     yield self.get_record('TRL', {
+    #         'transaction_count': self.transaction_count,
+    #         'record_count': self.record_count + 4})
+    #
+    # def create_cwr(self):
+    #     """Create CWR and save.
+    #     """
+    #     if self.cwr:
+    #         return
+    #     self.cwr = ''.join(self.yield_lines())
+    #     self.year = self.cwr[66:68]
+    #     nr = type(self).objects.filter(year=self.year)
+    #     nr = nr.order_by('-num_in_year').first()
+    #     if nr:
+    #         self.num_in_year = nr.num_in_year + 1
+    #     else:
+    #         self.num_in_year = 1
+    #     super().save()
 
 
 class WorkAcknowledgement(models.Model):
