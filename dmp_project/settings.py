@@ -145,7 +145,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'work_id_prefix': '',
 
     'publisher_id': 'XXX',
-    'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
+    'publisher_name': 'DMP DEMO PUB',
     'publisher_ipi_name': '00000000199',
     'publisher_pr_society': '071',
     'publisher_mr_society': '034',
@@ -154,7 +154,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'us_publisher_override': {
         'ASCAP': {
             'publisher_id': 'XXXA',
-            'publisher_name': 'DJANGO MUSIC PUBLISHING ASCAP PUB',
+            'publisher_name': 'DMP ASCAP PUB',
             'publisher_ipi_name': '00000000493',
             'publisher_pr_society': '010',
             'publisher_mr_society': '034',
@@ -162,7 +162,7 @@ MUSIC_PUBLISHER_SETTINGS = {
         },
         'BMI': {
             'publisher_id': 'XXXB',
-            'publisher_name': 'DJANGO MUSIC PUBLISHING BMI PUB',
+            'publisher_name': 'DMP BMI PUB',
             'publisher_ipi_name': '00000000395',
             'publisher_pr_society': '021',
             'publisher_mr_society': '044',
