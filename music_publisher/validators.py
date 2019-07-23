@@ -1,5 +1,8 @@
-"""
-CWR-compatibility validation
+"""CWR-compatibility field-level validation.
+
+For formats that allow dashes and dots (ISWC, IPI Base), the actual format is
+from CWR 2.x specification for compatibility.
+
 """
 
 import re

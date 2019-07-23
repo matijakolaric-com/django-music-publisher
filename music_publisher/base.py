@@ -91,6 +91,14 @@ class IPIBase(models.Model):
         'Performing rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
         choices=const.SOCIETIES)
+    mr_society = models.CharField(
+        'Mechanical rights society', max_length=3, blank=True, null=True,
+        validators=(CWRFieldValidator('writer_pr_society'),),
+        choices=const.SOCIETIES)
+    sr_society = models.CharField(
+        'Synchronization rights society', max_length=3, blank=True, null=True,
+        validators=(CWRFieldValidator('writer_pr_society'),),
+        choices=const.SOCIETIES)
     saan = models.CharField(
         'Society-assigned agreement number',
         help_text='Use this field for general agreements only.',
@@ -129,9 +137,8 @@ class IPIBase(models.Model):
             error_msg=const.CAN_NOT_BE_CONTROLLED_MSG):
         """Clean with a lot of arguments.
 
-        In DMP they come from settings, but in other (closed source) solutions
-        that use this code, these values are set dynamically.
-
+        In DMP they come from settings, but in other solutions that use this
+        code, these values may be set dynamically.
 
         Args:
             enforce_ipi_name (bool, optional):

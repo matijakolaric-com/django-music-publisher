@@ -6,118 +6,7 @@ Django Music Publisher can be installed either as a Django app, or as a stand-al
 There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>`_ that simplifies the process for a moderate subscription fee.
 
 
-
-Installing the App
-===============================================================================
-
-If you want to install the latest stable release of the 
-`django_music_publisher` app, just use pip::
-
-    pip install --upgrade django_music_publisher
-
-Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
-URLs need to be added, as everything goes through the Django Admin.
-
-Settings
-++++++++
-
-You will have to add this to the settings, replace with your data.
-
-.. code:: python
-
-    MUSIC_PUBLISHER_SETTINGS = {
-        'admin_show_publisher': False,  # Needed only in US version
-        'admin_show_saan': True,  # Needed only if societies assign agreement #
-        'allow_modifications': True,  # Only original works if False
-        'allow_multiple_ops': False,  # Writers can have multiple original pubs
-
-        'enforce_saan': True,  # Agr. # is required in many societies
-        'enforce_publisher_fee': True,  # False for self-publishers
-        'enforce_pr_society': True,  # Strictly not required, but good practice
-        'enforce_ipi_name': True,  # Strictly not required, but good practice
-
-        'allow_modifications': True  # If set to False, only original works
-
-        'work_id_prefix': 'TOP',  # Makes work IDs somewhat unique
-        
-        'publisher_id': 'TOP',  # THE 2-3 letter CWR delivery publisher code 
-        'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
-        'publisher_ipi_name': '00000000199',  # IPI name number
-        'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
-        'publisher_pr_society': '052',  # Performing Rights Society Code
-        'publisher_mr_society': '044',  # Mechanical Rights Society Code
-        'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
-
-        'library': 'THE FOO LIBRARY',  # Use only if you are in library music
-        'label': 'FOO BAR MUSIC',  # Use only if you are also a label
-    }
-
-For US publishers with entities in different PROs, define the "main" publisher
-first, which is original publisher for affiliate writers in the respective PRO
-and foreign societies. Then define publishers in other PROs.
-
-.. code:: python
-
-    MUSIC_PUBLISHER_SETTINGS = {
-        'admin_show_publisher': True,  # Needed in US version
-        'admin_show_saan': False,  # Not used in US
-        'allow_modifications': True,  # Only original works if False
-        'allow_multiple_ops': False,  # Writers can have multiple original pubs
-
-        'enforce_saan': False,  # Not used in US
-        'enforce_publisher_fee': True,  # False for self-publishers
-        'enforce_pr_society': True,  # Strictly not required, but good practice
-        'enforce_ipi_name': True,  # Strictly not required, but good practice
-
-        'work_id_prefix': 'FOO',  # Makes work IDs somewhat unique
-        
-        'publisher_id': 'FOO',
-        'publisher_name': 'FOO S MUSIC PUBLISHING',
-        'publisher_ipi_name': '00000000199',
-        'publisher_pr_society': '071',  # SESAC
-        'publisher_mr_society': '034',  # HFA
-        'publisher_sr_society': None,
-
-        'us_publisher_override': {
-            'ASCAP': {
-                'publisher_id': 'FOOA',
-                'publisher_name': 'FOO A MUSIC PUBLISHING',
-                'publisher_ipi_name': '00000000493',
-                'publisher_pr_society': '010',  # ASCAP
-                'publisher_mr_society': '034',  # HFA
-                'publisher_sr_society': None,
-            },
-            'BMI': {
-                'publisher_id': 'FOOB',
-                'publisher_name': 'FOO B MUSIC PUBLISHING',
-                'publisher_ipi_name': '00000000395',
-                'publisher_pr_society': '021',  # BMI 
-                'publisher_mr_society': '044',  # HFA
-                'publisher_sr_society': None,
-            },
-            'SESAC': None,  # Already defined, set to None
-        },
-
-        'library': 'FOO BAR MUSIC',  # Use only if you are in library music
-        'label': 'FOO BAR MUSIC',  # Use only if you are also a label
-    }
-
-
-More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
-
-Additional Societies
-++++++++++++++++++++
-
-The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-set-up, only 18 societies from 12 countries are present, as well as two 
-administrative agencies. If you need to add additional societies, do it with 
-this setting (and not in the ``models.py``).
-
-All societies the original publisher and all writers are affiliated with must be present.
-
-.. _StandaloneDeployment:
-
-Installing the Project (Standalone Deployment)
+Installing Django Music Publisher (Standalone Deployment)
 ===============================================================================
 
 You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7. It might work with other Python 3 versions, but not with Python 2. It is advised you run this inside a virtual environment.
@@ -134,8 +23,8 @@ Do::
 On Windows: instead of ``source bin/activate``, run ``Scripts\activate``.
 
 The next step is to create ``dmp_project/local_settings.py`` or set the
-appropriate environment variables. ``SECRET_KEY``, ``ALLOWED_HOSTS``, and 
-``MUSIC_PUBLISHER_SETTINGS`` (see above for details) must be set. 
+appropriate environment variables. ``SECRET_KEY``, ``ALLOWED_HOSTS``, and
+``MUSIC_PUBLISHER_SETTINGS`` must be set.
 
 Then::
 
@@ -143,24 +32,86 @@ Then::
     python manage.py createsuperuser
 
 If you wish to add two predefined permission groups (recommended), run::
-    
+
     python manage.py loaddata publishing_staff.json
-    
-For local installations, set ``DEBUG`` to ``True`` in 
+
+For local installations, set ``DEBUG`` to ``True`` in
 ``dmp_project/local_settings.py`` or as environment variable. Then run::
 
     python manage.py runserver
 
 Then open the following link: http://localhost:8000/ and log in with
-credentials you provided in a previous step. For instructions on permanent 
-deployment, please use official 
+credentials you provided in a previous step. For instructions on permanent
+deployment, please use official
 `Django documentation <https://www.djangoproject.com/>`_.
 
-Deployment on Heroku / Dokku
+
+Installing as Django Module (developers only)
+===============================================================================
+
+If you plan to use Django Music Publisher as one of the apps in your Django project, there is nothing special about it::
+
+    pip install --upgrade django_music_publisher
+
+Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
+URLs need to be added, as everything goes through the Django Admin.
+
+
+Settings
+===============================================================================
+
+You will have to add this to the settings, replace with your data.
+
+.. code:: python
+
+    MUSIC_PUBLISHER_SETTINGS = {
+        'allow_modifications': True,  # Only original works if False
+        'allow_multiple_ops': False,  # Writers can have multiple original pubs
+
+        'enforce_saan': True,  # Agr. # is required in many societies
+        'enforce_publisher_fee': True,  # False for self-publishers
+        'enforce_pr_society': True,  # Strictly not required, but good practice
+        'enforce_ipi_name': True,  # Strictly not required, but good practice
+
+        'work_id_prefix': 'TOP',  # Makes work and recording IDs somewhat unique
+        
+        'publisher_id': 'TOP',  # THE 2-4 letter CWR delivery publisher code
+        'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
+        'publisher_ipi_name': '00000000199',  # IPI name number
+        'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
+        'publisher_pr_society': '052',  # Performing Rights Society Code
+        'publisher_mr_society': '044',  # Mechanical Rights Society Code
+        'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
+    }
+
+More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
+
+Additional Societies
+++++++++++++++++++++
+
+The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
+set-up, only 18 societies from 12 countries are present, as well as two 
+administrative agencies. Here is the format::
+
+    MUSIC_PUBLISHER_SOCIETIES = [
+        ('101', 'SOCAN, Canada'),
+        ('88', 'CMRRA, Canada'),
+        ('10', 'ASCAP, United States'),
+        ('21', 'BMI, United States'),
+        ('71', 'SESAC Inc., United States'),
+        ('34', 'HFA, United States'),
+        ('707', 'Musicmark, Administrative Agency')]
+
+.. _StandaloneDeployment:
+
+Deployment on Heroku / Dokku / (any PaaS)
 ==============================================================================
 
-``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var. The recommended way to do this is to create a custom Django project in a private repository that uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
+``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var.
 
+One way to do this is to create a custom Django project in a private repository that uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
+
+Another would be to use base64 encoding for this variable if your PaaS supports it.
 
 DMP Guru
 ==============================================================================
@@ -170,4 +121,3 @@ DMP Guru
 You only need to provide basic data about the publisher (e.g. name, IPI name #, collecting society (or societies)) and it will figure out the correct settings. 
 
 Your DMP instance will be properly maintained, regularly upgraded, data will be backed up daily, and you can export your data and move to another arrangement at any point.
-

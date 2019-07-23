@@ -1,4 +1,4 @@
-Introduction for Developers and Sysadmins
+Brief Overview of Music Publishing
 #########################################
 
 This is a very brief introduction for software developers and system administrators. It is required as music rights are quite complex and often counter-intuitive and available information can be misleading.
@@ -11,8 +11,6 @@ Music publishing started with publishing of sheet music, and first music *perfor
 Although sheet music is not in the focus any more, *composers and lyricists (writers)* still have contracts with *music publishers*. When a (co-)writer has a contract about a musical work with a publisher, this publisher is original publisher of the work in question. Usually 50% of performing and 100% of mechanical and synchronization rights are transferred to the original publishers. Each writer can have a different publisher, or even multiple ones, or not have one at all.
 
 Writers and publishers who are in the chain of agreements that includes the sender of the CWR file are referred to as *controlled*.
-
-Django Music Publisher allows for multiple original publishers. It only supports usual 50% perf. / 100% mech. / 100% sync. publisher share splits.
 
 Please note that *musical work means composition and lyrics*, this has nothing to do with sound.
 
@@ -38,11 +36,4 @@ Publisher Size
 
 In the software context, the size of a publisher is completely irrelevant. There are self-proclaimed small music publishers who do just about everything and anything, as well as large publishers who are just original publishers or just administrators or just sub-publishers.
 
-In the context of Django Music Publisher, original publishers with up to about 1000 works, effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows.
-
-Contributing to Django Music Publisher
-***************************************
-
-Django Music Publisher is activelly developed, though the speed of development partly depends on sponsors, for details please see :doc:`features`.
-
-While the maintainer hopes that this project will be community-driven, only pull requests of sufficient quality will be accepted.
+In the context of Django Music Publisher, original publishers with up to about 1000 works (depending on metadata complexity), effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows.

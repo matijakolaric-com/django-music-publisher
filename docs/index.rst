@@ -1,7 +1,7 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
-THIS IS THE DEVELOPMENT VERSION, DOCUMENTATION IS OBSOLETE.
+THIS IS THE DEVELOPMENT VERSION, DOCUMENTATION MAY BE OBSOLETE.
 SEE https://django-music-publisher.readthedocs.io/en/stable/ for the stable version.
 
 
@@ -38,10 +38,6 @@ It uses **Common Works Registration (CWR)** protocol for batch registration of m
 
 The videos about Django Music Publisher are available on `YouTube <https://www.youtube.com/watch?v=P57hoY9wwH4&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP>`_.
 
-**We are looking for sponsors for version 19.7! See** :doc:`Sponsored Features <features>` **for details.**
-
-Current stable version 19.1 was sponsored by `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider for Django Music Publisher instances.
-
 
 General Documentation
 *********************
@@ -53,8 +49,6 @@ General Documentation
    publishing
    installation
    releases
-   features
-   saas
 
 User manual
 ********************

@@ -73,7 +73,7 @@ sub-publishers?
 
 What is Common Works Registration (CWR)?
 	CWR is a specification of a process and a file format for registering
-	musical works with collecting societies worldwide.
+	musical works, and several related tasks, with collecting societies worldwide.
 
 
 Open Source / Free
@@ -86,54 +86,36 @@ Does "free" mean "free of charge"?
 What is open source?
 	Open source means that the whole source for this program is freely available.
 
-Is `DMP Guru <https://dmp.guru>`_ charging for the use of this software?
-	No. DMP Guru is a specialised application platform-as-a-service. They install, host and 
-	maintain **your app instance** of Django Music Publisher and charge for this service.
-
-Is there a difference? I am still paying for it?
-	Yes, there is a difference. There is no lock-in. You can download the database backup, install 
-	Django Music Publisher somewhere else, import the database data, and keep using it. There will
-	be no significant differences. You are paying for the convenience.
-
-Are there other services that use Django Music Publisher in some way?
-	Yes. None has so far chosen to advertise this fact, and the maintainer respects this choice, so they will not be named here.
-
-
 Who is ...?
 +++++++++++
 
 When my society says I should ask the vendor about some issue, who do I ask?
-	Regardless if you installed Django Music Publisher yourself, or are using
-	DMP Guru, the software vendor in their meaning of the word is **you**,
-	as you have accepted the MIT licence, which makes clear that the software
-	comes 'as is'.
+	Regardless if you installed Django Music Publisher yourself, the software
+	vendor in their meaning of the word is **you**, as you have accepted the
+	MIT licence, which makes clear that the software comes 'as is'.
 
 	Having said that, you are welcome to report any potential bugs to the
 	repository. The maintainer may choose to help you. Or not.
-
-	DMP Guru provides support for their service, but issues raised by societies
-	have nothing to do with hosting and maintenance, but they will report the
-	bug to the maintainer if there is a bug.
 
 
 Does it ...?
 +++++++++++++++
 
 Export Common Works Registration (CWR) files and process acknowledgements?
-	Yes.
+	Yes. CWR 2.1 is supported and well tested, CWR 2.2 will not be implemented.
+    CWR 3.0 is experimental and available as a separate module.
 
 Export Electronic Batch Registration (EBR) files?
 	No. EBR is officially accepted by MusicMark (ASCAP, BMI, SOCAN) and 
 	unofficially also by a few other societies. All of them also accept CWR.
 
 Export MWN (DDEX) or any other DDEX format?
-	No. MWN is on the roadmap, you are welcome to sponsor the development
-	(See :doc:`Sponsored Features <features>`). Other DDEX formats may follow.
+	MWN export is experimental. Other DDEX formats may follow.
 
 Export some other format specified by someone?
-	No. There are, actually, two JSON-based export formats. They are created by
-	the maintainer of this project and used in several projects, but it is work
-	in progress, and is still unspecified.
+	There are, actually, two JSON-based export formats. They are created by
+	the maintainer of this project and used in several other projects. But they
+	are work in progress, and is still unspecified.
 
 Import CWR acknowledgements?
 	Yes. However, if it contains additional information, then you must use an
@@ -145,8 +127,7 @@ Import CWR acknowledgements?
 Import metadata from other sources?
 	Formats used by Django's ``loaddata`` are, naturally, supported, but
 	nothing else at the moment. (If you dont understand, it means **No** in
-	Geek.) Importing data is important and is on the roadmap. You are welcome
-	to sponsor the development (See :doc:`Sponsored Features <features>`).
+	Geek.)
 
 
 Which societies...?
@@ -163,7 +144,7 @@ PRS/MCPS
 
 BUMA/STEMRA, GEMA, SABAM, KODA, STIM, TEOSTO, TONO
 	Registering and acknowledgement processing works flawlessly (same as in
-	PRS/MCPS). ISWC imports have not yet been tested.
+	PRS/MCPS). There may be some specific rules that are not covered.
 
 SACEM, SIAE, ZAIKS, SGAE, SPA, SUISA
 	Works, but not everything was tested so far, as users did not use all

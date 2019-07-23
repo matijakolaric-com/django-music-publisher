@@ -5,6 +5,7 @@ Please note that this is the only interface.
 Attributes:
     IS_POPUP_VAR (bool): :attr:`django.contrib.admin.options.IS_POPUP_VAR`
 """
+
 from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
@@ -790,6 +791,7 @@ class WorkAdmin(MusicPublisherAdmin):
         territories = {}
         writers = {}
         publishers = {}
+        releases = {}
         qs = qs.prefetch_related('alternatetitle_set')
         qs = qs.prefetch_related('writerinwork_set__writer')
         qs = qs.prefetch_related('artistinwork_set__artist')
@@ -798,9 +800,8 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = qs.prefetch_related('recordings__tracks__release__library')
         qs = qs.prefetch_related('recordings__tracks__release__release_label')
         for work in qs:
-            work_data = work.get_dict(normalize=normalize)
-            key = next(iter(work_data))
-            j = work_data[key]
+            j = work.get_dict(normalize=normalize)
+            key = j.pop('code')
             affiliation_types.update(j.pop('affiliation_types'))
             agreement_types.update(j.pop('agreement_types'))
             writers.update(j.pop('writers'))
@@ -811,6 +812,7 @@ class WorkAdmin(MusicPublisherAdmin):
             organizations.update(j.pop('organizations', {}))
             territories.update(j.pop('territories', {}), )
             libraries.update(j.pop('libraries', {}), )
+            releases.update(j.pop('releases', {}))
             works[key] = j
         if normalize:
             j = {
@@ -823,6 +825,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 'territories': territories,
                 'publishers': publishers,
                 'writers': writers,
+                'releases': releases,
                 'works': works,
             }
         else:

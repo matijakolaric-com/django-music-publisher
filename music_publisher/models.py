@@ -1,3 +1,9 @@
+"""Concrete models.
+
+They mostly classes from :mod:`.base`.
+
+"""
+
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from decimal import Decimal
@@ -13,6 +19,13 @@ from .const import (CAN_NOT_BE_CONTROLLED_MSG, ENFORCE_PUBLISHER_FEE,
                     WORK_ID_PREFIX)
 from .cwr_templates import *
 from .validators import CWRFieldValidator
+
+
+def normalize_dict(full_dict, inner_dict, key, code_key='code'):
+    code = inner_dict.pop(code_key)
+    full_dict[key].update({code: inner_dict})
+    return code
+
 
 
 class Artist(PersonBase, models.Model):
@@ -45,12 +58,12 @@ class Artist(PersonBase, models.Model):
         Returns:
             dict: JSON-serializable data structure
         """
-        j = {
+        return {
+            'code': self.artist_id,
             'last_name': self.last_name,
             'first_name': self.first_name or None,
             'isni': self.isni or None,
         }
-        return {self.artist_id: j}
 
     @property
     def artist_id(self):
@@ -63,7 +76,7 @@ class Label(models.Model):
 
     Attributes:
         name (django.db.models.CharField): Label Name
-        """
+    """
 
     class Meta:
         verbose_name_plural = ' Music Labels'
@@ -87,7 +100,8 @@ class Label(models.Model):
         Returns:
             dict: JSON-serializable data structure
         """
-        return {self.label_id: {'name': self.name}}
+        return {'code': self.label_id,
+                'name': self.name}
 
 
 class Library(models.Model):
@@ -95,7 +109,7 @@ class Library(models.Model):
 
     Attributes:
         name (django.db.models.CharField): Library Name
-        """
+    """
 
     class Meta:
         verbose_name_plural = ' Music Libraries'
@@ -127,7 +141,11 @@ class Library(models.Model):
 class Release(models.Model):
     """Music Release (album / other product)
 
+    Attributes:
+        cd_identifier (django.db.models.CharField): CD Identifier, used for LIB
+        library (django.db.models.ForeignKey): Foreign key to Library model
     """
+
     class Meta:
         ordering = ('release_title', 'cd_identifier', '-id')
 
@@ -188,7 +206,8 @@ class Release(models.Model):
                 self.release_date or
                 self.ean):
             return None
-        j = {
+        return {
+            'code': self.release_id,
             'release_title': self.release_title or None,
             'release_date':
                 self.release_date.strftime('%Y%m%d') if self.release_date
@@ -197,7 +216,6 @@ class Release(models.Model):
                 self.release_label.get_dict() if self.release_label else None,
             'ean': self.ean,
         }
-        return {self.release_id: j}
 
 
 class LibraryReleaseManager(models.Manager):
@@ -308,7 +326,8 @@ class Writer(PersonBase, IPIBase, models.Model):
             dict: JSON-serializable data structure
         """
 
-        j = {
+        return {
+            'code': self.writer_id,
             'first_name': self.first_name or None,
             'last_name': self.last_name or None,
             'ipi_name': self.ipi_name or None,
@@ -329,7 +348,6 @@ class Writer(PersonBase, IPIBase, models.Model):
                 }
             }] if self.pr_society else []
         }
-        return {'WR{:06d}'.format(self.id): j}
 
 
 class WorkManager(models.Manager):
@@ -417,7 +435,7 @@ class Work(TitleBase):
 
 
     def get_publishers_dict(self):
-        """Create a data structure for the publisher.
+        """Create data structure for the publisher.
 
         Returns:
             dict: JSON-serializable data structure
@@ -490,40 +508,45 @@ class Work(TitleBase):
         return j
 
     @staticmethod
+    def normalize_affiliation(j, aff):
+        """Normalize publisher affiliations.
+
+        This refers to organizations, affiliation types and territories.
+        """
+        # Organization
+        aff['organization'] = normalize_dict(
+            j, aff['organization'], 'organizations')
+        # Affiliation Type
+        aff['affiliation_type'] = normalize_dict(
+            j, aff['affiliation_type'], 'affiliation_types')
+        # Territory
+        aff['territory'] = normalize_dict(
+            j, aff['territory'], 'territories')
+
+
+    @staticmethod
     def normalize_publisher_affiliations(j):
+        """Normalize publisher affiliations.
+
+        This refers to organizations, affiliation types and territories.
+        """
+
         pid = SETTINGS['publisher_id']
         for aff in j['publishers'][pid]['affiliations']:
-
-            # Organization
-            org = aff['organization']
-            code = org.pop('code')
-            j['organizations'].update(
-                {code: org})
-            aff['organization'] = code
-
-            # Affiliation Type
-            typ = aff['affiliation_type']
-            code = typ.pop('code')
-            j['affiliation_types'].update(
-                {code: typ})
-            aff['affiliation_type'] = code
-
-            # Territory
-            ter = aff['territory']
-            code = ter.pop('code')
-            j['territories'].update(
-                {code: ter})
-            aff['territory'] = code
+            Work.normalize_affiliation(j, aff)
 
 
     def get_dict(self, normalize=True):
         """Create a data structure that can be serialized as JSON.
+
+        Normalize the structure if required.
 
         Returns:
             dict: JSON-serializable data structure
         """
 
         j = {
+            'code': self.work_id,
             'work_title': self.title,
             'version_type': {
                 'code': 'MOD',
@@ -551,118 +574,94 @@ class Work(TitleBase):
             'origin': (
                 self.library_release.get_origin_dict() if self.library_release
                 else None),
+            'releases': {},
             'recordings': {},
             'writers_for_work': [],
             'artists_for_work': [],
-            'cross_refferences': []
+            'cross_references': []
         }
 
         if normalize:
             self.normalize_publisher_affiliations(j)
 
-
         if normalize and self.library_release:
-            # Normalize origin data
-            code = j['origin']['library'].pop('code')
-            j['libraries'].update({code: j['origin']['library']})
-            j['origin']['library'] = code
+            # Normalize origin library data0
+            j['origin']['library'] = normalize_dict(
+                j, j['origin']['library'], 'libraries'
+            )
 
-        for wiw in self.artistinwork_set.all():
-            d = wiw.get_dict()
-            a = d.get('artist', None)
+        # add data for (live) artists in work, normalize of required
+        for aiw in self.artistinwork_set.all():
+            d = aiw.get_dict()
             if normalize:
-                d['artist'] = next(iter(a))
-                j['artists'].update(a)
+                d['artist'] = normalize_dict(
+                    j, d['artist'], 'artists'
+                )
             j['artists_for_work'].append(d)
 
+        # add data for writers in work, normalize of required
         for wiw in self.writerinwork_set.all():
             d = wiw.get_dict()
             w = d.get('writer', None)
             if not w:
                 continue
-            for aff in w[next(iter(w))].get('affiliations', []):
-                org = aff.get('organization')
-                if not org:
-                    continue
-                if normalize:
-                    # Organization
-                    org = aff['organization']
-                    code = org.pop('code')
-                    j['organizations'].update(
-                        {code: org})
-                    aff['organization'] = code
-
-                    # Affiliation Type
-                    typ = aff['affiliation_type']
-                    code = typ.pop('code')
-                    j['affiliation_types'].update(
-                        {code: typ})
-                    aff['affiliation_type'] = code
-
-                    # Territory
-                    ter = aff['territory']
-                    code = ter.pop('code')
-                    j['territories'].update(
-                        {code: ter})
-                    aff['territory'] = code
             if normalize:
-                d['writer'] = next(iter(w))
+                for aff in w.get('affiliations', []):
+                    self.normalize_affiliation(j, aff)
+
                 for pwr in d.get('publishers_for_writer', []):
                     agreement = pwr.get('agreement')
                     if not agreement:
                         continue
-                    org = agreement['recipient_organization']
-                    j['organizations'].update(
-                        {org['code']: {'name': org['name']}})
-                    agreement['recipient_organization'] = \
-                        agreement['recipient_organization']['code']
-                    agreement_type = agreement['agreement_type']
-                    code = agreement_type['code']
-                    agreement['agreement_type'] = agreement_type.pop('code')
-                    j['agreement_types'].update({
-                        code: agreement_type})
+                    # Recipient organization
+                    agreement['recipient_organization'] = normalize_dict(
+                        j, agreement['recipient_organization'], 'organizations'
+                    )
+                    # Agreement type
+                    agreement['agreement_type'] = normalize_dict(
+                        j, agreement['agreement_type'], 'agreement_types'
+                    )
+                d['writer'] = normalize_dict(j, w, 'writers')
 
-            if normalize:
-                j['writers'].update(w)
             j['writers_for_work'].append(d)
 
+        # add recording data, normalize if required
         for recording in self.recordings.all():
-            d = recording.get_dict(with_releases=True)
+            rec = recording.get_dict(with_releases=True)
+            rec_code = rec.pop('code')
             if normalize:
-                key = next(iter(d))
-                rec = d[key]
-                artist = rec['recording_artist']
-                if artist:
-                    j['artists'].update(artist)
-                    d[key]['recording_artist'] = next(iter(artist))
-                label = rec['record_label']
-                if label:
-                    j['labels'].update(label)
-                    d[key]['record_label'] = next(iter(label))
-                tracks = rec['tracks']
-                for track in tracks:
+                if rec['recording_artist']:
+                    rec['recording_artist'] = normalize_dict(
+                        j, rec['recording_artist'], 'artists'
+                    )
+                if rec['record_label']:
+                    rec['record_label'] = normalize_dict(
+                        j, rec['record_label'], 'labels'
+                    )
+                for track in rec['tracks']:
                     rel = track['release']
-                    rel_key = next(iter(rel))
-                    label = rel[rel_key]['release_label']
+                    label = rel['release_label']
                     if label:
-                        j['labels'].update(label)
-                        rel[rel_key]['release_label'] = next(iter(label))
+                        rel['release_label'] = normalize_dict(
+                            j, rel['release_label'], 'labels'
+                        )
+                    track['release'] = normalize_dict(
+                        j, rel, 'releases'
+                    )
+            j['recordings'].update({rec_code: rec})
 
-        j['recordings'].update(d)
-
+        # add cross references, currently only society work ids from ACKs
         for wa in self.workacknowledgement_set.filter(
                 remote_work_id__gt='').distinct():
             d = wa.get_dict()
             if normalize:
                 # Organization
-                org = d['organization']
-                code = org.pop('code')
-                j['organizations'].update(
-                    {code: org})
-                d['organization'] = code
-            j['cross_refferences'].append(d)
+                d['organization'] = normalize_dict(
+                    j, d['organization'], 'organizations'
+                )
+            j['cross_references'].append(d)
 
-        return {self.work_id: j}
+        return j
 
 
 class AlternateTitle(TitleBase):
@@ -987,7 +986,7 @@ class Recording(models.Model):
         """
         if self.id is None:
             return ''
-        return '{}R{:06}'.format(SETTINGS.get('work_id_prefix', ''), self.id)
+        return '{}{:06}R'.format(SETTINGS.get('work_id_prefix', ''), self.id)
 
 
     def get_dict(self, with_releases=False):
@@ -997,6 +996,7 @@ class Recording(models.Model):
             dict: JSON-serializable data structure
         """
         j = {
+            'code': self.recording_id,
             'recording_title': (
                 self.complete_recording_title or self.work.title),
             'version_title': self.complete_version_title,
@@ -1017,10 +1017,10 @@ class Recording(models.Model):
                 if not d:
                     continue
                 j['tracks'].append({
-                    'cut_number': track.cut_number,
                     'release': d,
+                    'cut_number': track.cut_number,
                 })
-        return {self.recording_id: j}
+        return j
 
 
 class Track(models.Model):
@@ -1058,8 +1058,9 @@ class CWRExport(models.Model):
     nwr_rev = models.CharField(
         'CWR version/type', max_length=3, db_index=True, default='NWR',
         choices=(
-            ('NWR', 'CWR 2.1: New work registration'),
-            ('REV', 'CWR 2.1: Revision of registered work')))
+            ('NWR', 'CWR 2.1: New work registrations'),
+            ('REV', 'CWR 2.1: Revisions of registered works'),
+            ('WRK', 'CWR 3.0: Work registration (experimental)')))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)

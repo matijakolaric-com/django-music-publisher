@@ -1,4 +1,6 @@
-"""Constants used throughout the module."""
+"""Constants used throughout the module.
+
+They are really just calculated from settings."""
 
 from django.conf import settings
 
