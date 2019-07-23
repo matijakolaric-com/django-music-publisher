@@ -12,14 +12,14 @@ There are two reasons for a major release:
 
 * Every two years, a new long term support (LTS) version of Django is released, in April of the odd year. There will be a new Django Music Publisher release several months later.
 
-* When there are significant new features. Please note that new features of Django Music Publisher depend on sponsors.
+* New features of Django Music Publisher depend on sponsors. If there is enough financing for a new feature, there will be a sponsored major release.
 
 Current Major Release
 +++++++++++++++++++++
 
-Current major release is 19.7.
+Current major release is |version|.
 
-Major Changes from 19.1
+Changes from 19.1
 +++++++++++++++++++++++
 
 Support for US publishers with entities in different PROs was dropped. If you need to manage multiple publishing entities, you need to run multiple instances of DMP and manage them separately.
@@ -30,7 +30,9 @@ Collecting societies decided not to use release/album data in work registrations
 
 All imports and exports, including two JSON formats included in 19.7, are now based on a single data structure, which is becoming the default for other tools and services by the maintainer.
 
-CWR 2.1 generation and acknowledgement parsing is still available. CWR 3.0, labeled as "experimental", is freely available as a separate module.
+CWR 2.1 generation and acknowledgement parsing is still available, but moved to a separate module, together with CWR 3.0, labeled as "experimental".
+
+General ocumentation is now shorter, but more precise. User manual was rewritten. FAQ section was extended.
 
 Minor Releases
 ==============

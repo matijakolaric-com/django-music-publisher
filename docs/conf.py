@@ -27,9 +27,9 @@ copyright = '2018-2019, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = '19.1 Epiphany'
+version = '19.7 Summer Night'
 # The full version, including alpha/beta/rc tags
-release = '19.1.4.post1'
+release = '19.7'
 
 rst_epilog = '''
 .. |version| replace:: {}

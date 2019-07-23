@@ -22,7 +22,7 @@ RE_ISNI = re.compile(r'(^[0-9]{15}[0-9X]$)')
 RE_IPI_BASE = re.compile(r'(I-\d{9}-\d)')
 
 
-def check_ean_digit(ean: str):
+def check_ean_digit(ean):
     """EAN checksum validation.
 
     Args:
@@ -41,7 +41,7 @@ def check_ean_digit(ean: str):
         raise ValidationError('Invalid EAN.')
 
 
-def check_iswc_digit(iswc: str, weight: int):
+def check_iswc_digit(iswc, weight):
     """ISWC / IPI Base checksum validation.
 
     Args:
@@ -52,7 +52,7 @@ def check_iswc_digit(iswc: str, weight: int):
         ValidationError
     """
     digits = re.sub(r'\D', r'', iswc)
-    total: int = weight
+    total = weight
     for i, d in enumerate(digits[:9]):
         total += (i + 1) * int(d)
     checksum = (10 - total % 10) % 10

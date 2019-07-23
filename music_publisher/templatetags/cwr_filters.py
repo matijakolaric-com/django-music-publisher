@@ -50,7 +50,7 @@ def soc(value):
 def prshare(value):
     """Format and validate fields containing shares."""
     value = value or 0
-    value = int(round(value * 50))
+    value = int(round(value * 5000))
     return '{:05d}'.format(value)
 
 
@@ -59,5 +59,5 @@ def mrshare(value):
     """Format and validate fields containing shares."""
 
     value = value or 0
-    value = int(round(value * 100))
+    value = int(round(value * 10000))
     return '{:05d}'.format(value)

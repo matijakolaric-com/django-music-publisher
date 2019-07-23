@@ -9,7 +9,7 @@ There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>
 Installing Django Music Publisher (Standalone Deployment)
 ===============================================================================
 
-You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7. It might work with other Python 3 versions, but not with Python 2. It is advised you run this inside a virtual environment.
+You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7.
 
 Do::
 

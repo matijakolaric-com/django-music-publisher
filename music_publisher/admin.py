@@ -781,57 +781,7 @@ class WorkAdmin(MusicPublisherAdmin):
             JsonResponse: JSON file with selected works
         """
 
-        works = OrderedDict()
-        affiliation_types = {}
-        agreement_types = {}
-        artists = {}
-        labels = {}
-        libraries = {}
-        organizations = {}
-        territories = {}
-        writers = {}
-        publishers = {}
-        releases = {}
-        qs = qs.prefetch_related('alternatetitle_set')
-        qs = qs.prefetch_related('writerinwork_set__writer')
-        qs = qs.prefetch_related('artistinwork_set__artist')
-        qs = qs.prefetch_related('recordings__record_label')
-        qs = qs.prefetch_related('recordings__artist')
-        qs = qs.prefetch_related('recordings__tracks__release__library')
-        qs = qs.prefetch_related('recordings__tracks__release__release_label')
-        for work in qs:
-            j = work.get_dict(normalize=normalize)
-            key = j.pop('code')
-            affiliation_types.update(j.pop('affiliation_types'))
-            agreement_types.update(j.pop('agreement_types'))
-            writers.update(j.pop('writers'))
-            if normalize:
-                publishers.update(j.pop('publishers'))
-            artists.update(j.pop('artists', {}))
-            labels.update(j.pop('labels', {}))
-            organizations.update(j.pop('organizations', {}))
-            territories.update(j.pop('territories', {}), )
-            libraries.update(j.pop('libraries', {}), )
-            releases.update(j.pop('releases', {}))
-            works[key] = j
-        if normalize:
-            j = {
-                'affiliation_types': affiliation_types,
-                'agreement_types': agreement_types,
-                'artists': artists,
-                'labels': labels,
-                'libraries': libraries,
-                'organizations': organizations,
-                'territories': territories,
-                'publishers': publishers,
-                'writers': writers,
-                'releases': releases,
-                'works': works,
-            }
-        else:
-            j = {
-                'works': works,
-            }
+        j = Work.objects.get_dict(qs, normalize=normalize)
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(
@@ -839,13 +789,11 @@ class WorkAdmin(MusicPublisherAdmin):
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
-
     create_json.short_description = \
         'Export selected works (JSON).'
 
     def create_normalized_json(self, request, qs):
         return self.create_json(request, qs, normalize=True)
-
     create_normalized_json.short_description = \
         'Export selected works (normalized JSON).'
 
@@ -1082,24 +1030,14 @@ class CWRExportAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
 
-    def save_model(self, request, obj, form, change):
-        """Django splits the saving process int two parts, which does not
-            work in this case, so this is simply passing the main object
-            through to :meth:`save_related`.
-        """
-        if not (hasattr(self, 'obj') and self.obj.cwr):
-            super().save_model(request, obj, form, change)
-            self.obj = obj
 
     def save_related(self, request, form, formsets, change):
         """:meth:`save_model` passes the main object, which is needed to fetch
             CWR form the external service, but only after related objects are
             saved.
         """
-        if hasattr(self, 'obj'):
-            super().save_related(request, form, formsets, change)
-            # self.obj.create_cwr()
-            del self.obj
+        super().save_related(request, form, formsets, change)
+        form.instance.create_cwr()
 
 
 class ACKImportForm(ModelForm):

@@ -1,7 +1,7 @@
-Technical introduction
+Introduction
 =================================
 
-Django Music Publisher is an open source software for original music publishers. It is based on Django Web framework.
+Django Music Publisher is open source software for original music publishers. It is based on Django Web framework.
 
 Django Music Publisher is a tool for **managing metadata** on musical works and recordings. It has support for **royalty distribution processing**.
 
@@ -44,7 +44,7 @@ Limitations
 
 Django Music Publisher is aiming to be a simple tool that is good enough for most original publishers. Being simple means that there are some limitations.
 
-As already stated, it does not hold data on "other" publishers. Co-publishing deals are still possible, with each publisher registering their shares.
+It does not hold data on "other" publishers. Co-publishing deals are still possible, with each publisher registering their shares.
 
 With default settings, it is presumed that controlled writers own and collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are owned and collected by publishers. A different split is possible, but there can only be one for all controlled writers.
 

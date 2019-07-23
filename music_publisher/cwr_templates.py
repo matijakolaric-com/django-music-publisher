@@ -48,7 +48,7 @@ TEMPLATES_21 = {
     'SWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SWR{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ interested_party_number|ljust:9 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }} '
         '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
         '{{ pr_society|soc }}{{ share|prshare }}'
@@ -57,14 +57,14 @@ TEMPLATES_21 = {
     'SWT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SWT{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ interested_party_number|ljust:9 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ share|prshare }}0000000000I2136N001\r\n{% endautoescape %}'),
     'PWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ publisher_id|ljust:9 }}'
         '{{ publisher_name|ljust:45 }}              {{ saan|ljust:14 }}'
-        '{{ interested_party_number|ljust:9 }}\r\n{% endautoescape %}'),
+        '{{ code|ljust:9 }}\r\n{% endautoescape %}'),
     'OPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'OPU{{ transaction_sequence|rjust:8 }}'
@@ -95,7 +95,7 @@ TEMPLATES_21 = {
     'VER': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'VER{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ original_title|ljust:60 }}' +
+        '{{ record_sequence|rjust:8 }}{{ work_title|ljust:60 }}' +
         ' ' * (11 + 2 + 45 + 30 + 60 + 11 + 13 + 45 + 30 + 11 + 13 + 14) +
         '\r\n{% endautoescape %}'),
     'PER': Template(
@@ -108,8 +108,8 @@ TEMPLATES_21 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'REC{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
-        '{{ release_date|date:"Ymd"|default:"00000000" }}' +
-        ' ' * 60 + '{{ duration|date:"His"|default:"000000" }}     '
+        '{{ release_date|default:"00000000" }}' +
+        ' ' * 60 + '{{ duration|rjust:6|default:"000000" }}     '
         '{{ album_title|ljust:60 }}'
         '{{ album_label|ljust:60 }}                  {{ ean|ljust:13 }}'
         '{{ isrc|ljust:12 }}     \r\n{% endautoescape %}'),
