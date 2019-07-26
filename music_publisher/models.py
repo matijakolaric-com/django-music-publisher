@@ -86,7 +86,7 @@ class Label(models.Model):
         validators=(CWRFieldValidator('label'),))
 
     def __str__(self):
-        return self.name
+        return self.name.upper()
 
     @property
     def label_id(self):
@@ -121,7 +121,7 @@ class Library(models.Model):
         validators=(CWRFieldValidator('library'),))
 
     def __str__(self):
-        return self.name
+        return self.name.upper()
 
     @property
     def library_id(self):
@@ -186,7 +186,8 @@ class Release(models.Model):
                     self.cd_identifier, self.library)
         else:
             if self.release_label:
-                return '{} ({})'.format(self.release_label, self.release_title.upper())
+                return '{} ({})'.format(
+                    self.release_title.upper(), self.release_label)
             return self.release_title.upper()
 
     @property
@@ -1225,7 +1226,6 @@ class CWRExport(models.Model):
         """
         qs = self.works.order_by('id',)
         works = Work.objects.get_dict(qs)['works']
-        print("works fetched")
 
         self.record_count = self.record_sequence = self.transaction_count = 0
 
@@ -1237,7 +1237,6 @@ class CWRExport(models.Model):
         yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
 
         for work_id, work in works.items():
-            print(work_id)
 
             # NWR
             self.record_sequence = 0
@@ -1286,10 +1285,15 @@ class CWRExport(models.Model):
             # SWR, SWT, PWR
             for wiw in work['writers_for_work']:
                 if not wiw['controlled']:
-                    continue
+                    continue  # goes to OWR
                 w = wiw['writer']
                 agr = wiw['publishers_for_writer'][0]['agreement']
                 saan = agr['recipient_agreement_number'] if agr else None
+                affiliations = w.get('affiliations', [])
+                for aff in affiliations:
+                    if aff['affiliation_type']['code'] == 'PR':
+                        w['pr_society'] = aff['organization']['code']
+                        break
                 w.update({
                     'capacity': wiw['capacity']['code'],
                     'share': controlled_shares[w['code']],
@@ -1303,12 +1307,17 @@ class CWRExport(models.Model):
             # OWR
             for wiw in work['writers_for_work']:
                 if wiw['controlled']:
-                    continue
+                    continue  # done in SWR
                 writer = wiw['writer']
                 if writer and writer['code'] in controlled_writer_ids:
                     continue  # co-publishing, already solved
                 if writer:
                     w = wiw['writer']
+                    affiliations = w.get('affiliations', [])
+                    for aff in affiliations:
+                        if aff['affiliation_type']['code'] == 'PR':
+                            w['pr_society'] = aff['organization']['code']
+                            break
                 else:
                     w = {'writer_unknown_indicator': 'Y'}
                 w.update({
@@ -1442,6 +1451,7 @@ class ACKImport(models.Model):
     """CWR acknowledgement file import.
 
     Attributes:
+        date (django.db.models.DateField): Acknowledgement date
         date (django.db.models.DateField): Acknowledgement date
         filename (django.db.models.CharField): Description
         report (django.db.models.CharField): Basically a log
