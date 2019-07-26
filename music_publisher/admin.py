@@ -68,7 +68,7 @@ class RecordingInline(admin.StackedInline):
                     'complete_recording_title'),
                 ('version_title', 'version_title_suffix',
                     'complete_version_title'),
-                ('isrc', 'artist', 'record_label'),
+                ('isrc', 'record_label', 'artist'),
                 ('duration', 'release_date'),
             ),
         }),
