@@ -68,7 +68,12 @@ In Django Music Publisher, publishing agreements between all controlled writers 
 
 The sum of relative shares for each work must be 100%.
 
-For public domain works, set the share of original writers (``composer``, ``lyricist``, ``composer and lyricist``) to 0.
+For a musical work that is a modification of a public domain one, set the share of original writers (``composer``, ``lyricist``, ``composer and lyricist``) to 0.
+
+.. figure:: /images/writers_pd.png
+   :width: 100%
+
+   Writers in work for a work that is a modification of one in public domain
 
 Controlled
 ----------
