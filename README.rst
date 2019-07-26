@@ -1,21 +1,6 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
-.. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
-    :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
-    :alt: Build Status
-.. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=stable
-    :target: https://django-music-publisher.readthedocs.io/en/stable/
-    :alt: Documentation Status
-.. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=19.1
-    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher
-    :alt: Coverage Status
-.. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg
-    :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
-    :alt: License
-.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
-    :target: https://pypi.org/project/django-music-publisher/
-
 Django Music Publisher is open source software for original music publishers.
 It is a tool for **managing metadata** on musical works and recordings,
 including data on writers, recording and performing artists, albums and music
@@ -28,7 +13,7 @@ musical works.
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
-Latest release **19.1 Epiphany** was sponsored by
+Latest stable release **19.1 Epiphany** was sponsored by
 `DMP Guru <https://dmp.guru>`_, a specialized platform-as-a-service provider
 for Django Music Publisher instances. You can have your own DMP instance set up
 and running in a minute. First 30 days are free.
