@@ -17,16 +17,17 @@ Data table can be sorted by almost any column, or combination of the columns, an
 Exporting JSON
 ++++++++++++++++++++++++++
 
+.. figure:: /images/work_list_action.png
+   :width: 100%
+
+   Exporting musical works in JSON format.
+
 Select several (or all) works in the ``musical work list`` view, select the ``Export selected works JSON.`` or ``Export selected works JSON (normalized).`` action and press on ``Go``. A JSON file will be downloaded, containing all the information about your works.
 
 The difference between these two formats is subtle and technical. Normalized data has no redundancy, so the file is smaller, but it is also more complicated to process.
 
 If you ever choose to stop using Django Music Publisher and move on, there is no lock-in. While these JSON formats might be confusing, there are free on-line tools that will convert JSON to just about any other format you need. https://json-csv.com/ is the first one Google came up with.
 
-.. figure:: /images/export.png
-   :width: 100%
-
-   Exporting musical works.
 
 CWR Exporting Wizard
 ++++++++++++++++++++

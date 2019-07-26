@@ -1,6 +1,11 @@
 Commercial and Library Releases
 ===============================
 
+.. figure:: /images/releases.png
+   :width: 100%
+
+   Library release, note that ``Library`` and ``CD Identifier`` fields are required.
+
 In the previous versions of Django Music Publisher, this was called "Albums and Library CDs", in accordance with CWR 2.x terminology. As these features don't exist in CWR 3.0, they have been renamed.
 
 Under the hood of Django Music Publisher, there is very little difference between Commercial and Library releases, they share the same database table. However, the differences how they are used are significant.

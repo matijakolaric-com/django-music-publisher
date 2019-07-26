@@ -64,8 +64,7 @@ What other kinds are there?
 	Publishers also can sign agreements with other publishers. The most
 	important roles are **administrator** and **sub-publisher**.
 
-What is the difference between original publishers, administrators and
-sub-publishers?
+What is the difference between original publishers, administrators and sub-publishers?
 	That would be beyond the scope of this document. What is important is that
 	both require significantly more complex data structure and therefore also a
 	far more complex user interface. Django Music Publisher does not support

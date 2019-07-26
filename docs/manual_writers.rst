@@ -1,6 +1,11 @@
 Writers
 =======
 
+.. figure:: /images/writers.png
+   :width: 100%
+
+   Writer list view, note how lack of data influences ``can be controlled`` value.
+
 As every musical work requires at least one writer, this makes ``Writer`` views to be a very important one.
 
 ``Add`` and ``change`` views have three field groups. ``Last name`` and ``first name`` fields in the first, ``IPI name #``, ``IPI Base #`` and ``Performance Rights Society`` in the second, all quite obvious.

@@ -22,7 +22,7 @@ Please note that the field ``Works`` uses auto-complete, and if you don't come h
 
    CWR export list view
 
-Upon save, you will be taken to the ``CWR export list view``. It has two links in each row: ``View CWR`` and ``Download``. The latter will download the CWR file, and the former will take you to the preview:
+Upon save, you will be taken to the ``CWR export list`` view. It has two links in each row: ``View CWR`` and ``Download``. The latter will download the CWR file, and the former will take you to the preview:
 
 .. figure:: /images/highlight.png
    :width: 100%

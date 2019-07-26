@@ -4,7 +4,7 @@ Musical Works: Adding, Changing and Deleting
 .. figure:: /images/add_work.png
    :width: 100%
 
-   Add work view
+   Add work view, minimal example with default settings
 
 The view for adding and changing works is shown in the image above. It is the most complex view in Django Music Publisher. It has several parts, so let us cover them one by one.
 
@@ -105,14 +105,14 @@ It may also be set as required for controlled writers. If it is set as a part of
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. figure:: /images/works_recordings.png
-   :width: 100%
-
-   Add work view, recordings
-
 Since version 19.7, Django Music Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
 
 Please note that, although there is a separate set of views for :doc:`recordings <manual_recordings>`, it is recommended to edit them here.
+
+.. figure:: /images/works_recordings.png
+   :width: 100%
+
+   Add work view, recordings section, note the use of recording and version title suffix checkboxes
 
 Recording title
 ---------------

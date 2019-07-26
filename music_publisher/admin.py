@@ -157,6 +157,7 @@ class ArtistAdmin(MusicPublisherAdmin):
 
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
+    actions = None
     search_fields = ('name', )
     list_display = (
         'name', 'recording_count', 'commercialrelease_count',
@@ -219,6 +220,7 @@ class LabelAdmin(MusicPublisherAdmin):
 
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
+    actions = None
     search_fields = ('name', )
 
     list_display = ('name', 'libraryrelease_count', 'work_count')
@@ -267,6 +269,7 @@ class ReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Release`.
     """
 
+    actions = None
     list_display = (
         '__str__',
     )
@@ -302,6 +305,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.AlbumCD`.
     """
 
+    actions = None
     form = LibraryReleaseForm
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
@@ -343,7 +347,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         """
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
-            qs = Work.objects.filter(recordings__album_cd=obj)
+            qs = Work.objects.filter(recordings__release=obj)
             qs.update(last_change=now())
 
     def get_queryset(self, request):
@@ -384,6 +388,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.AlbumCD`.
     """
 
+    actions = None
     inlines = [TrackInline]
     autocomplete_fields = ('release_label',)
 
@@ -766,18 +771,11 @@ class WorkAdmin(MusicPublisherAdmin):
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recordings__count'
 
-    def duration(self, obj):
-        if not (hasattr(obj, 'recording') and
-                obj.recording and obj.recording.duration):
-            return None
-        return obj.recording.duration.strftime('%H:%M:%S')
-    duration.admin_order_field = 'recordings__duration'
-
     readonly_fields = (
         'writer_last_names', 'work_id', 'cwr_export_count')
     list_display = (
         'work_id', 'title', 'iswc', 'writer_last_names',
-        'percentage_controlled', 'duration', 'library_release',
+        'percentage_controlled', 'library_release',
         'recording_count', 'cwr_export_count')
 
     def get_queryset(self, request):
@@ -1008,6 +1006,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
 @admin.register(Recording)
 class RecordingAdmin(MusicPublisherAdmin):
+    actions = None
     inlines = [TrackInline]
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
@@ -1072,7 +1071,7 @@ class RecordingAdmin(MusicPublisherAdmin):
         return qs
 
     def title(self, obj):
-        return obj.complete_version_title or obj.complete_version_title or obj.work.title
+        return str(obj)
 
     def work_link(self, obj):
         url = reverse('admin:music_publisher_work_change', args=[obj.work.id])

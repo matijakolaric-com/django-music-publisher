@@ -1064,8 +1064,8 @@ class Recording(models.Model):
 
     def __str__(self):
         return (
-            self.complete_version_title or
-            self.recording_title or
+            self.complete_version_title if self.version_title else
+            self.complete_recording_title if self.recording_title else
             self.work.title)
 
     @property
@@ -1345,7 +1345,7 @@ class CWRExport(models.Model):
                     continue
                 artists.update({
                     rec['recording_artist']['code']: rec['recording_artist']})
-            for artist in sorted(artists.values()):
+            for artist in artists.values():
                 yield self.get_transaction_record('PER', artist)
 
             # REC

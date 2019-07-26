@@ -1,6 +1,11 @@
 Labels and Libraries
 ====================
 
+.. figure:: /images/libraries.png
+   :width: 100%
+
+   Librariy list view, note the counters for releases and works with links
+
 Labels and libraries are extremely simple, these models only have a single field: ``name``.
 
 However, the list views have counters with links:
