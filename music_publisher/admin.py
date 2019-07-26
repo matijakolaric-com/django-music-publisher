@@ -50,7 +50,7 @@ class ArtistInWorkInline(admin.TabularInline):
     model = ArtistInWork
     extra = 0
     verbose_name_plural = \
-        'Performing Artists (not mentioned in "recordings" section)'
+        'Artists performing Works (not mentioned in "recordings" section)'
 
 
 class RecordingInline(admin.StackedInline):
@@ -65,19 +65,18 @@ class RecordingInline(admin.StackedInline):
             'fields': (
                 'work',
                 ('recording_title', 'recording_title_suffix',
-                 'complete_recording_title'),
+                    'complete_recording_title'),
                 ('version_title', 'version_title_suffix',
-                 'complete_version_title'),
+                    'complete_version_title'),
                 ('isrc', 'artist', 'record_label'),
                 ('duration', 'release_date'),
-                # ('album_cd', )
             ),
         }),
     )
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
-    verbose_name_plural = 'Recordings (with recording artists and labels)'
+    verbose_name_plural = 'Recordings (with recording artists and record labels)'
     model = Recording
     extra = 0
 
@@ -93,17 +92,12 @@ class ArtistAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Artist`.
     """
 
-    list_display = ('last_or_band', 'first_name', 'isni')
+    list_display = (
+        'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
     search_fields = ('last_name', 'isni',)
-    inlines = [RecordingInline, ArtistInWorkInline]
     fieldsets = (
-        ('Name', {
-            'fields': (
-                ('first_name', 'last_name'),)}),
-        ('ISNI', {
-            'fields': (
-                'isni',),
-        }),
+        ('Name', {'fields': (('first_name', 'last_name'),)}),
+        ('ISNI', {'fields': ('isni',),}),
     )
 
     def get_inline_instances(self, request, obj=None):
@@ -129,16 +123,138 @@ class ArtistAdmin(MusicPublisherAdmin):
             qs = Work.objects.filter(artistinwork__artist=obj)
             qs.update(last_change=now())
 
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count('work', distinct=True))
+        qs = qs.annotate(models.Count('recording', distinct=True))
+        return qs
+
+    def work_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.work__count
+
+        url = reverse('admin:music_publisher_work_changelist')
+        url += '?artists__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    work_count.short_description = 'Perf. Works'
+    work_count.admin_order_field = 'work__count'
+
+    def recording_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.recording__count
+
+        url = reverse('admin:music_publisher_recording_changelist')
+        url += '?recording_artist__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    recording_count.short_description = 'Recordings'
+    recording_count.admin_order_field = 'recording__count'
 
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
     search_fields = ('name', )
+    list_display = (
+        'name', 'recording_count', 'commercialrelease_count',
+        'libraryrelease_count')
+    readonly_fields = (
+        'recording_count', 'commercialrelease_count', 'libraryrelease_count')
+
+
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(
+            libraryrelease__count=models.Count(
+                'release', distinct=True,
+                filter=models.Q(release__cd_identifier__isnull=False)))
+        qs = qs.annotate(
+            commercialrelease__count=models.Count(
+                'release', distinct=True,
+                filter=models.Q(release__cd_identifier__isnull=True)))
+        qs = qs.annotate(models.Count('recording', distinct=True))
+        return qs
+
+    def commercialrelease_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.commercialrelease__count
+
+        url = reverse('admin:music_publisher_commercialrelease_changelist')
+        url += '?release_label__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    commercialrelease_count.short_description = 'Commercial releases'
+    commercialrelease_count.admin_order_field = 'commercialrelease__count'
+
+    def libraryrelease_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.libraryrelease__count
+
+        url = reverse('admin:music_publisher_libraryrelease_changelist')
+        url += '?release_label__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    libraryrelease_count.short_description = 'Library releases'
+    libraryrelease_count.admin_order_field = 'libraryrelease__count'
+
+    def recording_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.recording__count
+
+        url = reverse('admin:music_publisher_recording_changelist')
+        url += '?record_label__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    recording_count.short_description = 'Recordings'
+    recording_count.admin_order_field = 'recording__count'
 
 
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
     search_fields = ('name', )
 
+    list_display = ('name', 'libraryrelease_count', 'work_count')
+    readonly_fields = ('libraryrelease_count', 'work_count')
+
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(work__count=models.Count('release__works', distinct=True))
+        qs = qs.annotate(release__count=models.Count('release__id', distinct=True))
+        return qs
+
+    def libraryrelease_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.release__count
+
+        url = reverse('admin:music_publisher_libraryrelease_changelist')
+        url += '?library__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    libraryrelease_count.short_description = 'Library releases'
+    libraryrelease_count.admin_order_field = 'libraryrelease__count'
+
+    def work_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.work__count
+
+        url = reverse('admin:music_publisher_work_changelist')
+        url += '?library_release__library__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    work_count.short_description = 'Works'
+    work_count.admin_order_field = 'work__count'
 
 class TrackInline(admin.TabularInline):
     model = Track
@@ -150,19 +266,6 @@ class TrackInline(admin.TabularInline):
 class ReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Release`.
     """
-
-    fieldsets = (
-        ('Library', {
-            'fields': (
-                ('cd_identifier', 'library'),)
-        }),
-        ('Release (album)', {
-            'fields': (
-                ('release_title', 'release_label'),
-                ('ean', 'release_date'))
-        }),
-    )
-
 
     list_display = (
         '__str__',
@@ -176,6 +279,15 @@ class ReleaseAdmin(MusicPublisherAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return super().has_view_permission(request, obj)
 
 
 class LibraryReleaseForm(forms.ModelForm):
@@ -194,17 +306,27 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
 
-    def get_fieldsets(self, request, obj=None):
-        """Fields depend on settings.
-        """
-        return ReleaseAdmin.get_fieldsets(self, request, obj)
+    fieldsets = (
+        ('Library', {
+            'fields': (
+                ('library', 'cd_identifier'),)
+        }),
+        ('Release (album)', {
+            'fields': (
+                ('release_title', 'release_label'),
+                ('ean', 'release_date'))
+        }),
+    )
 
     list_display = (
         'cd_identifier',
         'library',
         'release_title',
-        'release_label'
+        'release_label',
+        'work_count',
+        'track_count',
     )
+    readonly_fields = ('work_count', 'track_count')
 
     list_filter = ('release_label', 'library')
     search_fields = ('release_title', '^cd_identifier')
@@ -224,6 +346,38 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
             qs = Work.objects.filter(recordings__album_cd=obj)
             qs.update(last_change=now())
 
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count('tracks', distinct=True))
+        qs = qs.annotate(models.Count('works', distinct=True))
+        return qs
+
+    def work_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.works__count
+
+        url = reverse('admin:music_publisher_work_changelist')
+        url += '?library_release__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    work_count.short_description = 'Works'
+    work_count.admin_order_field = 'works__count'
+
+    def track_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.tracks__count
+
+        url = reverse('admin:music_publisher_recording_changelist')
+        url += '?release__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    track_count.short_description = 'Recordings'
+    track_count.admin_order_field = 'tracks__count'
+
 
 @admin.register(CommercialRelease)
 class CommercialReleaseAdmin(MusicPublisherAdmin):
@@ -235,8 +389,11 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     list_display = (
         'release_title',
-        'release_label'
+        'release_label',
+        'track_count',
     )
+
+    readonly_fields = ('track_count',)
 
     list_filter = ('release_label',)
     search_fields = ('release_title',)
@@ -256,6 +413,25 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
             return []
         return super().get_inline_instances(request)
 
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count('tracks', distinct=True))
+        return qs
+
+
+    def track_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.tracks__count
+
+        url = reverse('admin:music_publisher_recording_changelist')
+        url += '?release__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    track_count.short_description = 'Recordings'
+    track_count.admin_order_field = 'tracks__count'
 
 
 @admin.register(Writer)
@@ -264,11 +440,12 @@ class WriterAdmin(MusicPublisherAdmin):
     """
 
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
-                    '_can_be_controlled', 'generally_controlled')
+                    '_can_be_controlled', 'generally_controlled',
+                    'work_count')
 
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
-    readonly_fields = ('_can_be_controlled', 'original_publisher')
+    readonly_fields = ('_can_be_controlled', 'work_count')
     fieldsets = (
         ('Name', {
             'fields': (
@@ -287,16 +464,6 @@ class WriterAdmin(MusicPublisherAdmin):
     )
     actions = None
 
-    @staticmethod
-    def original_publisher(obj):
-        """Return the original publisher.
-
-        This makes sense only in the US context."""
-
-        if obj.generally_controlled and obj.pr_society:
-            return obj.get_publisher_dict().get('publisher_name')
-        return ''
-
     def save_model(self, request, obj, form, *args, **kwargs):
         """Perform normal save_model, then update last_change of
         all connected works."""
@@ -304,6 +471,26 @@ class WriterAdmin(MusicPublisherAdmin):
         if form.changed_data:
             qs = Work.objects.filter(writerinwork__writer=obj)
             qs.update(last_change=now())
+
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count('work', distinct=True))
+        return qs
+
+
+    def work_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.work__count
+
+        url = reverse('admin:music_publisher_work_changelist')
+        url += '?writers__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+    work_count.short_description = 'Works'
+    work_count.admin_order_field = 'work__count'
 
 
 class AlternateTitleFormSet(BaseInlineFormSet):
@@ -330,7 +517,7 @@ class AlternateTitleFormSet(BaseInlineFormSet):
                 if not form.cleaned_data.get('suffix'):
                     continue
                 title_suffix_len = len(form.cleaned_data['title'])
-                if work_title_len + title_suffix_len > 59:  # 60 - 1 for space
+                if work_title_len + title_suffix_len > 60 - 1:
                     form.add_error(
                         'title',
                         'Too long for suffix, work title plus suffix must be '
@@ -344,7 +531,8 @@ class AlternateTitleInline(admin.TabularInline):
     formset = AlternateTitleFormSet
     extra = 0
     readonly_fields = ('complete_alt_title',)
-    verbose_name_plural = 'Alternative titles (not mentioned in "recordings" section)'
+    verbose_name_plural = \
+        'Alternative titles (not mentioned in "recordings" section)'
     fields = ('title', 'suffix', 'complete_alt_title')
 
     def complete_alt_title(self, obj):
@@ -509,7 +697,8 @@ class WorkAdmin(MusicPublisherAdmin):
 
     inlines = (
         WriterInWorkInline,
-        RecordingInline, AlternateTitleInline,
+        RecordingInline,
+        AlternateTitleInline,
         ArtistInWorkInline,
         WorkAcknowledgementInline)
 
@@ -563,7 +752,6 @@ class WorkAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_cwrexport_changelist')
         url += '?works__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
-
     cwr_export_count.short_description = 'CWRs'
     cwr_export_count.admin_order_field = 'cwr_exports__count'
 
@@ -575,7 +763,6 @@ class WorkAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?work__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
-
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recordings__count'
 
@@ -584,7 +771,6 @@ class WorkAdmin(MusicPublisherAdmin):
                 obj.recording and obj.recording.duration):
             return None
         return obj.recording.duration.strftime('%H:%M:%S')
-
     duration.admin_order_field = 'recordings__duration'
 
     readonly_fields = (
@@ -724,7 +910,10 @@ class WorkAdmin(MusicPublisherAdmin):
     list_filter = (
         HasISWCListFilter,
         HasRecordingListFilter,
+        ('library_release__library', admin.RelatedOnlyFieldListFilter),
         ('library_release', admin.RelatedOnlyFieldListFilter),
+        ('artists', admin.RelatedOnlyFieldListFilter),
+        ('writers', admin.RelatedOnlyFieldListFilter),
         'last_change',
         InCWRListFilter,
         ACKSocietyListFilter,
@@ -732,8 +921,9 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     search_fields = (
-        'title', 'alternatetitle__title', 'writerinwork__writer__last_name',
-        '^iswc', '^id')
+        'title', 'alternatetitle__title', '^iswc', '^id' 
+        'recordings__recording_title', 'recordings__version_title',
+        'recordings__iswc', 'writerinwork__writer__last_name')
 
     def get_search_results(self, request, queryset, search_term):
         """Deal with the situation term is work ID.
@@ -821,7 +1011,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     inlines = [TrackInline]
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
-        'record_label')
+        'label_link')
 
     class HasISRCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISRC.
@@ -847,11 +1037,12 @@ class RecordingAdmin(MusicPublisherAdmin):
                 return queryset.filter(isrc__isnull=True)
 
     list_filter = (HasISRCListFilter, 'artist', 'record_label')
-    search_fields = ('work__title', 'recording_title', 'version_title')
+    search_fields = (
+        'work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
         'complete_recording_title', 'complete_version_title', 'title',
-        'work_link', 'artist_link')
+        'work_link', 'artist_link', 'label_link')
     fieldsets = (
         (None, {
             'fields': (
@@ -862,9 +1053,8 @@ class RecordingAdmin(MusicPublisherAdmin):
                 (
                     'version_title', 'version_title_suffix',
                     'complete_version_title'),
-                ('isrc', 'artist', 'record_label'),
+                ('isrc', 'record_label', 'artist'),
                 ('duration', 'release_date'),
-                # ('album_cd', )
             ),
         }),
     )
@@ -900,6 +1090,15 @@ class RecordingAdmin(MusicPublisherAdmin):
     artist_link.short_description = 'Recording Artist'
     artist_link.admin_order_field = 'artist'
 
+    def label_link(self, obj):
+        if not (obj.record_label):
+            return None
+        url = reverse('admin:music_publisher_label_change', args=[obj.record_label.id])
+        link = '<a href="{}">{}</a>'.format(url, obj.record_label)
+        return mark_safe(link)
+    label_link.short_description = 'Record Label'
+    label_link.admin_order_field = 'record_label'
+
 
 @admin.register(CWRExport)
 class CWRExportAdmin(admin.ModelAdmin):
@@ -917,7 +1116,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         url = reverse('admin:music_publisher_work_changelist')
         url += '?cwr_exports__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
-
     work_count.short_description = 'Works'
     work_count.admin_order_field = 'works__count'
 

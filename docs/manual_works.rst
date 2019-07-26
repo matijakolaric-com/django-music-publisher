@@ -1,5 +1,5 @@
-Adding, Changing and Deleting Musical Works
-===========================================
+Musical Works: Adding, Changing and Deleting
+============================================
 
 .. figure:: /images/add_work.png
    :width: 100%
@@ -11,69 +11,139 @@ The view for adding and changing works is shown in the image above. It is the mo
 General
 +++++++
 
-This part contains the fields ``Title`` and ``ISWC``, as well as read-only field ``Work ID``, which is set automatically upon first save. Please note that the label ``Title`` is bold, representing that this field is required. So, lets put a title in.
+This part contains basic fields. Field ``work ID``, which is set automatically upon first save. This field is extremely important for registrations. The proper explanation is beyond the scope of this manual.
 
-If ``allow_modifications`` is set, two more fields are shown, ``original title`` and ``version type``, with only the former being editable. By filling out this field, the ``version type`` will be set to ``modification`` and a more complex set of validation rules will apply.
+``title`` should be obvious. Please note that the label ``title`` is bold, representing that this field is required. ``ISWC`` is a unique identifier assigned to works by collecting societies.
 
-Alternate Titles
-++++++++++++++++
+Fields ``original title`` and ``version type``, with only the former being editable, are used for modifications. By filling out ``original title`` field, the ``version type`` will be set to ``modification`` and a more complex set of validation rules will apply.
 
-Press on ``Add another Alternate Title`` and put the title in the field. Please note the icon for deleting the row.
+Please note that the difference between modifications of works in public domain and those where copyright still exists is set through ``writers in work`` section.
 
-.. figure:: /images/alternate_title.png
-   :width: 100%
+Library
++++++++
 
-Setting ``admin_show_alt_suffix`` adds two more columns to this section. If you choose to mark the alt title as ``suffix``, then it will be appended to the ``Work title``, and the result will be displayed in the last column. Please note that the limit of 60 characters applies to the whole alternate title.
+Django Music Publisher has good support for music libraries. If a work is part of a :doc:`library <manual_labels_libraries>`, then a :doc:`library release <manual_releases>` must be set here.
 
 Writers in Work
 +++++++++++++++
 
-This is where you put in the information on composers and lyricists who created this musical work. As information on at least one controlled writer is required, let us look at all the columns:
+This is where you put in the information about :doc:`writers <manual_writers>` (composers and lyricists) who created this musical work. At least one is required, to add more, click on ``add another writer in work``.
 
-* ``Writer`` is where you can select a writer. The field is conditionally required for controlled writers, and at least one writer must be controlled, so you need to select at least one. But, as there are no writers, press on the green plus ``+`` sign next to it. A pop-up window appears. Fill out ``First name``, ``Last name``, ``IPI Name #`` and ``Performing Rights Society``, and press ``Save``. The newly added writer will appear in this field. There is another way to add writers, which will be covered later. Please also note that for shares you do not control, this field is not required. If left empty, it means that the writer is unknown.
+Each column is described next.
+
+Writer
+------
+
+This is where you select a :doc:`writer <manual_writers>`. The field is conditionally required for a controlled writer, and at least one writer must be controlled.
+
+To add a writer, press on the green plus ``+`` sign next to it. A pop-up window will appear. Fill out ``first name``, ``last name``, ``IPI name #`` and ``performance rights society``, and press on ``save``. The newly added writer will appear in this field.
+
+There is another way to add writers, which will be covered in the :doc:`writers <manual_writers>` section.
+
+If left empty, it means that the writer is unknown. This is often used with modifications of traditional musical works.
+
 
 .. figure:: /images/popup_add_writer.png
    :width: 100%
 
    Add writer pop-up view
 
-* ``Capacity`` is where you select how this writer contributed to the work, the options are: ``Composer``, ``Lyricist`` and ``Composer and Lyricist``. This field is required for controlled writers. Please note that at least one of the writers should be a ``Composer`` or a ``Composer and Lyricist``. If modifications are allowed, further roles are present and a far more complex set of validation rules applies. At least two rows are required, one being (original) ``Composer`` or a ``Composer and Lyricist``, and one being ``Arranger``, ``Adaptor`` or ``Translator``.
+Capacity
+--------
 
-* ``Relative share`` is where the relative share is put in. The sum of relative shares for each work must be 100%. This is how the writers split the shares **prior** to publishing. For controlled writers, 50% for performing rights, 100% for mechanical and 100% for sync, of ``relative share`` is transferred to the publisher (you). Please note that Django Music Publisher does not support different splits.
+This where you select how this writer contributed to the work. This field is required for controlled writers. Please note that at least one of the writers should be a ``composer`` or a ``composer and lyricist``.
 
-* ``Controlled`` is where you select whether you control the writer or not. Select it for at least one ``Writer in Work`` row.
+The options are ``composer``, ``lyricist`` and ``composer and lyricist`` for original works. ``Arranger``, ``adaptor`` or ``translator`` can only be used in modifications. For them, at least two rows are required, one being (original) ``composer`` or a ``composer and lyricist``, and one being ``arranger``, ``adaptor`` or ``translator``.
 
-* ``Original publisher`` is a read-only field showing which entity is the original publisher. This field only makes sense for the US publishers with multiple entities. It can be disabled in the settings. `DMP Guru <https://dmp.guru>`_ instances show this field only if the publisher has enities in multiple US PROs.
+For modifications of traditional works, set the capacity of the unknown writer to ``composer and lyricist``.
 
-* ``Society-assigned agreement number`` is a field where society-assigned agreement numbers for **specific agreements** are entered. For **general agreements**, they are set when defining the ``Writers``. If both exist, the **specific** one is used. This field can also be disabled in settings, as it is only used in some societies. It may also be set as required for controlled writers. It should **not** be filled for other writers. `DMP Guru <https://dmp.guru>`_ does not show this field for affiliates of US PROs and HFA, shows for all other societies. For affiliates of societies that require this field, it is automatically set as required.
+Relative Share
+--------------
 
-* ``Publisher fee`` is the fee kept by the publisher, while the rest is forwarded to the writer. **This field is not used in registrations.** It is used only for royalty statement processing. This field can also be disabled in the settings. It may also be set as required for controlled writers. It should not be filled for other writers. `DMP Guru <https://dmp.guru>`_ sets this field as required for controlled writers. If it is set as a part of a general agreement in ``Writers``, it does not have to be set in ``Writer in Work``. If it is set in both places, the one from ``Writer in Work`` has precedence.
+Django Music Publisher uses a very simple single-field share model. It seems that the model is completely illogical to "experts". If it does not work for you, then it does not and Django Music Publisher is not the right solution for you.
 
-Setting ``allow_multiple_ops`` enables the option to cover the case with multiple original publishers per writer. As stated in many places, the data on other publishers can not be entered. So, in case of multiple original publishers, one of which is you, enter two ``Writer in Work`` rows with the same ``Writer`` and ``Capacity``, one controlled (with your share) and one for the other publisher(s).
+The principle is very simple. Writers create a work and decide how they want to split the shares among themselves. This is referred to as ``relative share``. Then each of the writers may choose a publisher and transfer some of their relative share to the publisher, according to their publishing agreement. This does not influence other writers.
 
-First Recording
-+++++++++++++++
+In Django Music Publisher, publishing agreements between all controlled writers and you as the original publisher have the same splits, The default is that 50% of performance and 100% of mechanical and sync is transferred to you. Please note that ``publisher fee`` has nothing to do with this split. Again, if this does not work for you, it does not.
 
-**Django Music Publisher can only hold data on the first recording/release of a musical work, not all of them.** This is caused by the fact that not all societies and well-known sub-publishers have removed a long obsolete limit in CWR to one recording per work. This will change in future releases.
+The sum of relative shares for each work must be 100%.
 
-.. figure:: /images/first_recording.png
-   :width: 100%
+For public domain works, set the share of original writers (``composer``, ``lyricist``, ``composer and lyricist``) to 0.
 
-   Data on the first recording of the work
+Controlled
+----------
 
-All fields are self-explanatory. Please note that fields ``Album / Library CD`` and ``Recording Artist`` behave in the same way the described field ``Writer`` does. Let us presume that our first work has not been recorded yet and remove this form.
+This is where you select whether you control the writer or not. Select it for at least one ``writer in work`` row.
 
-**Please read the part on ``Albums and/or Library CDs`` for details on albums and music libraries, as this is often a source of confusion for production music publishers.**
+A writer can be entered in two rows, once as controlled, once as not. This allows for co-publishing deals. If there is more than one other publisher per writer, add their shares to a single row.
+
+Society-assigned agreement number
+---------------------------------
+
+In this field, society-assigned agreement numbers for **specific agreements** are entered. For **general agreements**, they are set when defining the :doc:`writer <manual_writers>`. If both exist and are different, the **specific** one is used.
+
+This field may be set as required for controlled writers.
+
+
+Publisher fee
+-------------
+
+This is the fee kept by the publisher when royalties are paid and distributed. **This field is not used in registrations.** It is used only for royalty statement processing. Most small publishers don't use it.
+
+It may also be set as required for controlled writers. If it is set as a part of a general agreement for the :doc:`writer <manual_writers>`, it does not have to be set in ``writer in work`` section. If it is set in both places, the one from ``writer in work`` has precedence.
+
+Recordings (With Recording Artists and Record Labels)
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Since version 19.7, Django Music Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
+
+Please note that, although there is a separate set of views for :doc:`recordings <manual_recordings>`, it is recommended to edit them here.
+
+Recording title
+---------------
+
+There are three fields in this row. ``Recording title`` is where one enters the title of the recording. If ``recording title suffix`` is checked, then the former field is used as a suffix to the ``work title``. This is a huge benefit in production music, where tehre are multiple recordings per work, usually with same suffixes, e.g. "drums", "bed", etc. The result is then snown in the ``complete recording title`` field.
+
+Version title
+-------------
+
+Same is valid for the ``version title``, except that the suffix is added to the ``recording title``.
+
+Other fields
+------------
+
+``ISRC`` is a unique identifier, issued by record labels. ``Recording artist``, ``record label``, ``duration`` and ``release date`` are quite obvious.
+
+Note that after a succesfull save, there is a ``change`` link in the recording header.
+
+
+Alternative Titles
+++++++++++++++++++
+
+Alternative titles section is for alternative titles. There is no need to enter the recording or version titles from recordings section. The suffixes work the same way as for ``recording titles``.
 
 Artists Performing Works
 ++++++++++++++++++++++++
 
-Here you list the artists who are performing the work, there is no need to repeat the ``Artist`` set as the ``Recording Artist`` in the previous section. 
+Here you list the artists who are performing the work, there is no need to repeat the artists set as ``recording artist`` in the ``recordings`` section.
 
 Registration Acknowledgements
 +++++++++++++++++++++++++++++++++++
 
-This is where the work registration acknowledgements are recorded. Please note that only superusers (in the default configuration) can modify this section, as it is automatically filled out from uploaded acknowledgement files. This will be covered later in this document.
+This is where the work registration acknowledgements are recorded. Please note that only superusers (in the default configuration) can modify this section, as it is automatically filled out from :doc:`uploaded acknowledgement files <manual_ack>`.
 
-Once you press ``Save``, you are taken to the ``Work list view``.
+Saving and Deleting
++++++++++++++++++++
+
+At the bottom, there is a delete button and three save buttons. Delete is obvious. The save buttons do following:
+
+* ``Save and add another`` (when adding new work) saves the work and then opens a new, empty form for the next one.
+* ``Save as new`` (when editing existing work) saves this data as a new work (with a different work ID)
+* ``Save and continue editing`` saves the work and then opens the same work for further editing.
+* ``SAVE`` saves the work and returns to the :doc:`work list view <manual_works_list>`, covered next.
+
+The combination is extremely powerful, especially when the changes between works is small, as is often the case for production music.
+One enters the first work, using suffixes as much as possible, presses on ``save and continue editing``.
+If save was succesful, then the data can be changed for the next work, and then one presses on ``save as new``, and this new work is saved.
+The process can be repeated for all the works in the set.
 

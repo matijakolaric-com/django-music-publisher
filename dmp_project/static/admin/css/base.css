@@ -462,7 +462,7 @@ input[type=number], input[type=tel], textarea, select, .vTextField {
     margin-top: 0;
 }
 
-.inline-related:not(.tabular) input[type=text] {
+div:not(.tabular) input[type=text] {
     width: 20em;
 }
 
@@ -472,7 +472,7 @@ textarea:focus, select:focus, .vTextField:focus {
     border-color: #999;
 }
 
-select {
+select:not(.filtered) {
     height: 18px;
     box-sizing: content-box;
 }
@@ -572,9 +572,14 @@ input[type=button][disabled].default {
     border-collapse: collapse;
 }
 
-.app-music_publisher.module tr.model-work th,
-.app-music_publisher.module tr.model-recording th {
-    font-size: 18px;
+.app-music_publisher.module tr.model-work th {
+    font-size: 20px;
+}
+
+.app-music_publisher.module tr.model-commercialrelease th,
+.app-music_publisher.module tr.model-libraryrelease th,
+.app-music_publisher.module tr.model-cwrexport th {
+    font-size: 16px;
 }
 
 /* MESSAGES & ERRORS */

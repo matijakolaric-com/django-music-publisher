@@ -7,7 +7,7 @@ This is the user manual for Django Music Publisher (|release|), regardless if yo
 
 This manual continues at the point where :ref:`StandaloneDeployment` ended, presuming that Django Music Publisher was installed, migrations performed, a superuser created, predefined permission groups added, and that Django Music Publisher is running.
 
-This manual is in a form of a walk-through, covering all features. It presumes that the user understands the music industry terms and has already used some web-based tools.
+It presumes that the user understands the music industry terms and has already used some web-based tools.
 
 .. toctree::
    :maxdepth: 2
@@ -17,8 +17,12 @@ This manual is in a form of a walk-through, covering all features. It presumes t
    manual_app
    manual_works
    manual_works_list
+   manual_releases
+   manual_labels_libraries
+   manual_artists
+   manual_recordings
+   manual_writers
    manual_cwr
    manual_ack
-   manual_albumcd
 
 

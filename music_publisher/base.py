@@ -21,10 +21,8 @@ class TitleBase(models.Model):
         abstract = True
 
     title = models.CharField(
-        max_length=60, db_index=True, validators=(
-            # Original CWR Generator marks all alternate titles as 'AT',
-            # so the validation is the same as in NWR.work_title
-            CWRFieldValidator('work_title'),))
+        max_length=60, db_index=True,
+        validators=(CWRFieldValidator('work_title'),))
 
     def __str__(self):
         return self.title.upper()
@@ -88,7 +86,7 @@ class IPIBase(models.Model):
         'IPI Base #', max_length=15, blank=True, null=True,
         validators=(CWRFieldValidator('writer_ipi_base'),))
     pr_society = models.CharField(
-        'Performing rights society', max_length=3, blank=True, null=True,
+        'Performance rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
         choices=const.SOCIETIES)
     mr_society = models.CharField(
@@ -125,7 +123,9 @@ class IPIBase(models.Model):
         if self.ipi_base:
             self.ipi_base = self.ipi_base.replace('.', '')
             self.ipi_base = re.sub(
-                r'(I).?(\d{9}).?(\d)', r'\1-\2-\3', self.ipi_base)
+                r'(I).?(\d{9}).?(\d)',
+                r'\1-\2-\3',
+                self.ipi_base)
         return super().clean_fields(*args, **kwargs)
 
     def clean(

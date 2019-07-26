@@ -103,19 +103,19 @@ Does it ...?
 
 Export Common Works Registration (CWR) files and process acknowledgements?
 	Yes. CWR 2.1 is supported and well tested, CWR 2.2 will not be implemented.
-    CWR 3.0 is experimental and available as a separate module.
+	CWR 3.0 is experimental and available as a separate module.
 
 Export Electronic Batch Registration (EBR) files?
 	No. EBR is officially accepted by MusicMark (ASCAP, BMI, SOCAN) and 
 	unofficially also by a few other societies. All of them also accept CWR.
 
 Export MWN (DDEX) or any other DDEX format?
-	MWN export is experimental. Other DDEX formats may follow.
+	DDEX licence is not compatible with MIT licence. DDEX promised to solve the issue promptly. Months ago.
 
 Export some other format specified by someone?
-	There are, actually, two JSON-based export formats. They are created by
-	the maintainer of this project and used in several other projects. But they
-	are work in progress, and is still unspecified.
+	There are two JSON-based export formats. They are work in progress,
+	and are still unspecified. However, any developer should be able to
+	fiure them out.
 
 Import CWR acknowledgements?
 	Yes. However, if it contains additional information, then you must use an
@@ -137,31 +137,19 @@ Every society (CMO, PRO, MRO, etc.) is somewhat different. Django Music
 Publisher has been tested with some of them, and other software solutions by
 the maintainer have also been used in many more. Here is what we know.
 
-PRS/MCPS
+ASCAP, BMI, PRS/MCPS
 	Registering and acknowledgement processing works flawlessly. For new works,
 	ISWCs are issued **after** the successful registration. One has to request
 	it as CSV from PRS/MCPS and import. Manually adding ISWCs is also possible.
 
-BUMA/STEMRA, GEMA, SABAM, KODA, STIM, TEOSTO, TONO
+BUMA/STEMRA, GEMA, KODA, SABAM, STIM, TEOSTO, TONO
 	Registering and acknowledgement processing works flawlessly (same as in
-	PRS/MCPS). There may be some specific rules that are not covered.
+	PRS/MCPS). There may be some country-specific rules that are not covered.
 
-SACEM, SIAE, ZAIKS, SGAE, SPA, SUISA
-	Works, but not everything was tested so far, as users did not use all
-	features of Django Music Publisher. No issues are expected.
-
-APRA, AKM/AUME, MUSICAUTOR, OSA, IMRO, UCMR-ADA, ACUM
-    Other registration software by maintainer works there without issues, no
-    issues are expected, but not tested yet.
-
-ASCAP, BMI, SESAC/HFA, SOCAN/SODRAC, CMMRA
-    Django Music Publisher and other registration software by maintainer works.
-    Lately there were some issues due to software changes in SESAC/HFA and it
+SESAC/HFA, SOCAN/SODRAC, CMMRA
+    There were some issues due to software changes in SESAC/HFA and it
     is not clear to the maintainer how Musicmark will process SODRAC (SOCAN RR)
-    registrations. With Django Music Publisher, no issues are expected.
-
-    Please note that US mode with enities in all US PROs is not publicly
-    available in DMP Guru.
+    registrations. Probably works.
 
 SAMRO, MESAM
 	Requires more testing, probably completely compatible.
@@ -179,7 +167,9 @@ Asia (except ACUM and MESAM) and Africa (except SAMRO)
 	Absolutely no idea.
 
 Latin America
-	It's complicated.
+	It's complicated. Most of the stuff will work in most societies. There may
+	be some country-specific rules that are not covered.
+
 
 
 Various Questions
@@ -189,42 +179,30 @@ What is ``relative share`` exactly?
 	When writers (composers and lyricists) create a work, they split the shares
 	among them. This is ``relative share``. A writer may then have a publisher,
 	which would be you in this case. They usually transfer 50% of performance
-	and 100% of mechanical and synchronization rights to the publisher. If this
-	is not the case, then Django Music Publisher is not the tool for you.
+	and 100% of mechanical and synchronization rights to the publisher. In some
+    countries, however, different splits may be enforced by law.
 
 What is ``publisher fee`` exactly?
 	This field is **not used for registrations**. In some cases the publisher
 	has to pay part of their revenues to the writer. The **kept** percentage
 	of it is referred to as ``publisher fee``.
 
-Does ``publisher fee`` apply to performance, as well as to mechanical and
-syncronization royalties?
-	This depends on options selected during the import of royalty statements.
-
-My work has several recording versions. How do I put it in?
-	Django Music Publisher only supports a single (first) recording per work.
-	This also means that one ISWC can only have one ISRC assigned to it.
-	In many cases, it is eanough to use ``Alternate Titles``. However, if ISRC
-	or some other data is required for additional rerordings, then Django Music
-	Publisher is not the right solution for you. Yet.
-
 Where do I put the duration of the composition?
 	Compositions do not really have a duration, recordings do. So, it is only
-	possible to assign duration to the ``First Recording``.
+	possible to assign duration to the ``Recording``.
 
-I dont have ISWC codes. What do I do?
+I don't have ISWC codes. What do I do?
 	You can enter other data and then add ISWCs later on. You should ask your
 	society how to apply. Some will assing them automatically once you register
-	by CWR. If that is the case, then you may be able to import them from
-	acknowledgement files.
+	by CWR.
 
 Is there any way of auto-filling the works?
 	There is a simple way to add similar works. Open a work that you want to
 	use as a template, enter the changes and then press on ``Save as new``.
 	The new work will be saved and opened. Repeat for all works.
-	See :doc:`Adding, Changing and Deleting Musical Works <manual_works>` for
+	See :doc:`Works <manual_works>` for
 	details.
 
 How do I enter multiple original publishers per one writer?
 	This is described
-	in :doc:`Adding, Changing and Deleting Musical Works <manual_works>`.
+	in :doc:`Works <manual_works>`.

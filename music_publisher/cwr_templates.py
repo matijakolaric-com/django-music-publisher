@@ -1,8 +1,7 @@
 """Django templates for CWR generation.
 
 Attributes:
-    TEMPLATES_21 (dict): \
-        Record templates for CWR verison 2.1 revision 7
+    TEMPLATES_21 (dict): Record templates for CWR 2.1
 """
 
 from django.template import Template
