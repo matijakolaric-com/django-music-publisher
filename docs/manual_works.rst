@@ -73,7 +73,7 @@ For a musical work that is a modification of a public domain one, set the share 
 .. figure:: /images/works_pd.png
    :width: 100%
 
-   Writers in work for a work that is a modification of one in public domain
+   Writers in work for a work that is a modification of a work in public domain
 
 Controlled
 ----------
@@ -85,7 +85,7 @@ A writer can be entered in two rows, once as controlled, once as not. This allow
 .. figure:: /images/works_copub.png
    :width: 100%
 
-   Add work view, recordings
+   Writers in work for a co-published work
 
 Society-assigned agreement number
 ---------------------------------
@@ -108,7 +108,7 @@ Recordings (With Recording Artists and Record Labels)
 .. figure:: /images/works_recordings.png
    :width: 100%
 
-   Writers in work for a co-published work
+   Add work view, recordings
 
 Since version 19.7, Django Music Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
 
