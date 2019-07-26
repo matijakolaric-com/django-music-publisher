@@ -56,13 +56,13 @@ The views for recordings are, strictly speaking, not needed, as this data is acc
 Writers
 -------
 
-Composers and lyricists are usually called "writers", the term dating back to days when sheet music was the only way of music distribution. This module is very important, though simple,
+Composers and lyricists are usually called "writers", the term dating back to days when sheet music was the only way of music distribution. This model is very important, though simple,
 as it holds not only data about the writers, but also about their affiliations, agreements, etc.
 
 CWR Exports
 -----------
 
-Common Works Registration is a file format for batch registration of musical works in collecting societies (aka PROs/MROs). This module is used for creating these files.
+Common Works Registration is a file format for batch registration of musical works in collecting societies (aka PROs/MROs). This model is used for creating these files.
 
 CWR ACK Imports
 ---------------
