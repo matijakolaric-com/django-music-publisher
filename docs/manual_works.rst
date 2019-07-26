@@ -82,6 +82,11 @@ This is where you select whether you control the writer or not. Select it for at
 
 A writer can be entered in two rows, once as controlled, once as not. This allows for co-publishing deals. If there is more than one other publisher per writer, add their shares to a single row.
 
+.. figure:: /images/works_copub.png
+   :width: 100%
+
+   Add work view, recordings
+
 Society-assigned agreement number
 ---------------------------------
 
@@ -99,6 +104,11 @@ It may also be set as required for controlled writers. If it is set as a part of
 
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. figure:: /images/works_recordings.png
+   :width: 100%
+
+   Writers in work for a co-published work
 
 Since version 19.7, Django Music Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
 
