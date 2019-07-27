@@ -10,12 +10,14 @@ Attributes:
 from . import const, cwr_templates, validators
 
 import music_publisher.models
+
 from django.template import Context
 from django.core import exceptions
 
-from django.test import TestCase, SimpleTestCase, TransactionTestCase
+from django.test import SimpleTestCase, TransactionTestCase
+from django.contrib.auth.models import User
+from django.urls import reverse
 
-# from django.contrib.auth.models import User
 # from django.core.files.uploadedfile import InMemoryUploadedFile
 # from music_publisher.admin import *
 # from music_publisher.models import *
@@ -52,10 +54,15 @@ class CWRTemplatesTest(SimpleTestCase):
 
     def test_templates(self):
         self.assertIsInstance(cwr_templates.TEMPLATES_21, dict)
-        for key in self.RECORD_TYPES:
+        for i, key in enumerate(self.RECORD_TYPES):
             self.assertIn(key, cwr_templates.TEMPLATES_21)
             template = cwr_templates.TEMPLATES_21[key]
-            self.assertIsInstance(template.render(Context({})).upper(), str)
+            d = {
+                'transaction_sequence': i,
+                'record_sequence': None,
+                'first_name': None,
+                'pr_society': '10'}
+            self.assertIsInstance(template.render(Context(d)).upper(), str)
 
 
 class ValidatorsTest(SimpleTestCase):
@@ -72,7 +79,7 @@ class ValidatorsTest(SimpleTestCase):
         with self.assertRaises(exceptions.ValidationError):
             validator('1X')
         with self.assertRaises(exceptions.ValidationError):
-            validator('000000000000011')
+            validator('0000000000000010')
 
     def test_ean(self):
         validator = validators.CWRFieldValidator('ean')
@@ -103,6 +110,8 @@ class ValidatorsTest(SimpleTestCase):
             validator('0000000199')
         with self.assertRaises(exceptions.ValidationError):
             validator('00000000100')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('0000000010A')
 
     def test_ipi_base(self):
         validator = validators.CWRFieldValidator('ipi_base')
@@ -123,21 +132,34 @@ class ModelsSimpleTest(TransactionTestCase):
 
     reset_sequences = True
 
+    RE_CWR = r"""HDRPB000000199DJANGO MUSIC PUBLISHING DEMO APP             01.10\d{22}               \r
+GRHNWR0000102.100000000000  \r
+NWR0000000000000000MUSIC PUB CARTOONS                                            DMP000001     T123456789400000000            UNC000000N      MOD   UNSUNS                                          N00000000000                                                   N\r
+SPU000000000000000101DMP      DJANGO MUSIC PUBLISHING DEMO APP              E 00000000000000000199              071050000341000005210000 N                                             \r
+SPT0000000000000002DMP            050001000010000I2136N001\r
+SWR0000000000000003W000001  KOLARIC                                      MATIJA                         CA0000000000000000019901005000   00000   00000 N  I-123456789-3             \r
+SWT0000000000000004W000001  050000000000000I2136N001\r
+PWR0000000000000005DMP      DJANGO MUSIC PUBLISHING DEMO APP                           J44VA         W000001  \r
+ALT0000000000000006MPC ACADEMY                                                 AT  \r
+VER0000000000000007MUSIC PUB CARTOONS                                                                                                                                                                                                                                                                                                                                       \r
+GRT000010000000100000010   0000000000\r
+TRL000010000000100000012"""
+
     def test_artist(self):
         artist = music_publisher.models.Artist(
             first_name='Matija', last_name='Kolarić')
         with self.assertRaises(exceptions.ValidationError):
             artist.clean_fields()
         artist = music_publisher.models.Artist(
-            first_name='Matija', last_name='Kolaric', isni='1X')
+            last_name='The Band', isni='1X')
         self.assertIsNone(artist.clean_fields())
         artist.save()
-        self.assertEqual(str(artist), 'MATIJA KOLARIC')
+        self.assertEqual(str(artist), 'THE BAND')
         self.assertDictEqual(artist.get_dict(), {
             'code': 'A000001',
-            'first_name': 'Matija',
+            'first_name': None,
             'isni': '000000000000001X',
-            'last_name': 'Kolaric'})
+            'last_name': 'The Band'})
 
     def test_library_release(self):
         library = music_publisher.models.Library(name='Music Library')
@@ -155,6 +177,12 @@ class ModelsSimpleTest(TransactionTestCase):
             'origin_type': {'code': 'LIB', 'name': 'Library Work'},
              'cd_identifier': 'ML001',
              'library': {'code': 'LI000001', 'name': 'Music Library'}})
+        release.ean = '1X'
+        with self.assertRaises(exceptions.ValidationError):
+            release.clean()
+        release.release_title = 'Test'
+        self.assertEqual(str(release), 'ML001: TEST (MUSIC LIBRARY)')
+
 
     def test_commercial_release(self):
         label = music_publisher.models.Label(name='Music Label')
@@ -172,6 +200,10 @@ class ModelsSimpleTest(TransactionTestCase):
             'release_label': {
                 'code': 'LA000001',
                 'name': 'Music Label'}})
+        release.release_label = None
+        self.assertEqual(str(release), 'ALBUM')
+        self.assertEqual(
+            music_publisher.models.CommercialRelease.objects.count(), 1)
 
     def test_writer(self):
         writer = music_publisher.models.Writer(
@@ -180,16 +212,32 @@ class ModelsSimpleTest(TransactionTestCase):
             writer.clean_fields()
         writer = music_publisher.models.Writer(
             first_name='Matija', last_name='Kolaric', ipi_name='199',
-            pr_society='10')
-        self.assertIsNone(writer.clean_fields())
-        writer.save()
+            ipi_base='I-123.456.789-3', pr_society='10', saan='J44va',
+            publisher_fee=50)
         self.assertEqual(str(writer), 'MATIJA KOLARIC')
+        self.assertIsNone(writer.clean_fields())
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean()
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            generally_controlled=True)
+        self.assertIsNone(writer.clean_fields())
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean()
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            ipi_base='I-123.456.789-3', pr_society='10',
+            generally_controlled=True, saan='J44va', publisher_fee=50)
+        self.assertIsNone(writer.clean_fields())
+        self.assertIsNone(writer.clean())
+        writer.save()
+        self.assertEqual(str(writer), 'MATIJA KOLARIC (*)')
         self.assertDictEqual(writer.get_dict(), {
             'code': 'W000001',
             'first_name': 'Matija',
             'last_name': 'Kolaric',
             'ipi_name': '00000000199',
-            'ipi_base': None,
+            'ipi_base': 'I-123456789-3',
             'affiliations': [{
                 'affiliation_type': {
                     'code': 'PR',
@@ -202,265 +250,327 @@ class ModelsSimpleTest(TransactionTestCase):
                     'name': 'World',
                     'tis_code': '2136'}}]})
 
-ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
-GRHACK0000102.100020180607
-ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607RA
-ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607AS
-ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607AS
-ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
-ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
-TRL000010000008000000839"""
+    def test_work(self):
+        work = music_publisher.models.Work(
+            title='Muzički birtijaški crtići')
+        with self.assertRaises(exceptions.ValidationError):
+            work.clean_fields()
+        work = music_publisher.models.Work(
+            title='Music Pub Cartoons',
+            iswc='T-123.456.789-4',
+            original_title='Music Pub Cartoons')
+        self.assertIsNone(work.clean_fields())
+        self.assertEqual(str(work.work_id), '')
+        self.assertTrue(work.is_modification())
+        work.save()
+
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            ipi_base='I-123.456.789-3', pr_society='10',
+            generally_controlled=True, saan='J44va', publisher_fee=50)
+        writer.clean_fields()
+        writer.clean()
+        writer.save()
+
+        wiw = music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=writer, capacity='CA', relative_share=100,
+            controlled=True)
+        wiw.clean_fields()
+        wiw.clean()
+
+        self.assertEqual(str(wiw), str(writer))
+        self.assertEqual(str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC)')
+
+        alt = work.alternatetitle_set.create(title='MPC Academy')
+        self.assertEqual(str(alt), 'MPC ACADEMY')
+        self.assertDictEqual(alt.get_dict(), {
+            'alternate_title': 'MPC ACADEMY',
+            'title_type': {'code': 'AT', 'name': 'Alternative Title'}})
+
+        # normalized dict
+        music_publisher.models.WorkManager().get_dict(
+            qs=music_publisher.models.Work.objects.all(), normalize=True)
+
+        # cwr uses denormalized dict
+        cwr = music_publisher.models.CWRExport(nwr_rev='NWR')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
+        self.assertRegex(cwr.cwr, self.RE_CWR)
+
+        # raises error because this writer is controlled in a work
+        writer.pr_society = None
+        writer.generally_controlled = False
+        writer.publisher_fee = None
+        writer.saan = None
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean()
 
 
-# class AllTest(TestCase):
-#     """All Tests in a single class.
-#     """
-#
-#     fixtures = ['publishing_staff.json']
-#
-#     def setUp(self):
-#         """Set up the initial data.
-#         """
-#
-#         self.user = User(
-#             username='user', is_superuser=False, is_staff=True)
-#         self.user.set_password('password')
-#         self.user.save()
-#         self.user.groups.add(1)
-#
-#     def get(self, path, re_post=None):
-#         """A helper method that similates opening of view and then simulates
-#             manual changes and save.
-#         """
-#         response = self.client.get(path)
-#         if response.status_code != 200:
-#             return response
-#         adminform = response.context_data.get('adminform')
-#         if not re_post:
-#             return response
-#         data = {}
-#         for sc in response.context:
-#             for d in sc:
-#                 if 'widget' in sc:
-#                     if (sc['widget'].get('type') == 'select' and
-#                             sc['widget']['selected'] is False):
-#                         continue
-#                     data[sc['widget']['name']] = sc['widget']['value']
-#         if adminform:
-#             data.update(adminform.form.initial)
-#         if isinstance(re_post, dict):
-#             data.update(re_post)
-#         for key, value in data.items():
-#             if value is None:
-#                 data[key] = ''
-#             else:
-#                 data[key] = value
-#         response = self.client.post(path, data)
-#         return response
-#
-#     def test_0_admin_login(self):
-#         """Basic navigation tests."""
-#
-#         response = self.get(reverse('admin:index'))
-#         self.assertEqual(response.status_code, 302)
-#         location = reverse('admin:login') + '?next=' + reverse('admin:index')
-#         self.assertEqual(
-#             response._headers.get('location'), (
-#                 'Location',
-#                 location))
-#         response = self.get(location, re_post={
-#             'username': 'user', 'password': 'wrongpassword'})
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('errornote', response.content.decode())
-#         response = self.get(location, re_post={
-#             'username': 'user', 'password': 'password'})
-#         self.assertEqual(response.status_code, 302)
-#         self.assertEqual(
-#             response._headers.get('location'), (
-#                 'Location',
-#                 reverse('admin:index')))
-#
-#     def test_1_indices(self):
-#         self.client.force_login(self.user)
-#         response = self.get(reverse('admin:index'))
-#         self.assertEqual(response.status_code, 200)
-#         response = self.get(
-#             reverse('admin:app_list', args=('music_publisher',)))
-#         self.assertEqual(response.status_code, 200)
-#
-#
-#     def test_2_works(self):
-#         self.client.force_login(self.user)
-#         response = self.get(reverse('admin:music_publisher_work_changelist',))
-#         self.assertEqual(response.status_code, 200)
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'last_name': 'Lošija',
-#                 'ipi_name': 'X',
-#                 'ipi_base': '1000000000'
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('Name contains invalid', response.content.decode())
-#         self.assertIn('Value must be numeric.', response.content.decode())
-#         self.assertIn('I-NNNNNNNNN-C format', response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'first_name': 'VERY',
-#                 'last_name': 'COOL',
-#                 'ipi_name': '100',
-#                 'ipi_base': 'I-123456789-0'
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('Not a valid IPI name', response.content.decode())
-#         self.assertIn('Not valid:', response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'first_name': 'VERY',
-#                 'last_name': 'COOL',
-#                 'ipi_name': '199',
-#                 'ipi_base': 'I-123456789-3'
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         writer = Writer.objects.all().first()
-#         self.assertFalse(writer._can_be_controlled)
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_change', args=(
-#                 writer.id,)),
-#             re_post={
-#                 'pr_society': '52'
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         writer = Writer.objects.all().first()
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'first_name': 'YANKEE',
-#                 'last_name': 'DOODLE',
-#                 'generally_controlled': 1,
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('Unsufficient data for a', response.content.decode())
-#         self.assertIn('This field is required.', response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'first_name': 'YANKEE',
-#                 'last_name': 'DOODLE',
-#                 'ipi_name': '297',
-#                 'pr_society': '010',
-#                 'saan': 'DREAM',
-#                 'publisher_fee': '100'
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('Only for a general agreemen', response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'first_name': 'YANKEE',
-#                 'last_name': 'DOODLE',
-#                 'ipi_name': '297',
-#                 'pr_society': '10',
-#                 'generally_controlled': 1,
-#                 'saan': 'DREAM',
-#                 'publisher_fee': '100'
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         writer2 = Writer.objects.filter(pr_society='10').first()
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'last_name': 'THIRD',
-#                 'ipi_name': '395',
-#                 'pr_society': '10',
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         writer3 = Writer.objects.filter(last_name='THIRD').first()
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_add'),
-#             re_post={
-#                 'last_name': 'OTHER',
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         writer4 = Writer.objects.filter(last_name='OTHER').first()
-#         response = self.get(
-#             reverse('admin:music_publisher_writer_changelist'))
-#         self.assertTrue(writer._can_be_controlled)
-#         response = self.get(
-#             reverse('admin:music_publisher_commercialrelease_add'),
-#             re_post={
-#                 'release_title': 'VERY COOL',
-#                 'ean': '199',
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('does not match EAN13 format', response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_commercialrelease_add'),
-#             re_post={
-#                 'ean': '1234567890123',
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('Invalid EAN.', response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_libraryrelease_add'),
-#             re_post={
-#                 'cd_identifier': 'C00L',
-#                 'ean': '1234567890123',
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn(
-#             'Required if other release data is set.',
-#             response.content.decode())
-#         response = self.get(
-#             reverse('admin:music_publisher_commercialrelease_add'),
-#             re_post={
-#                 'release_title': 'VERY COOL',
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         release = CommercialRelease.objects.all().first()
-#         self.assertEqual(str(release), 'VERY COOL')
-#         response = self.get(
-#             reverse('admin:music_publisher_commercialrelease_change', args=(
-#                 release.id,)),
-#             re_post={
-#                 'release_date': '2018-01-01',
-#                 'ean': '4006381333931',
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         release = CommercialRelease.objects.all().first()
-#         response = self.get(
-#             reverse('admin:music_publisher_commercialrelease_changelist'))
-#         self.assertEqual(response.status_code, 200)
-#         self.assertEqual(str(release), 'VERY COOL')
-#         response = self.get(
-#             reverse('admin:music_publisher_artist_add'),
-#             re_post={
-#                 'first_name': 'VERY',
-#                 'last_name': 'VERY COOL',
-#                 'isni': '1234567890123',
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         response = self.get(
-#             reverse('admin:music_publisher_artist_add'),
-#             re_post={
-#                 'last_name': 'VERY COOL',
-#                 'isni': '12345678SD23',
-#             })
-#         self.assertEqual(response.status_code, 200)
-#         response = self.get(
-#             reverse('admin:music_publisher_artist_add',),
-#             re_post={
-#                 'first_name': 'VERY',
-#                 'last_name': 'VERY COOL',
-#                 'isni': '1X',
-#             })
-#         self.assertEqual(response.status_code, 302)
-#         artist = Artist.objects.all().first()
-#         response = self.get(
-#             reverse('admin:music_publisher_artist_changelist'))
-#         self.assertEqual(response.status_code, 200)
+
+# ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
+# GRHACK0000102.100020180607
+# ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607RA
+# ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607AS
+# ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607AS
+# ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
+# ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
+# TRL000010000008000000839"""
+
+
+class IntegrationTest(TransactionTestCase):
+    """All integration tests in a single class.
+    """
+
+    reset_sequences = True
+    fixtures = ['publishing_staff.json']
+
+    def setUp(self):
+        """Set up the initial data.
+        """
+
+        self.user = User(
+            username='user', is_superuser=False, is_staff=True)
+        self.user.set_password('password')
+        self.user.save()
+        self.user.groups.add(1)
+
+
+    def get(self, path, re_post=None):
+        """A helper method that simulates opening of view and then simulates
+            manual changes and save.
+        """
+        response = self.client.get(path)
+        if response.status_code != 200:
+            return response
+        adminform = response.context_data.get('adminform')
+        if not re_post:
+            return response
+        data = {}
+        for sc in response.context:
+            for d in sc:
+                if 'widget' in sc:
+                    if (sc['widget'].get('type') == 'select' and
+                            sc['widget']['selected'] is False):
+                        continue
+                    data[sc['widget']['name']] = sc['widget']['value']
+        if adminform:
+            data.update(adminform.form.initial)
+        if isinstance(re_post, dict):
+            data.update(re_post)
+        for key, value in data.items():
+            if value is None:
+                data[key] = ''
+            else:
+                data[key] = value
+        response = self.client.post(path, data)
+        return response
+
+    def test_admin_login(self):
+        """Basic navigation tests."""
+
+        response = self.get(reverse('admin:index'))
+        self.assertEqual(response.status_code, 302)
+        location = reverse('admin:login') + '?next=' + reverse('admin:index')
+        self.assertEqual(
+            response._headers.get('location'), (
+                'Location',
+                location))
+        response = self.get(location, re_post={
+            'username': 'user', 'password': 'wrongpassword'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('errornote', response.content.decode())
+        response = self.get(location, re_post={
+            'username': 'user', 'password': 'password'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response._headers.get('location'), (
+                'Location',
+                reverse('admin:index')))
+
+    def test_1_indices(self):
+        self.client.force_login(self.user)
+        response = self.get(reverse('admin:index'))
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:app_list', args=('music_publisher',)))
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_2_works(self):
+        self.client.force_login(self.user)
+        response = self.get(reverse('admin:music_publisher_work_changelist',))
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'last_name': 'Lošija',
+                'ipi_name': 'X',
+                'ipi_base': '1000000000'
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Name contains invalid', response.content.decode())
+        self.assertIn('Value must be numeric.', response.content.decode())
+        self.assertIn('I-NNNNNNNNN-C format', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'first_name': 'VERY',
+                'last_name': 'COOL',
+                'ipi_name': '100',
+                'ipi_base': 'I-123456789-0'
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Not a valid IPI name', response.content.decode())
+        self.assertIn('Not valid:', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'first_name': 'VERY',
+                'last_name': 'COOL',
+                'ipi_name': '199',
+                'ipi_base': 'I-123456789-3'
+            })
+        self.assertEqual(response.status_code, 302)
+        writer = music_publisher.models.Writer.objects.all().first()
+        self.assertFalse(writer._can_be_controlled)
+        response = self.get(
+            reverse('admin:music_publisher_writer_change', args=(
+                writer.id,)),
+            re_post={
+                'pr_society': '52'
+            })
+        self.assertEqual(response.status_code, 302)
+        writer = music_publisher.models.Writer.objects.all().first()
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'first_name': 'YANKEE',
+                'last_name': 'DOODLE',
+                'generally_controlled': 1,
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Unsufficient data for a', response.content.decode())
+        self.assertIn('This field is required.', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'first_name': 'YANKEE',
+                'last_name': 'DOODLE',
+                'ipi_name': '297',
+                'pr_society': '010',
+                'saan': 'DREAM',
+                'publisher_fee': '100'
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Only for a general agreemen', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'first_name': 'YANKEE',
+                'last_name': 'DOODLE',
+                'ipi_name': '297',
+                'pr_society': '10',
+                'generally_controlled': 1,
+                'saan': 'DREAM',
+                'publisher_fee': '100'
+            })
+        self.assertEqual(response.status_code, 302)
+        writer2 = music_publisher.models.Writer.objects.filter(
+            pr_society='10').first()
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'last_name': 'THIRD',
+                'ipi_name': '395',
+                'pr_society': '10',
+            })
+        self.assertEqual(response.status_code, 302)
+        writer3 = music_publisher.models.Writer.objects.filter(
+            last_name='THIRD').first()
+        response = self.get(
+            reverse('admin:music_publisher_writer_add'),
+            re_post={
+                'last_name': 'OTHER',
+            })
+        self.assertEqual(response.status_code, 302)
+        writer4 = music_publisher.models.Writer.objects.filter(
+            last_name='OTHER').first()
+        self.get(reverse('admin:music_publisher_writer_changelist'))
+        self.assertTrue(writer._can_be_controlled)
+        response = self.get(
+            reverse('admin:music_publisher_commercialrelease_add'),
+            re_post={
+                'release_title': 'VERY COOL',
+                'ean': '199',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('does not match EAN13 format', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_commercialrelease_add'),
+            re_post={
+                'ean': '1234567890123',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Invalid EAN.', response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_libraryrelease_add'),
+            re_post={
+                'cd_identifier': 'C00L',
+                'ean': '1234567890123',
+            })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            'Required if other release data is set.',
+            response.content.decode())
+        response = self.get(
+            reverse('admin:music_publisher_commercialrelease_add'),
+            re_post={
+                'release_title': 'VERY COOL',
+            })
+        self.assertEqual(response.status_code, 302)
+        release = music_publisher.models.CommercialRelease.objects.all().first()
+        self.assertEqual(str(release), 'VERY COOL')
+        response = self.get(
+            reverse('admin:music_publisher_commercialrelease_change', args=(
+                release.id,)),
+            re_post={
+                'release_date': '2018-01-01',
+                'ean': '4006381333931',
+            })
+        self.assertEqual(response.status_code, 302)
+        release = music_publisher.models.CommercialRelease.objects.all().first()
+        # response = self.get(
+        #     reverse('admin:music_publisher_commercialrelease_changelist'))
+        # self.assertEqual(response.status_code, 200)
+        # self.assertEqual(str(release), 'VERY COOL')
+        # response = self.get(
+        #     reverse('admin:music_publisher_artist_add'),
+        #     re_post={
+        #         'first_name': 'VERY',
+        #         'last_name': 'VERY COOL',
+        #         'isni': '1234567890123',
+        #     })
+        # self.assertEqual(response.status_code, 200)
+        # response = self.get(
+        #     reverse('admin:music_publisher_artist_add'),
+        #     re_post={
+        #         'last_name': 'VERY COOL',
+        #         'isni': '12345678SD23',
+        #     })
+        # self.assertEqual(response.status_code, 200)
+        # response = self.get(
+        #     reverse('admin:music_publisher_artist_add',),
+        #     re_post={
+        #         'first_name': 'VERY',
+        #         'last_name': 'VERY COOL',
+        #         'isni': '1X',
+        #     })
+        # self.assertEqual(response.status_code, 302)
+        # artist = Artist.objects.all().first()
+        # response = self.get(
+        #     reverse('admin:music_publisher_artist_changelist'))
+        # self.assertEqual(response.status_code, 200)
 #
 #         response = self.get(
 #             reverse('admin:music_publisher_work_add'),

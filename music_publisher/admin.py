@@ -1205,10 +1205,10 @@ class CWRExportAdmin(admin.ModelAdmin):
             download: that downloads the CWR file."""
         obj = get_object_or_404(CWRExport, pk=object_id)
         if 'preview' in request.GET:
-            html = self.get_preview(obj)
+            cwr = self.get_preview(obj)
             return render(request, 'raw_cwr.html', {
                 **self.admin_site.each_context(request),
-                'lines': html,
+                'lines': cwr.split('\r\n'),
                 'title': obj.filename})
         elif 'download' in request.GET:
             response = HttpResponse(obj.cwr.encode().decode('latin1'))

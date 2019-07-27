@@ -3,98 +3,38 @@
 {% block extrastyle %}
     {{ block.super }}
     <style>
-      .cwr {overflow: auto;}
-      .cwr div.header {color:#600;}
-      .cwr span.sequence,
-      .cwr span.none {
-        color: #999 !important; font-weight: normal !important}
+      .cwr {overflow: auto; font-family: monospace;}
+      .cwr pre {line-height: 1.3em; margin: 0}
 
       .cwr div.HDR span.record_type,
-      .cwr div.TRL span.record_type {color: #909;}
+      .cwr div.TRL span.record_type {color: #909; margin: 0 1em 0 0}
       .cwr div.GRH span.record_type,
-      .cwr div.GRT span.record_type {color: #900;}
-      .cwr div.TER span.record_type,
-      .cwr div.ACK span.record_type,
+      .cwr div.GRT span.record_type {color: #900; margin: 0 1em 0 0}
+      .cwr div.WRK span.record_type,
       .cwr div.NWR span.record_type,
-      .cwr div.REV span.record_type,
-      .cwr div.ISW span.record_type,
-      .cwr div.EXC span.record_type {color: #630;}
+      .cwr div.REV span.record_type {color: #060; margin: 0 .7em 0 .3em}
       .cwr div.SPU span.record_type,
-      .cwr div.SWR span.record_type {color: #060;}
-      .cwr div.SPT span.record_type.listfield.even,
-      .cwr div.SWT span.record_type,
-      .cwr div.PWR span.record_type {color: #366;}
+      .cwr div.SWR span.record_type,
       .cwr div.OPU span.record_type,
-      .cwr div.OWR span.record_type {color: #339;}
-      .cwr div span.record_type {color: #666;}
+      .cwr div.OWR span.record_type {color: #006; margin: 0 .4em 0 .6em}
+      .cwr div.SPT span.record_type,
+      .cwr div.SWT span.record_type,
+      .cwr div.PWR span.record_type,
+      .cwr div.OPT span.record_type,
+      .cwr div.OWT span.record_type {color: #33C; margin: 0 .1em 0 .9em}
+      .cwr div span.record_type {color: #666;; margin: 0 .4em 0 .6em}
+      .cwr div.WRK,
+      .cwr div.NWR,
+      .cwr div.REV,
+      .cwr div.GRT {margin-top:0.4em}
 
-      .cwr .SPT .listfield.even,
-      .cwr .SPT .flagfield.flagfieldeven,
-      .cwr .listfield.odd,
-      .cwr .alphafield.submitter_work_number,
-      .cwr .iswc.odd,
-      .cwr .booleanfield.odd,
-      .cwr .flagfield.odd {color: #900;}
-      .cwr .listfield,
-      .cwr .iswc,
-      .cwr .booleanfield,
-      .cwr .flagfield  {color: #30C;}
-      .cwr .datefield.odd,
-      .cwr .timefield.odd,
-      .cwr .numericfield.odd {color: #036;}
-      .cwr .datefield,
-      .cwr .timefield,
-      .cwr .numericfield {color: #309;}
-      .cwr .alphafield {color: #000;}
-      .cwr .constantfield {color: #999;}
-
-      .SPU  span.interested_party_number,
-      .SPU  span.ipinamenumber,
-      .SPU  span.ipibasenumber,
-      .SPT  span.interested_party_number,
-      .OPU  span.interested_party_number,
-      .OPU  span.ipinamenumber,
-      .OPU  span.ipibasenumber,
-      .PWR  span.publisher_interested_party_number,
-      .SPT  span.tisfield,
-      .SWT  span.tisfield {
-        color: #609;
-      }
-      .SWR  span.alphafield.interested_party_number,
-      .SWR  span.ipinamenumber,
-      .SWR  span.ipibasenumber,
-      .OWR  span.alphafield.interested_party_number,
-      .OWR  span.ipinamenumber,
-      .OWR  span.ipibasenumber,
-      .SWT  span.alphafield.interested_party_number,
-      .PWR  span.alphafield.writer_interested_party_number {
-        color: #069;
-      }
-      .SPU .pr_share,
-      .SPT .pr_share,
-      .SWR .pr_share,
-      .SWT .pr_share {color: #C00;}
-      .SPU .mr_share,
-      .SPT .mr_share,
-      .SWR .mr_share,
-      .SWT .mr_share {color: #C60;}
-      .SPU .sr_share,
-      .SPT .sr_share,
-      .SWR .sr_share,
-      .SWT .sr_share {color: #390;}
-      .OPU .pr_share,
-      .OWR .pr_share {color: #933;}
-      .OPU .mr_share,
-      .OWR .mr_share {color: #A73;}
-      .OPU .sr_share,
-      .OWR .sr_share {color: #352;}
     </style>
 
 {% endblock %}
 {% block content %}
 <div class="module">
-    <div class="readonly">
-        <pre style="font-family:monospace" class="cwr">{{ lines|safe }}</pre>
+    <div class="readonly cwr">
+        {% for line in lines %}<div class="{{ line|slice:'0:3' }}"><pre><span class="record_type">{{ line|slice:'0:3' }}</span>{{ line|slice:'3:' }}</pre></div>{% endfor %}
     </div>
 </div>
 {% endblock %}

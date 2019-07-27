@@ -362,9 +362,7 @@ class WorkManager(models.Manager):
         """
         return super().get_queryset().prefetch_related('writers')
 
-    def get_dict(self, qs=None, normalize=False):
-        if qs is None:
-            qs = self.get_queryset()
+    def get_dict(self, qs, normalize=False):
         qs = qs.prefetch_related('alternatetitle_set')
         qs = qs.prefetch_related('writerinwork_set__writer')
         qs = qs.prefetch_related('artistinwork_set__artist')
@@ -499,7 +497,7 @@ class Work(TitleBase):
         return super().clean_fields(*args, **kwargs)
 
     def __str__(self):
-        return '{} {} ({})'.format(
+        return '{}: {} ({})'.format(
             self.work_id,
             self.title.upper(),
             ' / '.join(w.last_name.upper() for w in self.writers.all()))
@@ -786,8 +784,8 @@ class AlternateTitle(TitleBase):
 
     def __str__(self):
         if self.suffix:
-            return '{} {}'.format(self.work.title, self.title)
-        return self.title
+            return '{} {}'.format(self.work.title.upper(), self.title.upper())
+        return super().__str__()
 
 
 class ArtistInWork(models.Model):
@@ -1157,7 +1155,7 @@ class CWRExport(models.Model):
         choices=(
             ('NWR', 'CWR 2.1: New work registrations'),
             ('REV', 'CWR 2.1: Revisions of registered works'),
-            # ('WRK', 'CWR 3.0: Work registration (experimental)')
+            ('WRK', 'CWR 3.0: Work registration (experimental)')
         ))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
@@ -1166,9 +1164,36 @@ class CWRExport(models.Model):
     works = models.ManyToManyField(Work, related_name='cwr_exports')
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
+
+    @property
+    def version(self):
+        if self.nwr_rev == 'WRK':
+            return '30'
+        return '21'
+
     @property
     def filename(self):
-        """Return proper CWR filename.
+        if self.version == '30':
+            return self.filename30
+        return self.filename21
+
+    @property
+    def filename30(self):
+        """Return proper CWR 3.0 filename.
+
+        Format is: CWYYnnnnSUB_REP_VM - m - r.EXT
+
+        Returns:
+            str: CWR file name
+        """
+        return 'CW{}{:04}{}_0000_V3-0-0.SUB'.format(
+            self.year,
+            self.num_in_year,
+            SETTINGS.get('publisher_id'))
+
+    @property
+    def filename21(self):
+        """Return proper CWR 2.1 filename.
 
         Returns:
             str: CWR file name
@@ -1178,12 +1203,12 @@ class CWRExport(models.Model):
             self.num_in_year,
             SETTINGS.get('publisher_id'))
 
+
     def __str__(self):
         return self.filename
 
 
-    @staticmethod
-    def get_record(key, record):
+    def get_record(self, key, record):
         """Create CWR record (row) from the key and dict.
 
         Args:
@@ -1193,7 +1218,10 @@ class CWRExport(models.Model):
         Returns:
             str: CWR record (row)
         """
-        template = TEMPLATES_21.get(key)
+        if self.version == '30':
+            template = TEMPLATES_30.get(key)
+        else:
+            template = TEMPLATES_21.get(key)
         return template.render(Context(record)).upper()
 
     def get_transaction_record(self, key, record):
@@ -1231,6 +1259,7 @@ class CWRExport(models.Model):
 
         yield self.get_record('HDR', {
             'creation_date': datetime.now(),
+            'filename': self.filename,
             **SETTINGS
         })
 
@@ -1250,23 +1279,27 @@ class CWRExport(models.Model):
                     'MOD   UNSUNS'
                     if work['version_type']['code'] == 'MOD' else
                     'ORI         ')}
-            yield self.get_transaction_record('NWR', d)
+            yield self.get_transaction_record('WRK', d)
 
             # SPU, SPT
             controlled_relative_share = Decimal(0)
             other_publisher_share = Decimal(0) # used for co-publishing
-            controlled_writer_ids = [] # used for co-publishing
+            controlled_writer_ids = set() # used for co-publishing
+            copublished_writer_ids = set() # used for co-publishing
             controlled_shares = defaultdict(Decimal)
+            for wiw in work['writers_for_work']:
+                if wiw['controlled']:
+                    controlled_writer_ids.add(wiw['writer']['code'])
             for wiw in work['writers_for_work']:
                 writer = wiw['writer']
                 share = Decimal(wiw['relative_share'])
-                # controlled wiw's are always on top
                 if wiw['controlled']:
                     key = writer['code']
-                    controlled_writer_ids.append(key)
                     controlled_relative_share += share
                     controlled_shares[key] += share
                 elif (writer and writer['code'] in controlled_writer_ids):
+                    key = writer['code']
+                    copublished_writer_ids.add(key)
                     other_publisher_share += share
                     controlled_shares[key] += share
             publisher = SETTINGS
@@ -1278,9 +1311,9 @@ class CWRExport(models.Model):
             # OPU, co-publishing only
             if other_publisher_share:
                 yield self.get_transaction_record(
-                    'OPU', {
-                        'share': other_publisher_share,
-                        'sequence': 2})
+                    'OPU', {'sequence': 2})
+                yield self.get_transaction_record(
+                    'OPT', {'share': other_publisher_share})
 
             # SWR, SWT, PWR
             for wiw in work['writers_for_work']:
@@ -1302,7 +1335,16 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('SWR', w)
                 yield self.get_transaction_record('SWT', w)
                 w.update(publisher)
+                w['publisher_sequence'] = 1
                 yield self.get_transaction_record('PWR', w)
+                if (self.version == '30' and w and
+                        w['code'] in copublished_writer_ids):
+                    w['publisher_sequence'] = 2
+                    yield self.get_transaction_record(
+                        'PWR', {
+                            'code':w['code'],
+                            'publisher_sequence': 2
+                        })
 
             # OWR
             for wiw in work['writers_for_work']:
@@ -1324,7 +1366,12 @@ class CWRExport(models.Model):
                     'capacity': wiw['capacity']['code'],
                     'share': Decimal(wiw['relative_share'])})
                 yield self.get_transaction_record('OWR', w)
-
+                yield self.get_transaction_record('OWT', w)
+                if self.version == '30':
+                    w['publisher_sequence'] = 2
+                    yield self.get_transaction_record('PWR', w)
+            if self.version == '30':
+                continue
             # ALT
             alt_titles = set()
             for at in work['other_titles']:
@@ -1381,14 +1428,14 @@ class CWRExport(models.Model):
         """
         if self.cwr:
             return
-        self.cwr = ''.join(self.yield_lines())
-        self.year = self.cwr[66:68]
+        self.year = datetime.now().strftime('%y')
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
         if nr:
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
+        self.cwr = ''.join(self.yield_lines())
         self.save()
 
 
