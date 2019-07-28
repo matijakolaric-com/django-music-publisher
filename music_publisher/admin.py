@@ -1208,6 +1208,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             cwr = self.get_preview(obj)
             return render(request, 'raw_cwr.html', {
                 **self.admin_site.each_context(request),
+                'version': obj.version,
                 'lines': cwr.split('\r\n'),
                 'title': obj.filename})
         elif 'download' in request.GET:

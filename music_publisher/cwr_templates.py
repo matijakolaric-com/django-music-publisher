@@ -93,7 +93,7 @@ TEMPLATES_21 = {
         'ALT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}AT  '
         '\r\n{% endautoescape %}'),
-    'VER': Template(
+    'OWK': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'VER{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ work_title|ljust:60 }}' +
@@ -221,34 +221,38 @@ TEMPLATES_30 = {
         'ALT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}AT  '
         '\r\n{% endautoescape %}'),
-    'VER': Template(
+    'OWK': Template(
         '{% load cwr_filters %}{% autoescape off %}'
-        'VER{{ transaction_sequence|rjust:8 }}'
+        'OWK{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ work_title|ljust:60 }}' +
-        ' ' * (11 + 2 + 45 + 30 + 60 + 11 + 13 + 45 + 30 + 11 + 13 + 14) +
+        ' ' * (11 + 14 + 50 + 8 + 45 + 30 + 11 + 13 + 45 + 30 + 11 + 13) +
         '\r\n{% endautoescape %}'),
     'PER': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'PER{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ last_name|ljust:45 }}'
-        '{{ first_name|ljust:30 }}                        \r\n'
-        '{% endautoescape %}'),
+        '{{ first_name|ljust:30 }}' + ' ' * 11 +
+        '{{ isni|ljust:16 }}     \r\n{% endautoescape %}'),
     'REC': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'REC{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
-        '{{ release_date|default:"00000000" }}' +
-        ' ' * 60 + '{{ duration|rjust:6|default:"000000" }}     '
-        '{{ album_title|ljust:60 }}'
-        '{{ album_label|ljust:60 }}                  {{ ean|ljust:13 }}'
-        '{{ isrc|ljust:12 }}     \r\n{% endautoescape %}'),
+        '{{ release_date|default:"00000000" }}'
+        '{{ duration|rjust:6|default:"000000" }}' 
+        '{{ isrc|ljust:12 }}{{ recording_title|ljust:60 }}'
+        '{{ version_title|ljust:60 }}{{ display_artist|ljust:60 }}' +
+        ' ' * 11 +
+        '{{ recording_artist.isni|ljust:16 }}{{ record_label.name|ljust:60 }}'
+        '{{ isrc_validity|ljust:20 }}{{ code|ljust:14 }}\r\n'
+        '{% endautoescape %}'),
     'ORN': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'ORN{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}LIB' + ' ' * 60 +
-        '{{ cd_identifier|ljust:15 }}0000{{ library|ljust:60 }}' +
-        ' ' * (26 + 12 + 60 + 20) + '0000                  \r\n'
-        '{% endautoescape %}'),
+        '{{ record_sequence|rjust:8 }}LIB'
+        '{{ cd_identifier|ljust:15 }}0000'
+        '{{ library|ljust:60 }}' +
+        ' ' * (60 + 60 + 1 + 12 + 60 + 20) + '0000' +
+        ' ' * (19 + 26 + 21 + 40) + '\r\n{% endautoescape %}'),
     'GRT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRT00001{{ transaction_count|rjust:8 }}'

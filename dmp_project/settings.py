@@ -139,7 +139,7 @@ MUSIC_PUBLISHER_SETTINGS = {
     'work_id_prefix': 'DMP',
 
     'publisher_id': 'DMP',
-    'publisher_name': 'DJANGO MUSIC PUBLISHING DEMO APP',
+    'publisher_name': 'DJANGO MUSIC PUBLISHER DEMO APP',
     'publisher_ipi_name': '00000000199',
     'publisher_pr_society': '71',
     'publisher_mr_society': '34',

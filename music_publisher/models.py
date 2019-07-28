@@ -1045,7 +1045,8 @@ class Recording(models.Model):
         :rtype:
         """
         if self.recording_title_suffix:
-            return '{} {}'.format(self.work.title, self.recording_title)
+            return '{} {}'.format(
+                self.work.title, self.recording_title).strip()
         return self.recording_title
 
     @property
@@ -1058,7 +1059,7 @@ class Recording(models.Model):
         if self.version_title_suffix:
             return '{} {}'.format(
                 self.complete_recording_title or self.work.title,
-                self.version_title)
+                self.version_title).strip()
         return self.version_title
 
     def __str__(self):
@@ -1274,7 +1275,7 @@ class CWRExport(models.Model):
                 'work_id': work_id,
                 'work_title': work['work_title'],
                 'iswc': work['iswc'],
-                'recorded_indicator': 'Y' if work['recordings'] else 'N',
+                'recorded_indicator': 'Y' if work['recordings'] else 'U',
                 'version_type': (
                     'MOD   UNSUNS'
                     if work['version_type']['code'] == 'MOD' else
@@ -1282,10 +1283,10 @@ class CWRExport(models.Model):
             yield self.get_transaction_record('WRK', d)
 
             # SPU, SPT
-            controlled_relative_share = Decimal(0)
-            other_publisher_share = Decimal(0) # used for co-publishing
-            controlled_writer_ids = set() # used for co-publishing
-            copublished_writer_ids = set() # used for co-publishing
+            controlled_relative_share = Decimal(0)  # total pub share
+            other_publisher_share = Decimal(0)  # used for co-publishing
+            controlled_writer_ids = set()  # used for co-publishing
+            copublished_writer_ids = set()  # used for co-publishing
             controlled_shares = defaultdict(Decimal)
             for wiw in work['writers_for_work']:
                 if wiw['controlled']:
@@ -1306,7 +1307,8 @@ class CWRExport(models.Model):
             publisher['sequence'] = 1
             publisher['share'] = controlled_relative_share
             yield self.get_transaction_record('SPU', publisher)
-            yield self.get_transaction_record('SPT', publisher)
+            if publisher['share']:
+                yield self.get_transaction_record('SPT', publisher)
 
             # OPU, co-publishing only
             if other_publisher_share:
@@ -1333,11 +1335,12 @@ class CWRExport(models.Model):
                     'saan': saan,
                 })
                 yield self.get_transaction_record('SWR', w)
-                yield self.get_transaction_record('SWT', w)
+                if w['share']:
+                    yield self.get_transaction_record('SWT', w)
                 w.update(publisher)
                 w['publisher_sequence'] = 1
                 yield self.get_transaction_record('PWR', w)
-                if (self.version == '30' and w and
+                if (self.version == '30' and other_publisher_share and w and
                         w['code'] in copublished_writer_ids):
                     w['publisher_sequence'] = 2
                     yield self.get_transaction_record(
@@ -1366,12 +1369,12 @@ class CWRExport(models.Model):
                     'capacity': wiw['capacity']['code'],
                     'share': Decimal(wiw['relative_share'])})
                 yield self.get_transaction_record('OWR', w)
-                yield self.get_transaction_record('OWT', w)
-                if self.version == '30':
+                if w['share']:
+                    yield self.get_transaction_record('OWT', w)
+                if self.version == '30' and other_publisher_share:
                     w['publisher_sequence'] = 2
                     yield self.get_transaction_record('PWR', w)
-            if self.version == '30':
-                continue
+
             # ALT
             alt_titles = set()
             for at in work['other_titles']:
@@ -1389,7 +1392,7 @@ class CWRExport(models.Model):
 
             # VER
             if work['version_type']['code'] == 'MOD':
-                yield self.get_transaction_record('VER', work['original_work'])
+                yield self.get_transaction_record('OWK', work['original_work'])
 
             # PER
             # artists can be recording and/or live, so let's see
@@ -1406,14 +1409,23 @@ class CWRExport(models.Model):
 
             # REC
             # ignoring album data, so simple
-            for rec in work['recordings'].values():
+            for code, rec in work['recordings'].items():
+                rec['code'] = code
+                if rec['recording_artist']:
+                    rec['display_artist'] = '{} {}'.format(
+                        rec['recording_artist']['first_name'] or '',
+                        rec['recording_artist']['last_name'],
+                    ).strip()[:60]
+                if rec['isrc']:
+                    rec['isrc_validity'] = 'Y'
                 yield self.get_transaction_record('REC', rec)
 
             # ORN
             if work['origin']:
                 yield self.get_transaction_record('ORN', {
                     'library': work['origin']['library']['name'],
-                    'cd_identifier': work['origin']['cd_identifier']})
+                    'cd_identifier': work['origin']['cd_identifier'],
+                })
             self.transaction_count += 1
 
         yield self.get_record('GRT', {
