@@ -1,7 +1,7 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
-THIS IS THE DEVELOPMENT VERSION, DOCUMENTATION MAY BE OBSOLETE.
+THIS IS THE DOCUMENTATION FOR THE DEVELOPMENT VERSION.
 SEE https://django-music-publisher.readthedocs.io/en/stable/ for the stable version.
 
 
