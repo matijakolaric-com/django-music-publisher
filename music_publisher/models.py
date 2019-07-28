@@ -1240,8 +1240,9 @@ class CWRExport(models.Model):
         record['transaction_sequence'] = self.transaction_count
         record['record_sequence'] = self.record_sequence
         line = self.get_record(key, record)
-        self.record_count += 1
-        self.record_sequence += 1
+        if line:
+            self.record_count += 1
+            self.record_sequence += 1
         return line
 
     def yield_lines(self):
@@ -1313,7 +1314,7 @@ class CWRExport(models.Model):
             # OPU, co-publishing only
             if other_publisher_share:
                 yield self.get_transaction_record(
-                    'OPU', {'sequence': 2})
+                    'OPU', {'sequence': 2, 'share': other_publisher_share})
                 yield self.get_transaction_record(
                     'OPT', {'share': other_publisher_share})
 
@@ -1408,7 +1409,6 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('PER', artist)
 
             # REC
-            # ignoring album data, so simple
             for code, rec in work['recordings'].items():
                 rec['code'] = code
                 if rec['recording_artist']:
@@ -1426,6 +1426,10 @@ class CWRExport(models.Model):
                     'library': work['origin']['library']['name'],
                     'cd_identifier': work['origin']['cd_identifier'],
                 })
+
+            # XRF
+            for xrf in work['cross_references']:
+                yield self.get_transaction_record('XRF', xrf)
             self.transaction_count += 1
 
         yield self.get_record('GRT', {

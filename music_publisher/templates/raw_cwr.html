@@ -65,7 +65,7 @@
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="chain" title="Publisher sequence">{{ line|slice:'19:21' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'21:30' }}</span><span class="publisher" title="Publisher">{{ line|slice:'30:75' }}</span>{{ line|slice:'75:' }}</pre></div>
                 {% elif rt == 'SWR' or rt == 'OWR'%}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'19:28' }}</span><span class="writer" title="Writer">{{ line|slice:'28:103' }}</span>{{ line|slice:'103:' }}</pre></div>
-                {% elif rt == 'SWT' or rt == 'OWT' or rt == 'SPT' or rt == 'OWT' %}
+                {% elif rt == 'SWT' or rt == 'OWT' or rt == 'SPT' or rt == 'OPT' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:22' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'22:31' }}</span><span class="prshare" title="Performance share">{{ line|slice:'31:36' }}</span><span class="mrshare" title="Mechanical share">{{ line|slice:'36:41' }}</span><span class="srshare" title="Sync share">{{ line|slice:'41:46' }}</span>{{ line|slice:'46:' }}</pre></div>
                 {% elif rt == 'PWR'%}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="chain" title="Publisher sequence">{{ line|slice:'19:21' }}</span><span class="ipnumber" title="Publisher IP number">{{ line|slice:'21:30' }}</span><span class="ipnumber" title="Writer IP number">{{ line|slice:'30:39' }}</span>{{ line|slice:'39:' }}</pre></div>
@@ -81,7 +81,27 @@
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:' }}</pre></div>
                 {% endif %}
             {% else %}
-                <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span>{{ line|slice:'3:' }}</pre></div>
+                {% if rt == 'HDR' or rt == 'TRL' or rt == 'GRH' or rt == 'GRT' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span>{{ line|slice:'3:' }}</pre></div>
+                {% elif rt == 'NWR' or rt == 'REV' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="title" title="Work title">{{ line|slice:'19:79' }}</span>{{ line|slice:'79:' }}</pre></div>
+                {% elif rt == 'SPU' or rt == 'OPU'%}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="chain" title="Publisher sequence">{{ line|slice:'19:21' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'21:30' }}</span><span class="publisher" title="Publisher">{{ line|slice:'30:75' }}</span>{{ line|slice:'75:' }}</pre></div>
+                {% elif rt == 'SWR' or rt == 'OWR'%}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'19:28' }}</span><span class="writer" title="Writer">{{ line|slice:'28:103' }}</span>{{ line|slice:'103:' }}</pre></div>
+                {% elif rt == 'SPT' or rt == 'OPT' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'19:29' }}</span>{{ line|slice:'29:34' }}<span class="prshare" title="Performance share">{{ line|slice:'34:39' }}</span><span class="mrshare" title="Mechanical share">{{ line|slice:'39:44' }}</span><span class="srshare" title="Sync share">{{ line|slice:'44:49' }}</span>{{ line|slice:'49:' }}</pre></div>
+                {% elif rt == 'SWT' or rt == 'OWT' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="ipnumber" title="IP number">{{ line|slice:'19:28' }}</span><span class="prshare" title="Performance share">{{ line|slice:'28:33' }}</span><span class="mrshare" title="Mechanical share">{{ line|slice:'33:38' }}</span><span class="srshare" title="Sync share">{{ line|slice:'38:43' }}</span>{{ line|slice:'43:' }}</pre></div>
+                {% elif rt == 'PWR'%}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="ipnumber" title="Publisher IP number">{{ line|slice:'19:28' }}</span><span class="publisher" title="Publisher">{{ line|slice:'28:73' }}</span>{{ line|slice:'73:101' }}<span class="ipnumber" title="Publisher IP number">{{ line|slice:'101:110' }}</span>{{ line|slice:'110:' }}</pre></div>
+                {% elif rt == 'ALT' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="title" title="Alternative title">{{ line|slice:'19:79' }}</span>{{ line|slice:'79:' }}</pre></div>
+                {% elif rt == 'PER' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="artist" title="Performing artist">{{ line|slice:'19:79' }}</span>{{ line|slice:'79:' }}</pre></div>
+                {% else %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:' }}</pre></div>
+                {% endif %}
             {% endif %}
         {% endwith %}{% endfor %}
     </div>

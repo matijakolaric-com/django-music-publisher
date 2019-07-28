@@ -27,7 +27,11 @@ Upon save, you will be taken to the ``CWR export list`` view. It has two links i
 .. figure:: /images/highlight.png
    :width: 100%
 
-   CWR preview with syntax highlighting
+   CWR 3.0 preview with basic syntax highlighting
 
-The example shown above shows the CWR file with syntax highlighting. When you hover over the fields with your cursor, additional information is shown to help in solving issues with your society or any other receiver of the CWR file.  This feature is not available in open source code.
+The example shown above shows the CWR file with basic syntax highlighting. When you hover over the fields with your cursor, additional information is shown.
 
+CWR Delivery
+============
+
+CWR Delivery is currently not implemented. CWR 2.1 manual delivery is a relatively simple task and CWR 3.0 is not accepted yet by any collecting society.

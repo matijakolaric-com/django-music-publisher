@@ -110,9 +110,8 @@ TEMPLATES_21 = {
         'REC{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
         '{{ release_date|default:"00000000" }}' +
-        ' ' * 60 + '{{ duration|rjust:6|default:"000000" }}     '
-        '{{ album_title|ljust:60 }}'
-        '{{ album_label|ljust:60 }}                  {{ ean|ljust:13 }}'
+        ' ' * 60 + '{{ duration|rjust:6|default:"000000" }}     ' +
+        ' ' * 151 +
         '{{ isrc|ljust:12 }}     \r\n{% endautoescape %}'),
     'ORN': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -129,6 +128,7 @@ TEMPLATES_21 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'TRL00001{{ transaction_count|rjust:8 }}'
         '{{ record_count|rjust:8 }}{% endautoescape %}'),
+    'XRF': Template('')
 }
 
 TEMPLATES_30 = {
@@ -253,6 +253,11 @@ TEMPLATES_30 = {
         '{{ library|ljust:60 }}' +
         ' ' * (60 + 60 + 1 + 12 + 60 + 20) + '0000' +
         ' ' * (19 + 26 + 21 + 40) + '\r\n{% endautoescape %}'),
+    'XRF': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'XRF{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ organization.code|ljust:4 }}'
+        '{{ identifier|ljust:14 }}WY\r\n{% endautoescape %}'),
     'GRT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRT00001{{ transaction_count|rjust:8 }}'
