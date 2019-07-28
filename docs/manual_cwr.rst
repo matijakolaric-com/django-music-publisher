@@ -24,6 +24,9 @@ Please note that the field ``Works`` uses auto-complete, and if you don't come h
 
 Upon save, you will be taken to the ``CWR export list`` view. It has two links in each row: ``View CWR`` and ``Download``. The latter will download the CWR file, and the former will take you to the preview:
 
+Preview and Download
+--------------------
+
 .. figure:: /images/highlight.png
    :width: 100%
 
@@ -32,6 +35,6 @@ Upon save, you will be taken to the ``CWR export list`` view. It has two links i
 The example shown above shows the CWR file with basic syntax highlighting. When you hover over the fields with your cursor, additional information is shown.
 
 CWR Delivery
-============
+------------
 
 CWR Delivery is currently not implemented. CWR 2.1 manual delivery is a relatively simple task and CWR 3.0 is not accepted yet by any collecting society.
