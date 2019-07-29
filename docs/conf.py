@@ -139,7 +139,7 @@ latex_elements = {
     'figure_align': 'H',
 }
 
-latex_toplevel_sectioning = 'section'
+latex_toplevel_sectioning = 'part'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
