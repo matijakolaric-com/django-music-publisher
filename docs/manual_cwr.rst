@@ -37,4 +37,4 @@ The example shown above shows the CWR file with basic syntax highlighting. When 
 CWR Delivery
 ------------
 
-CWR Delivery is currently not implemented. CWR 2.1 manual delivery is a relatively simple task and CWR 3.0 is not accepted yet by any collecting society.
+CWR Delivery is currently not implemented. CWR 2.1 manual delivery is a relatively simple task and CWR 3.0 is not accepted by any societies yet.

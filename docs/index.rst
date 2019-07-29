@@ -3,8 +3,8 @@ Django Music Publisher
 
 .. only:: html
 
-   THIS IS THE DOCUMENTATION FOR THE DEVELOPMENT VERSION.
-   SEE https://django-music-publisher.readthedocs.io/en/stable/ for the stable version.
+   **THIS IS THE DOCUMENTATION FOR THE DEVELOPMENT VERSION.
+   SEE** https://django-music-publisher.readthedocs.io/en/stable/ **for the stable version.**
 
 .. |ProjectVersion| replace:: {release}
 
