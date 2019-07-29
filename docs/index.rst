@@ -22,7 +22,7 @@ SEE https://django-music-publisher.readthedocs.io/en/stable/ for the stable vers
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
     :target: https://pypi.org/project/django-music-publisher/
 
-Django Music Publisher is open source software for original music publishers. It is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing**. 
+Django Music Publisher is open source software for original music publishers. It is a tool for **managing metadata** on musical works and recordings, including data on writers, recording and performing artists, albums and music libraries, as well as **royalty distribution processing** support.
 
 It uses **Common Works Registration (CWR)** protocol for batch registration of musical works.
 
@@ -34,7 +34,7 @@ It uses **Common Works Registration (CWR)** protocol for batch registration of m
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
    <p>These videos are delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
-   <p>The first five are general videos, followed by four tutorial videos, and then later additions.</p>
+   <p>The first four are general videos, followed by four tutorial videos, and then later additions.</p>
 
 The videos about Django Music Publisher are available on `YouTube <https://www.youtube.com/watch?v=P57hoY9wwH4&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP>`_.
 

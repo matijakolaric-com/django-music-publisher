@@ -53,9 +53,9 @@ When creating CWR, many fields are left with blank/zero values. When the fields 
 * Musical Work Distribution is set to Unclassified
 * Recorded indicator is set to Unknown if no recording has been entered and to Yes if it has been entered
 * Grand Rights Indicator is set to No
-* Reversionary Indicator is left empty
+* Reversionary Indicator is set to No
 * First Recording Refusal Indicator is set to No
-* Work for Hire is left empty
+* Work for Hire is set to No
 
 If this is not how you work, then this is not the tool for you, but you are free to extend it for your needs.
 
