@@ -136,7 +136,7 @@ latex_elements = {
 
     # Latex figure (float) alignment
     #
-    'figure_align': 'H',
+    'figure_align': 'htbp',
 }
 
 latex_toplevel_sectioning = 'part'
