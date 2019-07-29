@@ -139,6 +139,7 @@ latex_elements = {
     'figure_align': 'H',
 }
 
+latex_domain_indices = False
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
