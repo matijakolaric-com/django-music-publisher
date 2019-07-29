@@ -8,6 +8,8 @@ import re
 from .validators import CWRFieldValidator
 from . import const
 
+def get_societies():
+    return const.SOCIETIES
 
 class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
@@ -88,15 +90,15 @@ class IPIBase(models.Model):
     pr_society = models.CharField(
         'Performance rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
-        choices=const.SOCIETIES)
+        choices=get_societies())
     mr_society = models.CharField(
         'Mechanical rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
-        choices=const.SOCIETIES)
+        choices=get_societies())
     sr_society = models.CharField(
         'Synchronization rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
-        choices=const.SOCIETIES)
+        choices=get_societies())
     saan = models.CharField(
         'Society-assigned agreement number',
         help_text='Use this field for general agreements only.',

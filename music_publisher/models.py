@@ -13,7 +13,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template import Context
 
-from .base import (IPIBase, PersonBase, TitleBase)
+from .base import (IPIBase, PersonBase, TitleBase, get_societies)
 from .const import (CAN_NOT_BE_CONTROLLED_MSG, ENFORCE_PUBLISHER_FEE,
                     ENFORCE_SAAN, SETTINGS, SOCIETIES, SOCIETY_DICT,
                     WORK_ID_PREFIX)
@@ -1484,7 +1484,7 @@ class WorkAcknowledgement(models.Model):
 
     work = models.ForeignKey(Work, on_delete=models.PROTECT)
     society_code = models.CharField(
-        'Society', max_length=3, choices=SOCIETIES)
+        'Society', max_length=3, choices=get_societies())
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(max_length=20, blank=True)
