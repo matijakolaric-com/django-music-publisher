@@ -148,28 +148,6 @@ class ModelsSimpleTest(TransactionTestCase):
             'isni': '000000000000001X',
             'last_name': 'The Band'})
 
-    def test_library_release(self):
-        library = music_publisher.models.Library(name='Music Library')
-        library.save()
-        self.assertEqual(str(library), 'MUSIC LIBRARY')
-        self.assertDictEqual(library.get_dict(), {
-            'code': 'LI000001',
-            'name': 'Music Library'})
-        release = music_publisher.models.LibraryRelease(
-            library=library, cd_identifier='ML001')
-        release.save()
-        self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
-        self.assertIsNone(release.get_dict())
-        self.assertDictEqual(release.get_origin_dict(), {
-            'origin_type': {'code': 'LIB', 'name': 'Library Work'},
-             'cd_identifier': 'ML001',
-             'library': {'code': 'LI000001', 'name': 'Music Library'}})
-        release.ean = '1X'
-        with self.assertRaises(exceptions.ValidationError):
-            release.clean()
-        release.release_title = 'Test'
-        self.assertEqual(str(release), 'ML001: TEST (MUSIC LIBRARY)')
-
 
     def test_commercial_release(self):
         label = music_publisher.models.Label(name='Music Label')
@@ -238,8 +216,32 @@ class ModelsSimpleTest(TransactionTestCase):
                     'tis_code': '2136'}}]})
 
     def test_work(self):
+
+        library = music_publisher.models.Library(name='Music Library')
+        library.save()
+        self.assertEqual(str(library), 'MUSIC LIBRARY')
+        self.assertDictEqual(library.get_dict(), {
+            'code': 'LI000001',
+            'name': 'Music Library'})
+
+        release = music_publisher.models.LibraryRelease(
+            library=library, cd_identifier='ML001')
+        release.save()
+        self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
+        self.assertIsNone(release.get_dict())
+        self.assertDictEqual(release.get_origin_dict(), {
+            'origin_type': {'code': 'LIB', 'name': 'Library Work'},
+             'cd_identifier': 'ML001',
+             'library': {'code': 'LI000001', 'name': 'Music Library'}})
+        release.ean = '1X'
+        with self.assertRaises(exceptions.ValidationError):
+            release.clean()
+        release.release_title = 'Test'
+        self.assertEqual(str(release), 'ML001: TEST (MUSIC LIBRARY)')
+
         work = music_publisher.models.Work(
-            title='Muzički birtijaški crtići')
+            title='Muzički birtijaški crtići',
+            library_release=release)
         with self.assertRaises(exceptions.ValidationError):
             work.clean_fields()
         work = music_publisher.models.Work(
@@ -259,18 +261,34 @@ class ModelsSimpleTest(TransactionTestCase):
         writer.clean()
         writer.save()
 
+        writer2 = music_publisher.models.Writer(
+            first_name='Ann', last_name='Other', ipi_name='297',
+            pr_society='10')
+        writer2.clean_fields()
+        writer2.clean()
+        writer2.save()
+
         music_publisher.models.WriterInWork.objects.create(
             work=work, writer=None, capacity='CA', relative_share=0,
             controlled=False)
 
         wiw = music_publisher.models.WriterInWork.objects.create(
-            work=work, writer=writer, capacity='AR', relative_share=100,
+            work=work, writer=writer, capacity='AR', relative_share=50,
             controlled=True)
         wiw.clean_fields()
         wiw.clean()
 
-        self.assertEqual(str(wiw), str(writer))
+        self.assertEqual(str(wiw), 'MATIJA KOLARIC (*)')
         self.assertEqual(str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC)')
+
+        wiw = music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=writer2, capacity='AD', relative_share=50,
+            controlled=False)
+        wiw.clean_fields()
+        wiw.clean()
+
+        self.assertEqual(
+            str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)')
 
         alt = work.alternatetitle_set.create(title='MPC Academy')
         self.assertEqual(str(alt), 'MPC ACADEMY')
@@ -287,12 +305,12 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+
+        # test also CWR 3.0
         cwr = music_publisher.models.CWRExport(nwr_rev='WRK')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        # print(cwr.cwr)
-        # self.assertRegex(cwr.cwr, self.RE_CWR)
 
         # raises error because this writer is controlled in a work
         writer.pr_society = None
