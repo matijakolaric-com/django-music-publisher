@@ -77,8 +77,3 @@ For Developers
    :maxdepth: 1
 
    modules
-
-.. only:: html
-
-   * :ref:`modindex`
-   * :ref:`genindex`
