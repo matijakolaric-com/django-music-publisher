@@ -10,6 +10,7 @@ from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
 import re
+import zipfile
 
 from django import forms
 from django.conf import settings
@@ -1212,6 +1213,18 @@ class CWRExportAdmin(admin.ModelAdmin):
                 'lines': cwr.split('\r\n'),
                 'title': obj.filename})
         elif 'download' in request.GET:
+            response = HttpResponse(content_type='application/zip')
+            zip_file = zipfile.ZipFile(response, 'w')
+            zip_file.writestr(obj.filename, obj.cwr.encode().decode('latin1'))
+            if obj.version == '30':
+                cd = 'attachment; filename="{}.zip"'.format(
+                    obj.filename.replace('.', '.'))
+            else:
+                cd = 'attachment; filename="{}"'.format(
+                    obj.filename.replace('.V21', '.zip'))
+            response['Content-Disposition'] = cd
+            return response
+
             response = HttpResponse(obj.cwr.encode().decode('latin1'))
             cd = 'attachment; filename="{}"'.format(obj.filename)
             response['Content-Disposition'] = cd

@@ -28,7 +28,7 @@ Multiple recordings per work can be added. But medleys are still not supported, 
 
 CWR 3.0 generation was added, though labeled as "experimental". CWR 2.1 generation is still available, but it does not contain album data. Collecting societies decided not to use release/album data in work registrations any more. Django Music Publisher 19.7 maintained and extended the data structure dedicated to releases. It will become useful with additional modules.
 
-CWR preview, for both versions, now includes basic syntax highlighting.
+CWR preview, for both versions, now includes basic syntax highlighting. CWR files are now zipped before the download.
 
 All exports, two JSON formats and two CWR versions, are now based on a single data structure, which is becoming the default for other tools and services by the maintainer.
 
