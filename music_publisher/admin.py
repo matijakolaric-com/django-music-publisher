@@ -1218,7 +1218,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             zip_file.writestr(obj.filename, obj.cwr.encode().decode('latin1'))
             if obj.version == '30':
                 cd = 'attachment; filename="{}.zip"'.format(
-                    obj.filename.replace('.', '.'))
+                    obj.filename.replace('.', '_'))
             else:
                 cd = 'attachment; filename="{}"'.format(
                     obj.filename.replace('.V21', '.zip'))
