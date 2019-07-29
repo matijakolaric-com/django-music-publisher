@@ -78,5 +78,7 @@ For Developers
 
    modules
 
-* :ref:`modindex`
-* :ref:`genindex`
+.. only:: html
+
+   * :ref:`modindex`
+   * :ref:`genindex`
