@@ -306,8 +306,14 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
 
-        # test also CWR 3.0
+        # test also CWR 3.0 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev='WRK')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
+
+        # test also CWR 3.0 ISR
+        cwr = music_publisher.models.CWRExport(nwr_rev='ISR')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()

@@ -2,7 +2,7 @@ Django Music Publisher
 ++++++++++++++++++++++
 
 Django Music Publisher is open source software for original music publishers.
-It is a tool for **managing metadata** on musical works and recordings,
+It is a tool for **managing metadata** for musical works and recordings,
 including data on writers, recording and performing artists, albums and music
 libraries, as well as **royalty distribution processing**.
 

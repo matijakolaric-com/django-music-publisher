@@ -1156,7 +1156,8 @@ class CWRExport(models.Model):
         choices=(
             ('NWR', 'CWR 2.1: New work registrations'),
             ('REV', 'CWR 2.1: Revisions of registered works'),
-            ('WRK', 'CWR 3.0: Work registration (experimental)')
+            ('WRK', 'CWR 3.0: Work registration (experimental)'),
+            ('ISR', 'CWR 3.0: ISWC request (experimental)')
         ))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
@@ -1168,7 +1169,7 @@ class CWRExport(models.Model):
 
     @property
     def version(self):
-        if self.nwr_rev == 'WRK':
+        if self.nwr_rev in ['WRK', 'ISR']:
             return '30'
         return '21'
 
@@ -1187,10 +1188,15 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        return 'CW{}{:04}{}_0000_V3-0-0.SUB'.format(
+        if self.nwr_rev == 'ISR':
+            ext = 'ISR'
+        else:
+            ext = 'SUB'
+        return 'CW{}{:04}{}_0000_V3-0-0.{}'.format(
             self.year,
             self.num_in_year,
-            SETTINGS.get('publisher_id'))
+            SETTINGS.get('publisher_id'),
+            ext)
 
     @property
     def filename21(self):
@@ -1245,31 +1251,37 @@ class CWRExport(models.Model):
             self.record_sequence += 1
         return line
 
-    def yield_lines(self):
-        """Yield CWR transaction records (rows/lines) for works
-
-        Args:
-            works (query): :class:`.models.Work` query
-
-        Yields:
-            str: CWR record (row/line)
-        """
-        qs = self.works.order_by('id',)
-        works = Work.objects.get_dict(qs)['works']
-
-        self.record_count = self.record_sequence = self.transaction_count = 0
-
-        yield self.get_record('HDR', {
-            'creation_date': datetime.now(),
-            'filename': self.filename,
-            **SETTINGS
-        })
-
-        yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
-
+    def yield_ISWC_request_lines(self, works):
         for work_id, work in works.items():
 
-            # NWR
+            # ISR
+            self.record_sequence = 0
+            work['work_id'] = work_id
+            if work['iswc']:
+                work['indicator'] = 'U'
+            yield self.get_transaction_record('ISR', work)
+
+            # WRI
+            reported = set()
+            for wiw in work['writers_for_work']:
+                w = wiw['writer']
+                if not w:
+                    continue  # goes to OWR
+                tup = (w['code'], wiw['capacity']['code'])
+                if tup in reported:
+                    continue
+                reported.add(tup)
+                w.update({
+                    'capacity': wiw['capacity']['code'],
+                })
+                yield self.get_transaction_record('WRI', w)
+
+            self.transaction_count += 1
+
+    def yield_registration_lines(self, works):
+        for work_id, work in works.items():
+
+            # WRK
             self.record_sequence = 0
             d = {
                 'record_type': self.nwr_rev,
@@ -1431,6 +1443,38 @@ class CWRExport(models.Model):
             for xrf in work['cross_references']:
                 yield self.get_transaction_record('XRF', xrf)
             self.transaction_count += 1
+
+
+
+    def yield_lines(self):
+        """Yield CWR transaction records (rows/lines) for works
+
+        Args:
+            works (query): :class:`.models.Work` query
+
+        Yields:
+            str: CWR record (row/line)
+        """
+        qs = self.works.order_by('id',)
+        works = Work.objects.get_dict(qs)['works']
+
+        self.record_count = self.record_sequence = self.transaction_count = 0
+
+        yield self.get_record('HDR', {
+            'creation_date': datetime.now(),
+            'filename': self.filename,
+            **SETTINGS
+        })
+
+        yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
+
+        if self.nwr_rev == 'ISR':
+            lines = self.yield_ISWC_request_lines(works)
+        else:
+            lines = self.yield_registration_lines(works)
+
+        for line in lines:
+            yield line
 
         yield self.get_record('GRT', {
             'transaction_count': self.transaction_count,

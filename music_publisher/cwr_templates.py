@@ -75,8 +75,6 @@ TEMPLATES_21 = {
         '   {{ share|mrshare }}'
         ' N                                             '
         '\r\n{% endautoescape %}'),
-    'OPT': Template(''),
-    'OWT': Template(''),
     'OWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'OWR{{ transaction_sequence|rjust:8 }}'
@@ -128,6 +126,8 @@ TEMPLATES_21 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'TRL00001{{ transaction_count|rjust:8 }}'
         '{{ record_count|rjust:8 }}{% endautoescape %}'),
+    'OPT': Template(''),
+    'OWT': Template(''),
     'XRF': Template('')
 }
 
@@ -258,6 +258,18 @@ TEMPLATES_30 = {
         'XRF{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ organization.code|ljust:4 }}'
         '{{ identifier|ljust:14 }}WY\r\n{% endautoescape %}'),
+    'ISR': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'ISR{{ transaction_sequence|rjust:8 }}00000000'
+        '{{ work_title|ljust:60 }}  {{ work_id|ljust:14 }}'
+        '{{ iswc|ljust:11 }}{{ indicator|ljust:1 }}\r\n{% endautoescape %}'),
+    'WRI': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'WRI{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
+        '{{ ipi_name|rjust:11 }}{{ last_name|ljust:45 }}'
+        '{{ first_name|ljust:30 }}{{ capacity|ljust:2 }}\r\n'
+        '{% endautoescape %}'),
     'GRT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRT00001{{ transaction_count|rjust:8 }}'
