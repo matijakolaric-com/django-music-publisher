@@ -29,6 +29,7 @@ matrix:
           - postgresql-10
           - postgresql-client-10
 env:
+  global:
   - DATABASE_URL="postgres://postgres@localhost:5433/dmp"
   - PGPORT=5433
 install:
