@@ -30,7 +30,7 @@ matrix:
           - postgresql-10
           - postgresql-client-10
 services: postgresql
-env: DATABASE_URL="postgres://postgres@localhost:5433/dmp"
+env: DATABASE_URL="postgres://postgres@localhost/dmp"
 install: pip install -r requirements.txt
 script: coverage run --source='music_publisher' manage.py test
 after_success: coveralls
