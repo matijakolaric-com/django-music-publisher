@@ -6,8 +6,7 @@ matrix:
       python: "3.7"
       addons:
         postgresql: "12"
-        env:
-        - PGPORT=5433
+        env:  PGPORT=5433
         apt:
           packages:
           - postgresql-12
@@ -30,14 +29,9 @@ matrix:
           packages:
           - postgresql-10
           - postgresql-client-10
-services:
-  - postgresql
-env:
-  - DATABASE_URL="postgres://postgres@localhost:5433/dmp"
-  - PGPORT=5433
-install:
-  - pip install -r requirements.txt
-script:
-  - coverage run --source='music_publisher' manage.py test
+services: postgresql
+env: DATABASE_URL="postgres://postgres@localhost:5433/dmp"
+install: pip install -r requirements.txt
+script: coverage run --source='music_publisher' manage.py test
 after_success: coveralls
 
