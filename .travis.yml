@@ -1,7 +1,7 @@
 language: python
 matrix:
   include:
-    - name: "Py3.7 Pg10"
+    - name: "18.04 Py3.7 Pg10"
       dist: bionic
       python: "3.7"
       addons:
@@ -10,10 +10,10 @@ matrix:
           packages:
           - postgresql-10
           - postgresql-client-10
-    - name: "Py3.7"
+    - name: "16.04 Py3.6"
       dist: xenial
-      python: "3.7"
-    - name: "Py3.6"
+      python: "3.6"
+    - name: "18.04 Py3.6"
       dist: bionic
       python: "3.6"
     - name: "Py3.5"
