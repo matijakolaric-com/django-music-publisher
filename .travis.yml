@@ -1,15 +1,15 @@
 language: python
 matrix:
   include:
-    - name: "18.04 Py3.7 Pg12"
+    - name: "18.04 Py3.7 Pg10"
       dist: bionic
       python: "3.7"
       addons:
-        postgresql: "12"
+        postgresql: "10"
         apt:
           packages:
-          - postgresql-12
-          - postgresql-client-12
+          - postgresql-10
+          - postgresql-client-10
     - name: "18.04 Py3.6 Pg11"
       dist: bionic
       python: "3.6"
