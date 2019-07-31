@@ -29,7 +29,9 @@ matrix:
           - postgresql-10
           - postgresql-client-10
 env:
-  - DATABASE_URL="postgres://postgres@localhost/dmp"
+  - DATABASE_URL="postgres://postgres@localhost:5433/dmp"
+  - global:
+      - PGPORT=5433
 install:
   - pip install -r requirements.txt
 script:
