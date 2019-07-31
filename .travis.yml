@@ -1,27 +1,34 @@
 language: python
 matrix:
   include:
-    - name: "18.04 Py3.7 Pg10"
+    - name: "18.04 Py3.7 Pg12"
       dist: bionic
       python: "3.7"
+      addons:
+        postgresql: "12"
+        apt:
+          packages:
+          - postgresql-12
+          - postgresql-client-12
+    - name: "18.04 Py3.6 Pg11"
+      dist: bionic
+      python: "3.6"
+      addons:
+        postgresql: "11"
+        apt:
+          packages:
+          - postgresql-11
+          - postgresql-client-11
+    - name: "18.04 Py3.5 Pg10"
+      dist: bionic
+      python: "3.5"
       addons:
         postgresql: "10"
         apt:
           packages:
           - postgresql-10
           - postgresql-client-10
-    - name: "16.04 Py3.6"
-      dist: xenial
-      python: "3.6"
-    - name: "18.04 Py3.6"
-      dist: bionic
-      python: "3.6"
-    - name: "Py3.5"
-      dist: xenial
-      python: "3.5"
-services:
-  - postgresql
-env: 
+env:
   - DATABASE_URL="postgres://postgres@localhost/dmp"
 install:
   - pip install -r requirements.txt
