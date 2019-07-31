@@ -20,7 +20,7 @@ matrix:
           - postgresql-10
           - postgresql-client-10
     - name: "18.04 Py3.6"
-      dist: bionic
+      dist: xenial
       python: "3.6"
     - name: "18.04 Py3.5"
       dist: xenial
