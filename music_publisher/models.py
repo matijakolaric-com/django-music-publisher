@@ -684,7 +684,7 @@ class Work(TitleBase):
         # add data for writers in work, normalize of required
         for wiw in self.writerinwork_set.all():
             d =  wiw.get_dict()
-            if normalize:
+            if normalize and d['capacity']:
                 d['capacity'] = normalize_dict(j, d['capacity'], 'capacities')
             w = d.get('writer', None)
             if normalize and w:
@@ -1379,7 +1379,8 @@ class CWRExport(models.Model):
                 else:
                     w = {'writer_unknown_indicator': 'Y'}
                 w.update({
-                    'capacity': wiw['capacity']['code'],
+                    'capacity': wiw['capacity']['code'] if wiw['capacity']
+                                else None,
                     'share': Decimal(wiw['relative_share'])})
                 yield self.get_transaction_record('OWR', w)
                 if w['share']:

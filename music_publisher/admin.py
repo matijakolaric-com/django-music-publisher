@@ -902,9 +902,9 @@ class WorkAdmin(MusicPublisherAdmin):
             """Filter on presence of :class:`.models.Recording`.
             """
             if self.value() == 'Y':
-                return queryset.exclude(recordings__isnull=True)
+                return queryset.exclude(recordings__count=0)
             elif self.value() == 'N':
-                return queryset.filter(recordings__isnull=True)
+                return queryset.filter(recordings__count=0)
 
     list_filter = (
         HasISWCListFilter,
@@ -920,9 +920,9 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     search_fields = (
-        'title', 'alternatetitle__title', '^iswc', '^id' 
+        'title', 'alternatetitle__title', '^iswc', '^id',
         'recordings__recording_title', 'recordings__version_title',
-        'recordings__iswc', 'writerinwork__writer__last_name')
+        '^recordings__isrc', 'writerinwork__writer__last_name')
 
     def get_search_results(self, request, queryset, search_term):
         """Deal with the situation term is work ID.
@@ -1316,8 +1316,10 @@ class ACKImportAdmin(admin.ModelAdmin):
             return self.fields
         return self.add_fields
 
-    RE_ACK = re.compile(re.compile(
-        r'(?<=\n)ACK.{106}(.{20})(.{20})(.{8})(.{2})', re.S))
+    RE_ACK_21 = re.compile(re.compile(
+        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})', re.S))
+    RE_ACK_30 = re.compile(re.compile(
+        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})', re.S))
 
     def process(self, request, society_code, file_content):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
@@ -1329,8 +1331,12 @@ class ACKImportAdmin(admin.ModelAdmin):
         unknown_work_ids = []
         existing_work_ids = []
         report = ''
-        for x in re.findall(self.RE_ACK, file_content):
-            work_id, remote_work_id, dat, status = x
+        if (file_content[59:64] == '01.10'):
+            pattern = self.RE_ACK_21
+        else:
+            pattern = self.RE_ACK_30
+        for x in re.findall(pattern, file_content):
+            tt, work_id, remote_work_id, dat, status = x
             # work ID is numeric with an optional string
             work_id = work_id.strip()
             PREFIX = SETTINGS.get('work_id_prefix', '')

@@ -142,7 +142,8 @@ TEMPLATES_30 = {
         '{{ filename|ljust:27 }}\r\n{% endautoescape %}'),
     'GRH': Template(
         '{% load cwr_filters %}{% autoescape off %}'
-        'GRHWRK0000103.000000000000\r\n{% endautoescape %}'),
+        'GRH{{ transaction_type|ljust:3 }}0000103.000000000000'
+        '\r\n{% endautoescape %}'),
     'WRK': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'WRK{{ transaction_sequence|rjust:8 }}00000000'

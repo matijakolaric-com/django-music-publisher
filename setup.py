@@ -15,7 +15,7 @@ setuptools.setup(
     url='https://django-music-publisher.readthedocs.io',
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django==2.2.*',
+        'Django>=2.2,<3.0',
         'requests>=2.20.0',
     ),
     include_package_data=True,

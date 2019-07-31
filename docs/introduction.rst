@@ -26,7 +26,7 @@ Multiple writers, both controlled and uncontrolled, are covered, with minor limi
 This translates to the following CWR 2.x / 3.0 transaction record types:
 
 ======================================  ======================================
-CWR 2.1 / 2.2                           CWR 3.0 (SUB files)
+CWR 2.1                                 CWR 3.0 (SUB files)
 ======================================  ======================================
 NWR/REV,                                WRK
 SPU, SPT (just World), OPU (unknown),   SPU, SPT (just World), OPU (unknown)
