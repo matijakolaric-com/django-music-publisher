@@ -23,25 +23,6 @@ The database contains data on **musical works** and **recordings**, including ti
 
 Multiple writers, both controlled and uncontrolled, are covered, with minor limitations.
 
-This translates to the following CWR 2.x / 3.0 transaction record types:
-
-======================================  ======================================
-CWR 2.1                                 CWR 3.0 (SUB files)
-======================================  ======================================
-NWR/REV,                                WRK
-SPU, SPT (just World), OPU (unknown),   SPU, SPT (just World), OPU (unknown)
-SWR, SWT (just World), PWR, OWR,        SWR, SWT (just World), PWR, OWR, OWT
-ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC, ORN (only LIB), XRF
-======================================  ======================================
-
-
-======================================
-CWR 3.0 (ISR files)
-======================================
-ISR
-WRI
-======================================
-
 Basic original publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers and for simple royalty distribution processing.
 
 The actual royalty distribution processing is not yet implemented.
