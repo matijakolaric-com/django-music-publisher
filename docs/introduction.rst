@@ -16,7 +16,7 @@ Django Music Publisher can be used out-of-the-box by most small publishers, both
 Each Django Music Publisher instance supports a **single original publisher**. It is not intended to be used by administrators or sub-publishers, nor by publishing companies with multiple entities.
 
 
-Current Features
+Features
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The database contains data on **musical works** and **recordings**, including titles of **original works** for **modified works**, **alternative titles**, data on **writers**, recording and performing **artists**, **releases** (albums) and **music libraries**, as well as **CWR exports**, **registration acknowledgements** and **ISWC assignments**.
@@ -32,6 +32,13 @@ NWR/REV,                                WRK
 SPU, SPT (just World), OPU (unknown),   SPU, SPT (just World), OPU (unknown)
 SWR, SWT (just World), PWR, OWR,        SWR, SWT (just World), PWR, OWR, OWT
 ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC, ORN (only LIB), XRF
+======================================  ======================================
+
+======================================  ======================================
+                                        CWR 3.0 ISR files)
+======================================  ======================================
+                                        ISR
+                                        WRI
 ======================================  ======================================
 
 Basic original publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers and for simple royalty distribution processing.
