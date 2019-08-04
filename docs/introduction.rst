@@ -34,12 +34,13 @@ SWR, SWT (just World), PWR, OWR,        SWR, SWT (just World), PWR, OWR, OWT
 ALT, PER, REC (single), ORN (only LIB)  ALT, PER, REC, ORN (only LIB), XRF
 ======================================  ======================================
 
-======================================  ======================================
-                                        CWR 3.0 ISR files)
-======================================  ======================================
-                                        ISR
-                                        WRI
-======================================  ======================================
+
+======================================
+CWR 3.0 (ISR files)
+======================================
+ISR
+WRI
+======================================
 
 Basic original publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers and for simple royalty distribution processing.
 
