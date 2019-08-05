@@ -6,7 +6,7 @@ format, as well as do some basic validation.
 
 from django import template
 from datetime import date, time
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.utils.html import mark_safe
 
 
@@ -50,7 +50,9 @@ def soc(value):
 def prshare(value):
     """Format and validate fields containing shares."""
     value = value or 0
-    value = int(round(value * 5000))
+    value = (value * Decimal(5000)).quantize(
+        Decimal('1.'), rounding=ROUND_HALF_UP)
+    value = int(value)
     return '{:05d}'.format(value)
 
 
@@ -59,5 +61,14 @@ def mrshare(value):
     """Format and validate fields containing shares."""
 
     value = value or 0
-    value = int(round(value * 10000))
+    value = (value * Decimal(10000)).quantize(
+        Decimal('1.'), rounding=ROUND_HALF_UP)
+    value = int(value)
     return '{:05d}'.format(value)
+
+@register.filter(name='perc')
+def perc(value):
+    """Format and validate fields containing shares."""
+
+    value = Decimal(value) / Decimal('100')
+    return '{}%'.format(value)
