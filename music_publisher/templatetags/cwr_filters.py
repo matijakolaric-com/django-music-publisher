@@ -8,6 +8,7 @@ from django import template
 from datetime import date, time
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils.html import mark_safe
+from music_publisher import const
 
 
 register = template.Library()
@@ -68,7 +69,14 @@ def mrshare(value):
 
 @register.filter(name='perc')
 def perc(value):
-    """Format and validate fields containing shares."""
+    """Display shares as human-readable string."""
 
     value = Decimal(value) / Decimal('100')
     return '{}%'.format(value)
+
+@register.filter(name='soc_name')
+def soc_name(value):
+    """Display society name"""
+
+    value = value.strip()
+    return const.SOCIETY_DICT.get(value, '')
