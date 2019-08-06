@@ -8,7 +8,7 @@ from django import template
 from datetime import date, time
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils.html import mark_safe
-from music_publisher import const
+from music_publisher import const, models
 
 
 register = template.Library()
@@ -80,3 +80,11 @@ def soc_name(value):
 
     value = value.strip()
     return const.SOCIETY_DICT.get(value, '')
+
+@register.filter(name='capacity')
+def capacity(value):
+    """Display capacity"""
+
+    value = value.strip()
+    obj = models.WriterInWork(capacity=value)
+    return obj.get_capacity_display()
