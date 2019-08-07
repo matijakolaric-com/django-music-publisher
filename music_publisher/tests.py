@@ -866,37 +866,39 @@ class IntegrationTest(TransactionTestCase):
         cwr_export = music_publisher.models.CWRExport.objects.all().first()
         response = self.get(
             reverse('admin:music_publisher_cwrexport_add'),
-            re_post={'nwr_rev': 'REV', 'works': [work.id, work2.id]})
+            re_post={'nwr_rev': 'WRK', 'works': [work.id, work2.id]})
         response = self.get(
             reverse(
                 'admin:music_publisher_cwrexport_change',
                 args=(cwr_export.id,)),
-            re_post={'nwr_rev': 'NWR', 'works': [work.id, work2.id]})
-        response = self.get(
-            '{}?download=1'.format(
-                reverse(
-                    'admin:music_publisher_work_change',
-                    args=(cwr_export.id,))))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(
-            reverse('admin:music_publisher_work_changelist'),
-            data={
-                'action': 'create_cwr', 'select_across': 1,
-                'index': 0, '_selected_action': work.id})
-        response = self.get(
-            reverse('admin:music_publisher_cwrexport_changelist'))
-        self.assertEqual(response.status_code, 200)
-        response = self.get(reverse(
-            'admin:music_publisher_cwrexport_change', args=(cwr_export.id,)))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse(
-            'admin:music_publisher_cwrexport_change',
-            args=(cwr_export.id,)) + '?download=true',)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse(
-            'admin:music_publisher_cwrexport_change',
-            args=(cwr_export.id,)) + '?preview=true',)
-        self.assertEqual(response.status_code, 200)
+            re_post={'nwr_rev': 'REV', 'works': [work.id, work2.id]})
+        cwr_exports = music_publisher.models.CWRExport.objects.all()
+        for cwr_export in cwr_exports:
+            response = self.get(
+                '{}?download=1'.format(
+                    reverse(
+                        'admin:music_publisher_work_change',
+                        args=(cwr_export.id,))))
+            self.assertEqual(response.status_code, 200)
+            response = self.client.post(
+                reverse('admin:music_publisher_work_changelist'),
+                data={
+                    'action': 'create_cwr', 'select_across': 1,
+                    'index': 0, '_selected_action': work.id})
+            response = self.get(
+                reverse('admin:music_publisher_cwrexport_changelist'))
+            self.assertEqual(response.status_code, 200)
+            response = self.get(reverse(
+                'admin:music_publisher_cwrexport_change', args=(cwr_export.id,)))
+            self.assertEqual(response.status_code, 200)
+            response = self.client.get(reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(cwr_export.id,)) + '?download=true',)
+            self.assertEqual(response.status_code, 200)
+            response = self.client.get(reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(cwr_export.id,)) + '?preview=true',)
+            self.assertEqual(response.status_code, 200)
 
         response = self.get(
             reverse('admin:music_publisher_work_changelist',) +
