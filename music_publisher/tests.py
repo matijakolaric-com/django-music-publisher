@@ -225,13 +225,20 @@ class ModelsSimpleTest(TransactionTestCase):
             'code': 'LI000001',
             'name': 'Music Library'})
 
+        label = music_publisher.models.Label(name='Music Label')
+        label.save()
+        self.assertEqual(str(label), 'MUSIC LABEL')
+        self.assertDictEqual(label.get_dict(), {
+            'code': 'LA000001',
+            'name': 'Music Label'})
+
         release = music_publisher.models.LibraryRelease(
             library=library, cd_identifier='ML001')
         release.save()
         self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
         self.assertIsNone(release.get_dict())
         self.assertDictEqual(release.get_origin_dict(), {
-            'origin_type': {'code': 'LIB', 'name': 'Library Work'},
+             'origin_type': {'code': 'LIB', 'name': 'Library Work'},
              'cd_identifier': 'ML001',
              'library': {'code': 'LI000001', 'name': 'Music Library'}})
         release.ean = '1X'
@@ -239,6 +246,12 @@ class ModelsSimpleTest(TransactionTestCase):
             release.clean()
         release.release_title = 'Test'
         self.assertEqual(str(release), 'ML001: TEST (MUSIC LIBRARY)')
+
+        release.ean = None
+        release.release_label = label
+        release.clean_fields()
+        release.clean()
+        release.save()
 
         work = music_publisher.models.Work(
             title='Muzički birtijaški crtići',
@@ -248,7 +261,8 @@ class ModelsSimpleTest(TransactionTestCase):
         work = music_publisher.models.Work(
             title='Music Pub Cartoons',
             iswc='T-123.456.789-4',
-            original_title='Music Pub Cartoons')
+            original_title='Music Pub Cartoons',
+            library_release=release)
         self.assertIsNone(work.clean_fields())
         self.assertEqual(str(work.work_id), '')
         self.assertTrue(work.is_modification())
@@ -282,8 +296,11 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(str(wiw), 'MATIJA KOLARIC (*)')
         self.assertEqual(str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC)')
 
+        music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=writer2, capacity='AD', relative_share=25,
+            controlled=True)
         wiw = music_publisher.models.WriterInWork.objects.create(
-            work=work, writer=writer2, capacity='AD', relative_share=50,
+            work=work, writer=writer2, capacity='AD', relative_share=25,
             controlled=False)
         wiw.clean_fields()
         wiw.clean()
@@ -296,6 +313,22 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertDictEqual(alt.get_dict(), {
             'alternate_title': 'MPC ACADEMY',
             'title_type': {'code': 'AT', 'name': 'Alternative Title'}})
+
+        rec = music_publisher.models.Recording.objects.create(
+            work=work,
+            recording_title='Work Recording',
+            record_label=label
+        )
+        rec.clean_fields()
+        rec.clean()
+
+        track = music_publisher.models.Track.objects.create(
+            release = release,
+            recording = rec,
+            cut_number = 1
+        )
+        track.clean_fields()
+        track.clean()
 
         # normalized dict
         music_publisher.models.WorkManager().get_dict(

@@ -500,7 +500,7 @@ class Work(TitleBase):
         return '{}: {} ({})'.format(
             self.work_id,
             self.title.upper(),
-            ' / '.join(w.last_name.upper() for w in self.writers.all()))
+            ' / '.join(w.last_name.upper() for w in self.writers.distinct()))
 
 
     def get_publishers_dict(self):
