@@ -1543,8 +1543,8 @@ class WorkAcknowledgement(models.Model):
         :return:
         :rtype:
         """
-        if not self.remote_work_id:
-            return None
+        # if not self.remote_work_id:
+        #     return None
         j = {
             'organization': {
                 'code': self.society_code,

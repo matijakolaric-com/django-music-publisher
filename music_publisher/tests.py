@@ -25,6 +25,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from io import StringIO
 # import os
 
+from datetime import datetime
+
 
 class ConstTest(SimpleTestCase):
 
@@ -253,6 +255,12 @@ class ModelsSimpleTest(TransactionTestCase):
         release.clean()
         release.save()
 
+        release2 = music_publisher.models.LibraryRelease(
+            library=library, cd_identifier='ML002')
+        release2.clean_fields()
+        release2.clean()
+        release2.save()
+
         work = music_publisher.models.Work(
             title='Muzički birtijaški crtići',
             library_release=release)
@@ -314,13 +322,43 @@ class ModelsSimpleTest(TransactionTestCase):
             'alternate_title': 'MPC ACADEMY',
             'title_type': {'code': 'AT', 'name': 'Alternative Title'}})
 
+        self.assertEqual(
+            str(music_publisher.models.Recording().recording_id),
+            '')
+
         rec = music_publisher.models.Recording.objects.create(
             work=work,
             recording_title='Work Recording',
+            version_title='Work Recording feat. Testing',
             record_label=label
         )
         rec.clean_fields()
         rec.clean()
+
+        rec2 = music_publisher.models.Recording.objects.create(
+            work=work,
+            recording_title='Suffix',
+            recording_title_suffix=True,
+            version_title='Co-suffix',
+            version_title_suffix=True
+        )
+        rec.clean_fields()
+        rec.clean()
+
+        music_publisher.models.WorkAcknowledgement.objects.create(
+            work=work,
+            society_code='10',
+            date=datetime.now(),
+            status='RA'
+        )
+
+        music_publisher.models.WorkAcknowledgement.objects.create(
+            work=work,
+            society_code='51',
+            remote_work_id='REMOTE1',
+            date=datetime.now(),
+            status='AS'
+        )
 
         track = music_publisher.models.Track.objects.create(
             release = release,
@@ -329,6 +367,12 @@ class ModelsSimpleTest(TransactionTestCase):
         )
         track.clean_fields()
         track.clean()
+
+        music_publisher.models.Track.objects.create(
+            release = release2,
+            recording = rec2,
+            cut_number = 2
+        )
 
         # normalized dict
         music_publisher.models.WorkManager().get_dict(
