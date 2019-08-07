@@ -27,6 +27,12 @@ In the context of registrations, basically there are three roles:
 * *administrators* to whom some OPs have entrusted all or some activities regarding musical works
 * *sub-publishers* to whom OPs or admins have entrusted all or some activieties in foreign countries
 
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/a2ME6hKlPZQ/?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+   <p>The differences are explained in this video, as well as some of the reasons for this choice.</p>
+   <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
+
 Django Music Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of composite works and some other rare cases.
 
 Please note that the term *self-publisher* is used for an original publisher with a single signed writer - usually the owner, or sometimes all members of a band. They usually do not require royalty statement processing.
@@ -36,4 +42,4 @@ Publisher Size
 
 In the software context, the size of a publisher is completely irrelevant. There are self-proclaimed small music publishers who do just about everything and anything, as well as large publishers who are just original publishers or just administrators or just sub-publishers.
 
-In the context of Django Music Publisher, original publishers with up to about 1000 works (depending on metadata complexity), effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows.
+In the context of Django Music Publisher, original publishers with up to about 1000 works (depending on metadata complexity), effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows. If you install it yourself on Heroku, it will be completely free of charge.

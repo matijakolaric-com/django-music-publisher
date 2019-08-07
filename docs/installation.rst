@@ -45,6 +45,11 @@ credentials you provided in a previous step. For instructions on permanent
 deployment, please use official
 `Django documentation <https://www.djangoproject.com/>`_.
 
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/H1cVGXpM-3s/?list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+   <p>The installation process for an older version can be seen here.</p>
+   <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
 
 Installing as Django Module (developers only)
 ===============================================================================
@@ -65,8 +70,6 @@ You will have to add this to the settings, replace with your data.
 .. code:: python
 
     MUSIC_PUBLISHER_SETTINGS = {
-        'allow_modifications': True,  # Only original works if False
-        'allow_multiple_ops': False,  # Writers can have multiple original pubs
 
         'enforce_saan': True,  # Agr. # is required in many societies
         'enforce_publisher_fee': True,  # False for self-publishers
@@ -79,12 +82,18 @@ You will have to add this to the settings, replace with your data.
         'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
         'publisher_ipi_name': '00000000199',  # IPI name number
         'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
-        'publisher_pr_society': '052',  # Performing Rights Society Code
-        'publisher_mr_society': '044',  # Mechanical Rights Society Code
+        'publisher_pr_society': '52',  # Performing Rights Society Code
+        'publisher_mr_society': '44',  # Mechanical Rights Society Code
         'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
     }
 
 More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
+
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/COi6LCzUTVQ/?list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+   <p>The settings for an older version are explained here, some have been removed since. Please note that the support for multiple publishing entities in the US are gone.</p>
+   <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
 
 Additional Societies
 ++++++++++++++++++++
