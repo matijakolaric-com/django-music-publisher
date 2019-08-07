@@ -141,11 +141,12 @@ MUSIC_PUBLISHER_SETTINGS = {
     'publisher_id': 'DMP',
     'publisher_name': 'DJANGO MUSIC PUBLISHER DEMO APP',
     'publisher_ipi_name': '00000000199',
+    'publisher_ipi_base': 'I-000000001-9',
     'publisher_pr_society': '71',
     'publisher_mr_society': '34',
     'publisher_sr_society': '52',
 
-    # NOTE: 'library' is only used for migrations to 19.7
+    # NOTE: 'library' is only used for migrations from 19.1 or 18.x to 19.7
     # 'library': 'FOO BAR MUSIC LIBRARY',
 }
 

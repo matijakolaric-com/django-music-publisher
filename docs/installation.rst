@@ -81,7 +81,7 @@ You will have to add this to the settings, replace with your data.
         'publisher_id': 'TOP',  # THE 2-4 letter CWR delivery publisher code
         'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
         'publisher_ipi_name': '00000000199',  # IPI name number
-        'publisher_ipi_base': 'I0000000393',  # IPI base number (rarely used)
+        'publisher_ipi_base': 'I-000000001-9',  # IPI base number (rarely used)
         'publisher_pr_society': '52',  # Performing Rights Society Code
         'publisher_mr_society': '44',  # Mechanical Rights Society Code
         'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
