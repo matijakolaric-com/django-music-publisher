@@ -500,6 +500,24 @@ class IntegrationTest(TransactionTestCase):
         response = self.get(reverse('admin:music_publisher_work_changelist',))
         self.assertEqual(response.status_code, 200)
         response = self.get(
+            reverse('admin:music_publisher_label_add'),
+            re_post={
+                'name': 'Label',
+            })
+        self.assertEqual(response.status_code, 302)
+        response = self.get(reverse('admin:music_publisher_label_changelist',))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.get(
+            reverse('admin:music_publisher_library_add'),
+            re_post={
+                'name': 'Library',
+            })
+        self.assertEqual(response.status_code, 302)
+        response = self.get(reverse('admin:music_publisher_library_changelist',))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.get(
             reverse('admin:music_publisher_writer_add'),
             re_post={
                 'last_name': 'Lošija',
