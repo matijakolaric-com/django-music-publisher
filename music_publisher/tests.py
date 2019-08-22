@@ -984,9 +984,14 @@ class IntegrationTest(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_commercialrelease_add'))
+        response = self.get(
+            reverse('admin:music_publisher_commercialrelease_add') + '?_popup=1')
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_libraryrelease_add'))
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_libraryrelease_add') + '?_popup=1')
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_work_add') + '?_popup=1')

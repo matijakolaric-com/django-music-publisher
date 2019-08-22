@@ -115,7 +115,9 @@ class ArtistAdmin(MusicPublisherAdmin):
         """
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
-            qs = Work.objects.filter(artistinwork__artist=obj)
+            qs = Work.objects.filter(
+                models.Q(artistinwork__artist=obj) |
+                models.Q(recordings__artist=obj))
             qs.update(last_change=now())
 
     def get_queryset(self, request):
@@ -342,7 +344,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         """
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
-            qs = Work.objects.filter(recordings__release=obj)
+            qs = Work.objects.filter(library_release=obj)
             qs.update(last_change=now())
 
     def get_queryset(self, request):
@@ -1238,7 +1240,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):
         """:meth:`save_model` passes the main object, which is needed to fetch
-            CWR form the external service, but only after related objects are
+            CWR from the external service, but only after related objects are
             saved.
         """
         super().save_related(request, form, formsets, change)
