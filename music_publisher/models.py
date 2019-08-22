@@ -22,6 +22,17 @@ from .validators import CWRFieldValidator
 
 
 def normalize_dict(full_dict, inner_dict, key, code_key='code'):
+    """Normalize a dictionary
+    
+    Args:
+        full_dict (dict): Complete dictionary 
+        inner_dict (dict): Dictionary that holds denormaliyed data
+        key (TYPE): Key for full_dict where the data from inner_dict goes
+        code_key (str, optional): Description
+    
+    Returns:
+        TYPE: Description
+    """
     code = inner_dict.pop(code_key)
     full_dict[key].update({code: inner_dict})
     return code
@@ -29,10 +40,9 @@ def normalize_dict(full_dict, inner_dict, key, code_key='code'):
 
 class Artist(PersonBase, models.Model):
     """Performing artists.
-
+    
     Attributes:
-        isni (django.db.models.CharField):
-            International Standard Name Identifier
+        isni (django.db.models.CharField): International Standard Name Identifier
     """
 
     class Meta:
@@ -52,10 +62,10 @@ class Artist(PersonBase, models.Model):
         return models.Model.clean_fields(self, *args, **kwargs)
 
     def get_dict(self):
-        """Create a data structure that can be serialized as JSON.
-
+        """Get the object in an internal dictionary format
+        
         Returns:
-            dict: JSON-serializable data structure
+            dict: internal dict format
         """
         return {
             'code': self.artist_id,
@@ -66,13 +76,17 @@ class Artist(PersonBase, models.Model):
 
     @property
     def artist_id(self):
-        """Artist identifier"""
+        """Artist identifier
+        
+        Returns:
+            str: Artist ID
+        """
         return 'A{:06d}'.format(self.id)
 
 
 class Label(models.Model):
     """Music Label.
-
+    
     Attributes:
         name (django.db.models.CharField): Label Name
     """
@@ -90,14 +104,18 @@ class Label(models.Model):
 
     @property
     def label_id(self):
-        """Label identifier"""
+        """Label identifier
+        
+        Returns:
+            str: Label ID
+        """
         return 'LA{:06d}'.format(self.id)
 
     def get_dict(self):
-        """Create a data structure that can be serialized as JSON.
-
+         """Get the object in an internal dictionary format
+        
         Returns:
-            dict: JSON-serializable data structure
+            dict: internal dict format
         """
         return {
             'code': self.label_id,
@@ -125,14 +143,18 @@ class Library(models.Model):
 
     @property
     def library_id(self):
-        """Library identifier"""
+        """Library identifier
+        
+        Returns:
+            str: Library ID
+        """
         return 'LI{:06d}'.format(self.id)
 
     def get_dict(self):
-        """Create a data structure that can be serialized as JSON.
-
+         """Get the object in an internal dictionary format
+        
         Returns:
-            dict: JSON-serializable data structure
+            dict: internal dict format
         """
         return {
             'code': self.library_id,
@@ -142,10 +164,15 @@ class Library(models.Model):
 
 class Release(models.Model):
     """Music Release (album / other product)
-
+    
     Attributes:
         cd_identifier (django.db.models.CharField): CD Identifier, used for LIB
+        ean (django.db.models.CharField): EAN code
         library (django.db.models.ForeignKey): Foreign key to Library model
+        recordings (django.db.models.ManyToManyField): Description
+        release_date (TYPE): Description
+        release_label (TYPE): Description
+        release_title (TYPE): Description
     """
 
     class Meta:
