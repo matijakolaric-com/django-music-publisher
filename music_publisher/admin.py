@@ -214,6 +214,17 @@ class LabelAdmin(MusicPublisherAdmin):
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recording__count'
 
+    def save_model(self, request, obj, form, *args, **kwargs):
+        """Save, then update ``last_change`` of the corresponding works.
+        """
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(
+                models.Q(recordings__record_label=obj))
+            qs.update(last_change=now())
+
+
+
 
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
@@ -254,6 +265,17 @@ class LibraryAdmin(MusicPublisherAdmin):
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
     work_count.short_description = 'Works'
     work_count.admin_order_field = 'work__count'
+
+
+    def save_model(self, request, obj, form, *args, **kwargs):
+        """Save, then update ``last_change`` of the corresponding works.
+        """
+        super().save_model(request, obj, form, *args, **kwargs)
+        if form.changed_data:
+            qs = Work.objects.filter(
+                models.Q(library_release__library=obj))
+            qs.update(last_change=now())
+
 
 class TrackInline(admin.TabularInline):
     model = Track
@@ -731,20 +753,6 @@ class WorkAdmin(MusicPublisherAdmin):
 
     work_id.short_description = 'Work ID'
     work_id.admin_order_field = 'id'
-
-    def library_release(self, obj):
-        if not (hasattr(obj, 'recording') and obj.recording):
-            return None
-        return obj.recording.album_cd
-
-    library_release.short_description = 'Album / Library CD'
-    library_release.admin_order_field = 'library_release__name'
-
-    # def isrcs(self, obj):
-    #     return [r.isrc for r in obj.recordings.all()]
-    #
-    # isrcs.short_description = 'ISRCs'
-    # isrcs.admin_order_field = 'recordings__isrc'
 
     def cwr_export_count(self, obj):
         """Return the count of CWR exports with the link to the filtered

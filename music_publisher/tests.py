@@ -514,6 +514,7 @@ class IntegrationTest(TransactionTestCase):
                 'name': 'Library',
             })
         self.assertEqual(response.status_code, 302)
+        library = music_publisher.models.Library.objects.first()
         response = self.get(reverse('admin:music_publisher_library_changelist',))
         self.assertEqual(response.status_code, 200)
 
@@ -949,6 +950,7 @@ class IntegrationTest(TransactionTestCase):
                     'index': 0, '_selected_action': work.id})
             response = self.get(
                 reverse('admin:music_publisher_cwrexport_changelist'))
+
             self.assertEqual(response.status_code, 200)
             response = self.get(reverse(
                 'admin:music_publisher_cwrexport_change', args=(cwr_export.id,)))
@@ -980,10 +982,8 @@ class IntegrationTest(TransactionTestCase):
             reverse('admin:music_publisher_commercialrelease_changelist'))
         self.assertEqual(response.status_code, 200)
         response = self.get(
-            reverse('admin:music_publisher_libraryrelease_changelist'))
-        self.assertEqual(response.status_code, 200)
-        response = self.get(
             reverse('admin:music_publisher_commercialrelease_add'))
+        self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_commercialrelease_add') + '?_popup=1')
         self.assertEqual(response.status_code, 200)
@@ -991,10 +991,46 @@ class IntegrationTest(TransactionTestCase):
             reverse('admin:music_publisher_libraryrelease_add'))
         self.assertEqual(response.status_code, 200)
         response = self.get(
-            reverse('admin:music_publisher_libraryrelease_add') + '?_popup=1')
+            reverse('admin:music_publisher_libraryrelease_add') + '?_popup=1',
+            re_post={
+                'library': library.id,
+                'cd_identifier': 'CD0001',
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_libraryrelease_changelist'))
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_work_add') + '?_popup=1')
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_work_add'),
+            re_post={
+                'title': 'LIBRARY',
+                'library_release': music_publisher.models.LibraryRelease.objects.first().id,
+                'writerinwork_set-TOTAL_FORMS': 1,
+                'writerinwork_set-0-writer': writer.id,
+                'writerinwork_set-0-capacity': 'CA',
+                'writerinwork_set-0-relative_share': '100',
+                'writerinwork_set-0-controlled': '1',
+                'writerinwork_set-0-saan': '1LJ4V4',
+                'writerinwork_set-0-publisher_fee': '25',
+            })
+        self.assertEqual(response.status_code, 302)
+        response = self.get(
+            reverse('admin:music_publisher_work_changelist'))
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_recording_changelist'))
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_recording_changelist') +
+            '?has_isrc=N')
+        self.assertEqual(response.status_code, 200)
+        response = self.get(
+            reverse('admin:music_publisher_recording_changelist') +
+            '?has_isrc=Y')
         self.assertEqual(response.status_code, 200)
         mock = StringIO()
         mock.write(ACK_CONTENT)
