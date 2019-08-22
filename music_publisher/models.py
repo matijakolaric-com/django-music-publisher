@@ -112,7 +112,7 @@ class Label(models.Model):
         return 'LA{:06d}'.format(self.id)
 
     def get_dict(self):
-         """Get the object in an internal dictionary format
+        """Get the object in an internal dictionary format
         
         Returns:
             dict: internal dict format
@@ -151,7 +151,7 @@ class Library(models.Model):
         return 'LI{:06d}'.format(self.id)
 
     def get_dict(self):
-         """Get the object in an internal dictionary format
+        """Get the object in an internal dictionary format
         
         Returns:
             dict: internal dict format

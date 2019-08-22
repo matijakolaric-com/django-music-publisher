@@ -179,7 +179,7 @@ What is ``relative share`` exactly?
 	among them. This is ``relative share``. A writer may then have a publisher,
 	which would be you in this case. They usually transfer 50% of performance
 	and 100% of mechanical and synchronization rights to the publisher. In some
-    countries, however, different splits may be enforced by law.
+	countries, however, different splits may be enforced by law.
 
 What is ``publisher fee`` exactly?
 	This field is **not used for registrations**. In some cases the publisher
