@@ -27,11 +27,11 @@ def normalize_dict(full_dict, inner_dict, key, code_key='code'):
     Args:
         full_dict (dict): Complete dictionary 
         inner_dict (dict): Dictionary that holds denormaliyed data
-        key (TYPE): Key for full_dict where the data from inner_dict goes
+        key (str): Key for full_dict where the data from inner_dict goes
         code_key (str, optional): Description
     
     Returns:
-        TYPE: Description
+        str: the key under which the data was normalized
     """
     code = inner_dict.pop(code_key)
     full_dict[key].update({code: inner_dict})
@@ -166,13 +166,13 @@ class Release(models.Model):
     """Music Release (album / other product)
     
     Attributes:
-        cd_identifier (django.db.models.CharField): CD Identifier, used for LIB
+        cd_identifier (django.db.models.CharField): CD Identifier, used when origin is library
         ean (django.db.models.CharField): EAN code
-        library (django.db.models.ForeignKey): Foreign key to Library model
-        recordings (django.db.models.ManyToManyField): Description
-        release_date (TYPE): Description
-        release_label (TYPE): Description
-        release_title (TYPE): Description
+        library (django.db.models.ForeignKey): Foreign key to :class:`.models.Library`
+        recordings (django.db.models.ManyToManyField): M2M to class:`.models.Recording` through class:`.models.Track`
+        release_date (django.db.models.DateField): Date of the release
+        release_label (django.db.models.ForeignKey): Foreign key to :class:`.models.Label`
+        release_title (django.db.models.CharField): Title of the release
     """
 
     class Meta:
@@ -219,14 +219,18 @@ class Release(models.Model):
 
     @property
     def release_id(self):
-        """Release identifier."""
+        """Release identifier.
+        
+        Returns:
+            str: Release ID
+        """
         return 'RE{:06d}'.format(self.id)
 
     def get_dict(self):
-        """Create a data structure that can be serialized as JSON.
-
+        """Get the object in an internal dictionary format
+        
         Returns:
-            dict: JSON-serializable data structure
+            dict: internal dict format
         """
         if not (self.release_title or
                 self.release_label or
@@ -249,11 +253,14 @@ class Release(models.Model):
 
 
 class LibraryReleaseManager(models.Manager):
-    def get_queryset(self):
-        """
+    """Manager for a proxy class :class:`.models.LibraryRelease`
+    """
 
-        :return:
-        :rtype:
+    def get_queryset(self):
+        """Return only library releases
+        
+        Returns:
+            django.db.models.query.QuerySet: Queryset with instances of :class:`.models.LibraryRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
