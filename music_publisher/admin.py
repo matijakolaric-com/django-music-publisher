@@ -1,12 +1,5 @@
-"""Interface for :mod:`music_publisher` app.
-
-Please note that this is the only interface.
-
-Attributes:
-    IS_POPUP_VAR (bool): :attr:`django.contrib.admin.options.IS_POPUP_VAR`
 """
-
-from collections import OrderedDict
+"""
 from datetime import datetime
 from decimal import Decimal
 import re
@@ -27,19 +20,18 @@ from django.utils.timezone import now
 
 from .const import SOCIETIES
 from .models import (
-    ACKImport, AlternateTitle, Artist, ArtistInWork, CommercialRelease,
-    CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
-    WorkAcknowledgement, Writer, WriterInWork)
-
+    ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
+    CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
+    Track, Work, WorkAcknowledgement, Writer, WriterInWork)
 
 SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
 
 class MusicPublisherAdmin(admin.ModelAdmin):
-    """Custom Admin class, easily extendable.
+    """
+    """
 
-    Should only be used for admin classes for top-level models."""
 
     save_as = True
 
@@ -77,7 +69,8 @@ class RecordingInline(admin.StackedInline):
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
-    verbose_name_plural = 'Recordings (with recording artists and record labels)'
+    verbose_name_plural = \
+        'Recordings (with recording artists and record labels)'
     model = Recording
     extra = 0
 
@@ -225,7 +218,6 @@ class LabelAdmin(MusicPublisherAdmin):
 
 
 
-
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
     actions = None
@@ -238,8 +230,10 @@ class LibraryAdmin(MusicPublisherAdmin):
         """Optimized queryset for changelist view.
         """
         qs = super().get_queryset(request)
-        qs = qs.annotate(work__count=models.Count('release__works', distinct=True))
-        qs = qs.annotate(release__count=models.Count('release__id', distinct=True))
+        qs = qs.annotate(
+            work__count=models.Count('release__works', distinct=True))
+        qs = qs.annotate(
+            release__count=models.Count('release__id', distinct=True))
         return qs
 
     def libraryrelease_count(self, obj):
@@ -1088,7 +1082,8 @@ class RecordingAdmin(MusicPublisherAdmin):
     def artist_link(self, obj):
         if not (obj.artist):
             return None
-        url = reverse('admin:music_publisher_artist_change', args=[obj.artist.id])
+        url = reverse(
+            'admin:music_publisher_artist_change', args=[obj.artist.id])
         link = '<a href="{}">{}</a>'.format(url, obj.artist)
         return mark_safe(link)
     artist_link.short_description = 'Recording Artist'
@@ -1097,7 +1092,8 @@ class RecordingAdmin(MusicPublisherAdmin):
     def label_link(self, obj):
         if not (obj.record_label):
             return None
-        url = reverse('admin:music_publisher_label_change', args=[obj.record_label.id])
+        url = reverse(
+            'admin:music_publisher_label_change', args=[obj.record_label.id])
         link = '<a href="{}">{}</a>'.format(url, obj.record_label)
         return mark_safe(link)
     label_link.short_description = 'Record Label'
