@@ -1,6 +1,6 @@
 """Concrete models.
 
-They mostly classes from :mod:`.base`.
+They mostly inherit classes from :mod:`.base`.
 
 """
 
