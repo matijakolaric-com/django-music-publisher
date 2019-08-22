@@ -101,12 +101,6 @@ class ArtistAdmin(MusicPublisherAdmin):
         ('ISNI', {'fields': ('isni',),}),
     )
 
-    def get_inline_instances(self, request, obj=None):
-        """Limit inlines in popups."""
-        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return []
-        return super().get_inline_instances(request)
-
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
         return obj.last_name
