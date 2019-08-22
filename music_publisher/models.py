@@ -169,7 +169,7 @@ class Release(models.Model):
         cd_identifier (django.db.models.CharField): CD Identifier, used when origin is library
         ean (django.db.models.CharField): EAN code
         library (django.db.models.ForeignKey): Foreign key to :class:`.models.Library`
-        recordings (django.db.models.ManyToManyField): M2M to class:`.models.Recording` through class:`.models.Track`
+        recordings (django.db.models.ManyToManyField): M2M to :class:`.models.Recording` through :class:`.models.Track`
         release_date (django.db.models.DateField): Date of the release
         release_label (django.db.models.ForeignKey): Foreign key to :class:`.models.Label`
         release_title (django.db.models.CharField): Title of the release
@@ -266,14 +266,23 @@ class LibraryReleaseManager(models.Manager):
 
 
 class LibraryRelease(Release):
-    class Meta:
+    """Proxy class for Library Releases (AKA Library CDs)
+    
+    Attributes:
+        objects (LibraryReleaseManager): Database Manager
+    """
+    
+    class Meta:        
         proxy = True
         verbose_name_plural = '  Library Releases'
+
     objects = LibraryReleaseManager()
 
     def clean(self):
-        """
-
+        """Make sure that release title is required if one of the other "non-library" fields is present.
+        
+        Raises:
+            ValidationError: If not ccompliant.
         """
         if ((self.ean or self.release_date or self.release_label)
                 and not self.release_title):
@@ -281,10 +290,12 @@ class LibraryRelease(Release):
                 'release_title': 'Required if other release data is set.'})
 
     def get_origin_dict(self):
-        """Create a data structure that can be serialized as JSON.
+        """Get the object in an internal dictionary format.
 
+        This is used for work origin, not release data.
+        
         Returns:
-            dict: JSON-serializable data structure
+            dict: internal dict format
         """
         return {
             'origin_type': {
@@ -297,16 +308,25 @@ class LibraryRelease(Release):
 
 
 class CommercialReleaseManager(models.Manager):
-    def get_queryset(self):
-        """
+    """Manager for a proxy class :class:`.models.CommercialRelease`
+    """
 
-        :return:
-        :rtype:
+    def get_queryset(self):
+        """Return only commercial releases
+        
+        Returns:
+            django.db.models.query.QuerySet: Queryset with instances of :class:`.models.CommercialRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
 
 class CommercialRelease(Release):
+    """Proxy class for Commercial Releases
+    
+    Attributes:
+        objects (CommercialReleaseManager): Database Manager
+    """
+
     class Meta:
         proxy = True
         verbose_name_plural = '  Commercial Releases'
