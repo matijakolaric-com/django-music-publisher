@@ -505,6 +505,7 @@ class IntegrationTest(TransactionTestCase):
                 'name': 'Label',
             })
         self.assertEqual(response.status_code, 302)
+        label = music_publisher.models.Label.objects.first()
         response = self.get(reverse('admin:music_publisher_label_changelist',))
         self.assertEqual(response.status_code, 200)
 
@@ -798,11 +799,13 @@ class IntegrationTest(TransactionTestCase):
                 'writerinwork_set-3-relative_share': '25',
                 'writerinwork_set-4-writer': writer3.id,
                 'writerinwork_set-4-relative_share': '5',
-                'recordings-TOTAL_FORMS': 1,
+                'recordings-TOTAL_FORMS': 2,
                 'recordings-0-artist': artist.id,
                 'recordings-0-isrc': 'USX1X1234567',
                 'recordings-0-duration': '01:23',
                 'recordings-0-release_date': '2018-01-31',
+                'recordings-1-record_label': label.id,
+
             })
         self.assertEqual(response.status_code, 302)
         work = music_publisher.models.Work.objects.all().first()
@@ -874,6 +877,7 @@ class IntegrationTest(TransactionTestCase):
                 'writerinwork_set-3-relative_share': '25',
                 'artistinwork_set-TOTAL_FORMS': 1,
                 'artistinwork_set-0-artist': artist.id,
+
             })
         self.assertEqual(response.status_code, 302)
         work2 = music_publisher.models.Work.objects.filter(title='MODIFICATION').first()
@@ -1020,9 +1024,6 @@ class IntegrationTest(TransactionTestCase):
         self.assertEqual(response.status_code, 302)
         response = self.get(
             reverse('admin:music_publisher_work_changelist'))
-        self.assertEqual(response.status_code, 200)
-        response = self.get(
-            reverse('admin:music_publisher_recording_changelist'))
         self.assertEqual(response.status_code, 200)
         response = self.get(
             reverse('admin:music_publisher_recording_changelist') +
