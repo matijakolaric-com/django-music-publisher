@@ -1576,9 +1576,13 @@ class WorkAcknowledgement(models.Model):
         ('RA', 'Transaction Accepted'),
         ('AS', 'Registration Accepted'),
         ('AC', 'Registration Accepted with Changes'),
+        ('SR', 'Registration Accepted - Ready for Payment'),
+        ('CR', 'Registration Accepted with Changes - Ready for Payment'),
         ('RJ', 'Rejected'),
         ('NP', 'No Participation'),
         ('RC', 'Claim rejected'),
+        ('NA', 'Rejected - No Society Agreement Number'),
+        ('WA', 'Rejected - Wrong Society Agreement Number'),
     )
 
     work = models.ForeignKey(Work, on_delete=models.PROTECT)
