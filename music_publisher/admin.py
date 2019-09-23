@@ -72,12 +72,13 @@ class RecordingInline(admin.StackedInline):
     verbose_name_plural = \
         'Recordings (with recording artists and record labels)'
     model = Recording
+    ordering = ('recording_title', 'version_title')
     extra = 0
 
-    def complete_recording_title(selfSelf, obj):
+    def complete_recording_title(self, obj):
         return obj.complete_recording_title
 
-    def complete_version_title(selfSelf, obj):
+    def complete_version_title(self, obj):
         return obj.complete_version_title
 
 
