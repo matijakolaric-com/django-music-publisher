@@ -4,24 +4,9 @@ matrix:
     - name: "18.04 Py3.7 Pg10"
       dist: bionic
       python: "3.7"
-      addons:
-        postgresql: "10"
-        apt:
-          packages:
-          - postgresql-10
-          - postgresql-client-10
     - name: "18.04 Py3.6 Pg10"
       dist: bionic
-      python: "3.6"
-      addons:
-        postgresql: "10"
-        apt:
-          packages:
-          - postgresql-10
-          - postgresql-client-10
-      before_install:
-      - sudo apt-get update
-      - sudo apt-get --yes remove postgresql\*
+      python: "3.8"
     - name: "16.04 Py3.6"
       dist: xenial
       python: "3.6"
