@@ -2,5 +2,5 @@
   "name": "Django-Music-Publisher",
   "description": "Metadata management for original music publishers",
   "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
-  "logo": "https://raw.githubusercontent.com/matijakolaric-com/django-music-publisher/master/docs/images/dmp.png",
+  "logo": "https://raw.githubusercontent.com/matijakolaric-com/django-music-publisher/master/docs/images/dmp.png"
 }
