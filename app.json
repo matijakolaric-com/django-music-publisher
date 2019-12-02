@@ -5,6 +5,15 @@
   "logo": "https://avatars2.githubusercontent.com/u/57564555",
   "website": "https://matijakolaric.com/",
   "stack": "heroku-18",
+  "addons": [
+    {
+      "plan": "heroku-postgresql:hobby-dev",
+      "options": {
+        "version": "9.5"
+      },
+      "as": "DATABASE"
+    }
+  ],
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-python"
