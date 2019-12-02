@@ -1,10 +1,10 @@
 language: python
 matrix:
   include:
-    - name: "18.04 Py3.8 Pg11"
+    - name: "18.04 Py3.8"
       dist: bionic
       python: "3.8"
-    - name: "18.04 Py3.7 Pg10"
+    - name: "18.04 Py3.7"
       dist: bionic
       python: "3.7"
     - name: "16.04 Py3.6"
