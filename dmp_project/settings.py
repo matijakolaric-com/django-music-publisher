@@ -109,20 +109,20 @@ STATICFILES_DIRS = [
 ]
 
 MUSIC_PUBLISHER_SETTINGS = {
-    'enforce_saan': os.getenv('ENFORCE_SAAN', True),
-    'enforce_publisher_fee':  os.getenv('ENFORCE_PUBLISHER_FEE', True),
+    'enforce_saan': os.getenv('REQUIRE_SAAN', False),
+    'enforce_publisher_fee':  os.getenv('REQUIRE_PUBLISHER_FEE', False),
     'enforce_pr_society': True,
     'enforce_ipi_name': True,
 
     'work_id_prefix':  os.getenv('PUBLISHER_CODE', None),
 
     'publisher_id': os.getenv('PUBLISHER_CODE', None),
-    'publisher_name': os.getenv('PUBLISHER_NAME', None),
+    'publisher_name': os.getenv('PUBLISHER', None),
     'publisher_ipi_name': os.getenv('PUBLISHER_IPI_NAME', None),
     'publisher_ipi_base': os.getenv('PUBLISHER_IPI_BASE', None),
-    'publisher_pr_society': os.getenv('PUBLISHER_PR_SOCIETY', None),
-    'publisher_mr_society': os.getenv('PUBLISHER_MR_SOCIETY', None),
-    'publisher_sr_society': os.getenv('PUBLISHER_SR_SOCIETY', None),
+    'publisher_pr_society': os.getenv('PUBLISHER_SOCIETY_PR', None),
+    'publisher_mr_society': os.getenv('PUBLISHER_SOCIETY_MR', None),
+    'publisher_sr_society': os.getenv('PUBLISHER_SOCIETY_SR', None),
 }
 
 TIME_INPUT_FORMATS = [
