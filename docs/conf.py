@@ -22,14 +22,14 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = 'Django Music Publisher'
-copyright = '2018-2019, Matija Kolarić'
+project = 'Django-Music-Publisher'
+copyright = '2018-2020, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = '19.7 Metanoia'
+version = '20 Twenty'
 # The full version, including alpha/beta/rc tags
-release = '19.7'
+release = '20a1'
 
 rst_epilog = '''
 .. |version| replace:: {}
@@ -144,7 +144,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'DjangoMusicPublisher.tex', 'Django Music Publisher Documentation',
+    (master_doc, 'DjangoMusicPublisher.tex', 'Django-Music-Publisher Documentation',
      'Matija Kolarić', 'manual'),
 ]
 
@@ -154,7 +154,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'djangomusicpublisher', 'Django Music Publisher Documentation',
+    (master_doc, 'djangomusicpublisher', 'Django-Music-Publisher Documentation',
      [author], 1)
 ]
 
@@ -165,7 +165,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'DjangoMusicPublisher', 'Django Music Publisher Documentation',
+    (master_doc, 'DjangoMusicPublisher', 'Django-Music-Publisher Documentation',
      author, 'DjangoMusicPublisher', 'Open source solution for original music publishers.',
      'Miscellaneous'),
 ]

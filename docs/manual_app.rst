@@ -30,7 +30,7 @@ We are just briefly going to describe the top level models here, each will be th
 Works
 -----
 
-`Work` model represents musical works and it is the workhorse model in Django Music Publisher. And it's ``add`` and ``change`` views are the most complex ones, with data on related recordings, writers, performing artists, alternate titles etc.
+`Work` model represents musical works and it is the workhorse model in Django-Music-Publisher. And it's ``add`` and ``change`` views are the most complex ones, with data on related recordings, writers, performing artists, alternate titles etc.
 It also has several batch actions, e.g. data export.
 
 Commercial and Library Releases
@@ -41,7 +41,7 @@ Release is, generally speaking, a product containing one or more recordings, e.g
 Labels and Libraries
 --------------------
 
-Two very simple models, but their importance will grow with the upcoming extensions to Django Music Publisher.
+Two very simple models, but their importance will grow with the upcoming extensions to Django-Music-Publisher.
 
 Performing Artists
 ------------------

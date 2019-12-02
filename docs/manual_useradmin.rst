@@ -23,7 +23,7 @@ We add the username and the password twice and press on ``save and continue edit
 
 Please note that the password is not visible, and if the superuser needs to change it for another user, use the ``this form`` link in the password field.
 
-``Staff status`` has to be set for all users of Django Music Publisher, and they have to be assigned to an appropriate permission group. Two permission groups are set during installation:
+``Staff status`` has to be set for all users of Django-Music-Publisher, and they have to be assigned to an appropriate permission group. Two permission groups are set during installation:
 
 * ``Publishing staff`` gives all permissions required for everyday publishing work
 * ``Publishing audit`` gives read-only permessions to all the data in Music Publisher module

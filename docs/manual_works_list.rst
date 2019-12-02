@@ -26,7 +26,7 @@ Select several (or all) works in the ``musical work list`` view, select the ``Ex
 
 The difference between these two formats is subtle and technical. Normalized data has no redundancy, so the file is smaller, but it is also more complicated to process.
 
-If you ever choose to stop using Django Music Publisher and move on, there is no lock-in. While these JSON formats might be confusing, there are free on-line tools that will convert JSON to just about any other format you need. https://json-csv.com/ is the first one Google came up with.
+If you ever choose to stop using Django-Music-Publisher and move on, there is no lock-in. While these JSON formats might be confusing, there are free on-line tools that will convert JSON to just about any other format you need. https://json-csv.com/ is the first one Google came up with.
 
 
 CWR Exporting Wizard

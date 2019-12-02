@@ -6,6 +6,13 @@ This is a very brief introduction for software developers and system administrat
 Music Publishing
 ****************
 
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/1IQyUM-5aAM/?list=PLQ3e-DuNTFt-HjNC2jTRdmN1DZW1URvJ0" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+   <p>This playlist is a good technical introduction to music publishing, and it used Django-Music-Publisher for examples.</p>
+   <p>The videos are delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
+
+
 Music publishing started with publishing of sheet music, and first music *performing* rights societies were formed in the mid-1800s, predating recording, telephone and radio. With the invention of recording techniques, *mechanical* rights became a thing and some societies decided to cover them as well, while in some countries, new organizations were formed. All of them are called collecting organizations, but in official CWR documentation, they are referred to as *societies*. The third type are *synchronization* rights, basically music used for advertising.
 
 Although sheet music is not in the focus any more, *composers and lyricists (writers)* still have contracts with *music publishers*. When a (co-)writer has a contract about a musical work with a publisher, this publisher is original publisher of the work in question. Usually 50% of performing and 100% of mechanical and synchronization rights are transferred to the original publishers. Each writer can have a different publisher, or even multiple ones, or not have one at all.
@@ -33,7 +40,7 @@ In the context of registrations, basically there are three roles:
    <p>The differences are explained in this video, as well as some of the reasons for this choice.</p>
    <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
 
-Django Music Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of composite works and some other rare cases.
+Django-Music-Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of composite works and some other rare cases.
 
 Please note that the term *self-publisher* is used for an original publisher with a single signed writer - usually the owner, or sometimes all members of a band. They usually do not require royalty statement processing.
 
@@ -42,4 +49,4 @@ Publisher Size
 
 In the software context, the size of a publisher is completely irrelevant. There are self-proclaimed small music publishers who do just about everything and anything, as well as large publishers who are just original publishers or just administrators or just sub-publishers.
 
-In the context of Django Music Publisher, original publishers with up to about 1000 works (depending on metadata complexity), effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows. If you install it yourself on Heroku, it will be completely free of charge.
+In the context of Django-Music-Publisher, original publishers with up to about 1000 works (depending on metadata complexity), effectively self-publishers, will fit within the free tier of Heroku, limited to 10.000 database rows. If you install it yourself on Heroku, it will be completely free of charge.

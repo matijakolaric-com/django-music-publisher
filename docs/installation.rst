@@ -1,12 +1,12 @@
 Installation and Configuration
 ******************************
 
-Django Music Publisher can be installed either as a Django app, or as a stand-alone project. 
+Django-Music-Publisher can be installed either as a Django app, or as a stand-alone project.
 
 There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>`_ that simplifies the process for a moderate subscription fee.
 
 
-Installing Django Music Publisher (Standalone Deployment)
+Installing Django-Music-Publisher (Standalone Deployment)
 ===============================================================================
 
 You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7.
@@ -54,7 +54,7 @@ deployment, please use official
 Installing as Django Module (developers only)
 ===============================================================================
 
-If you plan to use Django Music Publisher as one of the apps in your Django project, there is nothing special about it::
+If you plan to use Django-Music-Publisher as one of the apps in your Django project, there is nothing special about it::
 
     pip install --upgrade django_music_publisher
 
@@ -125,7 +125,7 @@ Another would be to use base64 encoding for this variable if your PaaS supports 
 DMP Guru
 ==============================================================================
 
-`DMP Guru <https://dmp.guru/>`_ is a commercial hosting service for Django Music Publisher. Your instance of Django Music Publisher can be deployed in a minute. 
+`DMP Guru <https://dmp.guru/>`_ is a commercial hosting service for Django-Music-Publisher. Your instance of Django-Music-Publisher can be deployed in a minute.
 
 You only need to provide basic data about the publisher (e.g. name, IPI name #, collecting society (or societies)) and it will figure out the correct settings. 
 

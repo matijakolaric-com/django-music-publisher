@@ -18,10 +18,10 @@ Can I search through the documentation?
 	Yes. Please do.
 	
 
-Django Music Publisher is not
+Django-Music-Publisher is not
 +++++++++++++++++++++++++++++
 
-Django Music Publisher is an **open source software for original music
+Django-Music-Publisher is an **open source software for original music
 publishers**.
 
 Is it for administrators (who may or may not also be original publishers)?
@@ -67,7 +67,7 @@ What other kinds are there?
 What is the difference between original publishers, administrators and sub-publishers?
 	That would be beyond the scope of this document. What is important is that
 	both require significantly more complex data structure and therefore also a
-	far more complex user interface. Django Music Publisher does not support
+	far more complex user interface. Django-Music-Publisher does not support
 	anything beyond the role of original publisher.
 
 What is Common Works Registration (CWR)?
@@ -89,7 +89,7 @@ Who is ...?
 +++++++++++
 
 When my society says I should ask the vendor about some issue, who do I ask?
-	Regardless if you installed Django Music Publisher yourself, the software
+	Regardless if you installed Django-Music-Publisher yourself, the software
 	vendor in their meaning of the word is **you**, as you have accepted the
 	MIT licence, which makes clear that the software comes 'as is'.
 

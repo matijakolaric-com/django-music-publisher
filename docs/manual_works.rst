@@ -6,7 +6,7 @@ Musical Works: Adding, Changing and Deleting
 
    Add work view, minimal example with default settings
 
-The view for adding and changing works is shown in the image above. It is the most complex view in Django Music Publisher. It has several parts, so let us cover them one by one.
+The view for adding and changing works is shown in the image above. It is the most complex view in Django-Music-Publisher. It has several parts, so let us cover them one by one.
 
 General
 +++++++
@@ -22,7 +22,7 @@ Please note that the difference between modifications of works in public domain 
 Library
 +++++++
 
-Django Music Publisher has good support for music libraries. If a work is part of a :doc:`library <manual_labels_libraries>`, then a :doc:`library release <manual_releases>` must be set here.
+Django-Music-Publisher has good support for music libraries. If a work is part of a :doc:`library <manual_labels_libraries>`, then a :doc:`library release <manual_releases>` must be set here.
 
 Writers in Work
 +++++++++++++++
@@ -60,11 +60,11 @@ For modifications of traditional works, set the capacity of the unknown writer t
 Relative Share
 --------------
 
-Django Music Publisher uses a very simple single-field share model. It seems that the model is completely illogical to "experts". If it does not work for you, then it does not and Django Music Publisher is not the right solution for you.
+Django-Music-Publisher uses a very simple single-field share model. It seems that the model is completely illogical to "experts". If it does not work for you, then it does not and Django-Music-Publisher is not the right solution for you.
 
 The principle is very simple. Writers create a work and decide how they want to split the shares among themselves. This is referred to as ``relative share``. Then each of the writers may choose a publisher and transfer some of their relative share to the publisher, according to their publishing agreement. This does not influence other writers.
 
-In Django Music Publisher, publishing agreements between all controlled writers and you as the original publisher have the same splits, The default is that 50% of performance and 100% of mechanical and sync is transferred to you. Please note that ``publisher fee`` has nothing to do with this split. Again, if this does not work for you, it does not.
+In Django-Music-Publisher, publishing agreements between all controlled writers and you as the original publisher have the same splits, The default is that 50% of performance and 100% of mechanical and sync is transferred to you. Please note that ``publisher fee`` has nothing to do with this split. Again, if this does not work for you, it does not.
 
 The sum of relative shares for each work must be 100%.
 
@@ -105,7 +105,7 @@ It may also be set as required for controlled writers. If it is set as a part of
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Since version 19.7, Django Music Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
+Since version 19.7, Django-Music-Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
 
 Please note that, although there is a separate set of views for :doc:`recordings <manual_recordings>`, it is recommended to edit them here.
 
