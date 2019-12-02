@@ -4,6 +4,7 @@
   "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
   "logo": "https://avatars2.githubusercontent.com/u/57564555",
   "website": "https://matijakolaric.com/",
+  "stack": "heroku-18",
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-python"
