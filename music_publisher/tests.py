@@ -1054,6 +1054,9 @@ class IntegrationTest(TransactionTestCase):
             'admin:music_publisher_ackimport_add'),
             re_post={'acknowledgement_file': mockfile})
         self.assertEqual(response.status_code, 302)
+        response = self.get(reverse(
+            'admin:music_publisher_ackimport_change', args=[ackimport.id]))
+        self.assertEqual(response.status_code, 200)
         # second pass, same thing
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
