@@ -18,13 +18,13 @@ from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
-from .const import SOCIETIES
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
     Track, Work, WorkAcknowledgement, Writer, WriterInWork)
 
-SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
+from django.conf import settings
+
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
 
@@ -465,23 +465,41 @@ class WriterAdmin(MusicPublisherAdmin):
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
     readonly_fields = ('_can_be_controlled', 'work_count')
-    fieldsets = (
-        ('Name', {
-            'fields': (
-                ('first_name', 'last_name'),)}),
-        ('IPI', {
-            'fields': (
-                ('ipi_name', 'ipi_base'),
-                'pr_society'),
-        }),
-        ('General agreement', {
-            'fields': (
-                ('generally_controlled',
-                 ('saan', 'publisher_fee'))
-            ),
-        }),
-    )
+
+    def get_fieldsets(self, request, obj=None):
+        return (
+            ('Name', {
+                'fields': (
+                    ('first_name', 'last_name'),)}),
+            ('IPI', {
+                'fields': (
+                    ('ipi_name', 'ipi_base'),),
+            }),
+            ('Societies', {
+                'fields': (
+                    self.get_society_list(),),
+            }),
+            ('General agreement', {
+                'fields': (
+                    ('generally_controlled',
+                     ('saan', 'publisher_fee'))
+                ),
+            }),
+        )
+
     actions = None
+
+    @staticmethod
+    def get_society_list():
+        MR_SHARE, SR_SHARE = [
+            Decimal(s.strip()) for s in
+            settings.PUBLISHER_AGREEMENT_SHARES.split(',')][1:3]
+        societies = ['pr_society']
+        if MR_SHARE != Decimal(1):
+            societies.append('mr_society')
+        if SR_SHARE != Decimal(1):
+            societies.append('sr_society')
+        return societies
 
     def save_model(self, request, obj, form, *args, **kwargs):
         """Perform normal save_model, then update last_change of
@@ -823,7 +841,7 @@ class WorkAdmin(MusicPublisherAdmin):
             """Simple Yes/No filter
             """
             SDICT = dict()
-            for key, value in SOCIETIES:
+            for key, value in settings.SOCIETIES:
                 key1 = key.lstrip('0')
                 key2 = key.rjust(3, '0')
                 SDICT[key1] = value
@@ -973,7 +991,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(
-            SETTINGS.get('work_id_prefix', ''), datetime.now().toordinal())
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response

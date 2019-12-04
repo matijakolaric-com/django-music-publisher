@@ -1,4 +1,4 @@
-{% load i18n admin_urls static admin_modify %}
+{% load i18n admin_urls static admin_modify cwr_filters %}
 <div class="js-inline-admin-formset inline-group" id="{{ inline_admin_formset.formset.prefix }}-group"
      data-inline-type="tabular"
      data-inline-formset="{{ inline_admin_formset.inline_formset_data }}">
@@ -51,6 +51,19 @@
               {% else %}
                   {{ field.field.errors.as_ul }}
                   {{ field.field }}
+                  {% if field.field.name == 'relative_share' and inline_admin_form.form.instance.controlled %}
+                      {% with inline_admin_form.form.instance.relative_share as share %}
+                          <div class="help">
+                          <table>
+                              <thead><th></th><th>Perf</th><th>Mech</th><th>Sync</th></thead>
+                                  <tbody>
+                                  <tr><th>W</th><td>{{ share|prw|cwrshare|perc }}</td><td>{{ share|mrw|cwrshare|perc }}</td><td>{{ share|srw|cwrshare|perc }}</td></tr>
+                                  <tr><th>P</th><td>{{ share|prp|cwrshare|perc }}</td><td>{{ share|mrp|cwrshare|perc }}</td><td>{{ share|srp|cwrshare|perc }}</td></tr>
+                                  </tbody>
+                          </table>
+                          </div>
+                      {% endwith %}
+                  {% endif %}
               {% endif %}
               </td>
               {% endif %}

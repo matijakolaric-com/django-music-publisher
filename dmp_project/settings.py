@@ -10,9 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
+import csv
 import os
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
+from decimal import Decimal
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -108,27 +110,31 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "dmp_project", "static"),
 ]
 
-MUSIC_PUBLISHER_SETTINGS = {
-    'enforce_saan': os.getenv('REQUIRE_SAAN', False),
-    'enforce_publisher_fee':  os.getenv('REQUIRE_PUBLISHER_FEE', False),
-    'enforce_pr_society': True,
-    'enforce_ipi_name': True,
-
-    'work_id_prefix':  os.getenv('PUBLISHER_CODE', None),
-
-    'publisher_id': os.getenv('PUBLISHER_CODE', None),
-    'publisher_name': os.getenv('PUBLISHER', None),
-    'publisher_ipi_name': os.getenv('PUBLISHER_IPI_NAME', None),
-    'publisher_ipi_base': os.getenv('PUBLISHER_IPI_BASE', None),
-    'publisher_pr_society': os.getenv('PUBLISHER_SOCIETY_PR', None),
-    'publisher_mr_society': os.getenv('PUBLISHER_SOCIETY_MR', None),
-    'publisher_sr_society': os.getenv('PUBLISHER_SOCIETY_SR', None),
-}
-
 TIME_INPUT_FORMATS = [
     '%H:%M:%S',     # '14:30:59'
     '%M:%S',        # '14:30'
 ]
+
+PUBLISHER_NAME = os.getenv('PUBLISHER', '')
+PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
+PUBLISHER_IPI_BASE = os.getenv('PUBLISHER_IPI_BASE', None)
+PUBLISHER_IPI_NAME = os.getenv('PUBLISHER_IPI_NAME', '')
+PUBLISHER_SOCIETY_MR = os.getenv('PUBLISHER_SOCIETY_MR', None)
+PUBLISHER_SOCIETY_PR = os.getenv('PUBLISHER_SOCIETY_PR', None)
+PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
+
+REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
+REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
+
+PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.333333,0.333333,1')
+
+path = os.path.join(BASE_DIR, 'music_publisher', 'societies.csv')
+with open(path, 'r') as f:
+    reader = csv.reader(f)
+    SOCIETIES = sorted(
+        ((str(row[0]), '{} ({})'.format(row[1], row[2]))
+         for row in reader),
+        key=lambda row: row[1])
 
 try:
     from .local_settings import *

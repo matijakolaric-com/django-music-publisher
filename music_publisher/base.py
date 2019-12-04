@@ -6,10 +6,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 import re
 from .validators import CWRFieldValidator
-from . import const
+from django.conf import settings
 
 def get_societies():
-    return const.SOCIETIES
+    return settings.SOCIETIES
 
 class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
@@ -100,8 +100,10 @@ class IPIBase(models.Model):
         validators=(CWRFieldValidator('writer_pr_society'),),
         choices=get_societies())
     saan = models.CharField(
-        'Society-assigned agreement number',
-        help_text='Use this field for general agreements only.',
+        'Society-assigned general agreement number',
+        help_text='Use this field for general agreements only.\n'
+            'For specific agreements use the field in the Work form,\n'
+            'in Writers In Work section.',
         validators=(CWRFieldValidator('saan'),),
         max_length=14, blank=True, null=True, unique=True)
 
@@ -111,7 +113,9 @@ class IPIBase(models.Model):
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text='Percentage of royalties kept by the publisher')
+        help_text=
+            'Percentage of royalties kept by the publisher,\n'
+            'in a general agreement.')
 
     def clean_fields(self, *args, **kwargs):
         """
@@ -130,36 +134,10 @@ class IPIBase(models.Model):
                 self.ipi_base)
         return super().clean_fields(*args, **kwargs)
 
-    def clean(
-            self,
-            enforce_ipi_name=const.ENFORCE_IPI_NAME,
-            enforce_pr_society=const.ENFORCE_PR_SOCIETY,
-            enforce_saan=const.ENFORCE_SAAN,
-            enforce_publisher_fee=const.ENFORCE_PUBLISHER_FEE,
-            error_msg=const.CAN_NOT_BE_CONTROLLED_MSG):
-        """Clean with a lot of arguments.
+    def clean(self):
+        """Clean the data and validate."""
 
-        In DMP they come from settings, but in other solutions that use this
-        code, these values may be set dynamically.
-
-        Args:
-            enforce_ipi_name (bool, optional):
-                Makes IPI Name # required if controlled
-            enforce_pr_society (bool, optional):
-                Makes PR Society code required if controlled
-            enforce_saan (bool, optional):
-                Makes SAAN required if controlled
-            enforce_publisher_fee (bool, optional):
-                Makes Publisher fee required if controlled
-            error_msg (str, optional):
-                Error Message to show if required fields are not filled out
-        """
-
-        self._can_be_controlled = True
-        if enforce_ipi_name:
-            self._can_be_controlled &= bool(self.ipi_name)
-        if enforce_pr_society:
-            self._can_be_controlled &= bool(self.pr_society)
+        self._can_be_controlled = bool(self.ipi_name) & bool(self.pr_society)
         d = {}
         if not self.generally_controlled:
             if self.saan:
@@ -168,10 +146,12 @@ class IPIBase(models.Model):
                 d['publisher_fee'] = 'Only for a general agreement.'
         else:
             if not self._can_be_controlled:
-                d['generally_controlled'] = error_msg
-            if enforce_saan and not self.saan:
+                d['generally_controlled'] = (
+                    'IPI name number and PR society fields are required for '
+                    'a controlled writer.')
+            if settings.REQUIRE_SAAN and not self.saan:
                 d['saan'] = 'This field is required.'
-            if enforce_publisher_fee and not self.publisher_fee:
+            if settings.REQUIRE_PUBLISHER_FEE and not self.publisher_fee:
                 d['publisher_fee'] = 'This field is required.'
         if d:
             raise django.core.exceptions.ValidationError(d)

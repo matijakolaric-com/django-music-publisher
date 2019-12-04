@@ -8,10 +8,18 @@ from django import template
 from datetime import date, time
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils.html import mark_safe
-from music_publisher import const, models
-
+from music_publisher import models
+from django.conf import settings
 
 register = template.Library()
+
+PRP_SHARE, MRP_SHARE, SRP_SHARE = [
+    Decimal(s.strip()) for s in
+    settings.PUBLISHER_AGREEMENT_SHARES.split(',')]
+
+PRW_SHARE = Decimal('1') - PRP_SHARE
+MRW_SHARE = Decimal('1') - MRP_SHARE
+SRW_SHARE = Decimal('1') - SRP_SHARE
 
 
 @register.filter(name='rjust')
@@ -47,25 +55,50 @@ def soc(value):
     value = value.rjust(3, '0')
     return value
 
-@register.filter(name='prshare')
-def prshare(value):
-    """Format and validate fields containing shares."""
+
+def calculate_value(value, share):
     value = value or 0
-    value = (value * Decimal(5000)).quantize(
+    value *= share
+    return value
+
+
+@register.filter(name='prw')
+def prw(value):
+    return calculate_value(value, PRW_SHARE)
+
+
+@register.filter(name='prp')
+def prp(value):
+    return calculate_value(value, PRP_SHARE)
+
+
+@register.filter(name='mrw')
+def mrw(value):
+    return calculate_value(value, MRW_SHARE)
+
+
+@register.filter(name='mrp')
+def mrp(value):
+    return calculate_value(value, MRP_SHARE)
+
+
+@register.filter(name='srw')
+def srw(value):
+    return calculate_value(value, SRW_SHARE)
+
+
+@register.filter(name='srp')
+def srp(value):
+    return calculate_value(value, SRP_SHARE)
+
+
+@register.filter(name='cwrshare')
+def cwrshare(value):
+    value = (value * Decimal('10000')).quantize(
         Decimal('1.'), rounding=ROUND_HALF_UP)
     value = int(value)
     return '{:05d}'.format(value)
 
-
-@register.filter(name='mrshare')
-def mrshare(value):
-    """Format and validate fields containing shares."""
-
-    value = value or 0
-    value = (value * Decimal(10000)).quantize(
-        Decimal('1.'), rounding=ROUND_HALF_UP)
-    value = int(value)
-    return '{:05d}'.format(value)
 
 @register.filter(name='perc')
 def perc(value):
@@ -79,7 +112,7 @@ def soc_name(value):
     """Display society name"""
 
     value = value.strip()
-    return const.SOCIETY_DICT.get(value, '')
+    return models.SOCIETY_DICT.get(value, '')
 
 @register.filter(name='capacity')
 def capacity(value):

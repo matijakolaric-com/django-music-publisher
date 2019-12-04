@@ -14,12 +14,20 @@ from django.db import models
 from django.template import Context
 
 from .base import (IPIBase, PersonBase, TitleBase, get_societies)
-from .const import (CAN_NOT_BE_CONTROLLED_MSG, ENFORCE_PUBLISHER_FEE,
-                    ENFORCE_SAAN, SETTINGS, SOCIETIES, SOCIETY_DICT,
-                    WORK_ID_PREFIX)
 from .cwr_templates import *
 from .validators import CWRFieldValidator
+from django.conf import settings
 
+SOCIETY_DICT = dict(settings.SOCIETIES)
+PUBLISHER_DICT = {
+    'publisher_id': settings.PUBLISHER_CODE,
+    'publisher_name': settings.PUBLISHER_NAME,
+    'publisher_ipi_name': settings.PUBLISHER_IPI_NAME,
+    'publisher_ipi_base': settings.PUBLISHER_IPI_BASE,
+    'publisher_pr_society': settings.PUBLISHER_SOCIETY_PR,
+    'publisher_mr_society': settings.PUBLISHER_SOCIETY_MR,
+    'publisher_sr_society': settings.PUBLISHER_SOCIETY_SR,
+}
 
 def normalize_dict(full_dict, inner_dict, key, code_key='code'):
     """Normalize a dictionary
@@ -365,7 +373,7 @@ class Writer(PersonBase, IPIBase, models.Model):
         if self.writerinwork_set.filter(controlled=True).exists():
             raise ValidationError(
                 'This writer is controlled in at least one work. ' +
-                CAN_NOT_BE_CONTROLLED_MSG)
+                'Required fields are: Last name, IPI name and PR society.')
 
     @property
     def writer_id(self):
@@ -383,13 +391,16 @@ class Writer(PersonBase, IPIBase, models.Model):
             dict: JSON-serializable data structure
         """
 
-        return {
+        d =  {
             'code': self.writer_id,
             'first_name': self.first_name or None,
             'last_name': self.last_name or None,
             'ipi_name': self.ipi_name or None,
             'ipi_base': self.ipi_base or None,
-            'affiliations': [{
+            'affiliations': [],
+        }
+        if self.pr_society:
+            d['affiliations'].append({
                 'organization': {
                     'code': self.pr_society,
                     'name': self.get_pr_society_display().split(',')[0],
@@ -403,8 +414,40 @@ class Writer(PersonBase, IPIBase, models.Model):
                     'tis_code': '2136',
                     'name': 'World'
                 }
-            }] if self.pr_society else []
-        }
+            })
+        if self.mr_society:
+            d['affiliations'].append({
+                'organization': {
+                    'code': self.mr_society,
+                    'name': self.get_mr_society_display().split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'MR',
+                    'name': 'Mechanical Rights'
+                },
+                'territory': {
+                    'code': '2136',
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            })
+        if self.sr_society:
+            d['affiliations'].append({
+                'organization': {
+                    'code': self.sr_society,
+                    'name': self.get_sr_society_display().split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'SR',
+                    'name': 'Synchronization Rights'
+                },
+                'territory': {
+                    'code': '2136',
+                    'tis_code': '2136',
+                    'name': 'World'
+                }
+            })
+        return d
 
 
 class WorkManager(models.Manager):
@@ -530,7 +573,7 @@ class Work(TitleBase):
         """
         if self.id is None:
             return ''
-        return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
+        return '{}{:06}'.format(settings.PUBLISHER_CODE, self.id)
 
     def is_modification(self):
         """
@@ -564,15 +607,15 @@ class Work(TitleBase):
             dict: JSON-serializable data structure
         """
         j = {
-            SETTINGS['publisher_id']: {
-                'name' : SETTINGS['publisher_name'],
-                'ipi_name': SETTINGS['publisher_ipi_name'],
-                'ipi_base': SETTINGS.get('publisher_ipi_base'),
+            settings.PUBLISHER_CODE: {
+                'name' : settings.PUBLISHER_NAME,
+                'ipi_name': settings.PUBLISHER_IPI_NAME,
+                'ipi_base': settings.PUBLISHER_IPI_BASE,
                 'affiliations': [{
                     'organization': {
-                        'code': SETTINGS['publisher_pr_society'],
+                        'code': settings.PUBLISHER_SOCIETY_PR,
                         'name': SOCIETY_DICT.get(
-                            SETTINGS['publisher_pr_society']
+                            settings.PUBLISHER_SOCIETY_PR
                         ).split(',')[0],
                     },
                     'affiliation_type': {
@@ -589,12 +632,12 @@ class Work(TitleBase):
         }
 
         # append MR data to affiliations id needed
-        if SETTINGS.get('publisher_mr_society'):
-            j[SETTINGS['publisher_id']]['affiliations'].append({
+        if settings.PUBLISHER_SOCIETY_MR:
+            j[settings.PUBLISHER_CODE]['affiliations'].append({
                 'organization': {
-                    'code': SETTINGS['publisher_mr_society'],
+                    'code': settings.PUBLISHER_SOCIETY_MR,
                     'name': SOCIETY_DICT.get(
-                        SETTINGS['publisher_mr_society']
+                        settings.PUBLISHER_SOCIETY_MR
                     ).split(',')[0],
                 },
                 'affiliation_type': {
@@ -609,12 +652,12 @@ class Work(TitleBase):
             })
 
         # append SR data to affiliations id needed
-        if SETTINGS.get('publisher_sr_society'):
-            j[SETTINGS['publisher_id']]['affiliations'].append({
+        if settings.PUBLISHER_SOCIETY_SR:
+            j[settings.PUBLISHER_CODE]['affiliations'].append({
                 'organization': {
-                    'code': SETTINGS['publisher_sr_society'],
+                    'code': settings.PUBLISHER_SOCIETY_SR,
                     'name': SOCIETY_DICT.get(
-                        SETTINGS['publisher_sr_society']
+                        settings.PUBLISHER_SOCIETY_SR
                     ).split(',')[0],
                 },
                 'affiliation_type': {
@@ -654,7 +697,7 @@ class Work(TitleBase):
         This refers to organizations, affiliation types and territories.
         """
 
-        pid = SETTINGS['publisher_id']
+        pid = settings.PUBLISHER_CODE
         for aff in j['publishers'][pid]['affiliations']:
             Work.normalize_affiliation(j, aff)
 
@@ -905,13 +948,16 @@ class WriterInWork(models.Model):
     writer = models.ForeignKey(
         Writer, on_delete=models.PROTECT,blank=True, null=True)
     saan = models.CharField(
-        'Society-assigned agreement number',
-        help_text='Use this field for specific agreements only.',
+        'Society-assigned specific agreement number',
+        help_text= 'Use this field for specific agreements only.\n'
+            'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
         validators=(CWRFieldValidator('saan'),),)
     controlled = models.BooleanField(default=False)
-    relative_share = models.DecimalField(max_digits=5, decimal_places=2)
+    relative_share = models.DecimalField(
+        'Manuscript share', max_digits=5, decimal_places=2)
     capacity = models.CharField(
+        'Role',
         max_length=2, blank=True, choices=(
             ('CA', 'Composer&Lyricist'),
             ('C ', 'Composer'),
@@ -922,7 +968,9 @@ class WriterInWork(models.Model):
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text='Percentage of royalties kept by the publisher')
+        help_text =
+            'Percentage of royalties kept by the publisher,\n'
+            'in a specific agreement.')
 
     def __str__(self):
         return str(self.writer)
@@ -962,12 +1010,12 @@ class WriterInWork(models.Model):
             else:
                 if not self.writer._can_be_controlled:
                     d['writer'] = CAN_NOT_BE_CONTROLLED_MSG
-                if (ENFORCE_SAAN and
+                if (settings.REQUIRE_SAAN and
                         not self.writer.generally_controlled and
                         not self.saan):
                     d['saan'] = \
                         'Must be set. (controlled, no general agreement)'
-                if (ENFORCE_PUBLISHER_FEE and
+                if (settings.REQUIRE_PUBLISHER_FEE and
                         not self.writer.generally_controlled and
                         not self.publisher_fee):
                     d['publisher_fee'] = \
@@ -988,7 +1036,7 @@ class WriterInWork(models.Model):
             dict: JSON-serializable data structure
         """
 
-        pub_pr_soc = SETTINGS['publisher_pr_society']
+        pub_pr_soc = settings.PUBLISHER_SOCIETY_PR
         pub_pr_name = SOCIETY_DICT[pub_pr_soc].split(',')[0]
 
         j = {
@@ -1000,7 +1048,7 @@ class WriterInWork(models.Model):
                 'name': self.get_capacity_display()
             } if self.capacity else None,
             'publishers_for_writer': [{
-                'publisher': SETTINGS['publisher_id'],
+                'publisher': settings.PUBLISHER_CODE,
                 'capacity': {
                     'code': 'E',
                     'name': 'Original publisher'
@@ -1131,7 +1179,7 @@ class Recording(models.Model):
         """
         if self.id is None:
             return ''
-        return '{}{:06}R'.format(SETTINGS.get('work_id_prefix', ''), self.id)
+        return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
 
 
     def get_dict(self, with_releases=False):
@@ -1249,7 +1297,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_0000_V3-0-0.{}'.format(
             self.year,
             self.num_in_year,
-            SETTINGS.get('publisher_id'),
+            settings.PUBLISHER_CODE,
             ext)
 
     @property
@@ -1262,7 +1310,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
-            SETTINGS.get('publisher_id'))
+            settings.PUBLISHER_CODE)
 
 
     def __str__(self):
@@ -1370,7 +1418,7 @@ class CWRExport(models.Model):
                     copublished_writer_ids.add(key)
                     other_publisher_share += share
                     controlled_shares[key] += share
-            publisher = SETTINGS
+            publisher = PUBLISHER_DICT
             publisher['sequence'] = 1
             publisher['share'] = controlled_relative_share
             yield self.get_transaction_record('SPU', publisher)
@@ -1395,7 +1443,11 @@ class CWRExport(models.Model):
                 for aff in affiliations:
                     if aff['affiliation_type']['code'] == 'PR':
                         w['pr_society'] = aff['organization']['code']
-                        break
+                    elif aff['affiliation_type']['code'] == 'MR':
+                        w['mr_society'] = aff['organization']['code']
+                    elif aff['affiliation_type']['code'] == 'SR':
+                        w['sr_society'] = aff['organization']['code']
+
                 w.update({
                     'capacity': wiw['capacity']['code'],
                     'share': controlled_shares[w['code']],
@@ -1518,7 +1570,7 @@ class CWRExport(models.Model):
         yield self.get_record('HDR', {
             'creation_date': datetime.now(),
             'filename': self.filename,
-            **SETTINGS
+            **PUBLISHER_DICT
         })
 
         yield self.get_record('GRH', {'transaction_type': self.nwr_rev})

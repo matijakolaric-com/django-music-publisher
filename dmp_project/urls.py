@@ -22,8 +22,7 @@ urlpatterns = [
     path('', admin.site.urls),
 ]
 
-admin.site.site_header = settings.MUSIC_PUBLISHER_SETTINGS.get(
-    'publisher_name', 'Django Music Publisher')
+admin.site.site_header = settings.PUBLISHER_NAME
 admin.site.site_title = admin.site.site_header
 admin.site.index_title = ''
 admin.site.site_url = ''
