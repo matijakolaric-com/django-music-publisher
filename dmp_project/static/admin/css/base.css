@@ -572,6 +572,11 @@ input[type=button][disabled].default {
     border-collapse: collapse;
 }
 
+
+.module.overview table {
+    width: 100%;
+}
+
 .app-music_publisher.module tr.model-work th {
     font-size: 20px;
 }

@@ -57,7 +57,7 @@ def soc(value):
 
 
 def calculate_value(value, share):
-    value = value or 0
+    value = Decimal(value or 0)
     value *= share
     return value
 
@@ -107,12 +107,22 @@ def perc(value):
     value = Decimal(value) / Decimal('100')
     return '{}%'.format(value)
 
+
+@register.filter(name='percf')
+def percf(value):
+    """Display shares as human-readable string."""
+    return '{}%'.format(value.quantize(
+        Decimal('0.01'), rounding=ROUND_HALF_UP))
+
+
+
 @register.filter(name='soc_name')
 def soc_name(value):
     """Display society name"""
 
     value = value.strip()
     return models.SOCIETY_DICT.get(value, '')
+
 
 @register.filter(name='capacity')
 def capacity(value):

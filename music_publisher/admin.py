@@ -731,6 +731,7 @@ class WorkAdmin(MusicPublisherAdmin):
     """
 
     form = WorkForm
+    change_form_template = 'admin/work.html'
 
     inlines = (
         WriterInWorkInline,
@@ -1021,6 +1022,7 @@ class WorkAdmin(MusicPublisherAdmin):
             ]]
         return instances
 
+        super().change_view()
 
 @admin.register(Recording)
 class RecordingAdmin(MusicPublisherAdmin):
