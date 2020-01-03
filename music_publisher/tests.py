@@ -51,6 +51,7 @@ class ChangeListsTest(TestCase):
         cls.label = Label.objects.create(name='LABEL')
         cls.library = Library.objects.create(name='LIBRARY')
         cls.artist = Artist.objects.create(first_name='JOHN', last_name='DOE')
+        cls.release = Release.objects.create(release_title='ALBUM')
 
     def test_unknown_user(self):
 
@@ -80,14 +81,17 @@ class ChangeListsTest(TestCase):
                 args=(1,))
             response = self.client.get(url, follow=False)
             # self.assertEqual(response.status_code, 200)
+
         url = reverse('admin:music_publisher_label_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LABEL'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Label.objects.get(pk=1).name, 'NEW LABEL')
+
         url = reverse('admin:music_publisher_library_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LIBRARY'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Library.objects.get(pk=1).name, 'NEW LIBRARY')
+
         url = reverse('admin:music_publisher_artist_change', args=(1,))
         response = self.client.post(url, {
             'last_name': 'DOVE',
@@ -95,6 +99,23 @@ class ChangeListsTest(TestCase):
         }, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Artist.objects.get(pk=1).last_name, 'DOVE')
+
+        url = reverse(
+            'admin:music_publisher_commercialrelease_change', args=(1,))
+        response = self.client.post(
+            url, {
+                'release_title': 'NEW ALBUM',
+                'release_label': '',
+                'ean': '',
+                'release_date': '',
+                'tracks-TOTAL_FORMS': 0,
+                'tracks-INITIAL_FORMS': 0
+            }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            CommercialRelease.objects.get(pk=1).release_title, 'NEW ALBUM')
+        with self.assertRaises(LibraryRelease.DoesNotExist):
+            LibraryRelease.objects.get(pk=1)
 
     def test_audit_user(self):
 
@@ -107,7 +128,7 @@ class ChangeListsTest(TestCase):
             self.assertEqual(response.status_code, 200)
             url = reverse(f'admin:music_publisher_{testing_admin}_add')
             response = self.client.get(url, follow=False)
-            # self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 403)
 
 
 # class ConstTest(SimpleTestCase):
