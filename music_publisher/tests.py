@@ -56,7 +56,7 @@ class ChangeListsTest(TestCase):
     def test_unknown_user(self):
 
         for testing_admin in self.testing_admins:
-            url = reverse('admin:music_publisher_{}_changelist.format(testing_admin)')
+            url = reverse('admin:music_publisher_{}_changelist'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
             url = reverse(f'admin:music_publisher_{ testing_admin }_add')
