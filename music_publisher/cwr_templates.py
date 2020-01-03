@@ -21,7 +21,7 @@ TEMPLATES_21 = {
         '{% load cwr_filters %}{% autoescape off %}'
         '{{ record_type }}'
         '{{ transaction_sequence|rjust:8 }}00000000'
-        '{{ work_title|ljust:60 }}  {{ work_id|ljust:14 }}'
+        '{{ work_title|ljust:60 }}  {{ code|ljust:14 }}'
         '{{ iswc|ljust:11 }}00000000            UNC'
         '{{ duration|date:"His"|default:"000000" }}{{ recorded_indicator }}'
         '      {{ version_type }}  ' + ' ' * 40 + 'N00000000000' +
@@ -30,18 +30,19 @@ TEMPLATES_21 = {
     'SPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SPU{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ sequence|rjust:2 }}'
-        '{{ publisher_id|ljust:9 }}{{ publisher_name|ljust:45 }}'
-        ' E 000000000{{ publisher_ipi_name|rjust:11 }}              '
-        '{{ publisher_pr_society|soc }}{{ share|prp|cwrshare }}'
-        '{{ publisher_mr_society|soc }}{{ share|mrp|cwrshare }}'
-        '{{ publisher_sr_society|soc }}{{ share|srp|cwrshare }}'
-        ' N {{ publisher_ipi_base|ljust:13 }}                               '
+        '{{ record_sequence|rjust:8 }}01'
+        '{{ settings.PUBLISHER_CODE|ljust:9 }}'
+        '{{ settings.PUBLISHER_NAME|ljust:45 }}'
+        ' E 000000000{{ settings.PUBLISHER_IPI_NAME|rjust:11 }}              '
+        '{{ settings.PUBLISHER_SOCIETY_PR|soc }}{{ share|prp|cwrshare }}'
+        '{{ settings.PUBLISHER_SOCIETY_MR|soc }}{{ share|mrp|cwrshare }}'
+        '{{ PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
+        ' N {{ settings.PUBLISHER_IPI_BASE|ljust:13 }}                               '
         '\r\n{% endautoescape %}'),
     'SPT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SPT{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ publisher_id|ljust:9 }}'
+        '{{ record_sequence|rjust:8 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
         '      {{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
         '{{ share|srp|cwrshare }}'
         'I2136N001\r\n{% endautoescape %}'),
@@ -50,11 +51,11 @@ TEMPLATES_21 = {
         'SWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }} '
-        '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
+        '{{ writer_role|ljust:2 }}000000000{{ ipi_name_number|rjust:11 }}'
         '{{ pr_society|soc }}{{ share|prw|cwrshare }}'
         '{{ mr_society|soc }}{{ share|mrw|cwrshare }}'
         '{{ sr_society|soc }}{{ share|srw|cwrshare }}'
-        ' N  {{ ipi_base|ljust:13 }}             \r\n'
+        ' N  {{ ipi_base_number|ljust:13 }}             \r\n'
         '{% endautoescape %}'),
     'SWT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -65,8 +66,9 @@ TEMPLATES_21 = {
     'PWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ publisher_id|ljust:9 }}'
-        '{{ publisher_name|ljust:45 }}              {{ saan|ljust:14 }}'
+        '{{ record_sequence|rjust:8 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
+        '{{ settings.PUBLISHER_NAME|ljust:45 }}              '
+        '{{ saan|ljust:14 }}'
         '{{ code|ljust:9 }}\r\n{% endautoescape %}'),
     'OPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -85,7 +87,7 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}{{ interested_party_number|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}'
         '{{ writer_unknown_indicator|default:" "}}'
-        '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
+        '{{ writer_role|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
         '{{ pr_society|soc }}{{ share|cwrshare }}'
         '{{ mr_society|soc }}{{ share|cwrshare }}'
         '{{ sr_society|soc }}{{ share|cwrshare }}    '
@@ -138,7 +140,7 @@ TEMPLATES_21 = {
 TEMPLATES_30 = {
     'HDR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
-        'HDRPB{{ publisher_id|ljust:4 }}'
+        'HDRPB{{ publisher_code|ljust:4 }}'
         '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
         '{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
@@ -151,7 +153,7 @@ TEMPLATES_30 = {
     'WRK': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'WRK{{ transaction_sequence|rjust:8 }}00000000'
-        '{{ work_title|ljust:60 }}  {{ work_id|ljust:14 }}'
+        '{{ work_title|ljust:60 }}  {{ code|ljust:14 }}'
         '{{ iswc|ljust:11 }}00000000            UNC'
         '{{ duration|date:"His"|default:"000000" }}{{ recorded_indicator }}'
         '      {{ version_type }}N00000000000' + ' ' * 51 + 'N'
@@ -159,10 +161,11 @@ TEMPLATES_30 = {
     'SPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SPU{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ sequence|rjust:2 }}'
-        '{{ publisher_id|ljust:9 }}{{ publisher_name|ljust:45 }}'
-        'NE 000000000{{ publisher_ipi_name|rjust:11 }}'
-        '{{ publisher_ipi_base|ljust:13 }} \r\n{% endautoescape %}'),
+        '{{ record_sequence|rjust:8 }}01'
+        '{{ settings.PUBLISHER_CODE|ljust:9 }}'
+        '{{ settings.PUBLISHER_NAME|ljust:45 }}'
+        'NE 000000000{{ settings.PUBLISHER_IPI_NAME|rjust:11 }}'
+        '{{ settings.PUBLISHER_IPI_BASE|ljust:13 }} \r\n{% endautoescape %}'),
     'SPT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SPT{{ transaction_sequence|rjust:8 }}'
@@ -176,8 +179,8 @@ TEMPLATES_30 = {
         'SWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}N'
-        '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
-        '{{ ipi_base|ljust:13 }} N  \r\n'
+        '{{ writer_role|ljust:2 }}000000000{{ ipi_name_number|rjust:11 }}'
+        '{{ ipi_base_number|ljust:13 }} N  \r\n'
         '{% endautoescape %}'),
     'SWT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -198,9 +201,10 @@ TEMPLATES_30 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
-        '{{ publisher_sequence|rjust:2 }}{{ publisher_id|ljust:9 }}'
+        '{{ publisher_sequence|rjust:2 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
         '{{ code|ljust:9 }}' + ' ' * 14 + '{{ publisher_pr_society|ljust:4 }}'
-        '{{ saan|ljust:14 }}  \r\n{% endautoescape %}'),
+        '{{ saan|ljust:14 }}{{ original_publishers.0.agreement.agreement_type.code|ljust:2 }}'
+        '\r\n{% endautoescape %}'),
     'OPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'OPU{{ transaction_sequence|rjust:8 }}'
@@ -220,8 +224,8 @@ TEMPLATES_30 = {
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}'
         '{{ writer_unknown_indicator|default:"N"}}'
-        '{{ capacity|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
-        '{{ ipi_base|ljust:13 }} N  \r\n'
+        '{{ writer_role|ljust:2 }}000000000{{ ipi_name_number|rjust:11 }}'
+        '{{ ipi_base_number|ljust:13 }} N  \r\n'
         '{% endautoescape %}'),
     'ALT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -274,7 +278,7 @@ TEMPLATES_30 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'WRI{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
-        '{{ ipi_name|rjust:11 }}{{ last_name|ljust:45 }}'
+        '{{ ipi_name_number|rjust:11 }}{{ last_name|ljust:45 }}'
         '{{ first_name|ljust:30 }}{{ capacity|ljust:2 }}\r\n'
         '{% endautoescape %}'),
     'GRT': Template(

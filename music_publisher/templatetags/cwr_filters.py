@@ -131,3 +131,14 @@ def capacity(value):
     value = value.strip()
     obj = models.WriterInWork(capacity=value)
     return obj.get_capacity_display()
+
+
+@register.filter(name='agreement_type')
+def capacity(value):
+    """Display agreement_type"""
+
+    value = value.strip()
+    return {
+        'OG': 'Original general',
+        'OS': 'Original specific',
+    }.get(value, 'Unknown')

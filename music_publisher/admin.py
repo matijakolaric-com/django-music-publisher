@@ -981,14 +981,14 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_cwr.short_description = 'Create CWR from selected works.'
 
-    def create_json(self, request, qs, normalize=False):
+    def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing selected works.
 
         Returns:
             JsonResponse: JSON file with selected works
         """
 
-        j = Work.objects.get_dict(qs, normalize=normalize)
+        j = Work.objects.get_dict(qs)
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(
@@ -999,12 +999,7 @@ class WorkAdmin(MusicPublisherAdmin):
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    def create_normalized_json(self, request, qs):
-        return self.create_json(request, qs, normalize=True)
-    create_normalized_json.short_description = \
-        'Export selected works (normalized JSON).'
-
-    actions = (create_cwr, create_json, create_normalized_json)
+    actions = (create_cwr, create_json)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
