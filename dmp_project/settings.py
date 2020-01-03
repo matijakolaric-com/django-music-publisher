@@ -129,6 +129,7 @@ REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.333333,0.333333,1')
 
 path = os.path.join(BASE_DIR, 'music_publisher', 'societies.csv')
+
 with open(path, 'r') as f:
     reader = csv.reader(f)
     SOCIETIES = sorted(

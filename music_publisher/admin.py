@@ -146,6 +146,7 @@ class ArtistAdmin(MusicPublisherAdmin):
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recording__count'
 
+
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
     actions = None
@@ -216,7 +217,6 @@ class LabelAdmin(MusicPublisherAdmin):
             qs = Work.objects.filter(
                 models.Q(recordings__record_label=obj))
             qs.update(last_change=now())
-
 
 
 @admin.register(Library)
