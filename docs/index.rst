@@ -1,8 +1,6 @@
 Django-Music-Publisher
 ++++++++++++++++++++++
 
-.. |ProjectVersion| replace:: {release}
-
 .. only:: html
 
    .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master

@@ -8,7 +8,7 @@ Django-Music-Publisher is a tool for **managing metadata** for musical works and
 Project Scope
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Django-Music-Publisher can be used out-of-the-box by most small publishers, both in commercial and production music. Others can use it as a proof of concept or as a base for custom development.
+Django-Music-Publisher can be used out-of-the-box by most small publishers, both in commercial and production music. Others can use it as a proof-of-concept for custom development.
 
 Each Django-Music-Publisher instance supports a **single original publisher**. It is not intended to be used by administrators or sub-publishers, nor by publishing companies with multiple entities.
 
@@ -20,20 +20,18 @@ The database contains data on **musical works** and **recordings**, including ti
 
 Multiple writers, both controlled and uncontrolled, are covered, with minor limitations.
 
-Basic original publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers and for simple royalty distribution processing.
+Basic original publishing agreement data can be entered, sufficient for registrations in societies that require society-assigned agreement numbers.
 
-The actual royalty distribution processing is not yet implemented.
-
+Data is also sufficient for simple royalty distribution processing, which is not yet fully implemented.
 
 Limitations
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Django-Music-Publisher is aiming to be a simple tool that is good enough for most original publishers. Being simple means that there are some limitations.
+Django-Music-Publisher is aiming to be a simple tool appropriate for most original publishers. Being simple means that there are some limitations.
 
 It does not manage data on "other" publishers. Co-publishing deals are still possible, with each publisher registering their own shares.
 
-With default settings, it is presumed that **controlled writers** collect 50% of performing rights and the other 50%, as well as 100% of mechanical and sync are collected by the **original publisher (you)**.
-Currently, this can not be changed through settings.
+Shares split between the original publisher and controlled writers is global and defined in the settings.
 
 Recordings based on multiple musical works (e.g. medleys) are not supported.
 
