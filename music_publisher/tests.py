@@ -14,7 +14,7 @@ import music_publisher.models
 from django.template import Context
 from django.core import exceptions
 
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
 
@@ -30,8 +30,6 @@ from django.contrib.admin.options import IS_POPUP_VAR
 
 
 def get_data_from_response(response):
-    if response.status_code != 200:
-        return response
     adminform = response.context_data.get('adminform')
     data = {}
     for sc in response.context:
@@ -54,6 +52,16 @@ def get_data_from_response(response):
     return data
 
 
+@override_settings(
+    PUBLISHER_NAME='TEST PUBLISHER',
+    PUBLISHER_CODE='MK',
+    PUBLISHER_IPI_NAME='0000000199',
+    PUBLISHER_SOCIETY_PR='52',
+    PUBLISHER_SOCIETY_MR='44',
+    REQUIRE_SAAN=True,
+    REQUIRE_PUBLISHER_FEE=True,
+    PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
+)
 class AdminTest(TestCase):
 
     fixtures = ['publishing_staff.json']
@@ -63,6 +71,45 @@ class AdminTest(TestCase):
         'commercialrelease', 'writer', 'recording',
         # 'cwrexport', 'ackimport'
     ]
+
+    @classmethod
+    def create_original_work(cls):
+        cls.original_work = Work.objects.create(title='The Work')
+        WriterInWork.objects.create(work=cls.original_work,
+            writer=cls.generally_controlled_writer, capacity='C ',
+            relative_share=Decimal('50'), controlled=True)
+        WriterInWork.objects.create(work=cls.original_work,
+            writer=cls.other_writer, capacity='A ',
+            relative_share=Decimal('50'), controlled=False)
+        AlternateTitle.objects.create(work=cls.original_work, suffix=True,
+            title='Behind the Work')
+        AlternateTitle.objects.create(work=cls.original_work, title='Work')
+        Recording.objects.create(work=cls.original_work,
+            record_label=cls.label, artist=cls.artist)
+
+    @classmethod
+    def create_modified_work(cls):
+        cls.modified_work = Work.objects.create(
+            title='The Modified Work', original_title='The Work')
+        WriterInWork.objects.create(
+            work=cls.modified_work,
+            writer=cls.generally_controlled_writer,
+            capacity='AR',
+            relative_share=Decimal('100'),
+            controlled=True
+        )
+        WriterInWork.objects.create(
+            work=cls.modified_work,
+            writer=None,
+            capacity='CA',
+            relative_share=Decimal('0'),
+            controlled=False
+        )
+        cls.modified_work.artists.add(cls.artist)
+        AlternateTitle.objects.create(work=cls.modified_work, suffix=False,
+            title='The Copy')
+        AlternateTitle.objects.create(work=cls.modified_work, suffix=True,
+            title='Behind the Modified Work')
 
     @classmethod
     def setUpClass(cls):
@@ -83,7 +130,9 @@ class AdminTest(TestCase):
             release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
         cls.generally_controlled_writer = Writer(
             first_name='John', last_name='Smith', ipi_name='00000000297',
-            pr_society='10', generally_controlled=True, saan='A1B2C3'
+            pr_society='10', mr_society='34',
+            generally_controlled=True, saan='A1B2C3',
+            publisher_fee=Decimal('0.25')
         )
         cls.generally_controlled_writer.clean()
         cls.generally_controlled_writer.save()
@@ -92,30 +141,23 @@ class AdminTest(TestCase):
         cls.other_writer.clean()
         cls.other_writer.save()
 
-        cls.original_work = Work.objects.create(title='The Work')
-        WriterInWork.objects.create(
-            work=cls.original_work,
-            writer=cls.generally_controlled_writer,
-            capacity='C ',
-            relative_share=Decimal('50'),
-            controlled=True
-        )
-        WriterInWork.objects.create(
-            work=cls.original_work,
-            writer=cls.other_writer,
-            capacity='A ',
-            relative_share=Decimal('50'),
-            controlled=False
-        )
-        AlternateTitle.objects.create(
-            work=cls.original_work,
-            suffix=True,
-            title='Behind the Work')
-        AlternateTitle.objects.create(
-            work=cls.original_work,
-            title='Work')
-        Recording.objects.create(
-            work=cls.original_work, record_label=cls.label, artist=cls.artist)
+        cls.create_modified_work()
+        cls.create_original_work()
+
+        cls.cwr2_export = CWRExport.objects.create(
+            description='Test NWR', nwr_rev='NWR')
+        cls.cwr2_export.works.add(cls.original_work)
+        cls.cwr2_export.works.add(cls.modified_work)
+        cls.cwr2_export.create_cwr()
+        print(cls.cwr2_export.cwr)
+
+        cls.cwr3_export = CWRExport.objects.create(
+            description='Test WRK', nwr_rev='WRK')
+        cls.cwr3_export.works.add(cls.original_work)
+        cls.cwr3_export.works.add(cls.modified_work)
+        cls.cwr3_export.create_cwr()
+
+        # print(cls.cwr3_export.cwr)
 
     def test_unknown_user(self):
 
