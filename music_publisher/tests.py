@@ -36,7 +36,8 @@ def get_data_from_response(response):
         for d in sc:
             if 'widget' in sc:
                 if sc['widget'].get('type') == 'checkbox':
-                    data[sc['widget']['name']] = sc['widget']['attrs'].get('checked')
+                    data[sc['widget']['name']] = \
+                        sc['widget']['attrs'].get('checked')
                     continue
                 if (sc['widget'].get('type') == 'select' and
                         sc['widget']['selected'] is False):
@@ -72,7 +73,8 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_original_work(cls):
-        cls.original_work = Work.objects.create(title='The Work')
+        cls.original_work = Work.objects.create(
+            title='The Work', iswc='T1234567893')
         WriterInWork.objects.create(work=cls.original_work,
             writer=cls.generally_controlled_writer, capacity='C ',
             relative_share=Decimal('50'), controlled=True)
@@ -83,7 +85,8 @@ class AdminTest(TestCase):
             title='Behind the Work')
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
         Recording.objects.create(work=cls.original_work,
-            record_label=cls.label, artist=cls.artist)
+            record_label=cls.label, artist=cls.artist,
+            isrc='US-S1Z-99-00001')
 
     @classmethod
     def create_modified_work(cls):
@@ -167,7 +170,8 @@ class AdminTest(TestCase):
 
         cls.label = Label.objects.create(name='LABEL')
         cls.library = Library.objects.create(name='LIBRARY')
-        cls.artist = Artist.objects.create(first_name='JOHN', last_name='DOE')
+        cls.artist = Artist.objects.create(
+            first_name='JOHN', last_name='DOE', isni='000000012146438X')
         cls.release = Release.objects.create(release_title='ALBUM')
         cls.library_release = Release.objects.create(
             release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
@@ -297,6 +301,7 @@ class AdminTest(TestCase):
         response = self.client.post(
             url, {
                 'release_title': 'NEW ALBUM',
+                'ean': '4003994155486',
                 'tracks-TOTAL_FORMS': 0,
                 'tracks-INITIAL_FORMS': 0
             }, follow=True)
@@ -336,10 +341,25 @@ class AdminTest(TestCase):
         with self.assertRaises(CommercialRelease.DoesNotExist):
             CommercialRelease.objects.get(pk=2)
 
+    def test_ackimport(self):
+        self.client.force_login(self.staffuser)
+        mock = StringIO()
+        mock.write(ACK_CONTENT)
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNotNone(ackimport)
+
     def test_audit_user(self):
-
         self.client.force_login(self.audituser)
-
         for testing_admin in self.testing_admins:
             url = reverse(
                 'admin:music_publisher_{}_changelist'.format(testing_admin))
@@ -729,14 +749,14 @@ class AdminTest(TestCase):
 #
 #
 #
-# ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
-# GRHACK0000102.100020180607
-# ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607AS
-# ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607RA
-# ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607RA
-# ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
-# ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
-# TRL000010000008000000839"""
+ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
+GRHACK0000102.100020180607
+ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607AS
+ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607RA
+ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607RA
+ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
+ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
+TRL000010000008000000839"""
 #
 #
 # class IntegrationTest(TransactionTestCase):

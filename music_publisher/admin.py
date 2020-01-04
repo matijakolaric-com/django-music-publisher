@@ -1352,9 +1352,8 @@ class ACKImportAdmin(admin.ModelAdmin):
             tt, work_id, remote_work_id, dat, status = x
             # work ID is numeric with an optional string
             work_id = work_id.strip()
-            PREFIX = SETTINGS.get('work_id_prefix', '')
-            if work_id.startswith(PREFIX):
-                work_id = work_id[len(PREFIX):]
+            if work_id.startswith(settings.PUBLISHER_CODE):
+                work_id = work_id[len(settings.PUBLISHER_CODE):]
             if not work_id.isnumeric():
                 unknown_work_ids.append(work_id)
                 continue
