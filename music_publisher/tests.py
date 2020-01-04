@@ -86,19 +86,6 @@ class AdminTest(TestCase):
             record_label=cls.label, artist=cls.artist)
 
     @classmethod
-    def create_writers(cls):
-        cls.generally_controlled_writer = Writer(first_name='John',
-            last_name='Smith', ipi_name='00000000297', pr_society='10',
-            mr_society='34', generally_controlled=True, saan='A1B2C3',
-            publisher_fee=Decimal('0.25'))
-        cls.generally_controlled_writer.clean()
-        cls.generally_controlled_writer.save()
-        cls.other_writer = Writer(first_name='John', last_name='Smith',
-            ipi_name='395')
-        cls.other_writer.clean()
-        cls.other_writer.save()
-
-    @classmethod
     def create_modified_work(cls):
         cls.modified_work = Work.objects.create(
             title='The Modified Work', original_title='The Work')
@@ -121,6 +108,22 @@ class AdminTest(TestCase):
             title='The Copy')
         AlternateTitle.objects.create(work=cls.modified_work, suffix=True,
             title='Behind the Modified Work')
+
+    @classmethod
+    def create_writers(cls):
+        cls.generally_controlled_writer = Writer(first_name='John',
+            last_name='Smith', ipi_name='00000000297', pr_society='10',
+            ipi_base='I-123456789-3',
+            mr_society='34', generally_controlled=True, saan='A1B2C3',
+            publisher_fee=Decimal('0.25'))
+        cls.generally_controlled_writer.clean()
+        cls.generally_controlled_writer.clean_fields()
+        cls.generally_controlled_writer.save()
+        cls.other_writer = Writer(first_name='Jane', last_name='Doe',
+            ipi_name='395')
+        cls.writer_no_first_name = Writer(last_name='Jones')
+        cls.other_writer.clean()
+        cls.other_writer.save()
 
     @classmethod
     def create_cwr2_export(cls):
@@ -174,6 +177,20 @@ class AdminTest(TestCase):
         cls.create_original_work()
         cls.create_cwr2_export()
         cls.create_cwr3_export()
+
+    def test_strings(self):
+        self.assertEqual(
+            str(self.original_work),
+            'MK000002: THE WORK (DOE / SMITH)')
+        self.assertEqual(
+            str(self.generally_controlled_writer),
+            'JOHN SMITH (*)')
+        self.assertEqual(
+            str(self.other_writer),
+            'JANE DOE')
+        self.assertEqual(
+            str(self.writer_no_first_name),
+            'JONES')
 
     def test_unknown_user(self):
 
@@ -240,19 +257,31 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
 
-        # Label change
+    def test_json(self):
+        self.client.force_login(self.staffuser)
+        response = self.client.post(
+        reverse('admin:music_publisher_work_changelist'),
+        data={
+            'action': 'create_json', 'select_across': 1,
+            'index': 0, '_selected_action': self.original_work.id})
+        self.assertEqual(response.status_code, 200)
+
+    def test_label_change(self):
+        self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_label_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LABEL'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Label.objects.get(pk=1).name, 'NEW LABEL')
 
-        # Library change
+    def test_library_change(self):
+        self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_library_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LIBRARY'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Library.objects.get(pk=1).name, 'NEW LIBRARY')
 
-        # Artist change
+    def test_artist_change(self):
+        self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_artist_change', args=(1,))
         response = self.client.post(url, {
             'last_name': 'DOVE',
@@ -261,7 +290,8 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Artist.objects.get(pk=1).last_name, 'DOVE')
 
-        # Commercial release
+    def test_commercialrelease_change(self):
+        self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_commercialrelease_change', args=(1,))
         response = self.client.post(
@@ -276,7 +306,8 @@ class AdminTest(TestCase):
         with self.assertRaises(LibraryRelease.DoesNotExist):
             LibraryRelease.objects.get(pk=1)
 
-        # Library release
+    def test_libraryrelease_change(self):
+        self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_libraryrelease_change', args=(2,)
         ) + '?' + IS_POPUP_VAR + '=1'

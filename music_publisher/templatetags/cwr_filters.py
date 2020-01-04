@@ -108,12 +108,11 @@ def perc(value):
     return '{}%'.format(value)
 
 
-@register.filter(name='percf')
-def percf(value):
-    """Display shares as human-readable string."""
-    return '{}%'.format(value.quantize(
-        Decimal('0.01'), rounding=ROUND_HALF_UP))
-
+# @register.filter(name='percf')
+# def percf(value):
+#     """Display shares as human-readable string."""
+#     return '{}%'.format(value.quantize(
+#         Decimal('0.01'), rounding=ROUND_HALF_UP))
 
 
 @register.filter(name='soc_name')
