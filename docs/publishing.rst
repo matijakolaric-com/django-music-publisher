@@ -34,12 +34,6 @@ In the context of registrations, basically there are three roles:
 * *administrators* to whom some OPs have entrusted all or some activities regarding musical works
 * *sub-publishers* to whom OPs or admins have entrusted all or some activieties in foreign countries
 
-.. raw:: html
-
-   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/a2ME6hKlPZQ/?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
-   <p>The differences are explained in this video, as well as some of the reasons for this choice.</p>
-   <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
-
 Django-Music-Publisher covers the need of publishers who are only performing the role of an original publisher. Furthermore, it does not cover the case of composite works and some other rare cases.
 
 Please note that the term *self-publisher* is used for an original publisher with a single signed writer - usually the owner, or sometimes all members of a band. They usually do not require royalty statement processing.
