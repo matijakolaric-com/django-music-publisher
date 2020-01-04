@@ -45,22 +45,3 @@ When creating CWR, many fields are left with blank/zero values. When the fields 
 * Work for Hire is set to No
 
 If this is not how you work, then this is not the tool for you, but you are free to extend it for your needs.
-
-
-Deployment options
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Django-Music-Publisher, as any Django-based application, can be installed in
-many different ways.
-
-`Heroku <heroku.com>`_ is a well-known cloud platform, offering a very simple
-installation procedure for cloud-native applications. The free tier is enough
-for publishers with up to ~1000 musical works. Also, this is the fastest way
-to test Django-Music-Publisher.
-
-Other ways include:
-
-* installed on a local computer (not recommended for real work)
-* custom VPS installation (requires basic sysadmin skills)
-* to be included in a larger Django project (requires significant coding skills)
-
