@@ -66,10 +66,8 @@ class AdminTest(TestCase):
 
     fixtures = ['publishing_staff.json']
     testing_admins = [
-        'artist', 'label', 'library',
-        'work',
-        'commercialrelease', 'writer', 'recording',
-        # 'cwrexport', 'ackimport'
+        'artist', 'label', 'library', 'work', 'commercialrelease', 'writer',
+        'recording', 'cwrexport', #'ackimport'
     ]
 
     @classmethod
@@ -86,6 +84,19 @@ class AdminTest(TestCase):
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
         Recording.objects.create(work=cls.original_work,
             record_label=cls.label, artist=cls.artist)
+
+    @classmethod
+    def create_writers(cls):
+        cls.generally_controlled_writer = Writer(first_name='John',
+            last_name='Smith', ipi_name='00000000297', pr_society='10',
+            mr_society='34', generally_controlled=True, saan='A1B2C3',
+            publisher_fee=Decimal('0.25'))
+        cls.generally_controlled_writer.clean()
+        cls.generally_controlled_writer.save()
+        cls.other_writer = Writer(first_name='John', last_name='Smith',
+            ipi_name='395')
+        cls.other_writer.clean()
+        cls.other_writer.save()
 
     @classmethod
     def create_modified_work(cls):
@@ -112,6 +123,32 @@ class AdminTest(TestCase):
             title='Behind the Modified Work')
 
     @classmethod
+    def create_cwr2_export(cls):
+        cls.cwr2_export = CWRExport.objects.create(
+            description='Test NWR', nwr_rev='NWR')
+        cls.cwr2_export.works.add(cls.original_work)
+        cls.cwr2_export.works.add(cls.modified_work)
+        cls.cwr2_export.create_cwr()
+        rev = CWRExport.objects.create(
+            description='Test REV', nwr_rev='REV')
+        rev.works.add(cls.original_work)
+        rev.works.add(cls.modified_work)
+        rev.create_cwr()
+
+    @classmethod
+    def create_cwr3_export(cls):
+        cls.cwr3_export = CWRExport.objects.create(
+            description='Test WRK', nwr_rev='WRK')
+        cls.cwr3_export.works.add(cls.original_work)
+        cls.cwr3_export.works.add(cls.modified_work)
+        cls.cwr3_export.create_cwr()
+        isr = CWRExport.objects.create(
+            description='Test ISR', nwr_rev='ISR')
+        isr.works.add(cls.original_work)
+        isr.works.add(cls.modified_work)
+        isr.create_cwr()
+
+    @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
@@ -119,45 +156,24 @@ class AdminTest(TestCase):
         cls.staffuser = User.objects.create(
             username='staffuser', password='password', is_active=True,
             is_staff=True)
+        cls.staffuser.groups.add(1)
         cls.audituser = User.objects.create(
             username='audituser', password='password', is_active=True,
             is_staff=True)
+        cls.audituser.groups.add(2)
+
         cls.label = Label.objects.create(name='LABEL')
         cls.library = Library.objects.create(name='LIBRARY')
         cls.artist = Artist.objects.create(first_name='JOHN', last_name='DOE')
         cls.release = Release.objects.create(release_title='ALBUM')
         cls.library_release = Release.objects.create(
             release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
-        cls.generally_controlled_writer = Writer(
-            first_name='John', last_name='Smith', ipi_name='00000000297',
-            pr_society='10', mr_society='34',
-            generally_controlled=True, saan='A1B2C3',
-            publisher_fee=Decimal('0.25')
-        )
-        cls.generally_controlled_writer.clean()
-        cls.generally_controlled_writer.save()
-        cls.other_writer = Writer(
-            first_name='John', last_name='Smith', ipi_name='395')
-        cls.other_writer.clean()
-        cls.other_writer.save()
 
+        cls.create_writers()
         cls.create_modified_work()
         cls.create_original_work()
-
-        cls.cwr2_export = CWRExport.objects.create(
-            description='Test NWR', nwr_rev='NWR')
-        cls.cwr2_export.works.add(cls.original_work)
-        cls.cwr2_export.works.add(cls.modified_work)
-        cls.cwr2_export.create_cwr()
-        print(cls.cwr2_export.cwr)
-
-        cls.cwr3_export = CWRExport.objects.create(
-            description='Test WRK', nwr_rev='WRK')
-        cls.cwr3_export.works.add(cls.original_work)
-        cls.cwr3_export.works.add(cls.modified_work)
-        cls.cwr3_export.create_cwr()
-
-        # print(cls.cwr3_export.cwr)
+        cls.create_cwr2_export()
+        cls.create_cwr3_export()
 
     def test_unknown_user(self):
 
@@ -177,8 +193,9 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 302)
 
     def test_staff_user(self):
-        self.staffuser.groups.add(1)
+
         self.client.force_login(self.staffuser)
+        # General checks
         for testing_admin in self.testing_admins:
             url = reverse(
                 'admin:music_publisher_{}_changelist'.format(testing_admin))
@@ -205,16 +222,37 @@ class AdminTest(TestCase):
                 url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)
 
+    def test_cwr_previews(self):
+        self.client.force_login(self.staffuser)
+        for cwr_export in CWRExport.objects.all():
+            url = reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(cwr_export.id,)) + '?preview=true'
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+
+    def test_cwr_downloads(self):
+        self.client.force_login(self.staffuser)
+        for cwr_export in CWRExport.objects.all():
+            url = reverse(
+                'admin:music_publisher_cwrexport_change',
+                args=(cwr_export.id,)) + '?download=true'
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+
+        # Label change
         url = reverse('admin:music_publisher_label_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LABEL'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Label.objects.get(pk=1).name, 'NEW LABEL')
 
+        # Library change
         url = reverse('admin:music_publisher_library_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LIBRARY'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Library.objects.get(pk=1).name, 'NEW LIBRARY')
 
+        # Artist change
         url = reverse('admin:music_publisher_artist_change', args=(1,))
         response = self.client.post(url, {
             'last_name': 'DOVE',
@@ -223,6 +261,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Artist.objects.get(pk=1).last_name, 'DOVE')
 
+        # Commercial release
         url = reverse(
             'admin:music_publisher_commercialrelease_change', args=(1,))
         response = self.client.post(
@@ -237,6 +276,7 @@ class AdminTest(TestCase):
         with self.assertRaises(LibraryRelease.DoesNotExist):
             LibraryRelease.objects.get(pk=1)
 
+        # Library release
         url = reverse(
             'admin:music_publisher_libraryrelease_change', args=(2,)
         ) + '?' + IS_POPUP_VAR + '=1'
@@ -267,7 +307,6 @@ class AdminTest(TestCase):
 
     def test_audit_user(self):
 
-        self.audituser.groups.add(2)
         self.client.force_login(self.audituser)
 
         for testing_admin in self.testing_admins:

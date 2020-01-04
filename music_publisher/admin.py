@@ -574,7 +574,6 @@ class AlternateTitleInline(admin.TabularInline):
         return str(obj)
 
 
-
 class WriterInWorkFormSet(BaseInlineFormSet):
     """Formset for :class:`WriterInWorkInline`.
     """

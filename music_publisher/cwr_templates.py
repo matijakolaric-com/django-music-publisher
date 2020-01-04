@@ -171,8 +171,10 @@ TEMPLATES_30 = {
         'SPT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}001{{ publisher_id|ljust:9 }}'
         '{{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
-        '{{ share|srp|cwrshare }}I2136{{ publisher_pr_society|ljust:4 }}'
-        '{{ publisher_mr_society|ljust:4 }}{{ publisher_sr_society|ljust:4 }}'
+        '{{ share|srp|cwrshare }}I2136'
+        '{{ settings.PUBLISHER_SOCIETY_PR|ljust:4 }}'
+        '{{ settings.PUBLISHER_SOCIETY_MR|ljust:4 }}'
+        '{{ settings.PUBLISHER_SOCIETY_SR|ljust:4 }}'
         + ' ' * 32 + '0000\r\n{% endautoescape %}'),
     'SWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
