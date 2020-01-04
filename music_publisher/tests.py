@@ -411,69 +411,69 @@ class AdminTest(TestCase):
 #             self.assertIsInstance(template.render(Context(d)).upper(), str)
 #
 #
-# class ValidatorsTest(SimpleTestCase):
-#
-#     def test_title(self):
-#         validator = validators.CWRFieldValidator('work_title')
-#         self.assertIsNone(validator('VALID TITLE'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('|Invalid')
-#
-#     def test_isni(self):
-#         validator = validators.CWRFieldValidator('isni')
-#         self.assertIsNone(validator('000000000000001X'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('1X')
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('0000000000000010')
-#
-#     def test_ean(self):
-#         validator = validators.CWRFieldValidator('ean')
-#         self.assertIsNone(validator('4006381333931'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('400638133393')
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('4006381333932')
-#
-#     def test_iswc(self):
-#         validator = validators.CWRFieldValidator('iswc')
-#         self.assertIsNone(validator('T1234567894'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('I1234567894')
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('T1234567893')
-#
-#     def test_isrc(self):
-#         validator = validators.CWRFieldValidator('isrc')
-#         self.assertIsNone(validator('USX1X1234567'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('USX1X123A567')
-#
-#     def test_ipi_name(self):
-#         validator = validators.CWRFieldValidator('ipi_name')
-#         self.assertIsNone(validator('00000000199'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('0000000199')
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('00000000100')
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('0000000010A')
-#
-#     def test_ipi_base(self):
-#         validator = validators.CWRFieldValidator('ipi_base')
-#         self.assertIsNone(validator('I-123456789-3'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('T-123456789-3')
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('I-123456789-4')
-#
-#     def test_name(self):
-#         validator = validators.CWRFieldValidator('last_name')
-#         self.assertIsNone(validator('VALID NAME'))
-#         with self.assertRaises(exceptions.ValidationError):
-#             validator('NAME, INVALID')
-#
-#
+class ValidatorsTest(SimpleTestCase):
+
+    def test_title(self):
+        validator = validators.CWRFieldValidator('work_title')
+        self.assertIsNone(validator('VALID TITLE'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('|Invalid')
+
+    def test_isni(self):
+        validator = validators.CWRFieldValidator('isni')
+        self.assertIsNone(validator('000000000000001X'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('1X')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('0000000000000010')
+
+    def test_ean(self):
+        validator = validators.CWRFieldValidator('ean')
+        self.assertIsNone(validator('4006381333931'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('400638133393')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('4006381333932')
+
+    def test_iswc(self):
+        validator = validators.CWRFieldValidator('iswc')
+        self.assertIsNone(validator('T1234567894'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('I1234567894')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('T1234567893')
+
+    def test_isrc(self):
+        validator = validators.CWRFieldValidator('isrc')
+        self.assertIsNone(validator('USX1X1234567'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('USX1X123A567')
+
+    def test_ipi_name(self):
+        validator = validators.CWRFieldValidator('ipi_name')
+        self.assertIsNone(validator('00000000199'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('0000000199')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('00000000100')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('0000000010A')
+
+    def test_ipi_base(self):
+        validator = validators.CWRFieldValidator('ipi_base')
+        self.assertIsNone(validator('I-123456789-3'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('T-123456789-3')
+        with self.assertRaises(exceptions.ValidationError):
+            validator('I-123456789-4')
+
+    def test_name(self):
+        validator = validators.CWRFieldValidator('last_name')
+        self.assertIsNone(validator('VALID NAME'))
+        with self.assertRaises(exceptions.ValidationError):
+            validator('NAME, INVALID')
+
+
 # class ModelsSimpleTest(TransactionTestCase):
 #
 #     reset_sequences = True
