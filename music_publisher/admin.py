@@ -439,7 +439,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
 
-
     def track_count(self, obj):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
@@ -515,7 +514,6 @@ class WriterAdmin(MusicPublisherAdmin):
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('work', distinct=True))
         return qs
-
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.

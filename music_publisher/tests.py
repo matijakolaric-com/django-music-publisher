@@ -26,15 +26,42 @@ from io import StringIO
 # import os
 
 from datetime import datetime
+from django.contrib.admin.options import IS_POPUP_VAR
 
 
-class ChangeListsTest(TestCase):
+def get_data_from_response(response):
+    if response.status_code != 200:
+        return response
+    adminform = response.context_data.get('adminform')
+    data = {}
+    for sc in response.context:
+        for d in sc:
+            if 'widget' in sc:
+                if sc['widget'].get('type') == 'checkbox':
+                    data[sc['widget']['name']] = sc['widget']['attrs'].get('checked')
+                    continue
+                if (sc['widget'].get('type') == 'select' and
+                        sc['widget']['selected'] is False):
+                    continue
+                data[sc['widget']['name']] = sc['widget']['value']
+    if adminform:
+        data.update(adminform.form.initial)
+    for key, value in data.items():
+        if value is None:
+            data[key] = ''
+        else:
+            data[key] = value
+    return data
+
+
+class AdminTest(TestCase):
 
     fixtures = ['publishing_staff.json']
     testing_admins = [
         'artist', 'label', 'library',
-        'work', 'libraryrelease',
-        'commercialrelease', 'writer', 'recording', 'cwrexport', 'ackimport'
+        'work',
+        'commercialrelease', 'writer', 'recording',
+        # 'cwrexport', 'ackimport'
     ]
 
     @classmethod
@@ -52,18 +79,58 @@ class ChangeListsTest(TestCase):
         cls.library = Library.objects.create(name='LIBRARY')
         cls.artist = Artist.objects.create(first_name='JOHN', last_name='DOE')
         cls.release = Release.objects.create(release_title='ALBUM')
+        cls.library_release = Release.objects.create(
+            release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
+        cls.generally_controlled_writer = Writer(
+            first_name='John', last_name='Smith', ipi_name='00000000297',
+            pr_society='10', generally_controlled=True, saan='A1B2C3'
+        )
+        cls.generally_controlled_writer.clean()
+        cls.generally_controlled_writer.save()
+        cls.other_writer = Writer(
+            first_name='John', last_name='Smith', ipi_name='395')
+        cls.other_writer.clean()
+        cls.other_writer.save()
+
+        cls.original_work = Work.objects.create(title='The Work')
+        WriterInWork.objects.create(
+            work=cls.original_work,
+            writer=cls.generally_controlled_writer,
+            capacity='C ',
+            relative_share=Decimal('50'),
+            controlled=True
+        )
+        WriterInWork.objects.create(
+            work=cls.original_work,
+            writer=cls.other_writer,
+            capacity='A ',
+            relative_share=Decimal('50'),
+            controlled=False
+        )
+        AlternateTitle.objects.create(
+            work=cls.original_work,
+            suffix=True,
+            title='Behind the Work')
+        AlternateTitle.objects.create(
+            work=cls.original_work,
+            title='Work')
+        Recording.objects.create(
+            work=cls.original_work, record_label=cls.label, artist=cls.artist)
 
     def test_unknown_user(self):
 
         for testing_admin in self.testing_admins:
-            url = reverse('admin:music_publisher_{}_changelist'.format(testing_admin))
-            response = self.client.get(url, follow=False)
-            self.assertEqual(response.status_code, 302)
-            url = reverse(f'admin:music_publisher_{ testing_admin }_add')
+            url = reverse(
+                'admin:music_publisher_{}_changelist'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
             url = reverse(
-                f'admin:music_publisher_{testing_admin}_change', args=(1,))
+                'admin:music_publisher_{}_add'.format(testing_admin))
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 302)
+            url = reverse(
+                'admin:music_publisher_{}_change'.format(testing_admin),
+                args=(1,))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
 
@@ -71,16 +138,30 @@ class ChangeListsTest(TestCase):
         self.staffuser.groups.add(1)
         self.client.force_login(self.staffuser)
         for testing_admin in self.testing_admins:
-            url = reverse(f'admin:music_publisher_{ testing_admin }_changelist')
+            url = reverse(
+                'admin:music_publisher_{}_changelist'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(f'admin:music_publisher_{testing_admin}_add')
+            url = reverse(
+                'admin:music_publisher_{}_add'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(f'admin:music_publisher_{testing_admin}_change',
+            url = reverse(
+                'admin:music_publisher_{}_add'.format(testing_admin)
+            ) + '?' + IS_POPUP_VAR + '=1'
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = reverse(
+                'admin:music_publisher_{}_change'.format(testing_admin),
                 args=(1,))
             response = self.client.get(url, follow=False)
-            # self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
+            data = get_data_from_response(response)
+            if 'first_name' in data:
+                data['first_name'] += ' JR.'
+            response = self.client.post(
+                url, data=data, follow=False)
+            self.assertEqual(response.status_code, 302)
 
         url = reverse('admin:music_publisher_label_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LABEL'}, follow=True)
@@ -105,9 +186,6 @@ class ChangeListsTest(TestCase):
         response = self.client.post(
             url, {
                 'release_title': 'NEW ALBUM',
-                'release_label': '',
-                'ean': '',
-                'release_date': '',
                 'tracks-TOTAL_FORMS': 0,
                 'tracks-INITIAL_FORMS': 0
             }, follow=True)
@@ -117,16 +195,46 @@ class ChangeListsTest(TestCase):
         with self.assertRaises(LibraryRelease.DoesNotExist):
             LibraryRelease.objects.get(pk=1)
 
+        url = reverse(
+            'admin:music_publisher_libraryrelease_change', args=(2,)
+        ) + '?' + IS_POPUP_VAR + '=1'
+        response = self.client.post(
+            url, {
+                'release_title': 'LIB RELEASE',
+                'library': '1',
+                'cd_identifier': 'ABC',
+            }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            LibraryRelease.objects.get(pk=2).release_title, 'LIB RELEASE')
+        url = reverse(
+            'admin:music_publisher_libraryrelease_change', args=(2,))
+        response = self.client.post(
+            url, {
+                'release_title': 'LIBRARY RELEASE',
+                'library': '1',
+                'cd_identifier': 'ABC', 'tracks-TOTAL_FORMS': 0,
+                'tracks-INITIAL_FORMS': 0
+            }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            LibraryRelease.objects.get(pk=2).release_title,
+            'LIBRARY RELEASE')
+        with self.assertRaises(CommercialRelease.DoesNotExist):
+            CommercialRelease.objects.get(pk=2)
+
     def test_audit_user(self):
 
         self.audituser.groups.add(2)
         self.client.force_login(self.audituser)
 
         for testing_admin in self.testing_admins:
-            url = reverse(f'admin:music_publisher_{ testing_admin }_changelist')
+            url = reverse(
+                'admin:music_publisher_{}_changelist'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(f'admin:music_publisher_{testing_admin}_add')
+            url = reverse(
+                'admin:music_publisher_{}_add'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 403)
 

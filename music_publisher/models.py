@@ -180,7 +180,7 @@ class Release(models.Model):
         blank=True, null=True)
     release_title = models.CharField(
         'Release (album) title ',
-        max_length=60, blank=True, null=True, unique=True,
+        max_length=60, blank=True, null=True,
         validators=(CWRFieldValidator('release_title'),))
     ean = models.CharField(
         'Release (album) EAN',
@@ -812,7 +812,7 @@ class WriterInWork(models.Model):
                 d['writer'] = 'Must be set for a controlled writer.'
             else:
                 if not self.writer._can_be_controlled:
-                    d['writer'] = CAN_NOT_BE_CONTROLLED_MSG
+                    d['writer'] = 'IPI name and PR society must be set.'
                 if (settings.REQUIRE_SAAN and
                         not self.writer.generally_controlled and
                         not self.saan):
