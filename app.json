@@ -17,15 +17,15 @@
       "generator": "secret"
     },
     "PUBLISHER": {
-      "description": "The name of your publishing entity. Do NOT use coma in the name!",
+      "description": "The name of your publishing entity.\nDo NOT use comma in the name.",
       "required": true
     },
     "PUBLISHER_CODE": {
-      "description": "The code required for CWR delivery, get it from your society. Without it, CWR export will not work, but you can add it later.",
+      "description": "The code required for CWR delivery, get it from your society. \nWithout it, CWR export will not work, but you can add it later.",
       "required": false
     },
     "PUBLISHER_IPI_NAME": {
-      "description": "Publisher IPI name number, get it from your society.",
+      "description": "Publisher IPI name number, get it from your society (PRO, collecting organization).",
       "required": true
     },
     "PUBLISHER_IPI_BASE": {
@@ -33,23 +33,23 @@
       "required": false
     },
     "PUBLISHER_SOCIETY_PR": {
-      "description": "Numerical performance society code, ask your society for the value. Do not enter leading zeros.",
+      "description": "Numerical performance society code, ask your society (PRO, collecting organization) for the value.\nDo not enter leading zeros.",
       "required": true
     },
     "PUBLISHER_SOCIETY_MR": {
-      "description": "Numerical mechanical society code, ask your society for the value. Do not enter leading zeros.",
+      "description": "Numerical mechanical society code, ask your society (MRO, collecting organization) for the value.\nDo not enter leading zeros.",
       "required": false
     },
     "PUBLISHER_SOCIETY_SR": {
-      "description": "Numerical synchronization society code, rarely used",
+      "description": "Numerical synchronization society code, rarely used and only for production music blanket licencing.",
       "required": false
     },
     "REQUIRE_SAAN": {
-      "description": "Enter '1' to make society-assigned original agreement number required. Required in some societies, e.g. PRS for Music, BUMA/STEMRA, GEMA.",
+      "description": "Enter '1' to make Society-Assigned Agreement Number a required field.\nRequired in some societies, e.g. PRS/MCPS, BUMA/STEMRA, GEMA.",
       "required": false
     },
     "REQUIRE_PUBLISHER_FEE": {
-      "description": "Enter '1' to make publisher fee required. If unsure, leave the default.",
+      "description": "Enter '1' to make Publisher Fee a required field. If unsure, leave it empty.",
       "required": false
     }
   }

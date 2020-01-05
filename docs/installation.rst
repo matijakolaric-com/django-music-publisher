@@ -1,15 +1,44 @@
-Installation and Configuration
-******************************
+Installation / Deployment and Configuration
+*******************************************
 
-Django-Music-Publisher can be installed either as a Django app, or as a stand-alone project.
+Django-Music-Publisher can be installed/deployed as a stand-alone application, or used as a Python package.
 
-There is a specialised commercial application PaaS `DMP Guru <https://dmp.guru/>`_ that simplifies the process for a moderate subscription fee.
+Installing as Python package (developers only)
+===================================================================
+
+If you plan to use Django-Music-Publisher as one of the apps in your Django project, there is nothing special about it::
+
+    pip install --upgrade django_music_publisher
+
+Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no URLs need to be added, as everything goes
+through the Django Admin.
+
+See `Settings`_.
 
 
-Installing Django-Music-Publisher (Standalone Deployment)
-===============================================================================
+Standalone Deployment
+=====================
 
-You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6 and 3.7.
+Depending on your needs and technical knowledge, there are several options here. They are listed below, starting with
+the simplest option.
+
+Deployment to Heroku
+--------------------
+
+This is the fastest and simplest option to deploy Django-Music-Publisher. One can use
+the free tier of Heroku for testing and even for production up to ~1000 musical works.
+
+.. raw:: html
+
+    Simply press <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>
+    and you will be taken to Heroku. You need to register and then follow the instructions.
+
+You will have to enter
+
+
+
+You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6, 3.7, and
+3.8.
 
 Do::
 
@@ -96,7 +125,7 @@ More information is available in this `video <https://www.youtube.com/watch?v=CO
    <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
 
 Additional Societies
-++++++++++++++++++++
+--------------------
 
 The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
 set-up, only 18 societies from 12 countries are present, as well as two 
