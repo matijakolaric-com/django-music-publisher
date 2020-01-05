@@ -26,21 +26,22 @@ the simplest option.
 Deployment to Heroku
 --------------------
 
-This is the fastest and simplest option. One can use the free tier of Heroku for testing and even for production up to
-~1000 musical works. This is the default.
+This is the fastest and simplest option, using the free tier of Heroku,
+which is enough for up to ~1000 musical works. If you need more, for $16 per month,
+the limit raises to roughly one million works.
 
 .. raw:: html
 
-    <p>Simply press <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>
-    and you will be taken to Heroku. You need to register and then follow the instructions.</p>
+    <p>First, you need to sign up with <a href="https://heroku.com">Heroku</a> and/or log in.
+    Then press
+    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>.</p>
 
+Select a name for your app, choose the region, and enter the Config Vars described next.
 
-You should enter the name for your app, choose the region, and
-enter several Config Vars.
+The first set is used for generating the superuser account. You should
+change the password once you log in and delete these variables from Heroku dashboard.
 
-The first set is used for generating the superuser account. You can and
-change the password once you log in. You may as well delete these variables after the initial
-installation in Heroku dashboard. *Please be careful, Heroku orders the fields alphabetically, e.g. USERNAME comes
+*Please be careful, Heroku orders the fields alphabetically, e.g. USERNAME comes
 after PASSWORD.*
 
 * ``DJANGO_SUPERUSER_EMAIL`` - email address for the administrator account
@@ -55,46 +56,29 @@ From the rest of the fields about your publishing entity, only these are require
 
 All Config Vars can be changed at any point in the Heroku Dashboard.
 
-DMP.Guru
+Please note that the data you enter must be valid, otherwise the installation
+will fail. If you fail to get the values right, you may test the next option.
+
+DMP Guru
 --------
 
-The author and maintainer of Django-Music-Publisher offers professional maintenance of
-Django-Music-Publisher instances deployed to Heroku as well as user support.
+DMP Guru is a service,
+run by the author and maintainer of Django-Music-Publisher,
+providing regular smart configuration, automatic upgrades, maintenance and user
+support for Django-Music-Publisher instances.
 
 See https://dmp.guru for details.
 
 Other options - manual deployment
 ----------------------------------
 
-You can only install Django-Music-Publisher on a system that has Python 3 pre-installed.
-Currently supported Python versions are 3.5, 3.6, 3.7, and 3.8. It is recommended to use it with
-Python Virtual Environment.
-
-For more information, consult the official
+Django-Music-Publisher is based on Django, which can be installed on Windows,
+Mac and Linux PCs and servers. For more information, consult the official
 `Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
 
 
 Settings
 ____________________________________
-
-Here is the excerpt from the settings, individual variables are described below.
-
-.. code:: python
-
-    PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
-    PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
-
-    PUBLISHER_IPI_BASE = os.getenv('PUBLISHER_IPI_BASE', None)
-    PUBLISHER_IPI_NAME = os.getenv('PUBLISHER_IPI_NAME', '')
-
-    PUBLISHER_SOCIETY_PR = os.getenv('PUBLISHER_SOCIETY_PR', None)
-    PUBLISHER_SOCIETY_MR = os.getenv('PUBLISHER_SOCIETY_MR', None)
-    PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
-
-    PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.5,1,1')
-    REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
-    REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
-
 
 Publisher-related settings
 ++++++++++++++++++++++++++++
@@ -120,5 +104,5 @@ Agreement-related settings
 The last setting is a fairly complex one. The default works for most publishers, 50% of performance and 100% of
 mechanical and 100% of sync is collected by the publisher.
 
-Please contact your society or societies to check if your country laws require a certain value.
-
+Please contact your society or societies for details, as laws in some countries require
+specific values, e.g. Netherlands.
