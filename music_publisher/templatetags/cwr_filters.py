@@ -5,17 +5,22 @@ format, as well as do some basic validation.
 """
 
 from django import template
-from datetime import date, time
 from decimal import Decimal, ROUND_HALF_UP
-from django.utils.html import mark_safe
 from music_publisher import models
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 register = template.Library()
 
-PRP_SHARE, MRP_SHARE, SRP_SHARE = [
-    Decimal(s.strip()) for s in
-    settings.PUBLISHER_AGREEMENT_SHARES.split(',')]
+try:
+    PRP_SHARE, MRP_SHARE, SRP_SHARE = [
+        Decimal(s.strip()) for s in
+        settings.PUBLISHER_AGREEMENT_SHARES.split(',')]
+except Exception as e:
+    raise ImproperlyConfigured('PUBLISHER_AGREEMENT_SHARES: ' + str(e))
+
+if not (0 <= PRP_SHARE <= 0.5 and 0 <= MRP_SHARE <= 1 and 0 <= SRP_SHARE <= 1):
+    raise ImproperlyConfigured('PUBLISHER_AGREEMENT_SHARES: Disallowed split.')
 
 PRW_SHARE = Decimal('1') - PRP_SHARE
 MRW_SHARE = Decimal('1') - MRP_SHARE
@@ -106,13 +111,6 @@ def perc(value):
 
     value = Decimal(value) / Decimal('100')
     return '{}%'.format(value)
-
-
-# @register.filter(name='percf')
-# def percf(value):
-#     """Display shares as human-readable string."""
-#     return '{}%'.format(value.quantize(
-#         Decimal('0.01'), rounding=ROUND_HALF_UP))
 
 
 @register.filter(name='soc_name')

@@ -15,6 +15,7 @@ import os
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
+from music_publisher.validators import CWRFieldValidator
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -115,19 +116,6 @@ TIME_INPUT_FORMATS = [
     '%M:%S',        # '14:30'
 ]
 
-PUBLISHER_NAME = os.getenv('PUBLISHER_NAME', '')
-PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
-PUBLISHER_IPI_BASE = os.getenv('PUBLISHER_IPI_BASE', None)
-PUBLISHER_IPI_NAME = os.getenv('PUBLISHER_IPI_NAME', '')
-PUBLISHER_SOCIETY_MR = os.getenv('PUBLISHER_SOCIETY_MR', None)
-PUBLISHER_SOCIETY_PR = os.getenv('PUBLISHER _SOCIETY_PR', None)
-PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
-
-REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
-REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
-
-PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.5,1,1')
-
 path = os.path.join(BASE_DIR, 'music_publisher', 'societies.csv')
 
 with open(path, 'r') as f:
@@ -136,6 +124,21 @@ with open(path, 'r') as f:
         ((str(row[0]), '{} ({})'.format(row[1], row[2]))
          for row in reader),
         key=lambda row: row[1])
+
+PUBLISHER_NAME = os.getenv('PUBLISHER_NAME', 'DJANGO-MUSIC-PUBLISHER')
+PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
+
+PUBLISHER_IPI_BASE = os.getenv('PUBLISHER_IPI_BASE', None)
+PUBLISHER_IPI_NAME = os.getenv('PUBLISHER_IPI_NAME', '')
+
+PUBLISHER_SOCIETY_MR = os.getenv('PUBLISHER_SOCIETY_MR', None)
+PUBLISHER_SOCIETY_PR = os.getenv('PUBLISHER_SOCIETY_PR', None)
+PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
+
+REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
+REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
+
+PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.5,1,1')
 
 try:
     from .local_settings import *

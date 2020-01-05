@@ -371,46 +371,37 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 403)
 
 
-# class ConstTest(SimpleTestCase):
-#
-#     def test_const(self):
-#         self.assertIsInstance(const.SETTINGS, dict)
-#         self.assertIsInstance(const.SOCIETY_DICT, dict)
-#         for soc in const.SOCIETIES:
-#             self.assertIsInstance(soc, tuple)
-#             self.assertIsInstance(soc[0], str)
-#             self.assertNotEqual(soc[0], '0')
-#             self.assertTrue(soc[0].isnumeric())
-#         self.assertIn('publisher_id', const.SETTINGS)
-#         self.assertIn('publisher_name', const.SETTINGS)
-#         self.assertIn('publisher_ipi_name', const.SETTINGS)
-#         self.assertIn('publisher_pr_society', const.SETTINGS)
-#         for key in ['publisher_pr_society',
-#                     'publisher_mr_society',
-#                     'publisher_sr_society']:
-#             if key in const.SETTINGS:
-#                 self.assertIn(const.SETTINGS[key], const.SOCIETY_DICT)
-#
-#
-# class CWRTemplatesTest(SimpleTestCase):
-#
-#     RECORD_TYPES = [
-#         'ALT', 'GRH', 'GRT', 'HDR', 'WRK', 'OPU', 'OPT', 'ORN', 'OWR', 'PER', 'PWR',
-#         'REC', 'SPT', 'SPU', 'SWR', 'SWT', 'TRL', 'OWK']
-#
-#     def test_templates(self):
-#         self.assertIsInstance(cwr_templates.TEMPLATES_21, dict)
-#         for i, key in enumerate(self.RECORD_TYPES):
-#             self.assertIn(key, cwr_templates.TEMPLATES_21)
-#             template = cwr_templates.TEMPLATES_21[key]
-#             d = {
-#                 'transaction_sequence': i,
-#                 'record_sequence': None,
-#                 'first_name': None,
-#                 'pr_society': '10'}
-#             self.assertIsInstance(template.render(Context(d)).upper(), str)
-#
-#
+class CWRTemplatesTest(SimpleTestCase):
+
+    RECORD_TYPES = [
+        'ALT', 'GRH', 'GRT', 'HDR', 'WRK', 'OPU', 'OPT', 'ORN', 'OWR', 'PER',
+        'PWR', 'REC', 'SPT', 'SPU', 'SWR', 'SWT', 'TRL', 'OWK']
+
+    def test_templates(self):
+        self.assertIsInstance(cwr_templates.TEMPLATES_21, dict)
+        for i, key in enumerate(self.RECORD_TYPES):
+            self.assertIn(key, cwr_templates.TEMPLATES_21)
+            template = cwr_templates.TEMPLATES_21[key]
+            d = {
+                'transaction_sequence': i,
+                'record_sequence': None,
+                'first_name': None,
+                'pr_society': '10',
+                'share': Decimal('0.5')}
+            self.assertIsInstance(template.render(Context(d)).upper(), str)
+        self.assertIsInstance(cwr_templates.TEMPLATES_30, dict)
+        for i, key in enumerate(self.RECORD_TYPES):
+            self.assertIn(key, cwr_templates.TEMPLATES_30)
+            template = cwr_templates.TEMPLATES_30[key]
+            d = {
+                'transaction_sequence': i,
+                'record_sequence': None,
+                'first_name': None,
+                'pr_society': '10',
+                'share': Decimal('0.5')}
+            self.assertIsInstance(template.render(Context(d)).upper(), str)
+
+
 class ValidatorsTest(SimpleTestCase):
 
     def test_title(self):
@@ -474,281 +465,298 @@ class ValidatorsTest(SimpleTestCase):
             validator('NAME, INVALID')
 
 
-# class ModelsSimpleTest(TransactionTestCase):
-#
-#     reset_sequences = True
-#
-#     def test_artist(self):
-#         artist = music_publisher.models.Artist(
-#             first_name='Matija', last_name='Kolarić')
-#         with self.assertRaises(exceptions.ValidationError):
-#             artist.clean_fields()
-#         artist = music_publisher.models.Artist(
-#             last_name='The Band', isni='1X')
-#         self.assertIsNone(artist.clean_fields())
-#         artist.save()
-#         self.assertEqual(str(artist), 'THE BAND')
-#         self.assertDictEqual(artist.get_dict(), {
-#             'code': 'A000001',
-#             'first_name': None,
-#             'isni': '000000000000001X',
-#             'last_name': 'The Band'})
-#
-#
-#     def test_commercial_release(self):
-#         label = music_publisher.models.Label(name='Music Label')
-#         label.save()
-#         self.assertEqual(str(label), 'MUSIC LABEL')
-#         release = music_publisher.models.CommercialRelease(
-#             release_title='Album', release_label=label)
-#         release.save()
-#         self.assertEqual(str(release), 'ALBUM (MUSIC LABEL)')
-#         self.assertDictEqual(release.get_dict(), {
-#             'code': 'RE000001',
-#             'release_title': 'Album',
-#             'ean': None,
-#             'release_date': None,
-#             'release_label': {
-#                 'code': 'LA000001',
-#                 'name': 'Music Label'}})
-#         release.release_label = None
-#         self.assertEqual(str(release), 'ALBUM')
-#         self.assertEqual(
-#             music_publisher.models.CommercialRelease.objects.count(), 1)
-#
-#     def test_writer(self):
-#         writer = music_publisher.models.Writer(
-#             first_name='Matija', last_name='Kolarić')
-#         with self.assertRaises(exceptions.ValidationError):
-#             writer.clean_fields()
-#         writer = music_publisher.models.Writer(
-#             first_name='Matija', last_name='Kolaric', ipi_name='199',
-#             ipi_base='I-123.456.789-3', pr_society='10', saan='J44va',
-#             publisher_fee=50)
-#         self.assertEqual(str(writer), 'MATIJA KOLARIC')
-#         self.assertIsNone(writer.clean_fields())
-#         with self.assertRaises(exceptions.ValidationError):
-#             writer.clean()
-#         writer = music_publisher.models.Writer(
-#             first_name='Matija', last_name='Kolaric', ipi_name='199',
-#             generally_controlled=True)
-#         self.assertIsNone(writer.clean_fields())
-#         with self.assertRaises(exceptions.ValidationError):
-#             writer.clean()
-#         writer = music_publisher.models.Writer(
-#             first_name='Matija', last_name='Kolaric', ipi_name='199',
-#             ipi_base='I-123.456.789-3', pr_society='10',
-#             generally_controlled=True, saan='J44va', publisher_fee=50)
-#         self.assertIsNone(writer.clean_fields())
-#         self.assertIsNone(writer.clean())
-#         writer.save()
-#         self.assertEqual(str(writer), 'MATIJA KOLARIC (*)')
-#         self.assertDictEqual(writer.get_dict(), {
-#             'code': 'W000001',
-#             'first_name': 'Matija',
-#             'last_name': 'Kolaric',
-#             'ipi_name': '00000000199',
-#             'ipi_base': 'I-123456789-3',
-#             'affiliations': [{
-#                 'affiliation_type': {
-#                     'code': 'PR',
-#                     'name': 'Performance Rights'},
-#                 'organization': {
-#                     'code': '10',
-#                     'name': 'ASCAP'},
-#                 'territory': {
-#                     'code': '2136',
-#                     'name': 'World',
-#                     'tis_code': '2136'}}]})
-#
-#     def test_work(self):
-#
-#         library = music_publisher.models.Library(name='Music Library')
-#         library.save()
-#         self.assertEqual(str(library), 'MUSIC LIBRARY')
-#         self.assertDictEqual(library.get_dict(), {
-#             'code': 'LI000001',
-#             'name': 'Music Library'})
-#
-#         label = music_publisher.models.Label(name='Music Label')
-#         label.save()
-#         self.assertEqual(str(label), 'MUSIC LABEL')
-#         self.assertDictEqual(label.get_dict(), {
-#             'code': 'LA000001',
-#             'name': 'Music Label'})
-#
-#         release = music_publisher.models.LibraryRelease(
-#             library=library, cd_identifier='ML001')
-#         release.save()
-#         self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
-#         self.assertIsNone(release.get_dict())
-#         self.assertDictEqual(release.get_origin_dict(), {
-#              'origin_type': {'code': 'LIB', 'name': 'Library Work'},
-#              'cd_identifier': 'ML001',
-#              'library': {'code': 'LI000001', 'name': 'Music Library'}})
-#         release.ean = '1X'
-#         with self.assertRaises(exceptions.ValidationError):
-#             release.clean()
-#         release.release_title = 'Test'
-#         self.assertEqual(str(release), 'ML001: TEST (MUSIC LIBRARY)')
-#
-#         release.ean = None
-#         release.release_label = label
-#         release.clean_fields()
-#         release.clean()
-#         release.save()
-#
-#         release2 = music_publisher.models.LibraryRelease(
-#             library=library, cd_identifier='ML002')
-#         release2.clean_fields()
-#         release2.clean()
-#         release2.save()
-#
-#         work = music_publisher.models.Work(
-#             title='Muzički birtijaški crtići',
-#             library_release=release)
-#         with self.assertRaises(exceptions.ValidationError):
-#             work.clean_fields()
-#         work = music_publisher.models.Work(
-#             title='Music Pub Cartoons',
-#             iswc='T-123.456.789-4',
-#             original_title='Music Pub Cartoons',
-#             library_release=release)
-#         self.assertIsNone(work.clean_fields())
-#         self.assertEqual(str(work.work_id), '')
-#         self.assertTrue(work.is_modification())
-#         work.save()
-#
-#         writer = music_publisher.models.Writer(
-#             first_name='Matija', last_name='Kolaric', ipi_name='199',
-#             ipi_base='I-123.456.789-3', pr_society='10',
-#             generally_controlled=True, saan='J44va', publisher_fee=50)
-#         writer.clean_fields()
-#         writer.clean()
-#         writer.save()
-#
-#         writer2 = music_publisher.models.Writer(
-#             first_name='Ann', last_name='Other', ipi_name='297',
-#             pr_society='10')
-#         writer2.clean_fields()
-#         writer2.clean()
-#         writer2.save()
-#
-#         music_publisher.models.WriterInWork.objects.create(
-#             work=work, writer=None, capacity='CA', relative_share=0,
-#             controlled=False)
-#
-#         wiw = music_publisher.models.WriterInWork.objects.create(
-#             work=work, writer=writer, capacity='AR', relative_share=50,
-#             controlled=True)
-#         wiw.clean_fields()
-#         wiw.clean()
-#
-#         self.assertEqual(str(wiw), 'MATIJA KOLARIC (*)')
-#         self.assertEqual(str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC)')
-#
-#         music_publisher.models.WriterInWork.objects.create(
-#             work=work, writer=writer2, capacity='AD', relative_share=25,
-#             controlled=True)
-#         wiw = music_publisher.models.WriterInWork.objects.create(
-#             work=work, writer=writer2, capacity='AD', relative_share=25,
-#             controlled=False)
-#         wiw.clean_fields()
-#         wiw.clean()
-#
-#         self.assertEqual(
-#             str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)')
-#
-#         alt = work.alternatetitle_set.create(title='MPC Academy')
-#         self.assertEqual(str(alt), 'MPC ACADEMY')
-#         self.assertDictEqual(alt.get_dict(), {
-#             'alternate_title': 'MPC ACADEMY',
-#             'title_type': {'code': 'AT', 'name': 'Alternative Title'}})
-#
-#         self.assertEqual(
-#             str(music_publisher.models.Recording().recording_id),
-#             '')
-#
-#         rec = music_publisher.models.Recording.objects.create(
-#             work=work,
-#             recording_title='Work Recording',
-#             version_title='Work Recording feat. Testing',
-#             record_label=label
-#         )
-#         rec.clean_fields()
-#         rec.clean()
-#
-#         rec2 = music_publisher.models.Recording.objects.create(
-#             work=work,
-#             recording_title='Suffix',
-#             recording_title_suffix=True,
-#             version_title='Co-suffix',
-#             version_title_suffix=True
-#         )
-#         rec.clean_fields()
-#         rec.clean()
-#
-#         music_publisher.models.WorkAcknowledgement.objects.create(
-#             work=work,
-#             society_code='10',
-#             date=datetime.now(),
-#             status='RA'
-#         )
-#
-#         music_publisher.models.WorkAcknowledgement.objects.create(
-#             work=work,
-#             society_code='51',
-#             remote_work_id='REMOTE1',
-#             date=datetime.now(),
-#             status='AS'
-#         )
-#
-#         track = music_publisher.models.Track.objects.create(
-#             release = release,
-#             recording = rec,
-#             cut_number = 1
-#         )
-#         track.clean_fields()
-#         track.clean()
-#
-#         music_publisher.models.Track.objects.create(
-#             release = release2,
-#             recording = rec2,
-#             cut_number = 2
-#         )
-#
-#         # normalized dict
-#         music_publisher.models.WorkManager().get_dict(
-#             qs=music_publisher.models.Work.objects.all(), normalize=True)
-#
-#         # cwr uses denormalized dict
-#         cwr = music_publisher.models.CWRExport(nwr_rev='NWR')
-#         cwr.save()
-#         cwr.works.add(work)
-#         cwr.create_cwr()
-#
-#         # test also CWR 3.0 WRK
-#         cwr = music_publisher.models.CWRExport(nwr_rev='WRK')
-#         cwr.save()
-#         cwr.works.add(work)
-#         cwr.create_cwr()
-#
-#         # test also CWR 3.0 ISR
-#         cwr = music_publisher.models.CWRExport(nwr_rev='ISR')
-#         cwr.save()
-#         cwr.works.add(work)
-#         cwr.create_cwr()
-#
-#         # raises error because this writer is controlled in a work
-#         writer.pr_society = None
-#         writer.generally_controlled = False
-#         writer.publisher_fee = None
-#         writer.saan = None
-#         with self.assertRaises(exceptions.ValidationError):
-#             writer.clean()
-#
-#
-#
+
+@override_settings(
+    PUBLISHER_NAME='TEST PUBLISHER',
+    PUBLISHER_CODE='DMP',
+    PUBLISHER_IPI_NAME='0000000199',
+    PUBLISHER_SOCIETY_PR='52',
+    PUBLISHER_SOCIETY_MR='44',
+    REQUIRE_SAAN=True,
+    REQUIRE_PUBLISHER_FEE=True,
+    PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
+)
+class ModelsSimpleTest(TestCase):
+
+    # reset_sequences = True
+
+    def test_artist(self):
+        artist = music_publisher.models.Artist(
+            first_name='Matija', last_name='Kolarić')
+        with self.assertRaises(exceptions.ValidationError):
+            artist.clean_fields()
+        artist = music_publisher.models.Artist(
+            last_name='The Band', isni='1X')
+        self.assertIsNone(artist.clean_fields())
+        artist.save()
+        self.assertEqual(str(artist), 'THE BAND')
+        self.assertDictEqual(artist.get_dict(), {
+            'id': 1,
+            'code': 'A000001',
+            'first_name': None,
+            'isni': '000000000000001X',
+            'last_name': 'The Band'})
+
+    def test_commercial_release(self):
+        label = music_publisher.models.Label(name='Music Label')
+        label.save()
+        self.assertEqual(str(label), 'MUSIC LABEL')
+        release = music_publisher.models.CommercialRelease(
+            release_title='Album', release_label=label)
+        release.save()
+        self.assertEqual(str(release), 'ALBUM (MUSIC LABEL)')
+        self.assertDictEqual(release.get_dict(), {
+            'id': 1,
+            'code': 'RE000001',
+            'title': 'Album',
+            'ean': None,
+            'date': None,
+            'label': {
+                'id': 1,
+                'code': 'LA000001',
+                'name': 'Music Label'}})
+        release.release_label = None
+        self.assertEqual(str(release), 'ALBUM')
+        self.assertEqual(
+            music_publisher.models.CommercialRelease.objects.count(), 1)
+
+    def test_writer(self):
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolarić')
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean_fields()
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            ipi_base='I-123.456.789-3', pr_society='10', saan='J44va',
+            publisher_fee=50)
+        self.assertEqual(str(writer), 'MATIJA KOLARIC')
+        self.assertIsNone(writer.clean_fields())
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean()
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            generally_controlled=True)
+        self.assertIsNone(writer.clean_fields())
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean()
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            ipi_base='I-123.456.789-3', pr_society='10',
+            generally_controlled=True, saan='J44va', publisher_fee=50)
+        self.assertIsNone(writer.clean_fields())
+        self.assertIsNone(writer.clean())
+        writer.save()
+        self.assertEqual(str(writer), 'MATIJA KOLARIC (*)')
+        self.assertDictEqual(writer.get_dict(), {
+            'id': 1,
+            'code': 'W000001',
+            'first_name': 'Matija',
+            'last_name': 'Kolaric',
+            'ipi_name_number': '00000000199',
+            'ipi_base_number': 'I-123456789-3',
+            'affiliations': [{
+                'organization': {
+                    'code': '10',
+                    'name': 'ASCAP (UNITED STATES)'},
+                'affiliation_type': {
+                    'code': 'PR',
+                    'name': 'Performance Rights'},
+                'territory': {
+                    'tis-a': '2WL',
+                    'tis-n': '2136',
+                    'name': 'World'}}]})
+
+    def test_work(self):
+
+        library = music_publisher.models.Library(name='Music Library')
+        library.save()
+        self.assertEqual(str(library), 'MUSIC LIBRARY')
+        self.assertDictEqual(library.get_dict(), {
+            'id': 1,
+            'code': 'LI000001',
+            'name': 'Music Library'})
+
+        label = music_publisher.models.Label(name='Music Label')
+        label.save()
+        self.assertEqual(str(label), 'MUSIC LABEL')
+        self.assertDictEqual(label.get_dict(), {
+            'id': 1,
+            'code': 'LA000001',
+            'name': 'Music Label'})
+
+        release = music_publisher.models.LibraryRelease(
+            library=library, cd_identifier='ML001')
+        release.save()
+        self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
+        self.assertIsNone(release.get_dict())
+        self.assertDictEqual(release.get_origin_dict(), {
+             'origin_type': {'code': 'LIB', 'name': 'Library Work'},
+             'cd_identifier': 'ML001',
+             'library': {'id': 1, 'code': 'LI000001', 'name': 'Music Library'}
+        })
+        release.ean = '1X'
+        with self.assertRaises(exceptions.ValidationError):
+            release.clean()
+        release.release_title = 'Test'
+        self.assertEqual(str(release), 'ML001: TEST (MUSIC LIBRARY)')
+
+        release.ean = None
+        release.release_label = label
+        release.clean_fields()
+        release.clean()
+        release.save()
+
+        release2 = music_publisher.models.LibraryRelease(
+            library=library, cd_identifier='ML002')
+        release2.clean_fields()
+        release2.clean()
+        release2.save()
+
+        work = music_publisher.models.Work(
+            title='Muzički birtijaški crtići',
+            library_release=release)
+        with self.assertRaises(exceptions.ValidationError):
+            work.clean_fields()
+        work = music_publisher.models.Work(
+            title='Music Pub Cartoons',
+            iswc='T-123.456.789-4',
+            original_title='Music Pub Cartoons',
+            library_release=release)
+        self.assertIsNone(work.clean_fields())
+        self.assertEqual(str(work.work_id), '')
+        self.assertTrue(work.is_modification())
+        work.save()
+
+        writer = music_publisher.models.Writer(
+            first_name='Matija', last_name='Kolaric', ipi_name='199',
+            ipi_base='I-123.456.789-3', pr_society='10',
+            generally_controlled=True, saan='J44va', publisher_fee=50)
+        writer.clean_fields()
+        writer.clean()
+        writer.save()
+
+        writer2 = music_publisher.models.Writer(
+            first_name='Ann', last_name='Other', ipi_name='297',
+            pr_society='10')
+        writer2.clean_fields()
+        writer2.clean()
+        writer2.save()
+
+        music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=None, capacity='CA', relative_share=0,
+            controlled=False)
+
+        wiw = music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=writer, capacity='AR', relative_share=50,
+            controlled=True)
+        wiw.clean_fields()
+        wiw.clean()
+
+        self.assertEqual(str(wiw), 'MATIJA KOLARIC (*)')
+        self.assertEqual(str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC)')
+
+        music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=writer2, capacity='AD', relative_share=25,
+            controlled=True)
+        wiw = music_publisher.models.WriterInWork.objects.create(
+            work=work, writer=writer2, capacity='AD', relative_share=25,
+            controlled=False)
+        wiw.clean_fields()
+        wiw.clean()
+
+        self.assertEqual(
+            str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)')
+
+        alt = work.alternatetitle_set.create(title='MPC Academy')
+        self.assertEqual(str(alt), 'MPC ACADEMY')
+        self.assertDictEqual(alt.get_dict(), {
+            'title': 'MPC ACADEMY',
+            'title_type': {'code': 'AT', 'name': 'Alternative Title'}})
+
+        self.assertEqual(
+            str(music_publisher.models.Recording().recording_id),
+            '')
+
+        rec = music_publisher.models.Recording.objects.create(
+            work=work,
+            recording_title='Work Recording',
+            version_title='Work Recording feat. Testing',
+            record_label=label
+        )
+        rec.clean_fields()
+        rec.clean()
+
+        rec2 = music_publisher.models.Recording.objects.create(
+            work=work,
+            recording_title='Suffix',
+            recording_title_suffix=True,
+            version_title='Co-suffix',
+            version_title_suffix=True
+        )
+        rec.clean_fields()
+        rec.clean()
+
+        music_publisher.models.WorkAcknowledgement.objects.create(
+            work=work,
+            society_code='10',
+            date=datetime.now(),
+            status='RA'
+        )
+
+        music_publisher.models.WorkAcknowledgement.objects.create(
+            work=work,
+            society_code='51',
+            remote_work_id='REMOTE1',
+            date=datetime.now(),
+            status='AS'
+        )
+
+        track = music_publisher.models.Track.objects.create(
+            release = release,
+            recording = rec,
+            cut_number = 1
+        )
+        track.clean_fields()
+        track.clean()
+
+        music_publisher.models.Track.objects.create(
+            release = release2,
+            recording = rec2,
+            cut_number = 2
+        )
+
+        # normalized dict
+        music_publisher.models.WorkManager().get_dict(
+            qs=music_publisher.models.Work.objects.all())
+
+        # cwr uses denormalized dict
+        cwr = music_publisher.models.CWRExport(nwr_rev='NWR')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
+
+        # test also CWR 3.0 WRK
+        cwr = music_publisher.models.CWRExport(nwr_rev='WRK')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
+
+        # test also CWR 3.0 ISR
+        cwr = music_publisher.models.CWRExport(nwr_rev='ISR')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
+
+        # raises error because this writer is controlled in a work
+        writer.pr_society = None
+        writer.generally_controlled = False
+        writer.publisher_fee = None
+        writer.saan = None
+        with self.assertRaises(exceptions.ValidationError):
+            writer.clean()
+
+
+
 ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
 ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607AS

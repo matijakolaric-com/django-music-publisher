@@ -1,5 +1,5 @@
 from django.apps import AppConfig
-
+from .validators import validate_settings
 
 class MusicPublisherConfig(AppConfig):
 
@@ -14,3 +14,7 @@ class MusicPublisherConfig(AppConfig):
     name = 'music_publisher'
     label = 'music_publisher'
     verbose_name = 'Music Publisher'
+
+    def ready(self):
+        validate_settings()
+

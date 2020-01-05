@@ -561,7 +561,8 @@ class Work(TitleBase):
                 'organization': {
                     'code': settings.PUBLISHER_SOCIETY_MR,
                     'name': SOCIETY_DICT.get(
-                        settings.PUBLISHER_SOCIETY_MR
+                        settings.PUBLISHER_SOCIETY_MR,
+                        ''
                     ).split(',')[0],
                 },
                 'affiliation_type': {
@@ -577,7 +578,8 @@ class Work(TitleBase):
                 'organization': {
                     'code': settings.PUBLISHER_SOCIETY_SR,
                     'name': SOCIETY_DICT.get(
-                        settings.PUBLISHER_SOCIETY_SR
+                        settings.SOCIETIES,
+                        ''
                     ).split(',')[0],
                 },
                 'affiliation_type': {

@@ -741,7 +741,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """This is a standard way how writers are shown in other apps."""
 
         return ' / '.join(
-            writer.last_name.upper() for writer in set(obj.writers.all()))
+            writer.last_name.upper() for writer in set(
+                obj.writers.order_by('last_name')))
 
     writer_last_names.short_description = 'Writers\' last names'
     writer_last_names.admin_order_field = 'writers__last_name'
@@ -1001,6 +1002,8 @@ class WorkAdmin(MusicPublisherAdmin):
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
         actions = super().get_actions(request)
+        if not settings.PUBLISHER_CODE:
+            del actions['create_cwr']
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
@@ -1015,6 +1018,7 @@ class WorkAdmin(MusicPublisherAdmin):
         return instances
 
         super().change_view()
+
 
 @admin.register(Recording)
 class RecordingAdmin(MusicPublisherAdmin):
@@ -1093,7 +1097,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     work_link.admin_order_field = 'work__id'
 
     def artist_link(self, obj):
-        if not (obj.artist):
+        if not obj.artist:
             return None
         url = reverse(
             'admin:music_publisher_artist_change', args=[obj.artist.id])
@@ -1103,7 +1107,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     artist_link.admin_order_field = 'artist'
 
     def label_link(self, obj):
-        if not (obj.record_label):
+        if not obj.record_label:
             return None
         url = reverse(
             'admin:music_publisher_label_change', args=[obj.record_label.id])
@@ -1119,6 +1123,11 @@ class CWRExportAdmin(admin.ModelAdmin):
     """
 
     actions = None
+
+    def has_add_permission(self, request):
+        if not settings.PUBLISHER_CODE:
+            return False
+        return super().has_add_permission(request)
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
@@ -1253,7 +1262,6 @@ class CWRExportAdmin(admin.ModelAdmin):
             })
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
-
 
     def save_related(self, request, form, formsets, change):
         """:meth:`save_model` passes the main object, which is needed to fetch

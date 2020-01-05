@@ -45,7 +45,7 @@
       "required": false
     },
     "REQUIRE_SAAN": {
-      "description": "Enter '1' to make society-assigned original agreement number required. Required in some societies, e.g. PRS.",
+      "description": "Enter '1' to make society-assigned original agreement number required. Required in some societies, e.g. PRS for Music, BUMA/STEMRA, GEMA.",
       "required": false
     },
     "REQUIRE_PUBLISHER_FEE": {
