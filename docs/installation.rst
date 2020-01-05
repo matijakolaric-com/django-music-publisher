@@ -22,146 +22,103 @@ Standalone Deployment
 Depending on your needs and technical knowledge, there are several options here. They are listed below, starting with
 the simplest option.
 
+
 Deployment to Heroku
 --------------------
 
-This is the fastest and simplest option to deploy Django-Music-Publisher. One can use
-the free tier of Heroku for testing and even for production up to ~1000 musical works.
-This is the default.
+This is the fastest and simplest option. One can use the free tier of Heroku for testing and even for production up to
+~1000 musical works. This is the default.
 
 .. raw:: html
 
-    Simply press <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>
-    and you will be taken to Heroku. You need to register and then follow the instructions.
+    <p>Simply press <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>
+    and you will be taken to Heroku. You need to register and then follow the instructions.</p>
 
-You will have to enter several Config Vars, please note that only these are required:
+
+You should enter the name for your app, choose the region, and
+enter several Config Vars.
+
+The first set is used for generating the superuser account. You can and
+change the password once you log in. You may as well delete these variables after the initial
+installation in Heroku dashboard. *Please be careful, Heroku orders the fields alphabetically, e.g. USERNAME comes
+after PASSWORD.*
+
+* ``DJANGO_SUPERUSER_EMAIL`` - email address for the administrator account
+* ``DJANGO_SUPERUSER_PASSWORD`` - password for the administrator account
+* ``DJANGO_SUPERUSER_USERNAME`` - password for the administrator account
+
+From the rest of the fields about your publishing entity, only these are required.
 
 * ``PUBLISHER`` - the name of the publisher
 * ``PUBLISHER_IPI_NAME`` - your IPI Name number
 * ``PUBLISHER_SOCIETY_PR`` - numeric code of your collecting society
 
+All Config Vars can be changed at any point in the Heroku Dashboard.
 
+DMP.Guru
+--------
 
+The author and maintainer of Django-Music-Publisher offers professional maintenance of
+Django-Music-Publisher instances deployed to Heroku as well as user support.
 
-You can only install this project on a system that has Python 3 pre-installed. Supported versions are 3.5, 3.6, 3.7, and
-3.8.
+See https://dmp.guru for details.
 
-Do::
+Other options - manual deployment
+----------------------------------
 
-    python3 -m venv dmp
-    cd dmp
-    source bin/activate
-    git clone https://github.com/matijakolaric-com/django-music-publisher.git
-    cd django-music-publisher
-    pip install -r requirements.txt
+You can only install Django-Music-Publisher on a system that has Python 3 pre-installed.
+Currently supported Python versions are 3.5, 3.6, 3.7, and 3.8. It is recommended to use it with
+Python Virtual Environment.
 
-On Windows: instead of ``source bin/activate``, run ``Scripts\activate``.
-
-The next step is to create ``dmp_project/local_settings.py`` or set the
-appropriate environment variables. ``SECRET_KEY``, ``ALLOWED_HOSTS``, and
-``MUSIC_PUBLISHER_SETTINGS`` must be set.
-
-Then::
-
-    python manage.py migrate
-    python manage.py createsuperuser
-
-If you wish to add two predefined permission groups (recommended), run::
-
-    python manage.py loaddata publishing_staff.json
-
-For local installations, set ``DEBUG`` to ``True`` in
-``dmp_project/local_settings.py`` or as environment variable. Then run::
-
-    python manage.py runserver
-
-Then open the following link: http://localhost:8000/ and log in with
-credentials you provided in a previous step. For instructions on permanent
-deployment, please use official
-`Django documentation <https://www.djangoproject.com/>`_.
-
-.. raw:: html
-
-   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/H1cVGXpM-3s/?list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
-   <p>The installation process for an older version can be seen here.</p>
-   <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
-
-Installing as Django Module (developers only)
-===============================================================================
-
-If you plan to use Django-Music-Publisher as one of the apps in your Django project, there is nothing special about it::
-
-    pip install --upgrade django_music_publisher
-
-Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no 
-URLs need to be added, as everything goes through the Django Admin.
+For more information, consult the official
+`Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
 
 
 Settings
-===============================================================================
+____________________________________
 
-You will have to add this to the settings, replace with your data.
+Here is the excerpt from the settings, individual variables are described below.
 
 .. code:: python
 
-    MUSIC_PUBLISHER_SETTINGS = {
+    PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
+    PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
 
-        'enforce_saan': True,  # Agr. # is required in many societies
-        'enforce_publisher_fee': True,  # False for self-publishers
-        'enforce_pr_society': True,  # Strictly not required, but good practice
-        'enforce_ipi_name': True,  # Strictly not required, but good practice
+    PUBLISHER_IPI_BASE = os.getenv('PUBLISHER_IPI_BASE', None)
+    PUBLISHER_IPI_NAME = os.getenv('PUBLISHER_IPI_NAME', '')
 
-        'work_id_prefix': 'TOP',  # Makes work and recording IDs somewhat unique
-        
-        'publisher_id': 'TOP',  # THE 2-4 letter CWR delivery publisher code
-        'publisher_name': 'THE ORIGINAL PUBLISHER',  # the publisher name
-        'publisher_ipi_name': '00000000199',  # IPI name number
-        'publisher_ipi_base': 'I-000000001-9',  # IPI base number (rarely used)
-        'publisher_pr_society': '52',  # Performing Rights Society Code
-        'publisher_mr_society': '44',  # Mechanical Rights Society Code
-        'publisher_sr_society': None,  # Sync Rights Society Code (rarely used)
-    }
+    PUBLISHER_SOCIETY_PR = os.getenv('PUBLISHER_SOCIETY_PR', None)
+    PUBLISHER_SOCIETY_MR = os.getenv('PUBLISHER_SOCIETY_MR', None)
+    PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
 
-More information is available in this `video <https://www.youtube.com/watch?v=COi6LCzUTVQ&index=4&list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3>`_. Please note that it refers to an earlier version.
+    PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.5,1,1')
+    REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
+    REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 
-.. raw:: html
 
-   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/COi6LCzUTVQ/?list=PLDIerrls8_JBuS82lC3qMSt-Yc-SKq8g3" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
-   <p>The settings for an older version are explained here, some have been removed since. Please note that the support for multiple publishing entities in the US are gone.</p>
-   <p>This video is delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.</p>
+Publisher-related settings
+++++++++++++++++++++++++++++
 
-Additional Societies
---------------------
+* ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, required
+* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code
+* ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
+* ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
 
-The only optional setting is ``MUSIC_PUBLISHER_SOCIETIES``. In the default 
-set-up, only 18 societies from 12 countries are present, as well as two 
-administrative agencies. Here is the format::
+Affiliation settings
+++++++++++++++++++++++++++++
+* ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO), required
+* ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO)
+* ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society, rarely used
 
-    MUSIC_PUBLISHER_SOCIETIES = [
-        ('101', 'SOCAN, Canada'),
-        ('88', 'CMRRA, Canada'),
-        ('10', 'ASCAP, United States'),
-        ('21', 'BMI, United States'),
-        ('71', 'SESAC Inc., United States'),
-        ('34', 'HFA, United States'),
-        ('707', 'Musicmark, Administrative Agency')]
+Agreement-related settings
+++++++++++++++++++++++++++++
 
-.. _StandaloneDeployment:
+* ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
+* ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
+* ``PUBLISHER_AGREEMENT_SHARES`` - Shares transferred to the publisher, comma separated performance, mechanical, sync
 
-Deployment on Heroku / Dokku / (any PaaS)
-==============================================================================
+The last setting is a fairly complex one. The default works for most publishers, 50% of performance and 100% of
+mechanical and 100% of sync is collected by the publisher.
 
-``MUSIC_PUBLISHER_SETTINGS`` is required and too complex to be set as a config var.
+Please contact your society or societies to check if your country laws require a certain value.
 
-One way to do this is to create a custom Django project in a private repository that uses the ``music_publisher`` app. Most files from ``dmp_project`` folder can be reused with no or minimal changes.
-
-Another would be to use base64 encoding for this variable if your PaaS supports it.
-
-DMP Guru
-==============================================================================
-
-`DMP Guru <https://dmp.guru/>`_ is a commercial hosting service for Django-Music-Publisher. Your instance of Django-Music-Publisher can be deployed in a minute.
-
-You only need to provide basic data about the publisher (e.g. name, IPI name #, collecting society (or societies)) and it will figure out the correct settings. 
-
-Your DMP instance will be properly maintained, regularly upgraded, data will be backed up daily, and you can export your data and move to another arrangement at any point.
