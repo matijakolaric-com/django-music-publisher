@@ -27,13 +27,19 @@ Deployment to Heroku
 
 This is the fastest and simplest option to deploy Django-Music-Publisher. One can use
 the free tier of Heroku for testing and even for production up to ~1000 musical works.
+This is the default.
 
 .. raw:: html
 
     Simply press <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>
     and you will be taken to Heroku. You need to register and then follow the instructions.
 
-You will have to enter
+You will have to enter several Config Vars, please note that only these are required:
+
+* ``PUBLISHER`` - the name of the publisher
+* ``PUBLISHER_IPI_NAME`` - your IPI Name number
+* ``PUBLISHER_SOCIETY_PR`` - numeric code of your collecting society
+
 
 
 
