@@ -125,7 +125,7 @@ with open(path, 'r') as f:
          for row in reader),
         key=lambda row: row[1])
 
-PUBLISHER_NAME = os.getenv('PUBLISHER_NAME', 'DJANGO-MUSIC-PUBLISHER')
+PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
 PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
 
 PUBLISHER_IPI_BASE = os.getenv('PUBLISHER_IPI_BASE', None)
