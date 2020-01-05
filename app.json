@@ -12,7 +12,7 @@
     }
   ],
   "scripts": {
-    "postdeploy": "python manage.py loaddata publishing_staff.json",
+    "postdeploy": "python manage.py loaddata publishing_staff.json"
   },
   "env": {
     "SECRET_KEY": {
