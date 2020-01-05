@@ -14,7 +14,8 @@ import music_publisher.models
 from django.template import Context
 from django.core import exceptions
 
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import (
+    SimpleTestCase, TestCase, TransactionTestCase, override_settings)
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
 
@@ -465,7 +466,6 @@ class ValidatorsTest(SimpleTestCase):
             validator('NAME, INVALID')
 
 
-
 @override_settings(
     PUBLISHER_NAME='TEST PUBLISHER',
     PUBLISHER_CODE='DMP',
@@ -476,9 +476,9 @@ class ValidatorsTest(SimpleTestCase):
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
 )
-class ModelsSimpleTest(TestCase):
+class ModelsSimpleTest(TransactionTestCase):
 
-    # reset_sequences = True
+    reset_sequences = True
 
     def test_artist(self):
         artist = music_publisher.models.Artist(
@@ -490,12 +490,6 @@ class ModelsSimpleTest(TestCase):
         self.assertIsNone(artist.clean_fields())
         artist.save()
         self.assertEqual(str(artist), 'THE BAND')
-        self.assertDictEqual(artist.get_dict(), {
-            'id': 1,
-            'code': 'A000001',
-            'first_name': None,
-            'isni': '000000000000001X',
-            'last_name': 'The Band'})
 
     def test_commercial_release(self):
         label = music_publisher.models.Label(name='Music Label')
@@ -505,16 +499,6 @@ class ModelsSimpleTest(TestCase):
             release_title='Album', release_label=label)
         release.save()
         self.assertEqual(str(release), 'ALBUM (MUSIC LABEL)')
-        self.assertDictEqual(release.get_dict(), {
-            'id': 1,
-            'code': 'RE000001',
-            'title': 'Album',
-            'ean': None,
-            'date': None,
-            'label': {
-                'id': 1,
-                'code': 'LA000001',
-                'name': 'Music Label'}})
         release.release_label = None
         self.assertEqual(str(release), 'ALBUM')
         self.assertEqual(
@@ -547,53 +531,22 @@ class ModelsSimpleTest(TestCase):
         self.assertIsNone(writer.clean())
         writer.save()
         self.assertEqual(str(writer), 'MATIJA KOLARIC (*)')
-        self.assertDictEqual(writer.get_dict(), {
-            'id': 1,
-            'code': 'W000001',
-            'first_name': 'Matija',
-            'last_name': 'Kolaric',
-            'ipi_name_number': '00000000199',
-            'ipi_base_number': 'I-123456789-3',
-            'affiliations': [{
-                'organization': {
-                    'code': '10',
-                    'name': 'ASCAP (UNITED STATES)'},
-                'affiliation_type': {
-                    'code': 'PR',
-                    'name': 'Performance Rights'},
-                'territory': {
-                    'tis-a': '2WL',
-                    'tis-n': '2136',
-                    'name': 'World'}}]})
 
     def test_work(self):
 
         library = music_publisher.models.Library(name='Music Library')
         library.save()
         self.assertEqual(str(library), 'MUSIC LIBRARY')
-        self.assertDictEqual(library.get_dict(), {
-            'id': 1,
-            'code': 'LI000001',
-            'name': 'Music Library'})
 
         label = music_publisher.models.Label(name='Music Label')
         label.save()
         self.assertEqual(str(label), 'MUSIC LABEL')
-        self.assertDictEqual(label.get_dict(), {
-            'id': 1,
-            'code': 'LA000001',
-            'name': 'Music Label'})
 
         release = music_publisher.models.LibraryRelease(
             library=library, cd_identifier='ML001')
         release.save()
         self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
         self.assertIsNone(release.get_dict())
-        self.assertDictEqual(release.get_origin_dict(), {
-             'origin_type': {'code': 'LIB', 'name': 'Library Work'},
-             'cd_identifier': 'ML001',
-             'library': {'id': 1, 'code': 'LI000001', 'name': 'Music Library'}
-        })
         release.ean = '1X'
         with self.assertRaises(exceptions.ValidationError):
             release.clean()
@@ -669,9 +622,6 @@ class ModelsSimpleTest(TestCase):
 
         alt = work.alternatetitle_set.create(title='MPC Academy')
         self.assertEqual(str(alt), 'MPC ACADEMY')
-        self.assertDictEqual(alt.get_dict(), {
-            'title': 'MPC ACADEMY',
-            'title_type': {'code': 'AT', 'name': 'Alternative Title'}})
 
         self.assertEqual(
             str(music_publisher.models.Recording().recording_id),
