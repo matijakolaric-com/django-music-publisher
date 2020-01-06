@@ -4,8 +4,8 @@ Release Policy
 Features Releases
 =================
 
-Since 2019, there are two releases per year with new features, in January and July.
-There were 4 releases with new features in 2018. Here is a brief overview.
+There were 4 releases with new features in 2018.
+Since 2019, there are two releases per year with new features, in January and July. Here is a brief overview.
 
 18.7 - 18.11
 ------------
@@ -40,6 +40,15 @@ Support for custom global share splits was added, solving compatibility issues w
 This also requires MR/SR affiliations for writers, so that was added as well.
 
 Normalized JSON export was dropped.
+
+20.7 and beyond
+---------------
+
+The main areas for further development are:
+
+* Royalty distribution
+* DDEX (MWN/RIN) support
+* CWR 3.x
 
 Minor Releases
 ==============
