@@ -4,7 +4,7 @@ Release Policy
 Features Releases
 =================
 
-Since 2019, there are two releases per year with new features, in January and in July.
+Since 2019, there are two releases per year with new features, in January and July.
 There were 4 releases with new features in 2018. Here is a brief overview.
 
 18.7 - 18.11
@@ -36,7 +36,7 @@ Support for US publishers with entities in different PROs was dropped.
 Twenty-twenty can now be deployed to the free tier of Heroku by non-techies and Heroku API
 can be used for maintenance.
 
-Support for custom global share splits were added, solving compatibility issues with some societies.
+Support for custom global share splits was added, solving compatibility issues with some societies.
 This also requires MR/SR affiliations for writers, so that was added as well.
 
 Normalized JSON export was dropped.
@@ -46,4 +46,5 @@ Minor Releases
 
 Minor releases are bugfix/security releases.
 
-They are released when a real security issue is detected in Django-Music-Publisher or any of the dependencies. Bugfix releases are released as bugs get fixed, the speed of it depends on the severity of a bug.
+They are released when a real security issue is detected in Django-Music-Publisher or any of the dependencies.
+Bugfixes are released when needed, the speed of it depends on the severity of a bug.
