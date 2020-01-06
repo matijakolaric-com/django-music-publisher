@@ -16,15 +16,15 @@
   },
   "env": {
     "DJANGO_SUPERUSER_USERNAME": {
-      "description": "Username for the administrator, can be changed later",
+      "description": "Username for the administrator, used only for installation",
       "required": true
     },
     "DJANGO_SUPERUSER_PASSWORD": {
-      "description": "Password for the administrator, can be changed later",
+      "description": "Password for the administrator, used only during installation",
       "required": true
     },
     "DJANGO_SUPERUSER_EMAIL": {
-      "description": "Email address for the administrator",
+      "description": "Email address for the administrator, used only during installation",
       "required": true
     },
     "SECRET_KEY": {
@@ -48,11 +48,11 @@
       "required": false
     },
     "PUBLISHER_SOCIETY_PR": {
-      "description": "Numerical performance society code, ask your society (PRO, collecting organization) for the value.\nDo not enter leading zeros.",
+      "description": "Numerical performance society code, ask your society (PRO, collecting organization) for the value.\nDo NOT enter leading zeros.",
       "required": true
     },
     "PUBLISHER_SOCIETY_MR": {
-      "description": "Numerical mechanical society code, ask your society (MRO, collecting organization) for the value.\nDo not enter leading zeros.",
+      "description": "Numerical mechanical society code, ask your society (MRO, collecting organization) for the value.\nDo NOT enter leading zeros.",
       "required": false
     },
     "PUBLISHER_SOCIETY_SR": {
