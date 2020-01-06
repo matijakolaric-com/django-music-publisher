@@ -139,8 +139,3 @@ REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
 REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 
 PUBLISHER_AGREEMENT_SHARES = os.getenv('PUBLISHER_AGREEMENT_SHARES', '0.5,1,1')
-
-try:
-    from .local_settings import *
-except ImportError:
-    pass

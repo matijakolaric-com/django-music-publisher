@@ -1,38 +1,45 @@
 Release Policy
 ##############
 
-Django-Music-Publisher release policy defines how and when new versions are released, as well as their naming. We have major and minor releases. Major releases have two segments in version identifier, the year and the month of the release.
+Features Releases
+=================
 
-Minor releases have three segments, the first two are the same as the current major release, while the third is incremental numbering.
+Since 2019, there are two releases per year with new features, in January and in July.
+There were 4 releases with new features in 2018. Here is a brief overview.
 
-Major Releases
-==============
+18.7 - 18.11
+------------
 
-There are two reasons for a major release:
+Initial release in July 2018 had a very simple data structure. It used external API
+for CWR generation. The code was open-source, but it was dependant on a commercial service.
 
-* Every two years, a new long term support (LTS) version of Django is released, in April of the odd year. There will be a new Django-Music-Publisher release several months later.
+Features were gradually added. Support was added for multiple US publishers, removed later.
 
-* New features of Django-Music-Publisher depend on sponsors. If there is enough financing for a new feature, there will be a sponsored major release.
+19.1 Epiphany
+-------------
 
-Current Major Release
-+++++++++++++++++++++
+CWR generation and complete data validation was added to the open-source code. Full support for
+modified works was added, as well as basic co-publishing support.
+Two JSON formats were added (one has been removed since).
 
-Current major release is |version|.
+19.7 Metanoia
+-------------
 
-Changes from 19.1
-+++++++++++++++++++++++
-
-Support for US publishers with entities in different PROs was dropped. If you need to manage multiple publishing entities, you need to run multiple instances of DMP and manage them separately.
-
-Multiple recordings per work can be added. But medleys are still not supported, nor will ever be.
-
-CWR 3.0 generation was added, though labeled as "experimental". CWR 2.1 generation is still available, but it does not contain album data. Collecting societies decided not to use release/album data in work registrations any more. Django-Music-Publisher 19.7 maintained and extended the data structure dedicated to releases. It will become useful with additional modules.
-
+Multiple recordings per work can be added. CWR 3.0 generation was added, labeled as "experimental".
 CWR preview, for both versions, now includes basic syntax highlighting. CWR files are now zipped before the download.
 
-All exports, two JSON formats and two CWR versions, are now based on a single data structure, which is becoming the default for other tools and services by the maintainer.
+Support for US publishers with entities in different PROs was dropped.
 
-General documentation is now shorter, but more precise. User manual was rewritten and extended.
+20 Twenty
+---------
+
+Twenty-twenty can now be deployed to the free tier of Heroku by non-techies and Heroku API
+can be used for maintenance.
+
+Support for custom global share splits were added, solving compatibility issues with some societies.
+This also requires MR/SR affiliations for writers, so that was added as well.
+
+Normalized JSON export was dropped.
 
 Minor Releases
 ==============
