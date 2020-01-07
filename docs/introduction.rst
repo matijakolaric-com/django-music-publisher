@@ -16,9 +16,9 @@ Each Django-Music-Publisher instance supports a **single original publisher**. I
 Features
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The database contains detailed metadata about **musical works** and **recordings**, **alternative titles**, data on
-**writers**, recording and performing **artists**, **releases** (albums) and **music libraries**, as well as
-**CWR exports**, **registration acknowledgements** and **ISWC assignments**.
+The database contains detailed metadata for **musical works** and **recordings**, data about
+**writers**, recording and performing **artists**, **releases** (albums) and **music libraries**,
+as well as **CWR exports**, **registration acknowledgements** and **ISWC assignments**.
 
 All entered data is validated for CWR compatibility on field-, record- and transaction-level. Different societies
 (collecing organizations) have slightly different requirements. This can be configured in the settings.
