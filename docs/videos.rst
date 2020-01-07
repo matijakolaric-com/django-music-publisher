@@ -1,12 +1,14 @@
 Videos
 ######
 
-Music Pub Cartoons is a YouTube channel about technical aspects of music metadata.
+Music Pub Cartoons is a YouTube channel about technical aspects of music rights.
 
 These videos are delivered from a cookie-less domain, which enhances your privacy, but some links in videos don't work.
-For full functionality, press on the YouTube icon.
+For full functionality, watch it on YouTube.
 
-Videos about Django-Music-Publisher
+
+
+Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++
 
 These videos are primarily about Django-Music-Publisher. First videos are about a version released in January 2019,
@@ -17,10 +19,12 @@ videos.
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
+
+
 Saturday Seminar: Music Publishing
 ++++++++++++++++++++++++++++++++++
 
-These videos are good technical introduction into music metadata, with Django-Music-Publisher appearing in most of the episodes.
+These videos are good technical introduction into music publishing, featuring Django-Music-Publisher.
 
 .. raw:: html
 

@@ -39,7 +39,7 @@ can be used for maintenance.
 Support for custom global share splits was added, solving compatibility issues with some societies.
 This also requires MR/SR affiliations for writers, so that was added as well.
 
-Normalized JSON export was dropped.
+Normalized JSON export was dropped. Documentation has been stripped of techie jargon.
 
 20.7 and beyond
 ---------------
