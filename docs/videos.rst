@@ -18,7 +18,7 @@ videos.
 .. raw:: html
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
-
+   <br/>
 
 
 Saturday Seminar: Music Publishing
