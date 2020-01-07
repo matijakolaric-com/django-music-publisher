@@ -11,7 +11,7 @@ For full functionality, watch it on YouTube.
 Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++
 
-These videos are primarily about Django-Music-Publisher. First videos are about a version released in January 2019,
+These videos are primarily about Django-Music-Publisher. First videos are about the version released in January 2019,
 since then many features have been added and limitations removed, which is explained in the later
 videos.
 
