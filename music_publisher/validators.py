@@ -180,6 +180,9 @@ def validate_settings():
             CWRFieldValidator('name')(settings.PUBLISHER_CODE)
         except ValidationError as e:
             raise ImproperlyConfigured('PUBLISHER_CODE: ' + str(e))
+        if not 2 <= len(settings.PUBLISHER_CODE) <= 3:
+            raise ImproperlyConfigured(
+                'PUBLISHER_CODE: must be 2-3 characters long')
     if settings.PUBLISHER_IPI_BASE:
         try:
             CWRFieldValidator('ipi_base')(settings.PUBLISHER_IPI_BASE)

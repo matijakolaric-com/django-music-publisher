@@ -11,20 +11,16 @@ from . import cwr_templates, validators
 
 import music_publisher.models
 
-from django.template import Context
 from django.core import exceptions
 
 from django.test import (
     SimpleTestCase, TestCase, TransactionTestCase, override_settings)
-from django.contrib.auth.models import User, Group
-from django.urls import reverse
+from django.contrib.auth.models import User
 
-from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from music_publisher.admin import *
 from music_publisher.models import *
 from io import StringIO
-# import os
 
 from datetime import datetime
 from django.contrib.admin.options import IS_POPUP_VAR
@@ -405,6 +401,31 @@ class CWRTemplatesTest(SimpleTestCase):
 
 class ValidatorsTest(SimpleTestCase):
 
+    @override_settings(PUBLISHER_NAME='Publisher, Inc.')
+    def test_setting_publisher_name(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
+    @override_settings(PUBLISHER_CODE='Publisher')
+    def test_setting_publisher_name(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
+    @override_settings(PUBLISHER_IPI_BASE='0000000199')
+    def test_setting_publisher_name(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
+    @override_settings(PUBLISHER_IPI_NAME='0001000199')
+    def test_setting_publisher_name(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
+    @override_settings(PUBLISHER_SOCIETY_MR='27')
+    def test_setting_publisher_name(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
     def test_title(self):
         validator = validators.CWRFieldValidator('work_title')
         self.assertIsNone(validator('VALID TITLE'))
@@ -704,7 +725,6 @@ class ModelsSimpleTest(TransactionTestCase):
         writer.saan = None
         with self.assertRaises(exceptions.ValidationError):
             writer.clean()
-
 
 
 ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
