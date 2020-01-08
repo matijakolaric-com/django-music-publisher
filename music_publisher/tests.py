@@ -78,7 +78,10 @@ class AdminTest(TestCase):
             relative_share=Decimal('50'), controlled=True)
         wiw = WriterInWork.objects.create(work=cls.original_work,
             writer=cls.other_writer, capacity='A ',
-            relative_share=Decimal('50'), controlled=False)
+            relative_share=Decimal('25'), controlled=False)
+        wiw = WriterInWork.objects.create(work=cls.original_work,
+            writer=cls.controllable_writer, capacity='A ',
+            relative_share=Decimal('25'), controlled=False)
         assert(wiw.get_agreement_dict() is None)
         AlternateTitle.objects.create(work=cls.original_work, suffix=True,
             title='Behind the Work')
@@ -97,7 +100,8 @@ class AdminTest(TestCase):
             capacity='AR',
             relative_share=Decimal('100'),
             controlled=True,
-            saan='SPECIAL'
+            saan='SPECIAL',
+            publisher_fee=Decimal('25')
         )
         WriterInWork.objects.create(
             work=cls.modified_work,
@@ -124,10 +128,12 @@ class AdminTest(TestCase):
         )
         WriterInWork.objects.create(
             work=cls.copublished_work,
-            writer=cls.generally_controlled_writer,
+            writer=cls.controllable_writer,
             capacity='CA',
             relative_share=Decimal('25'),
-            controlled=False,
+            controlled=True,
+            saan='SAAN',
+            publisher_fee=Decimal('25')
         )
         WriterInWork.objects.create(
             work=cls.copublished_work,
@@ -153,8 +159,11 @@ class AdminTest(TestCase):
         cls.other_writer.save()
 
         cls.writer_no_first_name = Writer(last_name='Jones')
+        cls.writer_no_first_name.clean()
+        cls.writer_no_first_name.save()
         cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
             ipi_name='493', pr_society='52', mr_society='44', sr_society='44')
+        cls.controllable_writer.clean()
         cls.controllable_writer.save()
 
 
@@ -218,7 +227,7 @@ class AdminTest(TestCase):
     def test_strings(self):
         self.assertEqual(
             str(self.original_work),
-            'MK000002: THE WORK (DOE / SMITH)')
+            'MK000002: THE WORK (DOE / DOE / SMITH)')
         self.assertEqual(
             str(self.generally_controlled_writer),
             'JOHN SMITH (*)')
@@ -380,23 +389,6 @@ class AdminTest(TestCase):
         with self.assertRaises(CommercialRelease.DoesNotExist):
             CommercialRelease.objects.get(pk=2)
 
-    def test_ackimport(self):
-        self.client.force_login(self.staffuser)
-        mock = StringIO()
-        mock.write(ACK_CONTENT)
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
-        url = reverse('admin:music_publisher_ackimport_add')
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({'acknowledgement_file': mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        ackimport = music_publisher.models.ACKImport.objects.first()
-        self.assertIsNotNone(ackimport)
-
     def test_audit_user(self):
         self.client.force_login(self.audituser)
         for testing_admin in self.testing_admins:
@@ -537,6 +529,72 @@ class AdminTest(TestCase):
             b'Title contains invalid characters.',
             response.content)
 
+    def test_unallowed_capacity(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_change', args=(2,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-capacity'] = 'AR'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Not allowed in original works.',
+            response.content)
+
+    def test_missing_capacity(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-capacity'] = 'CA'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'At least one must be Arranger, Adaptor or Translator.',
+            response.content)
+
+    def test_none_controlled(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-writer'] = self.controllable_writer.id
+        data['writerinwork_set-0-controlled'] = False
+        data['writerinwork_set-0-saan'] = ''
+        data['writerinwork_set-0-publisher_fee'] = ''
+        data['writerinwork_set-1-controlled'] = False
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'At least one writer must be controlled.',
+            response.content)
+
+    def test_wrong_sum_of_shares(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-relative_share'] = '60'
+        data['writerinwork_set-1-relative_share'] = '60'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Sum of relative shares must be 100%.',
+            response.content)
+
+    def test_wrong_capacity_in_copublishing_modification(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.controllable_writer.id
+        data['writerinwork_set-0-writer'] = self.controllable_writer.id
+        data['writerinwork_set-0-writer'] = self.controllable_writer.id
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Must be same as in controlled line for this writer.',
+            response.content)
+
     def test_altitle_sufix_too_long(self):
         self.client.force_login(self.staffuser)
         url = reverse(
@@ -550,6 +608,77 @@ class AdminTest(TestCase):
         self.assertIn(
             b'Too long for suffix, work title plus suffix must be 59',
             response.content)
+
+    def test_ack_import_and_work_filters(self):
+        """Must be together, ack import is used in filters."""
+        self.client.force_login(self.staffuser)
+        mock = StringIO()
+        mock.write(ACK_CONTENT)
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNotNone(ackimport)
+
+        self.client.force_login(self.audituser)
+        base_url = reverse('admin:music_publisher_work_changelist')
+        url = base_url + '?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = base_url + '?in_cwr=N&ack_status=RA&has_iswc=N&has_rec=N'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
+    def test_search(self):
+        """Must be together, ack import is used in filters."""
+        self.client.force_login(self.staffuser)
+        base_url = reverse('admin:music_publisher_work_changelist')
+        url = base_url + '?q=01'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
+    def test_simple_save(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['title'] = 'THE NEW TITLE'
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+
+    def test_create_cwr_wizard(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_changelist')
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data.update({
+            'action': 'create_cwr', 'select_across': 1, 'index': 0,
+            '_selected_action': 1
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b'error', response.content)
+
+    @override_settings(PUBLISHER_CODE='')
+    def test_create_cwr_wizard_no_publisher_code(self):
+        self.client.force_login(self.staffuser)
+        url = reverse('admin:music_publisher_work_changelist')
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data.update({
+            'action': 'create_cwr', 'select_across': 1, 'index': 0,
+            '_selected_action': 1
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+
 
 class CWRTemplatesTest(SimpleTestCase):
 

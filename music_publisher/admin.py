@@ -21,7 +21,7 @@ from django.utils.timezone import now
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
-    Track, Work, WorkAcknowledgement, Writer, WriterInWork)
+    Track, Work, WorkAcknowledgement, Writer, WriterInWork, SOCIETY_DICT)
 
 from django.conf import settings
 
@@ -839,15 +839,10 @@ class WorkAdmin(MusicPublisherAdmin):
         def lookups(self, request, model_admin):
             """Simple Yes/No filter
             """
-            SDICT = dict()
-            for key, value in settings.SOCIETIES:
-                key1 = key.lstrip('0')
-                key2 = key.rjust(3, '0')
-                SDICT[key1] = value
-                SDICT[key2] = value
+
             codes = WorkAcknowledgement.objects.values_list(
                 'society_code', flat=True).distinct()
-            return [(code, SDICT.get(code, code)) for code in codes]
+            return [(code, SOCIETY_DICT.get(code, code)) for code in codes]
 
         def queryset(self, request, queryset):
             """Filter on society sending ACKs.
@@ -1016,8 +1011,6 @@ class WorkAdmin(MusicPublisherAdmin):
                 ArtistInWorkInline, RecordingInline, WorkAcknowledgementInline
             ]]
         return instances
-
-        super().change_view()
 
 
 @admin.register(Recording)
