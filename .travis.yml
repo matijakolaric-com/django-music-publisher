@@ -10,9 +10,6 @@ matrix:
     - name: "16.04 Py3.6"
       dist: xenial
       python: "3.6"
-    - name: "16.04 Py3.5"
-      dist: xenial
-      python: "3.5"
 services: postgresql
 env: DATABASE_URL="postgres://postgres@localhost/dmp"
 install: pip install -r requirements.txt
