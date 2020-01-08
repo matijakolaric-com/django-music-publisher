@@ -578,7 +578,7 @@ class Work(TitleBase):
                 'organization': {
                     'code': settings.PUBLISHER_SOCIETY_SR,
                     'name': SOCIETY_DICT.get(
-                        settings.SOCIETIES,
+                        settings.PUBLISHER_SOCIETY_SR,
                         ''
                     ).split(',')[0],
                 },
@@ -840,7 +840,7 @@ class WriterInWork(models.Model):
         pub_pr_soc = settings.PUBLISHER_SOCIETY_PR
         pub_pr_name = SOCIETY_DICT.get(pub_pr_soc, '').split(',')[0]
 
-        if not self.controlled:
+        if not self.controlled or not self.writer:
             return None
         if self.writer.generally_controlled and not self.saan:
             # General
@@ -1297,7 +1297,10 @@ class CWRExport(models.Model):
                     for aff in affiliations:
                         if aff['affiliation_type']['code'] == 'PR':
                             w['pr_society'] = aff['organization']['code']
-                            break
+                        elif aff['affiliation_type']['code'] == 'MR':
+                            w['mr_society'] = aff['organization']['code']
+                        elif aff['affiliation_type']['code'] == 'SR':
+                            w['sr_society'] = aff['organization']['code']
                 else:
                     w = {'writer_unknown_indicator': 'Y'}
                 w.update({
@@ -1461,8 +1464,8 @@ class WorkAcknowledgement(models.Model):
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(max_length=20, blank=True)
 
-    def __str__(self):
-        return self.status
+    # def __str__(self):
+    #     return self.status
 
     def get_dict(self):
         """

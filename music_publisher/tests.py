@@ -56,6 +56,7 @@ def get_data_from_response(response):
     PUBLISHER_IPI_NAME='0000000199',
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
+    PUBLISHER_SOCIETY_SR='44',
     REQUIRE_SAAN=True,
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
@@ -75,9 +76,10 @@ class AdminTest(TestCase):
         WriterInWork.objects.create(work=cls.original_work,
             writer=cls.generally_controlled_writer, capacity='C ',
             relative_share=Decimal('50'), controlled=True)
-        WriterInWork.objects.create(work=cls.original_work,
+        wiw = WriterInWork.objects.create(work=cls.original_work,
             writer=cls.other_writer, capacity='A ',
             relative_share=Decimal('50'), controlled=False)
+        assert(wiw.get_agreement_dict() is None)
         AlternateTitle.objects.create(work=cls.original_work, suffix=True,
             title='Behind the Work')
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
@@ -94,7 +96,8 @@ class AdminTest(TestCase):
             writer=cls.generally_controlled_writer,
             capacity='AR',
             relative_share=Decimal('100'),
-            controlled=True
+            controlled=True,
+            saan='SPECIAL'
         )
         WriterInWork.objects.create(
             work=cls.modified_work,
@@ -110,20 +113,50 @@ class AdminTest(TestCase):
             title='Behind the Modified Work')
 
     @classmethod
+    def create_copublished_work(cls):
+        cls.copublished_work = Work.objects.create(title='Copublished')
+        WriterInWork.objects.create(
+            work=cls.copublished_work,
+            writer=cls.generally_controlled_writer,
+            capacity='CA',
+            relative_share=Decimal('25'),
+            controlled=True,
+        )
+        WriterInWork.objects.create(
+            work=cls.copublished_work,
+            writer=cls.generally_controlled_writer,
+            capacity='CA',
+            relative_share=Decimal('25'),
+            controlled=False,
+        )
+        WriterInWork.objects.create(
+            work=cls.copublished_work,
+            writer=cls.controllable_writer,
+            capacity='CA',
+            relative_share=Decimal('50'),
+            controlled=False,
+        )
+
+    @classmethod
     def create_writers(cls):
         cls.generally_controlled_writer = Writer(first_name='John',
-            last_name='Smith', ipi_name='00000000297', pr_society='10',
-            ipi_base='I-123456789-3',
-            mr_society='34', generally_controlled=True, saan='A1B2C3',
+            last_name='Smith', ipi_name='00000000297', pr_society='52',
+            ipi_base='I-123456789-3', sr_society='44',
+            mr_society='44', generally_controlled=True, saan='A1B2C3',
             publisher_fee=Decimal('0.25'))
         cls.generally_controlled_writer.clean()
         cls.generally_controlled_writer.clean_fields()
         cls.generally_controlled_writer.save()
         cls.other_writer = Writer(first_name='Jane', last_name='Doe',
             ipi_name='395')
-        cls.writer_no_first_name = Writer(last_name='Jones')
         cls.other_writer.clean()
         cls.other_writer.save()
+
+        cls.writer_no_first_name = Writer(last_name='Jones')
+        cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
+            ipi_name='493', pr_society='52', mr_society='44', sr_society='44')
+        cls.controllable_writer.save()
+
 
     @classmethod
     def create_cwr2_export(cls):
@@ -136,6 +169,7 @@ class AdminTest(TestCase):
             description='Test REV', nwr_rev='REV')
         rev.works.add(cls.original_work)
         rev.works.add(cls.modified_work)
+        rev.works.add(cls.copublished_work)
         rev.create_cwr()
 
     @classmethod
@@ -149,6 +183,7 @@ class AdminTest(TestCase):
             description='Test ISR', nwr_rev='ISR')
         isr.works.add(cls.original_work)
         isr.works.add(cls.modified_work)
+        isr.works.add(cls.copublished_work)
         isr.create_cwr()
 
     @classmethod
@@ -176,6 +211,7 @@ class AdminTest(TestCase):
         cls.create_writers()
         cls.create_modified_work()
         cls.create_original_work()
+        cls.create_copublished_work()
         cls.create_cwr2_export()
         cls.create_cwr3_export()
 
@@ -192,6 +228,12 @@ class AdminTest(TestCase):
         self.assertEqual(
             str(self.writer_no_first_name),
             'JONES')
+        self.assertEqual(
+            str(self.original_work.writerinwork_set.first()),
+            'JOHN SMITH (*)')
+        self.assertEqual(
+            str(self.modified_work.artistinwork_set.first()),
+            'JOHN DOE')
 
     def test_unknown_user(self):
 
@@ -367,6 +409,147 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 403)
 
+    def test_generally_controlled_not_controlled(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-controlled'] = False
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be set for a generally controlled writer.',
+            response.content)
+
+    def test_generally_controlled_missing_capacity(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-capacity'] = ''
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be set for a controlled writer.',
+            response.content)
+
+    def test_controlled_but_no_writer(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-0-writer'] = ''
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be set for a controlled writer.',
+            response.content)
+
+    def test_controlled_but_missing_data(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.other_writer.id
+        data['writerinwork_set-1-controlled'] = True
+        data['writerinwork_set-1-saan'] = 'WHATEVER'
+        data['writerinwork_set-1-publisher_fee'] = '25.0'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'IPI name and PR society must be set.',
+            response.content)
+
+    def test_controllable_and_controlled_but_missing_saan(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.controllable_writer.id
+        data['writerinwork_set-1-controlled'] = True
+        data['writerinwork_set-1-publisher_fee'] = '25.0'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be set. (controlled, no general agreement)',
+            response.content)
+
+    def test_controllable_and_controlled_but_missing_fee(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.controllable_writer.id
+        data['writerinwork_set-1-controlled'] = True
+        data['writerinwork_set-1-saan'] = 'WHATEVER'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be set. (controlled, no general agreement)',
+            response.content)
+
+    def test_not_controlled_extra_saan(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.controllable_writer.id
+        data['writerinwork_set-1-controlled'] = False
+        data['writerinwork_set-1-saan'] = 'WHATEVER'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be empty if writer is not controlled.',
+            response.content)
+
+    def test_not_controlled_extra_fee(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.controllable_writer.id
+        data['writerinwork_set-1-controlled'] = False
+        data['writerinwork_set-1-publisher_fee'] = '11.11'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Must be empty if writer is not controlled.',
+            response.content)
+
+    def test_bad_alt_title(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['alternatetitle_set-1-title'] = 'LOŠ'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Title contains invalid characters.',
+            response.content)
+
+    def test_altitle_sufix_too_long(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['alternatetitle_set-1-title'] = 'A' * 55
+        data['alternatetitle_set-1-suffix'] = True
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b'Too long for suffix, work title plus suffix must be 59',
+            response.content)
 
 class CWRTemplatesTest(SimpleTestCase):
 
@@ -399,7 +582,7 @@ class CWRTemplatesTest(SimpleTestCase):
             self.assertIsInstance(template.render(Context(d)).upper(), str)
 
 
-class ValidatorsTest(SimpleTestCase):
+class ValidatorsTest(TestCase):
 
     @override_settings(PUBLISHER_NAME='Publisher, Inc.')
     def test_setting_publisher_name(self):
@@ -407,24 +590,39 @@ class ValidatorsTest(SimpleTestCase):
             validators.validate_settings()
 
     @override_settings(PUBLISHER_CODE='Publisher')
-    def test_setting_publisher_name(self):
+    def test_setting_publisher_code(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
+    @override_settings(PUBLISHER_CODE='A,B')
+    def test_setting_publisher_code_len(self):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
 
     @override_settings(PUBLISHER_IPI_BASE='0000000199')
-    def test_setting_publisher_name(self):
+    def test_setting_publisher_ipi_base(self):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
 
     @override_settings(PUBLISHER_IPI_NAME='0001000199')
-    def test_setting_publisher_name(self):
+    def test_setting_publisher_ipi_name(self):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
 
     @override_settings(PUBLISHER_SOCIETY_MR='27')
-    def test_setting_publisher_name(self):
+    def test_setting_publisher_society(self):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
+
+    @override_settings(PUBLISHER_AGREEMENT_SHARES='1,1')
+    def test_setting_publisher_agreement_shares_fromat(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            from .templatetags import cwr_filters
+
+    @override_settings(PUBLISHER_AGREEMENT_SHARES='1,1,1')
+    def test_setting_publisher_agreement_shares_values(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            from .templatetags import cwr_filters
 
     def test_title(self):
         validator = validators.CWRFieldValidator('work_title')
@@ -493,6 +691,7 @@ class ValidatorsTest(SimpleTestCase):
     PUBLISHER_IPI_NAME='0000000199',
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
+    PUBLISHER_SOCIETY_SR='44',
     REQUIRE_SAAN=True,
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
