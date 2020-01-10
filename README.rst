@@ -7,7 +7,7 @@ This is the current development branch
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
 .. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=latest
-    :target: https://django-music-publisher.readthedocs.io/
+    :target: https://django-music-publisher.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=20
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=20
