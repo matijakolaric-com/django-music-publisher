@@ -59,8 +59,9 @@ def get_data_from_response(response):
     PUBLISHER_SOCIETY_SR='44',
     REQUIRE_SAAN=True,
     REQUIRE_PUBLISHER_FEE=True,
-    PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
-)
+    PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
+    PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
 
     fixtures = ['publishing_staff.json']
@@ -743,13 +744,8 @@ class ValidatorsTest(TestCase):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
 
-    @override_settings(PUBLISHER_AGREEMENT_SHARES='1,1')
-    def test_setting_publisher_agreement_shares_fromat(self):
-        with self.assertRaises(validators.ImproperlyConfigured):
-            from .templatetags import cwr_filters
-
-    @override_settings(PUBLISHER_AGREEMENT_SHARES='1,1,1')
-    def test_setting_publisher_agreement_shares_values(self):
+    @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('1.0'))
+    def test_setting_publisher_agreement_values(self):
         with self.assertRaises(validators.ImproperlyConfigured):
             from .templatetags import cwr_filters
 
@@ -823,7 +819,9 @@ class ValidatorsTest(TestCase):
     PUBLISHER_SOCIETY_SR='44',
     REQUIRE_SAAN=True,
     REQUIRE_PUBLISHER_FEE=True,
-    PUBLISHER_AGREEMENT_SHARES='0.333333,0.5,0.75'
+    PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
+    PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75')
 )
 class ModelsSimpleTest(TransactionTestCase):
 

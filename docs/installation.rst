@@ -99,7 +99,9 @@ Agreement-related settings
 
 * ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
 * ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
-* ``PUBLISHER_AGREEMENT_SHARES`` - Shares transferred to the publisher, comma separated performance, mechanical, sync
+* ``PUBLISHING_AGREEMENT_PUBLISHER_PR`` - Performance share transferred to the publisher, default is '0.5' (50%)
+* ``PUBLISHING_AGREEMENT_PUBLISHER_MR`` - Mechanical share transferred to the publisher, default is '1.0' (100%)
+* ``PUBLISHING_AGREEMENT_PUBLISHER_SR`` - Syncronization share transferred to the publisher, default is '1.0' (100%)
 
 The last setting is a fairly complex one. The default works for most publishers, 50% of performance and 100% of
 mechanical and 100% of sync is collected by the publisher.

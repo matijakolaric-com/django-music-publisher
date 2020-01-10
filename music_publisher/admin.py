@@ -490,13 +490,10 @@ class WriterAdmin(MusicPublisherAdmin):
 
     @staticmethod
     def get_society_list():
-        MR_SHARE, SR_SHARE = [
-            Decimal(s.strip()) for s in
-            settings.PUBLISHER_AGREEMENT_SHARES.split(',')][1:3]
         societies = ['pr_society']
-        if MR_SHARE != Decimal(1):
+        if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
             societies.append('mr_society')
-        if SR_SHARE != Decimal(1):
+        if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
             societies.append('sr_society')
         return societies
 

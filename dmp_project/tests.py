@@ -31,5 +31,7 @@ class DMPTestCase(TestCase):
         self.assertTrue(hasattr(settings, 'PUBLISHER_SOCIETY_SR'))
         self.assertTrue(hasattr(settings, 'REQUIRE_SAAN'))
         self.assertTrue(hasattr(settings, 'REQUIRE_PUBLISHER_FEE'))
-        self.assertTrue(hasattr(settings, 'PUBLISHER_AGREEMENT_SHARES'))
+        self.assertTrue(hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'))
+        self.assertTrue(hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR'))
+        self.assertTrue(hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_SR'))
         self.assertTrue(hasattr(settings, 'SOCIETIES'))

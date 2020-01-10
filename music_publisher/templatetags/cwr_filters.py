@@ -12,12 +12,9 @@ from django.core.exceptions import ImproperlyConfigured
 
 register = template.Library()
 
-try:
-    PRP_SHARE, MRP_SHARE, SRP_SHARE = [
-        Decimal(s.strip()) for s in
-        settings.PUBLISHER_AGREEMENT_SHARES.split(',')]
-except Exception as e:
-    raise ImproperlyConfigured('PUBLISHER_AGREEMENT_SHARES: ' + str(e))
+PRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+MRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+SRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
 if not (0 <= PRP_SHARE <= 0.5 and 0 <= MRP_SHARE <= 1 and 0 <= SRP_SHARE <= 1):
     raise ImproperlyConfigured('PUBLISHER_AGREEMENT_SHARES: Disallowed split.')
