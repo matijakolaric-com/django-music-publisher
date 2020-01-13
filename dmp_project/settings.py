@@ -145,7 +145,7 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHER_AGREEMENT_PR', '1.0'))
 
-SENTRY_DNS = os.getenv('SENTRY_DNS')
+SENTRY_DSN = os.getenv('SENTRY_DSN')
 
 if SENTRY_DSN:
     import sentry_sdk
