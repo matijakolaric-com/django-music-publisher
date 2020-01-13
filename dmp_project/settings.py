@@ -156,5 +156,4 @@ if SENTRY_DSN:
         integrations=[DjangoIntegration()],
         send_default_pii=True
     )
-
-    sentry_sdk.capture_message(f'Starting DMP for {PUBLISHER_NAME}')
+    sentry_sdk.capture_message('Starting.')
