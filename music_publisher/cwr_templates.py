@@ -13,6 +13,13 @@ TEMPLATES_21 = {
         '{{ publisher_name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
         '               \r\n{% endautoescape %}'),
+    'HDR_8': Template('{% load cwr_filters %}{% autoescape off %}'
+        'HDR{{ publisher_ipi_name|rjust:11 }}'
+        '{{ publisher_name|ljust:45 }}01.10{{ '
+        'creation_date|date:"Ymd" }}'
+        '{{ creation_date|date:"His" }}{{ '
+        'creation_date|date:"Ymd" }}'
+        '               \r\n{% endautoescape %}'),
     'GRH': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRH{{ transaction_type|ljust:3 }}0000102.10'
