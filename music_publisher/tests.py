@@ -167,7 +167,6 @@ class AdminTest(TestCase):
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
 
-
     @classmethod
     def create_cwr2_export(cls):
         cls.cwr2_export = CWRExport.objects.create(
@@ -1031,6 +1030,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.cwr.encode()[0:64], CWR_1)
 
         # test also CWR 3.0 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev='WRK')
@@ -1061,6 +1061,10 @@ ACK0000000200000000201805160910510000100000002NWRTHREE                          
 ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
 ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
 TRL000010000008000000839"""
+
+CWR_1 = b'HDR09000000020TEST PUBLISHER                               01.10'
+
+
 #
 #
 # class IntegrationTest(TransactionTestCase):
