@@ -29,10 +29,7 @@ IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
 
 class MusicPublisherAdmin(admin.ModelAdmin):
-    """
-    """
-
-
+    """Parent class to all admin classes."""
     save_as = True
 
 

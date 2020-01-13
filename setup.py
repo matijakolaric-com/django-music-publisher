@@ -19,7 +19,7 @@ setuptools.setup(
         'requests>=2.20.0',
     ),
     include_package_data=True,
-    classifiers=(
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -32,6 +32,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
-    ),
+    ],
     zip_safe=False,
 )

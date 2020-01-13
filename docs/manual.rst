@@ -3,7 +3,7 @@
 User Manual
 ############
 
-This is the user manual for Django-Music-Publisher |version|.
+This is the user manual for Django-Music-Publisher 20 Twenty.
 
 .. toctree::
    :maxdepth: 2

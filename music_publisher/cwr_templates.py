@@ -44,7 +44,8 @@ TEMPLATES_21 = {
         '{{ settings.PUBLISHER_SOCIETY_PR|soc }}{{ share|prp|cwrshare }}'
         '{{ settings.PUBLISHER_SOCIETY_MR|soc }}{{ share|mrp|cwrshare }}'
         '{{ PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
-        ' N {{ settings.PUBLISHER_IPI_BASE|ljust:13 }}                               '
+        ' N {{ settings.PUBLISHER_IPI_BASE|ljust:13 }}'
+        '                               '
         '\r\n{% endautoescape %}'),
     'SPT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -212,7 +213,8 @@ TEMPLATES_30 = {
         '{{ record_sequence|rjust:8 }}'
         '{{ publisher_sequence|rjust:2 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
         '{{ code|ljust:9 }}' + ' ' * 14 + '{{ publisher_pr_society|ljust:4 }}'
-        '{{ saan|ljust:14 }}{{ original_publishers.0.agreement.agreement_type.code|ljust:2 }}'
+        '{{ saan|ljust:14 }}'
+        '{{ original_publishers.0.agreement.agreement_type.code|ljust:2 }}'
         '\r\n{% endautoescape %}'),
     'OPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'

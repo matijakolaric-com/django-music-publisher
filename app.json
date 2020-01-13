@@ -17,7 +17,8 @@
   "env": {
     "DJANGO_SUPERUSER_USERNAME": {
       "description": "Username for the administrator, used only for installation",
-      "required": true
+      "required": true,
+      "default": "administrator"
     },
     "DJANGO_SUPERUSER_PASSWORD": {
       "description": "Password for the administrator, used only during installation",

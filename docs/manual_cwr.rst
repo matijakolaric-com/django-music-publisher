@@ -39,7 +39,7 @@ The example shown above shows the CWR file with basic syntax highlighting. When 
 
    CWR 3.0 ISR (ISWC request) preview with basic syntax highlighting
 
-CWR 3.0 introduces a new mechanisam for obtaining ISWCs. The short version is that publishers send ISWC requests (ISR), an example is shown here, and societies send answers (ISA).
+CWR 3.0 introduces a new mechanism for obtaining ISWCs. The short version is that publishers send ISWC requests (ISR), an example is shown here, and societies send answers (ISA).
 Please note that CWR 3.0 support is still experimental.
 
 

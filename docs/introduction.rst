@@ -21,7 +21,7 @@ The database contains detailed metadata for **musical works** and **recordings**
 as well as **CWR exports**, **registration acknowledgements** and **ISWC assignments**.
 
 All entered data is validated for CWR compatibility on field-, record- and transaction-level. Different societies
-(collecing organizations) have slightly different requirements. This can be configured in the settings.
+(collecting organizations) have slightly different requirements. This can be configured in the settings.
 
 Basic original publishing agreement data can be entered, sufficient for registrations in societies that require
 society-assigned agreement numbers.

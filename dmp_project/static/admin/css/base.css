@@ -564,7 +564,7 @@ input[type=button][disabled].default {
 .module caption,
 .inline-group h2 {
     font-size: 20px;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
@@ -767,7 +767,7 @@ a.deletelink:focus, a.deletelink:hover {
     color: #fff;
     background: #d50000;
     cursor: pointer;
-    s display: block;
+    display: block;
     float: left;
 }
 
@@ -916,7 +916,7 @@ table#change-history tbody th {
     margin: 0 0 0 20px;
     font-weight: 300;
     font-size: 14px;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     text-align: right;
 }

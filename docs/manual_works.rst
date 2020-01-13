@@ -125,7 +125,7 @@ Please note that, although there is a separate set of views for :doc:`recordings
 Recording title
 ---------------
 
-There are three fields in this row. ``Recording title`` is where one enters the title of the recording. If ``recording title suffix`` is checked, then the former field is used as a suffix to the ``work title``. This is a huge benefit in production music, where tehre are multiple recordings per work, usually with same suffixes, e.g. "drums", "bed", etc. The result is then snown in the ``complete recording title`` field.
+There are three fields in this row. ``Recording title`` is where one enters the title of the recording. If ``recording title suffix`` is checked, then the former field is used as a suffix to the ``work title``. This is a huge benefit in production music, where there are multiple recordings per work, usually with same suffixes, e.g. "drums", "bed", etc. The result is then shown in the ``complete recording title`` field.
 
 Version title
 -------------
@@ -137,7 +137,7 @@ Other fields
 
 ``ISRC`` is a unique identifier, issued by record labels. ``Recording artist``, ``record label``, ``duration`` and ``release date`` are quite obvious.
 
-Note that after a succesfull save, there is a ``change`` link in the recording header.
+Note that after a successful save, there is a ``change`` link in the recording header.
 
 
 Alternative Titles
@@ -167,6 +167,6 @@ At the bottom, there is a delete button and three save buttons. Delete is obviou
 
 The combination is extremely powerful, especially when the changes between works is small, as is often the case for production music.
 One enters the first work, using suffixes as much as possible, presses on ``save and continue editing``.
-If save was succesful, then the data can be changed for the next work, and then one presses on ``save as new``, and this new work is saved.
+If save was successful, then the data can be changed for the next work, and then one presses on ``save as new``, and this new work is saved.
 The process can be repeated for all the works in the set.
 

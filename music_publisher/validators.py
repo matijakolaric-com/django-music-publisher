@@ -10,7 +10,7 @@ import re
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.utils.deconstruct import deconstructible
 from django.conf import settings
-from decimal import Decimal
+
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
@@ -162,8 +162,9 @@ class CWRFieldValidator:
                 raise ValidationError(
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
-        elif ('name' in name or 'label' in name or name in [
-            'cd_identifier', 'saan', 'library']):
+        elif ('name' in name or
+                'label' in name or
+                name in ['cd_identifier', 'saan', 'library']):
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
 

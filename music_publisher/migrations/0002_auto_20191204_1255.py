@@ -2,11 +2,15 @@
 
 from django.db import migrations
 
+
 def strip_zeros_from_societies(apps, schema_editor):
-    Writer = apps.get_model('music_publisher', 'Writer')
-    for writer in Writer.objects.filter(pr_society__isnull=False):
+    """In older versions, society keys had leading zero, removed in CWR3.x."""
+
+    writer_cls = apps.get_model('music_publisher', 'Writer')
+    for writer in writer_cls.objects.filter(pr_society__isnull=False):
         writer.pr_society = writer.pr_society.lstrip('0')
         writer.save()
+
 
 class Migration(migrations.Migration):
 
@@ -15,5 +19,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(strip_zeros_from_societies, migrations.RunPython.noop),
+        migrations.RunPython(
+            strip_zeros_from_societies, migrations.RunPython.noop),
     ]
