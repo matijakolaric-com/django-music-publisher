@@ -147,12 +147,12 @@ PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
 
 SENTRY_DNS = os.getenv('SENTRY_DNS')
 
-if SENTRY_DNS:
+if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
     sentry_sdk.init(
-        dsn="SENTRY_DNS",
+        dsn="SENTRY_DSN",
         integrations=[DjangoIntegration()],
         send_default_pii=True
     )
