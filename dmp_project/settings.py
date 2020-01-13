@@ -144,3 +144,17 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
     os.getenv('PUBLISHER_AGREEMENT_PR', '1.0'))
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHER_AGREEMENT_PR', '1.0'))
+
+SENTRY_DNS = os.getenv('SENTRY_DNS')
+
+if SENTRY_DNS:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn="SENTRY_DNS",
+        integrations=[DjangoIntegration()],
+        send_default_pii=True
+    )
+
+    sentry_sdk.capture_message(f'Starting DMP for {PUBLISHER_NAME}')

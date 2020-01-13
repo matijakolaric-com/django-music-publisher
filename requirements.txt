@@ -9,6 +9,7 @@ psycopg2-binary
 pytz
 requests
 requests-toolbelt
+sentry-sdk
 Sphinx
 sphinx_rtd_theme
 sphinxcontrib-napoleon
