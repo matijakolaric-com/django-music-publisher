@@ -116,6 +116,8 @@ class AdminTest(TestCase):
             title='The Copy')
         AlternateTitle.objects.create(work=cls.modified_work, suffix=True,
             title='Behind the Modified Work')
+        Recording.objects.create(work=cls.modified_work,
+            isrc='US-S1Z-99-00002')
 
     @classmethod
     def create_copublished_work(cls):
@@ -615,6 +617,17 @@ class AdminTest(TestCase):
         mock = StringIO()
         mock.write(ACK_CONTENT)
         mock.seek(0)
+        mockfile = InMemoryUploadedFile(mock, 'acknowledgement_file',
+            'CX180001000_FOO.V22', 'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 200)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNone(ackimport)
+        mock.seek(0)
         mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
             'text', 0, None)
@@ -626,6 +639,20 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
         ackimport = music_publisher.models.ACKImport.objects.first()
         self.assertIsNotNone(ackimport)
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
         self.client.force_login(self.audituser)
         base_url = reverse('admin:music_publisher_work_changelist')
@@ -633,6 +660,16 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
         url = base_url + '?in_cwr=N&ack_status=RA&has_iswc=N&has_rec=N'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
+    def test_recording_filters(self):
+        self.client.force_login(self.audituser)
+        base_url = reverse('admin:music_publisher_recording_changelist')
+        url = base_url + '?has_isrc=Y'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = base_url + '?has_isrc=N'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -1055,8 +1092,8 @@ class ModelsSimpleTest(TransactionTestCase):
 
 ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
-ACK0000000000000000201805160910510000100000000NWRONE                                                         00000000000001      123                 20180607AS
-ACK0000000100000000201805160910510000100000001NWRTWO                                                         00000000000002                          20180607RA
+ACK0000000000000000201805160910510000100000000NWRONE                                                         MK000001            123                 20180607AS
+ACK0000000100000000201805160910510000100000001NWRTWO                                                         DMP000002                               20180607RA
 ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607RA
 ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
 ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
