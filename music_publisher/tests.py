@@ -197,20 +197,6 @@ class AdminTest(TestCase):
         isr.create_cwr()
 
     @classmethod
-    def create_cwr2_export_with_long_ipi(cls):
-        cls.cwr2_export = CWRExport.objects.create(
-            description='Test NWR', nwr_rev='NWR')
-        cls.cwr2_export.works.add(cls.original_work)
-        cls.cwr2_export.works.add(cls.modified_work)
-        cls.cwr2_export.create_cwr()
-        rev = CWRExport.objects.create(
-            description='Test REV', nwr_rev='REV')
-        rev.works.add(cls.original_work)
-        rev.works.add(cls.modified_work)
-        rev.works.add(cls.copublished_work)
-        rev.create_cwr()
-
-    @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
