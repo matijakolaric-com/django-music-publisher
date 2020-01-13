@@ -1145,8 +1145,7 @@ class CWRExport(models.Model):
         """
         if self.version == '30':
             template = TEMPLATES_30.get(key)
-        elif key == 'HDR' and len(
-                settings.PUBLISHER_IPI_NAME.lstrip('0')) > 10:
+        elif key == 'HDR' and len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9:
             template = TEMPLATES_21.get('HDR_8')
         else:
             template = TEMPLATES_21.get(key)
