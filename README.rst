@@ -1,8 +1,6 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
-This is the current development branch
-
 .. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=20
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
