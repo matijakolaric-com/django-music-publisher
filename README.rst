@@ -1,14 +1,14 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
-.. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=20
+.. image:: https://travis-ci.com/matijakolaric-com/django-music-publisher.svg?branch=master
     :target: https://travis-ci.com/matijakolaric-com/django-music-publisher
     :alt: Build Status
 .. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=latest
     :target: https://django-music-publisher.readthedocs.io/en/latest/
     :alt: Documentation Status
-.. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=20
-    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=20
+.. image:: https://coveralls.io/repos/github/matijakolaric-com/django-music-publisher/badge.svg?branch=master
+    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
     :alt: Coverage Status
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
@@ -26,6 +26,12 @@ It uses
 `Common Works Registration (CWR) <https://matijakolaric.com/articles/1/>`_
 for batch registration of musical works, versions 2.1 (stable) and 3.0
 (experimental).
+
+Installation to a cloud platform, free tier, requires no technical skills.
+
+Documentation includes a detailed user manual and video tutorials.
+
+Professional maintenance and user support are available. See http://dmp.guru.
 
 * Docs: https://django-music-publisher.readthedocs.io/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/

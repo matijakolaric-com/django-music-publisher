@@ -64,8 +64,8 @@ DMP Guru
 
 DMP Guru is a service,
 run by the author and maintainer of Django-Music-Publisher,
-providing regular smart configuration, automatic upgrades, maintenance and user
-support for Django-Music-Publisher instances.
+that provides smart configuration, automatic upgrades and security/bugfix updates, maintenance and user
+support.
 
 See https://dmp.guru for details.
 
