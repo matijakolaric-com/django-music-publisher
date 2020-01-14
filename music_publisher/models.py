@@ -31,7 +31,7 @@ class Artist(PersonBase, models.Model):
     """Performing artists.
     
     Attributes:
-        isni (django.db.models.CharField): International Standard Name Identifier
+        isni (django.db.models.CharField): International Standard Name Id
     """
 
     class Meta:
@@ -158,12 +158,16 @@ class Release(models.Model):
     """Music Release (album / other product)
 
     Attributes:
-        cd_identifier (django.db.models.CharField): CD Identifier, used when origin is library
+        cd_identifier (django.db.models.CharField): CD Identifier, used when \
+        origin is library
         ean (django.db.models.CharField): EAN code
-        library (django.db.models.ForeignKey): Foreign key to :class:`.models.Library`
-        recordings (django.db.models.ManyToManyField): M2M to :class:`.models.Recording` through :class:`.models.Track`
+        library (django.db.models.ForeignKey): Foreign key to \
+        :class:`.models.Library`
+        recordings (django.db.models.ManyToManyField): M2M to \
+        :class:`.models.Recording` through :class:`.models.Track`
         release_date (django.db.models.DateField): Date of the release
-        release_label (django.db.models.ForeignKey): Foreign key to :class:`.models.Label`
+        release_label (django.db.models.ForeignKey): Foreign key to \
+        :class:`.models.Label`
         release_title (django.db.models.CharField): Title of the release
     """
 
@@ -252,7 +256,8 @@ class LibraryReleaseManager(models.Manager):
         """Return only library releases
         
         Returns:
-            django.db.models.query.QuerySet: Queryset with instances of :class:`.models.LibraryRelease`
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.LibraryRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
@@ -271,10 +276,11 @@ class LibraryRelease(Release):
     objects = LibraryReleaseManager()
 
     def clean(self):
-        """Make sure that release title is required if one of the other "non-library" fields is present.
+        """Make sure that release title is required if one of the other \
+        "non-library" fields is present.
         
         Raises:
-            ValidationError: If not ccompliant.
+            ValidationError: If not compliant.
         """
         if ((self.ean or self.release_date or self.release_label)
                 and not self.release_title):
@@ -307,7 +313,8 @@ class CommercialReleaseManager(models.Manager):
         """Return only commercial releases
         
         Returns:
-            django.db.models.query.QuerySet: Queryset with instances of :class:`.models.CommercialRelease`
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.CommercialRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
@@ -340,15 +347,7 @@ class Writer(PersonBase, IPIBase, models.Model):
         return name
 
     def clean(self, *args, **kwargs):
-        """
-
-        :param args:
-        :type args:
-        :param kwargs:
-        :type kwargs:
-        :return:
-        :rtype:
-        """
+        """Check if writer who is controlled can no longer be."""
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
@@ -362,9 +361,10 @@ class Writer(PersonBase, IPIBase, models.Model):
     @property
     def writer_id(self):
         """
+        Writer ID for CWR
 
-        :return:
-        :rtype:
+        Returns:
+            str: formatted writer ID
         """
         return 'W{:06d}'.format(self.id)
 
@@ -425,14 +425,19 @@ class Writer(PersonBase, IPIBase, models.Model):
 
 class WorkManager(models.Manager):
     def get_queryset(self):
-        """
-
-        :return:
-        :rtype:
-        """
         return super().get_queryset().prefetch_related('writers')
 
     def get_dict(self, qs):
+        """
+        Return a dictionary with workks from the queryset
+
+        Args:
+            qs(django.db.models.query import QuerySet): works queryset
+
+        Returns:
+            dict: dictionary with works
+
+        """
         qs = qs.prefetch_related('alternatetitle_set')
         qs = qs.prefetch_related('writerinwork_set__writer')
         qs = qs.prefetch_related('artistinwork_set__artist')
@@ -493,7 +498,7 @@ class Work(TitleBase):
 
     @property
     def work_id(self):
-        """Create Work ID used in registrations
+        """Create Work ID used in registrations.
 
         Returns:
             str: Internal Work ID
@@ -504,9 +509,10 @@ class Work(TitleBase):
 
     def is_modification(self):
         """
+        Check if the work is a modification.
 
-        :return:
-        :rtype:
+        Returns:
+            bool: True if modification, False if original
         """
         return bool(self.original_title)
 
