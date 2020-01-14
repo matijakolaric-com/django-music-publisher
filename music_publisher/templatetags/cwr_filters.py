@@ -8,17 +8,12 @@ from django import template
 from decimal import Decimal, ROUND_HALF_UP
 from music_publisher import models
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 register = template.Library()
 
 PRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
 MRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
 SRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
-
-if not (0 <= PRP_SHARE <= 0.5 and 0 <= MRP_SHARE <= 1 and 0 <= SRP_SHARE <= 1):
-    raise ImproperlyConfigured('PUBLISHER_AGREEMENT_SHARES: Disallowed split.')
-
 PRW_SHARE = Decimal('1') - PRP_SHARE
 MRW_SHARE = Decimal('1') - MRP_SHARE
 SRW_SHARE = Decimal('1') - SRP_SHARE

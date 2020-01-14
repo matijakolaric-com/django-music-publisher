@@ -7,23 +7,26 @@ Attributes:
     CONTENT (str): CWR ACK file contents
 """
 
-from . import cwr_templates, validators
-
-import music_publisher.models
-
-from django.core import exceptions
-
-from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, override_settings)
-from django.contrib.auth.models import User
-
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from music_publisher.admin import *
-from music_publisher.models import *
+from datetime import datetime
+from decimal import Decimal
 from io import StringIO
 
-from datetime import datetime
 from django.contrib.admin.options import IS_POPUP_VAR
+from django.contrib.auth.models import User
+from django.core import exceptions
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.template import Context
+from django.test import (
+    SimpleTestCase, TestCase, TransactionTestCase, override_settings,
+)
+from django.urls import reverse
+
+import music_publisher.models
+from music_publisher.models import (
+    AlternateTitle, Artist, CWRExport, CommercialRelease, Label, Library,
+    LibraryRelease, Recording, Release, Work, Writer, WriterInWork,
+)
+from . import cwr_templates, validators
 
 
 def get_data_from_response(response):
@@ -781,9 +784,19 @@ class ValidatorsTest(TestCase):
             validators.validate_settings()
 
     @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('1.0'))
-    def test_setting_publisher_agreement_values(self):
+    def test_setting_publisher_agreement_pr(self):
         with self.assertRaises(validators.ImproperlyConfigured):
-            from .templatetags import cwr_filters
+            validators.validate_settings()
+
+    @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('2.0'))
+    def test_setting_publisher_agreement_mr(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
+
+    @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('-1.0'))
+    def test_setting_publisher_agreement_sr(self):
+        with self.assertRaises(validators.ImproperlyConfigured):
+            validators.validate_settings()
 
     def test_title(self):
         validator = validators.CWRFieldValidator('work_title')

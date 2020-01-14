@@ -203,3 +203,15 @@ def validate_settings():
                 'PUBLISHER_SOCIETY_{}: Unknown society code "{}".'.format(
                     t, attr
                 ))
+
+    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
+        raise ImproperlyConfigured(
+            'PUBLISHING_AGREEMENT_PUBLISHER_PR: Must be between 0.0 and 0.5')
+
+    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
+        raise ImproperlyConfigured(
+            'PUBLISHING_AGREEMENT_PUBLISHER_MR: Must be between 0.0 and 1.0')
+
+    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
+        raise ImproperlyConfigured(
+            'PUBLISHING_AGREEMENT_PUBLISHER_SR: Must be between 0.0 and 1.0')

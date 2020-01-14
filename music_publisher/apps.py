@@ -18,4 +18,3 @@ class MusicPublisherConfig(AppConfig):
 
     def ready(self):
         validate_settings()
-
