@@ -1,1 +1,1 @@
-"""Django Music Publisher Repository"""
+"""Django-Music-Publisher Repository"""

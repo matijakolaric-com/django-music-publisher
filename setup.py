@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='19.7',
+    version='20b1',
     author='Matija Kolarić',
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
@@ -15,23 +15,23 @@ setuptools.setup(
     url='https://django-music-publisher.readthedocs.io',
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=2.2,<3.0',
+        'Django>=3.0,<3.1',
         'requests>=2.20.0',
     ),
     include_package_data=True,
-    classifiers=(
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 2.2',
+        'Framework :: Django :: 3.0',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-    ),
+        'Programming Language :: Python :: 3.8',
+    ],
     zip_safe=False,
 )

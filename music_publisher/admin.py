@@ -18,21 +18,18 @@ from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
-from .const import SOCIETIES
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
-    Track, Work, WorkAcknowledgement, Writer, WriterInWork)
+    Track, Work, WorkAcknowledgement, Writer, WriterInWork, SOCIETY_DICT)
 
-SETTINGS = settings.MUSIC_PUBLISHER_SETTINGS
+from django.conf import settings
+
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
 
 class MusicPublisherAdmin(admin.ModelAdmin):
-    """
-    """
-
-
+    """Parent class to all admin classes."""
     save_as = True
 
 
@@ -146,6 +143,7 @@ class ArtistAdmin(MusicPublisherAdmin):
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recording__count'
 
+
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
     actions = None
@@ -216,7 +214,6 @@ class LabelAdmin(MusicPublisherAdmin):
             qs = Work.objects.filter(
                 models.Q(recordings__record_label=obj))
             qs.update(last_change=now())
-
 
 
 @admin.register(Library)
@@ -439,7 +436,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
 
-
     def track_count(self, obj):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
@@ -465,23 +461,38 @@ class WriterAdmin(MusicPublisherAdmin):
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
     readonly_fields = ('_can_be_controlled', 'work_count')
-    fieldsets = (
-        ('Name', {
-            'fields': (
-                ('first_name', 'last_name'),)}),
-        ('IPI', {
-            'fields': (
-                ('ipi_name', 'ipi_base'),
-                'pr_society'),
-        }),
-        ('General agreement', {
-            'fields': (
-                ('generally_controlled',
-                 ('saan', 'publisher_fee'))
-            ),
-        }),
-    )
+
+    def get_fieldsets(self, request, obj=None):
+        return (
+            ('Name', {
+                'fields': (
+                    ('first_name', 'last_name'),)}),
+            ('IPI', {
+                'fields': (
+                    ('ipi_name', 'ipi_base'),),
+            }),
+            ('Societies', {
+                'fields': (
+                    self.get_society_list(),),
+            }),
+            ('General agreement', {
+                'fields': (
+                    ('generally_controlled',
+                     ('saan', 'publisher_fee'))
+                ),
+            }),
+        )
+
     actions = None
+
+    @staticmethod
+    def get_society_list():
+        societies = ['pr_society']
+        if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
+            societies.append('mr_society')
+        if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
+            societies.append('sr_society')
+        return societies
 
     def save_model(self, request, obj, form, *args, **kwargs):
         """Perform normal save_model, then update last_change of
@@ -497,7 +508,6 @@ class WriterAdmin(MusicPublisherAdmin):
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('work', distinct=True))
         return qs
-
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
@@ -556,7 +566,6 @@ class AlternateTitleInline(admin.TabularInline):
 
     def complete_alt_title(self, obj):
         return str(obj)
-
 
 
 class WriterInWorkFormSet(BaseInlineFormSet):
@@ -713,6 +722,7 @@ class WorkAdmin(MusicPublisherAdmin):
     """
 
     form = WorkForm
+    change_form_template = 'admin/work.html'
 
     inlines = (
         WriterInWorkInline,
@@ -725,7 +735,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """This is a standard way how writers are shown in other apps."""
 
         return ' / '.join(
-            writer.last_name.upper() for writer in set(obj.writers.all()))
+            writer.last_name.upper() for writer in set(
+                obj.writers.order_by('last_name')))
 
     writer_last_names.short_description = 'Writers\' last names'
     writer_last_names.admin_order_field = 'writers__last_name'
@@ -822,15 +833,10 @@ class WorkAdmin(MusicPublisherAdmin):
         def lookups(self, request, model_admin):
             """Simple Yes/No filter
             """
-            SDICT = dict()
-            for key, value in SOCIETIES:
-                key1 = key.lstrip('0')
-                key2 = key.rjust(3, '0')
-                SDICT[key1] = value
-                SDICT[key2] = value
+
             codes = WorkAcknowledgement.objects.values_list(
                 'society_code', flat=True).distinct()
-            return [(code, SDICT.get(code, code)) for code in codes]
+            return [(code, SOCIETY_DICT.get(code, code)) for code in codes]
 
         def queryset(self, request, queryset):
             """Filter on society sending ACKs.
@@ -962,34 +968,31 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_cwr.short_description = 'Create CWR from selected works.'
 
-    def create_json(self, request, qs, normalize=False):
+    def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing selected works.
 
         Returns:
             JsonResponse: JSON file with selected works
         """
 
-        j = Work.objects.get_dict(qs, normalize=normalize)
+        j = Work.objects.get_dict(qs)
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}{}'.format(
-            SETTINGS.get('work_id_prefix', ''), datetime.now().toordinal())
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    def create_normalized_json(self, request, qs):
-        return self.create_json(request, qs, normalize=True)
-    create_normalized_json.short_description = \
-        'Export selected works (normalized JSON).'
-
-    actions = (create_cwr, create_json, create_normalized_json)
+    actions = (create_cwr, create_json)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
         actions = super().get_actions(request)
+        if not settings.PUBLISHER_CODE:
+            del actions['create_cwr']
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
@@ -1081,7 +1084,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     work_link.admin_order_field = 'work__id'
 
     def artist_link(self, obj):
-        if not (obj.artist):
+        if not obj.artist:
             return None
         url = reverse(
             'admin:music_publisher_artist_change', args=[obj.artist.id])
@@ -1091,7 +1094,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     artist_link.admin_order_field = 'artist'
 
     def label_link(self, obj):
-        if not (obj.record_label):
+        if not obj.record_label:
             return None
         url = reverse(
             'admin:music_publisher_label_change', args=[obj.record_label.id])
@@ -1107,6 +1110,11 @@ class CWRExportAdmin(admin.ModelAdmin):
     """
 
     actions = None
+
+    def has_add_permission(self, request):
+        if not settings.PUBLISHER_CODE:
+            return False
+        return super().has_add_permission(request)
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
@@ -1242,7 +1250,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
 
-
     def save_related(self, request, form, formsets, change):
         """:meth:`save_model` passes the main object, which is needed to fetch
             CWR from the external service, but only after related objects are
@@ -1340,9 +1347,8 @@ class ACKImportAdmin(admin.ModelAdmin):
             tt, work_id, remote_work_id, dat, status = x
             # work ID is numeric with an optional string
             work_id = work_id.strip()
-            PREFIX = SETTINGS.get('work_id_prefix', '')
-            if work_id.startswith(PREFIX):
-                work_id = work_id[len(PREFIX):]
+            if work_id.startswith(settings.PUBLISHER_CODE):
+                work_id = work_id[len(settings.PUBLISHER_CODE):]
             if not work_id.isnumeric():
                 unknown_work_ids.append(work_id)
                 continue

@@ -1,4 +1,4 @@
-Django>=2.2.8
+Django==3.0.*
 certifi
 chardet
 coverage
@@ -9,6 +9,7 @@ psycopg2-binary
 pytz
 requests
 requests-toolbelt
+sentry-sdk
 Sphinx
 sphinx_rtd_theme
 sphinxcontrib-napoleon

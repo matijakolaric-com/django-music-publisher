@@ -7,8 +7,10 @@ from CWR 2.x specification for compatibility.
 
 import re
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.utils.deconstruct import deconstructible
+from django.conf import settings
+
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
@@ -160,7 +162,44 @@ class CWRFieldValidator:
                 raise ValidationError(
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
-        elif ('name' in name or 'label' in name or name in [
-            'cd_identifier', 'saan', 'library']):
+        elif ('name' in name or
+                'label' in name or
+                name in ['cd_identifier', 'saan', 'library']):
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
+
+
+def validate_settings():
+    """CWR-compliance validation for settings"""
+    if settings.PUBLISHER_NAME:
+        try:
+            CWRFieldValidator('name')(settings.PUBLISHER_NAME)
+        except ValidationError as e:
+            raise ImproperlyConfigured('PUBLISHER_NAME: ' + str(e))
+    if settings.PUBLISHER_CODE:
+        try:
+            CWRFieldValidator('name')(settings.PUBLISHER_CODE)
+        except ValidationError as e:
+            raise ImproperlyConfigured('PUBLISHER_CODE: ' + str(e))
+        if not 2 <= len(settings.PUBLISHER_CODE) <= 3:
+            raise ImproperlyConfigured(
+                'PUBLISHER_CODE: must be 2-3 characters long')
+    if settings.PUBLISHER_IPI_BASE:
+        try:
+            CWRFieldValidator('ipi_base')(settings.PUBLISHER_IPI_BASE)
+        except ValidationError as e:
+            raise ImproperlyConfigured('PUBLISHER_IPI_BASE: ' + str(e))
+    if settings.PUBLISHER_IPI_NAME:
+        try:
+            CWRFieldValidator('ipi_name')(settings.PUBLISHER_IPI_NAME)
+        except ValidationError as e:
+            raise ImproperlyConfigured('PUBLISHER_IPI_NAME: ' + str(e))
+
+    keys = [s[0] for s in settings.SOCIETIES]
+    for t in ['PR', 'MR', 'SR']:
+        attr = getattr(settings, 'PUBLISHER_SOCIETY_' + t)
+        if attr and attr not in keys:
+            raise ImproperlyConfigured(
+                'PUBLISHER_SOCIETY_{}: Unknown society code "{}".'.format(
+                    t, attr
+                ))

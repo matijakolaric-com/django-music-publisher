@@ -14,35 +14,24 @@ from django.db import models
 from django.template import Context
 
 from .base import (IPIBase, PersonBase, TitleBase, get_societies)
-from .const import (CAN_NOT_BE_CONTROLLED_MSG, ENFORCE_PUBLISHER_FEE,
-                    ENFORCE_SAAN, SETTINGS, SOCIETIES, SOCIETY_DICT,
-                    WORK_ID_PREFIX)
 from .cwr_templates import *
 from .validators import CWRFieldValidator
+from django.conf import settings
 
+SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
 
-def normalize_dict(full_dict, inner_dict, key, code_key='code'):
-    """Normalize a dictionary
-    
-    Args:
-        full_dict (dict): Complete dictionary 
-        inner_dict (dict): Dictionary that holds denormaliyed data
-        key (str): Key for full_dict where the data from inner_dict goes
-        code_key (str, optional): Description
-    
-    Returns:
-        str: the key under which the data was normalized
-    """
-    code = inner_dict.pop(code_key)
-    full_dict[key].update({code: inner_dict})
-    return code
+WORLD_DICT = {
+    'tis-a': '2WL',
+    'tis-n': '2136',
+    'name': 'World'
+}
 
 
 class Artist(PersonBase, models.Model):
     """Performing artists.
     
     Attributes:
-        isni (django.db.models.CharField): International Standard Name Identifier
+        isni (django.db.models.CharField): International Standard Name Id
     """
 
     class Meta:
@@ -68,6 +57,7 @@ class Artist(PersonBase, models.Model):
             dict: internal dict format
         """
         return {
+            'id': self.id,
             'code': self.artist_id,
             'last_name': self.last_name,
             'first_name': self.first_name or None,
@@ -118,6 +108,7 @@ class Label(models.Model):
             dict: internal dict format
         """
         return {
+            'id': self.id,
             'code': self.label_id,
             'name': self.name,
         }
@@ -157,6 +148,7 @@ class Library(models.Model):
             dict: internal dict format
         """
         return {
+            'id': self.id,
             'code': self.library_id,
             'name': self.name,
         }
@@ -164,14 +156,18 @@ class Library(models.Model):
 
 class Release(models.Model):
     """Music Release (album / other product)
-    
+
     Attributes:
-        cd_identifier (django.db.models.CharField): CD Identifier, used when origin is library
+        cd_identifier (django.db.models.CharField): CD Identifier, used when \
+        origin is library
         ean (django.db.models.CharField): EAN code
-        library (django.db.models.ForeignKey): Foreign key to :class:`.models.Library`
-        recordings (django.db.models.ManyToManyField): M2M to :class:`.models.Recording` through :class:`.models.Track`
+        library (django.db.models.ForeignKey): Foreign key to \
+        :class:`.models.Library`
+        recordings (django.db.models.ManyToManyField): M2M to \
+        :class:`.models.Recording` through :class:`.models.Track`
         release_date (django.db.models.DateField): Date of the release
-        release_label (django.db.models.ForeignKey): Foreign key to :class:`.models.Label`
+        release_label (django.db.models.ForeignKey): Foreign key to \
+        :class:`.models.Label`
         release_title (django.db.models.CharField): Title of the release
     """
 
@@ -188,7 +184,7 @@ class Release(models.Model):
         blank=True, null=True)
     release_title = models.CharField(
         'Release (album) title ',
-        max_length=60, blank=True, null=True, unique=True,
+        max_length=60, blank=True, null=True,
         validators=(CWRFieldValidator('release_title'),))
     ean = models.CharField(
         'Release (album) EAN',
@@ -238,14 +234,14 @@ class Release(models.Model):
                 self.ean):
             return None
         return {
-            'code':
-                self.release_id,
-            'release_title':
+            'id': self.id, 
+            'code': self.release_id,
+            'title':
                 self.release_title or None,
-            'release_date':
+            'date':
                 self.release_date.strftime('%Y%m%d') if self.release_date
                 else None,
-            'release_label':
+            'label':
                 self.release_label.get_dict() if self.release_label else None,
             'ean':
                 self.ean,
@@ -260,7 +256,8 @@ class LibraryReleaseManager(models.Manager):
         """Return only library releases
         
         Returns:
-            django.db.models.query.QuerySet: Queryset with instances of :class:`.models.LibraryRelease`
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.LibraryRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
@@ -279,10 +276,11 @@ class LibraryRelease(Release):
     objects = LibraryReleaseManager()
 
     def clean(self):
-        """Make sure that release title is required if one of the other "non-library" fields is present.
+        """Make sure that release title is required if one of the other \
+        "non-library" fields is present.
         
         Raises:
-            ValidationError: If not ccompliant.
+            ValidationError: If not compliant.
         """
         if ((self.ean or self.release_date or self.release_label)
                 and not self.release_title):
@@ -315,7 +313,8 @@ class CommercialReleaseManager(models.Manager):
         """Return only commercial releases
         
         Returns:
-            django.db.models.query.QuerySet: Queryset with instances of :class:`.models.CommercialRelease`
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.CommercialRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
@@ -348,15 +347,7 @@ class Writer(PersonBase, IPIBase, models.Model):
         return name
 
     def clean(self, *args, **kwargs):
-        """
-
-        :param args:
-        :type args:
-        :param kwargs:
-        :type kwargs:
-        :return:
-        :rtype:
-        """
+        """Check if writer who is controlled can no longer be."""
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
@@ -365,14 +356,15 @@ class Writer(PersonBase, IPIBase, models.Model):
         if self.writerinwork_set.filter(controlled=True).exists():
             raise ValidationError(
                 'This writer is controlled in at least one work. ' +
-                CAN_NOT_BE_CONTROLLED_MSG)
+                'Required fields are: Last name, IPI name and PR society.')
 
     @property
     def writer_id(self):
         """
+        Writer ID for CWR
 
-        :return:
-        :rtype:
+        Returns:
+            str: formatted writer ID
         """
         return 'W{:06d}'.format(self.id)
 
@@ -383,13 +375,17 @@ class Writer(PersonBase, IPIBase, models.Model):
             dict: JSON-serializable data structure
         """
 
-        return {
+        d = {
+            'id': self.id,
             'code': self.writer_id,
             'first_name': self.first_name or None,
             'last_name': self.last_name or None,
-            'ipi_name': self.ipi_name or None,
-            'ipi_base': self.ipi_base or None,
-            'affiliations': [{
+            'ipi_name_number': self.ipi_name or None,
+            'ipi_base_number': self.ipi_base or None,
+            'affiliations': [],
+        }
+        if self.pr_society:
+            d['affiliations'].append({
                 'organization': {
                     'code': self.pr_society,
                     'name': self.get_pr_society_display().split(',')[0],
@@ -398,25 +394,50 @@ class Writer(PersonBase, IPIBase, models.Model):
                     'code': 'PR',
                     'name': 'Performance Rights'
                 },
-                'territory': {
-                    'code': '2136',
-                    'tis_code': '2136',
-                    'name': 'World'
-                }
-            }] if self.pr_society else []
-        }
+                'territory': WORLD_DICT,
+            })
+        if self.mr_society:
+            d['affiliations'].append({
+                'organization': {
+                    'code': self.mr_society,
+                    'name': self.get_mr_society_display().split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'MR',
+                    'name': 'Mechanical Rights'
+                },
+                'territory': WORLD_DICT,
+            })
+        if self.sr_society:
+            d['affiliations'].append({
+                'organization': {
+                    'code': self.sr_society,
+                    'name': self.get_sr_society_display().split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'SR',
+                    'name': 'Synchronization Rights'
+                },
+                'territory': WORLD_DICT,
+            })
+        return d
 
 
 class WorkManager(models.Manager):
     def get_queryset(self):
-        """
-
-        :return:
-        :rtype:
-        """
         return super().get_queryset().prefetch_related('writers')
 
-    def get_dict(self, qs, normalize=False):
+    def get_dict(self, qs):
+        """
+        Return a dictionary with workks from the queryset
+
+        Args:
+            qs(django.db.models.query import QuerySet): works queryset
+
+        Returns:
+            dict: dictionary with works
+
+        """
         qs = qs.prefetch_related('alternatetitle_set')
         qs = qs.prefetch_related('writerinwork_set__writer')
         qs = qs.prefetch_related('artistinwork_set__artist')
@@ -427,61 +448,15 @@ class WorkManager(models.Manager):
         qs = qs.prefetch_related('recordings__tracks__release__release_label')
         qs = qs.prefetch_related('workacknowledgement_set')
 
-        affiliation_types = OrderedDict()
-        agreement_types = OrderedDict()
-        capacities = OrderedDict()
-        origin_types = OrderedDict()
-        version_types = OrderedDict()
-        artists = OrderedDict()
-        labels = OrderedDict()
-        libraries = OrderedDict()
-        organizations = OrderedDict()
-        territories = OrderedDict()
-        writers = OrderedDict()
-        publishers = OrderedDict()
-        releases = OrderedDict()
-        works = OrderedDict()
+        works = []
 
         for work in qs:
-            j = work.get_dict(normalize=normalize)
-            key = j.pop('code')
-            affiliation_types.update(j.pop('affiliation_types'))
-            agreement_types.update(j.pop('agreement_types'))
-            capacities.update(j.pop('capacities'))
-            origin_types.update(j.pop('origin_types'))
-            version_types.update(j.pop('version_types'))
-            writers.update(j.pop('writers'))
-            if normalize:
-                publishers.update(j.pop('publishers'))
-            artists.update(j.pop('artists', {}))
-            labels.update(j.pop('labels', {}))
-            organizations.update(j.pop('organizations', {}))
-            territories.update(j.pop('territories', {}), )
-            libraries.update(j.pop('libraries', {}), )
-            releases.update(j.pop('releases', {}))
-            works[key] = j
+            j = work.get_dict()
+            works.append(j)
 
-        if normalize:
-            return {
-                'affiliation_types': affiliation_types,
-                'agreement_types': agreement_types,
-                'capacities': capacities,
-                'origin_types': origin_types,
-                'version_types': version_types,
-                'artists': artists,
-                'labels': labels,
-                'libraries': libraries,
-                'organizations': organizations,
-                'territories': territories,
-                'publishers': publishers,
-                'writers': writers,
-                'releases': releases,
-                'works': works,
-            }
-        else:
-            return {
-                'works': works,
-            }
+        return {
+            'works': works,
+        }
 
 
 class Work(TitleBase):
@@ -523,20 +498,21 @@ class Work(TitleBase):
 
     @property
     def work_id(self):
-        """Create Work ID used in registrations
+        """Create Work ID used in registrations.
 
         Returns:
             str: Internal Work ID
         """
         if self.id is None:
             return ''
-        return '{}{:06}'.format(WORK_ID_PREFIX, self.id)
+        return '{}{:06}'.format(settings.PUBLISHER_CODE, self.id)
 
     def is_modification(self):
         """
+        Check if the work is a modification.
 
-        :return:
-        :rtype:
+        Returns:
+            bool: True if modification, False if original
         """
         return bool(self.original_title)
 
@@ -556,110 +532,72 @@ class Work(TitleBase):
             self.title.upper(),
             ' / '.join(w.last_name.upper() for w in self.writers.distinct()))
 
-
-    def get_publishers_dict(self):
+    @staticmethod
+    def get_publisher_dict():
         """Create data structure for the publisher.
 
         Returns:
             dict: JSON-serializable data structure
         """
         j = {
-            SETTINGS['publisher_id']: {
-                'name' : SETTINGS['publisher_name'],
-                'ipi_name': SETTINGS['publisher_ipi_name'],
-                'ipi_base': SETTINGS.get('publisher_ipi_base'),
-                'affiliations': [{
-                    'organization': {
-                        'code': SETTINGS['publisher_pr_society'],
-                        'name': SOCIETY_DICT.get(
-                            SETTINGS['publisher_pr_society']
-                        ).split(',')[0],
-                    },
-                    'affiliation_type': {
-                        'code': 'PR',
-                        'name': 'Performance Rights'
-                    },
-                    'territory': {
-                        'code': '2136',
-                        'tis_code': '2136',
-                        'name': 'World'
-                    }
-                }]
-            }
+            'id': 1,
+            'code': settings.PUBLISHER_CODE,
+            'name': settings.PUBLISHER_NAME,
+            'ipi_name_number': settings.PUBLISHER_IPI_NAME,
+            'ipi_base_number': settings.PUBLISHER_IPI_BASE,
+            'affiliations': [{
+                'organization': {
+                    'code': settings.PUBLISHER_SOCIETY_PR,
+                    'name': SOCIETY_DICT.get(
+                        settings.PUBLISHER_SOCIETY_PR,
+                        ''
+                    ).split(',')[0],
+                },
+                'affiliation_type': {
+                    'code': 'PR',
+                    'name': 'Performance Rights'
+                },
+                'territory': WORLD_DICT,
+            }]
         }
 
         # append MR data to affiliations id needed
-        if SETTINGS.get('publisher_mr_society'):
-            j[SETTINGS['publisher_id']]['affiliations'].append({
+        if settings.PUBLISHER_SOCIETY_MR:
+            j['affiliations'].append({
                 'organization': {
-                    'code': SETTINGS['publisher_mr_society'],
+                    'code': settings.PUBLISHER_SOCIETY_MR,
                     'name': SOCIETY_DICT.get(
-                        SETTINGS['publisher_mr_society']
+                        settings.PUBLISHER_SOCIETY_MR,
+                        ''
                     ).split(',')[0],
                 },
                 'affiliation_type': {
                     'code': 'MR',
                     'name': 'Mechanical Rights'
                 },
-                'territory': {
-                    'code': '2136',
-                    'tis_code': '2136',
-                    'name': 'World'
-                }
+                'territory': WORLD_DICT,
             })
 
         # append SR data to affiliations id needed
-        if SETTINGS.get('publisher_sr_society'):
-            j[SETTINGS['publisher_id']]['affiliations'].append({
+        if settings.PUBLISHER_SOCIETY_SR:
+            j['affiliations'].append({
                 'organization': {
-                    'code': SETTINGS['publisher_sr_society'],
+                    'code': settings.PUBLISHER_SOCIETY_SR,
                     'name': SOCIETY_DICT.get(
-                        SETTINGS['publisher_sr_society']
+                        settings.PUBLISHER_SOCIETY_SR,
+                        ''
                     ).split(',')[0],
                 },
                 'affiliation_type': {
                     'code': 'SR',
                     'name': 'Synchronization Rights'
                 },
-                'territory': {
-                    'code': '2136',
-                    'tis_code': '2136',
-                    'name': 'World'
-                }
+                'territory': WORLD_DICT,
             })
 
         return j
 
-    @staticmethod
-    def normalize_affiliation(j, aff):
-        """Normalize publisher affiliations.
-
-        This refers to organizations, affiliation types and territories.
-        """
-        # Organization
-        aff['organization'] = normalize_dict(
-            j, aff['organization'], 'organizations')
-        # Affiliation Type
-        aff['affiliation_type'] = normalize_dict(
-            j, aff['affiliation_type'], 'affiliation_types')
-        # Territory
-        aff['territory'] = normalize_dict(
-            j, aff['territory'], 'territories')
-
-
-    @staticmethod
-    def normalize_publisher_affiliations(j):
-        """Normalize publisher affiliations.
-
-        This refers to organizations, affiliation types and territories.
-        """
-
-        pid = SETTINGS['publisher_id']
-        for aff in j['publishers'][pid]['affiliations']:
-            Work.normalize_affiliation(j, aff)
-
-
-    def get_dict(self, normalize=True):
+    def get_dict(self):
         """Create a data structure that can be serialized as JSON.
 
         Normalize the structure if required.
@@ -669,6 +607,7 @@ class Work(TitleBase):
         """
 
         j = {
+            'id': self.id,
             'code': self.work_id,
             'work_title': self.title,
             'version_type': {
@@ -682,124 +621,40 @@ class Work(TitleBase):
             'other_titles': [
                 at.get_dict() for at in self.alternatetitle_set.all()],
 
-            'affiliation_types': {},
-            'agreement_types': {},
-            'capacities': {},
-            'origin_types': {},
-            'version_types': {},
-            'artists': {},
-            'labels': {},
-            'libraries': {},
-            'organizations': {},
-            'territories': {},
-            'publishers': self.get_publishers_dict(),
-            'writers': {},
             'origin': (
                 self.library_release.get_origin_dict() if self.library_release
                 else None),
-            'releases': {},
-            'recordings': {},
-            'writers_for_work': [],
-            'artists_for_work': [],
+            'writers': [],
+            'performing_artists': [],
+            'recordings': [],
+            'original_works': [],
             'cross_references': []
         }
 
         if self.original_title:
-            j.update({
-                'original_work': {
-                    'work_title': self.original_title,
-                }
-            })
-
-        if normalize:
-            self.normalize_publisher_affiliations(j)
-            j['version_type'] = normalize_dict(
-                j, j['version_type'], 'version_types'
-            )
-
-        if normalize and j['origin']:
-            # Normalize origin type and library data
-            j['origin']['library'] = normalize_dict(
-                j, j['origin']['library'], 'libraries'
-            )
-            j['origin']['origin_type'] = normalize_dict(
-                j, j['origin']['origin_type'], 'origin_types'
-            )
+            d = {'work_title': self.original_title}
+            j['original_works'].append(d)
 
         # add data for (live) artists in work, normalize of required
         for aiw in self.artistinwork_set.all():
             d = aiw.get_dict()
-            if normalize:
-                d['artist'] = normalize_dict(
-                    j, d['artist'], 'artists'
-                )
-            j['artists_for_work'].append(d)
+            j['performing_artists'].append(d)
 
         # add data for writers in work, normalize of required
         for wiw in self.writerinwork_set.all():
-            d =  wiw.get_dict()
-            if normalize and d['capacity']:
-                d['capacity'] = normalize_dict(j, d['capacity'], 'capacities')
-            w = d.get('writer', None)
-            if normalize and w:
-                for aff in w.get('affiliations', []):
-                    self.normalize_affiliation(j, aff)
-
-                for pwr in d.get('publishers_for_writer', []):
-                    # Capacity
-                    pwr['capacity'] = normalize_dict(
-                        j, pwr['capacity'], 'capacities')
-
-                    agreement = pwr.get('agreement')
-                    if not agreement:
-                        continue
-                    # Recipient organization
-                    agreement['recipient_organization'] = normalize_dict(
-                        j, agreement['recipient_organization'], 'organizations'
-                    )
-                    # Agreement type
-                    agreement['agreement_type'] = normalize_dict(
-                        j, agreement['agreement_type'], 'agreement_types'
-                    )
-                d['writer'] = normalize_dict(j, w, 'writers')
-
-            j['writers_for_work'].append(d)
+            d = wiw.get_dict()
+            j['writers'].append(d)
 
         # add recording data, normalize if required
         for recording in self.recordings.all():
             rec = recording.get_dict(with_releases=True)
-            rec_code = rec.pop('code')
-            if normalize:
-                if rec['recording_artist']:
-                    rec['recording_artist'] = normalize_dict(
-                        j, rec['recording_artist'], 'artists'
-                    )
-                if rec['record_label']:
-                    rec['record_label'] = normalize_dict(
-                        j, rec['record_label'], 'labels'
-                    )
-                for track in rec['tracks']:
-                    rel = track['release']
-                    label = rel['release_label']
-                    if label:
-                        rel['release_label'] = normalize_dict(
-                            j, rel['release_label'], 'labels'
-                        )
-                    track['release'] = normalize_dict(
-                        j, rel, 'releases'
-                    )
-            j['recordings'].update({rec_code: rec})
+            j['recordings'].append(rec)
 
         # add cross references, currently only society work ids from ACKs
         for wa in self.workacknowledgement_set.all():
             if not wa.remote_work_id:
                 continue
             d = wa.get_dict()
-            if normalize:
-                # Organization
-                d['organization'] = normalize_dict(
-                    j, d['organization'], 'organizations'
-                )
             j['cross_references'].append(d)
 
         return j
@@ -828,13 +683,12 @@ class AlternateTitle(TitleBase):
             dict: JSON-serializable data structure
         """
         return {
-            'alternate_title': str(self),
+            'title': str(self),
             'title_type': {
                 'code': 'AT',
                 'name': 'Alternative Title',
             },
         }
-
 
     def __str__(self):
         if self.suffix:
@@ -866,8 +720,8 @@ class ArtistInWork(models.Model):
     def get_dict(self):
         """
 
-        :return:
-        :rtype:
+        Returns:
+            dict: taken from :meth:`models.Artist.get_dict`
         """
         return {'artist': self.artist.get_dict()}
 
@@ -905,13 +759,16 @@ class WriterInWork(models.Model):
     writer = models.ForeignKey(
         Writer, on_delete=models.PROTECT,blank=True, null=True)
     saan = models.CharField(
-        'Society-assigned agreement number',
-        help_text='Use this field for specific agreements only.',
+        'Society-assigned specific agreement number',
+        help_text= 'Use this field for specific agreements only.\n'
+            'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
         validators=(CWRFieldValidator('saan'),),)
     controlled = models.BooleanField(default=False)
-    relative_share = models.DecimalField(max_digits=5, decimal_places=2)
+    relative_share = models.DecimalField(
+        'Manuscript share', max_digits=5, decimal_places=2)
     capacity = models.CharField(
+        'Role',
         max_length=2, blank=True, choices=(
             ('CA', 'Composer&Lyricist'),
             ('C ', 'Composer'),
@@ -922,7 +779,9 @@ class WriterInWork(models.Model):
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text='Percentage of royalties kept by the publisher')
+        help_text =
+            'Percentage of royalties kept by the publisher,\n'
+            'in a specific agreement.')
 
     def __str__(self):
         return str(self.writer)
@@ -961,13 +820,13 @@ class WriterInWork(models.Model):
                 d['writer'] = 'Must be set for a controlled writer.'
             else:
                 if not self.writer._can_be_controlled:
-                    d['writer'] = CAN_NOT_BE_CONTROLLED_MSG
-                if (ENFORCE_SAAN and
+                    d['writer'] = 'IPI name and PR society must be set.'
+                if (settings.REQUIRE_SAAN and
                         not self.writer.generally_controlled and
                         not self.saan):
                     d['saan'] = \
                         'Must be set. (controlled, no general agreement)'
-                if (ENFORCE_PUBLISHER_FEE and
+                if (settings.REQUIRE_PUBLISHER_FEE and
                         not self.writer.generally_controlled and
                         not self.publisher_fee):
                     d['publisher_fee'] = \
@@ -981,6 +840,38 @@ class WriterInWork(models.Model):
         if d:
             raise ValidationError(d)
 
+    def get_agreement_dict(self):
+        """Get agreement dictionary for this writer in work."""
+
+        pub_pr_soc = settings.PUBLISHER_SOCIETY_PR
+        pub_pr_name = SOCIETY_DICT.get(pub_pr_soc, '').split(',')[0]
+
+        if not self.controlled or not self.writer:
+            return None
+        if self.writer.generally_controlled and not self.saan:
+            # General
+            return {
+                'recipient_organization': {
+                    'code': pub_pr_soc,
+                    'name': pub_pr_name,
+                },
+                'recipient_agreement_number': self.writer.saan,
+                'agreement_type': {
+                    'code': 'OG', 'name': 'Original General',
+                }
+            }
+        else:
+            return {
+                'recipient_organization': {
+                    'code': pub_pr_soc,
+                },
+                'recipient_agreement_number': self.saan,
+                'agreement_type': {
+                    'code': 'OS',
+                    'name': 'Original Specific',
+                }
+            }
+
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
 
@@ -988,44 +879,21 @@ class WriterInWork(models.Model):
             dict: JSON-serializable data structure
         """
 
-        pub_pr_soc = SETTINGS['publisher_pr_society']
-        pub_pr_name = SOCIETY_DICT[pub_pr_soc].split(',')[0]
-
         j = {
             'writer': self.writer.get_dict() if self.writer else None,
             'controlled': self.controlled,
             'relative_share': str(self.relative_share / 100),
-            'capacity': {
+            'writer_role': {
                 'code': self.capacity.strip(),
                 'name': self.get_capacity_display()
             } if self.capacity else None,
-            'publishers_for_writer': [{
-                'publisher': SETTINGS['publisher_id'],
-                'capacity': {
+            'original_publishers': [{
+                'publisher': self.work.get_publisher_dict(),
+                'publisher_role': {
                     'code': 'E',
                     'name': 'Original publisher'
                 },
-                'agreement': {
-                    'recipient_organization': {
-                        'code': pub_pr_soc,
-                        'name': pub_pr_name,
-                    },
-                    'recipient_agreement_number': self.saan,
-                    'agreement_type': {
-                        'code': 'OS',
-                        'name': 'Original Specific',
-                    }
-                } if (self.saan and self.saan != self.writer.saan) else {
-                    'recipient_organization': {
-                        'code': pub_pr_soc,
-                        'name': pub_pr_name,
-                    },
-                    'recipient_agreement_number': self.writer.saan,
-                    'agreement_type': {
-                        'code': 'OG',
-                        'name': 'Original General',
-                    }
-                } if self.writer.saan else None
+                'agreement': self.get_agreement_dict()
             }] if self.controlled else [],
         }
         return j
@@ -1131,7 +999,7 @@ class Recording(models.Model):
         """
         if self.id is None:
             return ''
-        return '{}{:06}R'.format(SETTINGS.get('work_id_prefix', ''), self.id)
+        return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
 
 
     def get_dict(self, with_releases=False):
@@ -1141,6 +1009,8 @@ class Recording(models.Model):
             dict: JSON-serializable data structure
         """
         j = {
+            'id':
+                self.id,
             'code':
                 self.recording_id,
             'recording_title':
@@ -1249,7 +1119,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_0000_V3-0-0.{}'.format(
             self.year,
             self.num_in_year,
-            SETTINGS.get('publisher_id'),
+            settings.PUBLISHER_CODE,
             ext)
 
     @property
@@ -1262,7 +1132,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_000.V21'.format(
             self.year,
             self.num_in_year,
-            SETTINGS.get('publisher_id'))
+            settings.PUBLISHER_CODE)
 
 
     def __str__(self):
@@ -1281,9 +1151,13 @@ class CWRExport(models.Model):
         """
         if self.version == '30':
             template = TEMPLATES_30.get(key)
+        elif key == 'HDR' and len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9:
+            template = TEMPLATES_21.get('HDR_8')
         else:
             template = TEMPLATES_21.get(key)
-        return template.render(Context(record)).upper()
+        record.update({'settings': settings})
+        return template.render(
+            Context(record)).upper()
 
     def get_transaction_record(self, key, record):
         """Create CWR transaction record (row) from the key and dict.
@@ -1306,40 +1180,39 @@ class CWRExport(models.Model):
         return line
 
     def yield_ISWC_request_lines(self, works):
-        for work_id, work in works.items():
+        for work in works:
 
             # ISR
             self.record_sequence = 0
-            work['work_id'] = work_id
             if work['iswc']:
                 work['indicator'] = 'U'
             yield self.get_transaction_record('ISR', work)
 
             # WRI
             reported = set()
-            for wiw in work['writers_for_work']:
+            for wiw in work['writers']:
                 w = wiw['writer']
                 if not w:
                     continue  # goes to OWR
-                tup = (w['code'], wiw['capacity']['code'])
+                tup = (w['code'], wiw['writer_role']['code'])
                 if tup in reported:
                     continue
                 reported.add(tup)
                 w.update({
-                    'capacity': wiw['capacity']['code'],
+                    'writer_role': wiw['writer_role']['code'],
                 })
                 yield self.get_transaction_record('WRI', w)
 
             self.transaction_count += 1
 
     def yield_registration_lines(self, works):
-        for work_id, work in works.items():
+        for work in works:
 
             # WRK
             self.record_sequence = 0
             d = {
                 'record_type': self.nwr_rev,
-                'work_id': work_id,
+                'code': work['code'],
                 'work_title': work['work_title'],
                 'iswc': work['iswc'],
                 'recorded_indicator': 'Y' if work['recordings'] else 'U',
@@ -1355,10 +1228,10 @@ class CWRExport(models.Model):
             controlled_writer_ids = set()  # used for co-publishing
             copublished_writer_ids = set()  # used for co-publishing
             controlled_shares = defaultdict(Decimal)
-            for wiw in work['writers_for_work']:
+            for wiw in work['writers']:
                 if wiw['controlled']:
                     controlled_writer_ids.add(wiw['writer']['code'])
-            for wiw in work['writers_for_work']:
+            for wiw in work['writers']:
                 writer = wiw['writer']
                 share = Decimal(wiw['relative_share'])
                 if wiw['controlled']:
@@ -1370,12 +1243,11 @@ class CWRExport(models.Model):
                     copublished_writer_ids.add(key)
                     other_publisher_share += share
                     controlled_shares[key] += share
-            publisher = SETTINGS
-            publisher['sequence'] = 1
-            publisher['share'] = controlled_relative_share
-            yield self.get_transaction_record('SPU', publisher)
-            if publisher['share']:
-                yield self.get_transaction_record('SPT', publisher)
+            yield self.get_transaction_record(
+                'SPU', {'share': controlled_relative_share})
+            if controlled_relative_share:
+                yield self.get_transaction_record(
+                    'SPT', {'share': controlled_relative_share})
 
             # OPU, co-publishing only
             if other_publisher_share:
@@ -1385,26 +1257,30 @@ class CWRExport(models.Model):
                     'OPT', {'share': other_publisher_share})
 
             # SWR, SWT, PWR
-            for wiw in work['writers_for_work']:
+            for wiw in work['writers']:
                 if not wiw['controlled']:
                     continue  # goes to OWR
                 w = wiw['writer']
-                agr = wiw['publishers_for_writer'][0]['agreement']
+                agr = wiw['original_publishers'][0]['agreement']
                 saan = agr['recipient_agreement_number'] if agr else None
                 affiliations = w.get('affiliations', [])
                 for aff in affiliations:
                     if aff['affiliation_type']['code'] == 'PR':
                         w['pr_society'] = aff['organization']['code']
-                        break
+                    elif aff['affiliation_type']['code'] == 'MR':
+                        w['mr_society'] = aff['organization']['code']
+                    elif aff['affiliation_type']['code'] == 'SR':
+                        w['sr_society'] = aff['organization']['code']
+
                 w.update({
-                    'capacity': wiw['capacity']['code'],
+                    'writer_role': wiw['writer_role']['code'],
                     'share': controlled_shares[w['code']],
                     'saan': saan,
+                    'original_publishers': wiw['original_publishers']
                 })
                 yield self.get_transaction_record('SWR', w)
                 if w['share']:
                     yield self.get_transaction_record('SWT', w)
-                w.update(publisher)
                 w['publisher_sequence'] = 1
                 yield self.get_transaction_record('PWR', w)
                 if (self.version == '30' and other_publisher_share and w and
@@ -1417,7 +1293,7 @@ class CWRExport(models.Model):
                         })
 
             # OWR
-            for wiw in work['writers_for_work']:
+            for wiw in work['writers']:
                 if wiw['controlled']:
                     continue  # done in SWR
                 writer = wiw['writer']
@@ -1429,11 +1305,14 @@ class CWRExport(models.Model):
                     for aff in affiliations:
                         if aff['affiliation_type']['code'] == 'PR':
                             w['pr_society'] = aff['organization']['code']
-                            break
+                        elif aff['affiliation_type']['code'] == 'MR':
+                            w['mr_society'] = aff['organization']['code']
+                        elif aff['affiliation_type']['code'] == 'SR':
+                            w['sr_society'] = aff['organization']['code']
                 else:
                     w = {'writer_unknown_indicator': 'Y'}
                 w.update({
-                    'capacity': wiw['capacity']['code'] if wiw['capacity']
+                    'writer_role': wiw['writer_role']['code'] if wiw['writer_role']
                                 else None,
                     'share': Decimal(wiw['relative_share'])})
                 yield self.get_transaction_record('OWR', w)
@@ -1446,8 +1325,8 @@ class CWRExport(models.Model):
             # ALT
             alt_titles = set()
             for at in work['other_titles']:
-                alt_titles.add(at['alternate_title'])
-            for rec in work['recordings'].values():
+                alt_titles.add(at['title'])
+            for rec in work['recordings']:
                 if rec['recording_title']:
                     alt_titles.add(rec['recording_title'])
                 if rec['version_title']:
@@ -1460,14 +1339,14 @@ class CWRExport(models.Model):
 
             # VER
             if work['version_type']['code'] == 'MOD':
-                yield self.get_transaction_record('OWK', work['original_work'])
+                yield self.get_transaction_record('OWK', work['original_works'][0])
 
             # PER
             # artists can be recording and/or live, so let's see
             artists = {}
-            for aiw in work['artists_for_work']:
+            for aiw in work['performing_artists']:
                 artists.update({aiw['artist']['code']: aiw['artist']})
-            for rec in work['recordings'].values():
+            for rec in work['recordings']:
                 if not rec['recording_artist']:
                     continue
                 artists.update({
@@ -1476,8 +1355,7 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('PER', artist)
 
             # REC
-            for code, rec in work['recordings'].items():
-                rec['code'] = code
+            for rec in work['recordings']:
                 if rec['recording_artist']:
                     rec['display_artist'] = '{} {}'.format(
                         rec['recording_artist']['first_name'] or '',
@@ -1518,7 +1396,9 @@ class CWRExport(models.Model):
         yield self.get_record('HDR', {
             'creation_date': datetime.now(),
             'filename': self.filename,
-            **SETTINGS
+            'publisher_ipi_name': settings.PUBLISHER_IPI_NAME,
+            'publisher_name': settings.PUBLISHER_NAME,
+            'publisher_code': settings.PUBLISHER_CODE,
         })
 
         yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
@@ -1592,8 +1472,8 @@ class WorkAcknowledgement(models.Model):
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(max_length=20, blank=True)
 
-    def __str__(self):
-        return self.status
+    # def __str__(self):
+    #     return self.status
 
     def get_dict(self):
         """
