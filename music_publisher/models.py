@@ -15,7 +15,7 @@ from django.db import models
 from django.template import Context
 
 from .base import (IPIBase, PersonBase, TitleBase, get_societies)
-from .cwr_templates import *
+from .cwr_templates import TEMPLATES_21, TEMPLATES_30
 from .validators import CWRFieldValidator
 
 SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
@@ -781,9 +781,9 @@ class WriterInWork(models.Model):
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text=
-        'Percentage of royalties kept by the publisher,\n'
-        'in a specific agreement.')
+        help_text=(
+            'Percentage of royalties kept by the publisher,\n'
+            'in a specific agreement.'))
 
     def __str__(self):
         return str(self.writer)

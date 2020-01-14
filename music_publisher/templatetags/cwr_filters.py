@@ -125,7 +125,7 @@ def capacity(value):
 
 
 @register.filter(name='agreement_type')
-def capacity(value):
+def agreement_type(value):
     """Display agreement_type"""
 
     value = value.strip()
