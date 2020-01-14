@@ -720,8 +720,8 @@ class ArtistInWork(models.Model):
     def get_dict(self):
         """
 
-        :return:
-        :rtype:
+        Returns:
+            dict: taken from :meth:`models.Artist.get_dict`
         """
         return {'artist': self.artist.get_dict()}
 
