@@ -7,7 +7,6 @@ import os
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
-from music_publisher.validators import CWRFieldValidator
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

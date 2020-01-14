@@ -26,10 +26,9 @@ WORLD_DICT = {
     'name': 'World'
 }
 
-
 class Artist(PersonBase, models.Model):
     """Performing artists.
-    
+
     Attributes:
         isni (django.db.models.CharField): International Standard Name Id
     """
@@ -52,7 +51,7 @@ class Artist(PersonBase, models.Model):
 
     def get_dict(self):
         """Get the object in an internal dictionary format
-        
+
         Returns:
             dict: internal dict format
         """
@@ -67,16 +66,15 @@ class Artist(PersonBase, models.Model):
     @property
     def artist_id(self):
         """Artist identifier
-        
+
         Returns:
             str: Artist ID
         """
         return 'A{:06d}'.format(self.id)
 
-
 class Label(models.Model):
     """Music Label.
-    
+
     Attributes:
         name (django.db.models.CharField): Label Name
     """
@@ -95,7 +93,7 @@ class Label(models.Model):
     @property
     def label_id(self):
         """Label identifier
-        
+
         Returns:
             str: Label ID
         """
@@ -103,7 +101,7 @@ class Label(models.Model):
 
     def get_dict(self):
         """Get the object in an internal dictionary format
-        
+
         Returns:
             dict: internal dict format
         """
@@ -112,7 +110,6 @@ class Label(models.Model):
             'code': self.label_id,
             'name': self.name,
         }
-
 
 class Library(models.Model):
     """Music Library.
@@ -135,7 +132,7 @@ class Library(models.Model):
     @property
     def library_id(self):
         """Library identifier
-        
+
         Returns:
             str: Library ID
         """
@@ -143,7 +140,7 @@ class Library(models.Model):
 
     def get_dict(self):
         """Get the object in an internal dictionary format
-        
+
         Returns:
             dict: internal dict format
         """
@@ -152,7 +149,6 @@ class Library(models.Model):
             'code': self.library_id,
             'name': self.name,
         }
-
 
 class Release(models.Model):
     """Music Release (album / other product)
@@ -216,7 +212,7 @@ class Release(models.Model):
     @property
     def release_id(self):
         """Release identifier.
-        
+
         Returns:
             str: Release ID
         """
@@ -224,7 +220,7 @@ class Release(models.Model):
 
     def get_dict(self):
         """Get the object in an internal dictionary format
-        
+
         Returns:
             dict: internal dict format
         """
@@ -247,24 +243,22 @@ class Release(models.Model):
                 self.ean,
         }
 
-
 class LibraryReleaseManager(models.Manager):
     """Manager for a proxy class :class:`.models.LibraryRelease`
     """
 
     def get_queryset(self):
         """Return only library releases
-        
+
         Returns:
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.LibraryRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
-
 class LibraryRelease(Release):
     """Proxy class for Library Releases (AKA Library CDs)
-    
+
     Attributes:
         objects (LibraryReleaseManager): Database Manager
     """
@@ -278,7 +272,7 @@ class LibraryRelease(Release):
     def clean(self):
         """Make sure that release title is required if one of the other \
         "non-library" fields is present.
-        
+
         Raises:
             ValidationError: If not compliant.
         """
@@ -292,7 +286,7 @@ class LibraryRelease(Release):
         """Get the object in an internal dictionary format.
 
         This is used for work origin, not release data.
-        
+
         Returns:
             dict: internal dict format
         """
@@ -305,24 +299,22 @@ class LibraryRelease(Release):
             'library': self.library.get_dict()
         }
 
-
 class CommercialReleaseManager(models.Manager):
     """Manager for a proxy class :class:`.models.CommercialRelease`
     """
 
     def get_queryset(self):
         """Return only commercial releases
-        
+
         Returns:
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
-
 class CommercialRelease(Release):
     """Proxy class for Commercial Releases
-    
+
     Attributes:
         objects (CommercialReleaseManager): Database Manager
     """
@@ -332,7 +324,6 @@ class CommercialRelease(Release):
         verbose_name_plural = '  Commercial Releases'
 
     objects = CommercialReleaseManager()
-
 
 class Writer(PersonBase, IPIBase, models.Model):
     """Base class for writers, the second most important top-level class.
@@ -424,7 +415,6 @@ class Writer(PersonBase, IPIBase, models.Model):
             })
         return d
 
-
 class WorkManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().prefetch_related('writers')
@@ -459,7 +449,6 @@ class WorkManager(models.Manager):
         return {
             'works': works,
         }
-
 
 class Work(TitleBase):
     """Concrete class, with references to foreign objects.
@@ -661,7 +650,6 @@ class Work(TitleBase):
 
         return j
 
-
 class AlternateTitle(TitleBase):
     """Concrete class for alternate titles.
 
@@ -697,7 +685,6 @@ class AlternateTitle(TitleBase):
             return '{} {}'.format(self.work.title.upper(), self.title.upper())
         return super().__str__()
 
-
 class ArtistInWork(models.Model):
     """Artist performing the work (live in CWR 3).
 
@@ -726,7 +713,6 @@ class ArtistInWork(models.Model):
             dict: taken from :meth:`models.Artist.get_dict`
         """
         return {'artist': self.artist.get_dict()}
-
 
 class WriterInWork(models.Model):
     """Writers who created this work.
@@ -900,7 +886,6 @@ class WriterInWork(models.Model):
         }
         return j
 
-
 class Recording(models.Model):
     """Holds data on first recording.
 
@@ -1043,7 +1028,6 @@ class Recording(models.Model):
                 })
         return j
 
-
 class Track(models.Model):
     class Meta:
         unique_together = (('recording', 'release'), ('release', 'cut_number'))
@@ -1056,7 +1040,6 @@ class Track(models.Model):
     cut_number = models.PositiveSmallIntegerField(
         blank=True, null=True,
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
-
 
 class CWRExport(models.Model):
     """Export in CWR format.
@@ -1437,7 +1420,6 @@ class CWRExport(models.Model):
         self.cwr = ''.join(self.yield_lines())
         self.save()
 
-
 class WorkAcknowledgement(models.Model):
     """Acknowledgement of work registration.
 
@@ -1495,7 +1477,6 @@ class WorkAcknowledgement(models.Model):
             'identifier': self.remote_work_id,
         }
         return j
-
 
 class ACKImport(models.Model):
     """CWR acknowledgement file import.
