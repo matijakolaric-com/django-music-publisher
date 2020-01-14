@@ -18,7 +18,6 @@
     "DJANGO_SUPERUSER_USERNAME": {
       "description": "Username for the administrator, used only for installation",
       "required": true,
-      "default": "administrator"
     },
     "DJANGO_SUPERUSER_PASSWORD": {
       "description": "Password for the administrator, used only during installation",
@@ -71,17 +70,14 @@
     "PUBLISHING_AGREEMENT_PUBLISHER_PR": {
       "description": "Performance share transferred from a controlled writer to the publisher",
       "required": false,
-      "default": "0.5"
     },
     "PUBLISHING_AGREEMENT_PUBLISHER_MR": {
       "description": "Mechanical share transferred from a controlled writer to the publisher",
       "required": false,
-      "default": "1.0"
     },
     "PUBLISHING_AGREEMENT_PUBLISHER_SR": {
       "description": "Synchronization share transferred from a controlled writer to the publisher",
       "required": false,
-      "default": "1.0"
     }
   }
 }
