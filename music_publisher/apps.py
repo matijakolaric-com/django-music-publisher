@@ -1,9 +1,9 @@
 from django.apps import AppConfig
+
 from .validators import validate_settings
 
 
 class MusicPublisherConfig(AppConfig):
-
     """Configuration for Music Publisher app.
 
     Attributes:

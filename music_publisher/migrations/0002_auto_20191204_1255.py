@@ -13,7 +13,6 @@ def strip_zeros_from_societies(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('music_publisher', '0001_initial'),
     ]

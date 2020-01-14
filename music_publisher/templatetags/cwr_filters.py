@@ -4,10 +4,12 @@ Their goal is to format the incoming data to the right fixed-length
 format, as well as do some basic validation.
 """
 
-from django import template
 from decimal import Decimal, ROUND_HALF_UP
-from music_publisher import models
+
+from django import template
 from django.conf import settings
+
+from music_publisher import models
 
 register = template.Library()
 

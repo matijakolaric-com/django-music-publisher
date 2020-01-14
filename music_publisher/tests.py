@@ -66,7 +66,6 @@ def get_data_from_response(response):
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
-
     fixtures = ['publishing_staff.json']
     testing_admins = [
         'artist', 'label', 'library', 'work', 'commercialrelease', 'writer',
@@ -75,22 +74,28 @@ class AdminTest(TestCase):
     @classmethod
     def create_original_work(cls):
         cls.original_work = Work.objects.create(title='The Work',
-            iswc='T1234567893')
+                                                iswc='T1234567893')
         WriterInWork.objects.create(work=cls.original_work,
-            writer=cls.generally_controlled_writer, capacity='C ',
-            relative_share=Decimal('50'), controlled=True)
+                                    writer=cls.generally_controlled_writer,
+                                    capacity='C ',
+                                    relative_share=Decimal('50'),
+                                    controlled=True)
         WriterInWork.objects.create(work=cls.original_work,
-            writer=cls.other_writer, capacity='A ',
-            relative_share=Decimal('25'), controlled=False)
+                                    writer=cls.other_writer, capacity='A ',
+                                    relative_share=Decimal('25'),
+                                    controlled=False)
         wiw = WriterInWork.objects.create(work=cls.original_work,
-            writer=cls.controllable_writer, capacity='A ',
-            relative_share=Decimal('25'), controlled=False)
+                                          writer=cls.controllable_writer,
+                                          capacity='A ',
+                                          relative_share=Decimal('25'),
+                                          controlled=False)
         assert (wiw.get_agreement_dict() is None)
         AlternateTitle.objects.create(work=cls.original_work, suffix=True,
-            title='Behind the Work')
+                                      title='Behind the Work')
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
         Recording.objects.create(work=cls.original_work,
-            record_label=cls.label, artist=cls.artist, isrc='US-S1Z-99-00001')
+                                 record_label=cls.label, artist=cls.artist,
+                                 isrc='US-S1Z-99-00001')
 
     @classmethod
     def create_modified_work(cls):
@@ -104,14 +109,15 @@ class AdminTest(TestCase):
             controlled=True,
             saan='SPECIAL', publisher_fee=Decimal('25'))
         WriterInWork.objects.create(work=cls.modified_work, writer=None,
-            capacity='CA', relative_share=Decimal('0'), controlled=False)
+                                    capacity='CA', relative_share=Decimal('0'),
+                                    controlled=False)
         cls.modified_work.artists.add(cls.artist)
         AlternateTitle.objects.create(work=cls.modified_work, suffix=False,
-            title='The Copy')
+                                      title='The Copy')
         AlternateTitle.objects.create(work=cls.modified_work, suffix=True,
-            title='Behind the Modified Work')
+                                      title='Behind the Modified Work')
         Recording.objects.create(work=cls.modified_work,
-            isrc='US-S1Z-99-00002')
+                                 isrc='US-S1Z-99-00002')
 
     @classmethod
     def create_copublished_work(cls):
@@ -143,15 +149,20 @@ class AdminTest(TestCase):
     @classmethod
     def create_writers(cls):
         cls.generally_controlled_writer = Writer(first_name='John',
-            last_name='Smith', ipi_name='00000000297', pr_society='52',
-            ipi_base='I-123456789-3', sr_society='44',
-            mr_society='44', generally_controlled=True, saan='A1B2C3',
-            publisher_fee=Decimal('0.25'))
+                                                 last_name='Smith',
+                                                 ipi_name='00000000297',
+                                                 pr_society='52',
+                                                 ipi_base='I-123456789-3',
+                                                 sr_society='44',
+                                                 mr_society='44',
+                                                 generally_controlled=True,
+                                                 saan='A1B2C3',
+                                                 publisher_fee=Decimal('0.25'))
         cls.generally_controlled_writer.clean()
         cls.generally_controlled_writer.clean_fields()
         cls.generally_controlled_writer.save()
         cls.other_writer = Writer(first_name='Jane', last_name='Doe',
-            ipi_name='395')
+                                  ipi_name='395')
         cls.other_writer.clean()
         cls.other_writer.save()
 
@@ -159,7 +170,8 @@ class AdminTest(TestCase):
         cls.writer_no_first_name.clean()
         cls.writer_no_first_name.save()
         cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
-            ipi_name='493', pr_society='52', mr_society='44', sr_society='44')
+                                         ipi_name='493', pr_society='52',
+                                         mr_society='44', sr_society='44')
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
 
@@ -308,10 +320,11 @@ class AdminTest(TestCase):
     def test_json(self):
         self.client.force_login(self.staffuser)
         response = self.client.post(
-        reverse('admin:music_publisher_work_changelist'),
-        data={
-            'action': 'create_json', 'select_across': 1,
-            'index': 0, '_selected_action': self.original_work.id})
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.original_work.id
+            })
         self.assertEqual(response.status_code, 200)
 
     def test_label_change(self):
@@ -589,7 +602,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Must be same as in controlled line for this writer.',
-            response.content)
+                      response.content)
 
     def test_altitle_sufix_too_long(self):
         self.client.force_login(self.staffuser)
@@ -612,7 +625,7 @@ class AdminTest(TestCase):
         mock.write(ACK_CONTENT)
         mock.seek(0)
         mockfile = InMemoryUploadedFile(mock, 'acknowledgement_file',
-            'CX180001000_FOO.V22', 'text', 0, None)
+                                        'CX180001000_FOO.V22', 'text', 0, None)
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -712,7 +725,6 @@ class AdminTest(TestCase):
 
 
 class CWRTemplatesTest(SimpleTestCase):
-
     RECORD_TYPES = [
         'ALT', 'GRH', 'GRT', 'HDR', 'WRK', 'OPU', 'OPT', 'ORN', 'OWR', 'PER',
         'PWR', 'REC', 'SPT', 'SPU', 'SWR', 'SWT', 'TRL', 'OWK']
@@ -727,7 +739,8 @@ class CWRTemplatesTest(SimpleTestCase):
                 'record_sequence': None,
                 'first_name': None,
                 'pr_society': '10',
-                'share': Decimal('0.5')}
+                'share': Decimal('0.5')
+            }
             self.assertIsInstance(template.render(Context(d)).upper(), str)
         self.assertIsInstance(cwr_templates.TEMPLATES_30, dict)
         for i, key in enumerate(self.RECORD_TYPES):
@@ -738,7 +751,8 @@ class CWRTemplatesTest(SimpleTestCase):
                 'record_sequence': None,
                 'first_name': None,
                 'pr_society': '10',
-                'share': Decimal('0.5')}
+                'share': Decimal('0.5')
+            }
             self.assertIsInstance(template.render(Context(d)).upper(), str)
 
 
@@ -864,7 +878,6 @@ class ValidatorsTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75')
 )
 class ModelsSimpleTest(TransactionTestCase):
-
     reset_sequences = True
 
     def test_artist(self):
@@ -920,7 +933,6 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(str(writer), 'MATIJA KOLARIC (*)')
 
     def test_work(self):
-
         library = music_publisher.models.Library(name='Music Library')
         library.save()
         self.assertEqual(str(library), 'MUSIC LIBRARY')
@@ -1049,17 +1061,17 @@ class ModelsSimpleTest(TransactionTestCase):
         )
 
         track = music_publisher.models.Track.objects.create(
-            release = release,
-            recording = rec,
-            cut_number = 1
+            release=release,
+            recording=rec,
+            cut_number=1
         )
         track.clean_fields()
         track.clean()
 
         music_publisher.models.Track.objects.create(
-            release = release2,
-            recording = rec2,
-            cut_number = 2
+            release=release2,
+            recording=rec2,
+            cut_number=2
         )
 
         # normalized dict

@@ -8,6 +8,7 @@ from collections import OrderedDict, defaultdict
 from datetime import datetime
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -16,7 +17,6 @@ from django.template import Context
 from .base import (IPIBase, PersonBase, TitleBase, get_societies)
 from .cwr_templates import *
 from .validators import CWRFieldValidator
-from django.conf import settings
 
 SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
 
@@ -83,7 +83,7 @@ class Label(models.Model):
 
     class Meta:
         verbose_name_plural = '  Music Labels'
-        ordering = ('name', )
+        ordering = ('name',)
 
     name = models.CharField(
         max_length=60, unique=True,
@@ -234,7 +234,7 @@ class Release(models.Model):
                 self.ean):
             return None
         return {
-            'id': self.id, 
+            'id': self.id,
             'code': self.release_id,
             'title':
                 self.release_title or None,
@@ -268,8 +268,8 @@ class LibraryRelease(Release):
     Attributes:
         objects (LibraryReleaseManager): Database Manager
     """
-    
-    class Meta:        
+
+    class Meta:
         proxy = True
         verbose_name_plural = '  Library Releases'
 
@@ -285,7 +285,8 @@ class LibraryRelease(Release):
         if ((self.ean or self.release_date or self.release_label)
                 and not self.release_title):
             raise ValidationError({
-                'release_title': 'Required if other release data is set.'})
+                'release_title': 'Required if other release data is set.'
+            })
 
     def get_origin_dict(self):
         """Get the object in an internal dictionary format.
@@ -329,6 +330,7 @@ class CommercialRelease(Release):
     class Meta:
         proxy = True
         verbose_name_plural = '  Commercial Releases'
+
     objects = CommercialReleaseManager()
 
 
@@ -474,7 +476,7 @@ class Work(TitleBase):
 
     class Meta:
         verbose_name = '    Musical Work'
-        ordering = ('-id', )
+        ordering = ('-id',)
 
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
@@ -757,13 +759,13 @@ class WriterInWork(models.Model):
     work = models.ForeignKey(
         Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
-        Writer, on_delete=models.PROTECT,blank=True, null=True)
+        Writer, on_delete=models.PROTECT, blank=True, null=True)
     saan = models.CharField(
         'Society-assigned specific agreement number',
-        help_text= 'Use this field for specific agreements only.\n'
-            'For general agreements use the field in the Writer form.',
+        help_text='Use this field for specific agreements only.\n'
+                  'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
-        validators=(CWRFieldValidator('saan'),),)
+        validators=(CWRFieldValidator('saan'),), )
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(
         'Manuscript share', max_digits=5, decimal_places=2)
@@ -779,9 +781,9 @@ class WriterInWork(models.Model):
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text =
-            'Percentage of royalties kept by the publisher,\n'
-            'in a specific agreement.')
+        help_text=
+        'Percentage of royalties kept by the publisher,\n'
+        'in a specific agreement.')
 
     def __str__(self):
         return str(self.writer)
@@ -1001,7 +1003,6 @@ class Recording(models.Model):
             return ''
         return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
 
-
     def get_dict(self, with_releases=False):
         """Create a data structure that can be serialized as JSON.
 
@@ -1090,7 +1091,6 @@ class CWRExport(models.Model):
     works = models.ManyToManyField(Work, related_name='cwr_exports')
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
-
     @property
     def version(self):
         if self.nwr_rev in ['WRK', 'ISR']:
@@ -1134,10 +1134,8 @@ class CWRExport(models.Model):
             self.num_in_year,
             settings.PUBLISHER_CODE)
 
-
     def __str__(self):
         return self.filename
-
 
     def get_record(self, key, record):
         """Create CWR record (row) from the key and dict.
@@ -1219,7 +1217,8 @@ class CWRExport(models.Model):
                 'version_type': (
                     'MOD   UNSUNS'
                     if work['version_type']['code'] == 'MOD' else
-                    'ORI         ')}
+                    'ORI         ')
+            }
             yield self.get_transaction_record('WRK', d)
 
             # SPU, SPT
@@ -1288,7 +1287,7 @@ class CWRExport(models.Model):
                     w['publisher_sequence'] = 2
                     yield self.get_transaction_record(
                         'PWR', {
-                            'code':w['code'],
+                            'code': w['code'],
                             'publisher_sequence': 2
                         })
 
@@ -1312,9 +1311,11 @@ class CWRExport(models.Model):
                 else:
                     w = {'writer_unknown_indicator': 'Y'}
                 w.update({
-                    'writer_role': wiw['writer_role']['code'] if wiw['writer_role']
-                                else None,
-                    'share': Decimal(wiw['relative_share'])})
+                    'writer_role': wiw['writer_role']['code'] if wiw[
+                        'writer_role']
+                    else None,
+                    'share': Decimal(wiw['relative_share'])
+                })
                 yield self.get_transaction_record('OWR', w)
                 if w['share']:
                     yield self.get_transaction_record('OWT', w)
@@ -1335,11 +1336,13 @@ class CWRExport(models.Model):
                 if alt_title == work['work_title']:
                     continue
                 yield self.get_transaction_record('ALT', {
-                    'alternate_title': alt_title})
+                    'alternate_title': alt_title
+                })
 
             # VER
             if work['version_type']['code'] == 'MOD':
-                yield self.get_transaction_record('OWK', work['original_works'][0])
+                yield self.get_transaction_record('OWK',
+                                                  work['original_works'][0])
 
             # PER
             # artists can be recording and/or live, so let's see
@@ -1350,7 +1353,8 @@ class CWRExport(models.Model):
                 if not rec['recording_artist']:
                     continue
                 artists.update({
-                    rec['recording_artist']['code']: rec['recording_artist']})
+                    rec['recording_artist']['code']: rec['recording_artist']
+                })
             for artist in artists.values():
                 yield self.get_transaction_record('PER', artist)
 
@@ -1377,8 +1381,6 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('XRF', xrf)
             self.transaction_count += 1
 
-
-
     def yield_lines(self):
         """Yield CWR transaction records (rows/lines) for works
 
@@ -1388,7 +1390,7 @@ class CWRExport(models.Model):
         Yields:
             str: CWR record (row/line)
         """
-        qs = self.works.order_by('id',)
+        qs = self.works.order_by('id', )
         works = Work.objects.get_dict(qs)['works']
 
         self.record_count = self.record_sequence = self.transaction_count = 0
@@ -1413,10 +1415,12 @@ class CWRExport(models.Model):
 
         yield self.get_record('GRT', {
             'transaction_count': self.transaction_count,
-            'record_count': self.record_count + 2})
+            'record_count': self.record_count + 2
+        })
         yield self.get_record('TRL', {
             'transaction_count': self.transaction_count,
-            'record_count': self.record_count + 4})
+            'record_count': self.record_count + 4
+        })
 
     def create_cwr(self):
         """Create CWR and save.
@@ -1519,4 +1523,3 @@ class ACKImport(models.Model):
 
     def __str__(self):
         return self.filename
-

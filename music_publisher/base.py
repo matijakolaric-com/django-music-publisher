@@ -1,15 +1,19 @@
 """Contains base (abstract) classes used in :mod:`.models`
 """
 
+import re
+
 import django.core.exceptions
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-import re
+
 from .validators import CWRFieldValidator
-from django.conf import settings
+
 
 def get_societies():
     return settings.SOCIETIES
+
 
 class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
@@ -102,8 +106,8 @@ class IPIBase(models.Model):
     saan = models.CharField(
         'Society-assigned general agreement number',
         help_text='Use this field for general agreements only.\n'
-            'For specific agreements use the field in the Work form,\n'
-            'in Writers In Work section.',
+                  'For specific agreements use the field in the Work form,\n'
+                  'in Writers In Work section.',
         validators=(CWRFieldValidator('saan'),),
         max_length=14, blank=True, null=True, unique=True)
 
@@ -114,8 +118,8 @@ class IPIBase(models.Model):
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text=
-            'Percentage of royalties kept by the publisher,\n'
-            'in a general agreement.')
+        'Percentage of royalties kept by the publisher,\n'
+        'in a general agreement.')
 
     def clean_fields(self, *args, **kwargs):
         """

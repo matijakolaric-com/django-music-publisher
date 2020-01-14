@@ -13,7 +13,8 @@ TEMPLATES_21 = {
         '{{ publisher_name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
         '               \r\n{% endautoescape %}'),
-    'HDR_8': Template('{% load cwr_filters %}{% autoescape off %}'
+    'HDR_8': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
         'HDR{{ publisher_ipi_name|rjust:11 }}'
         '{{ publisher_name|ljust:45 }}01.10{{ '
         'creation_date|date:"Ymd" }}'
@@ -33,7 +34,7 @@ TEMPLATES_21 = {
         '{{ duration|date:"His"|default:"000000" }}{{ recorded_indicator }}'
         '      {{ version_type }}  ' + ' ' * 40 + 'N00000000000' +
         ' ' * 51 + 'N'
-        '\r\n{% endautoescape %}'),
+                   '\r\n{% endautoescape %}'),
     'SPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SPU{{ transaction_sequence|rjust:8 }}'
@@ -131,7 +132,7 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}LIB' + ' ' * 60 +
         '{{ cd_identifier|ljust:15 }}0000{{ library|ljust:60 }}' +
         ' ' * (26 + 12 + 60 + 20) + '0000                  \r\n'
-        '{% endautoescape %}'),
+                                    '{% endautoescape %}'),
     'GRT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRT00001{{ transaction_count|rjust:8 }}'
@@ -164,8 +165,8 @@ TEMPLATES_30 = {
         '{{ work_title|ljust:60 }}  {{ code|ljust:14 }}'
         '{{ iswc|ljust:11 }}00000000            UNC'
         '{{ duration|date:"His"|default:"000000" }}{{ recorded_indicator }}'
-        '      {{ version_type }}N00000000000' + ' ' * 51 + 'N'
-        '\r\n{% endautoescape %}'),
+        '      {{ version_type }}N00000000000' + ' ' * 51 +
+        'N\r\n{% endautoescape %}'),
     'SPU': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'SPU{{ transaction_sequence|rjust:8 }}'
@@ -212,7 +213,8 @@ TEMPLATES_30 = {
         'PWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
         '{{ publisher_sequence|rjust:2 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
-        '{{ code|ljust:9 }}' + ' ' * 14 + '{{ publisher_pr_society|ljust:4 }}'
+        '{{ code|ljust:9 }}' + ' ' * 14 +
+        '{{ publisher_pr_society|ljust:4 }}'
         '{{ saan|ljust:14 }}'
         '{{ original_publishers.0.agreement.agreement_type.code|ljust:2 }}'
         '\r\n{% endautoescape %}'),
@@ -228,7 +230,7 @@ TEMPLATES_30 = {
         '{{ record_sequence|rjust:8 }}001         '
         '{{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
         '{{ share|srp|cwrshare }}I2136' + ' ' * 44 + '0000\r\n'
-        '{% endautoescape %}'),
+                                                     '{% endautoescape %}'),
     'OWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'OWR{{ transaction_sequence|rjust:8 }}'
@@ -260,7 +262,7 @@ TEMPLATES_30 = {
         'REC{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
         '{{ release_date|default:"00000000" }}'
-        '{{ duration|rjust:6|default:"000000" }}' 
+        '{{ duration|rjust:6|default:"000000" }}'
         '{{ isrc|ljust:12 }}{{ recording_title|ljust:60 }}'
         '{{ version_title|ljust:60 }}{{ display_artist|ljust:60 }}' +
         ' ' * 11 +

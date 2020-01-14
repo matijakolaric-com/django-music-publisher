@@ -1,9 +1,9 @@
 """
 """
-from datetime import datetime
-from decimal import Decimal
 import re
 import zipfile
+from datetime import datetime
+from decimal import Decimal
 
 from django import forms
 from django.conf import settings
@@ -21,9 +21,8 @@ from django.utils.timezone import now
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
-    Track, Work, WorkAcknowledgement, Writer, WriterInWork, SOCIETY_DICT)
-
-from django.conf import settings
+    SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
+)
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
@@ -55,9 +54,9 @@ class RecordingInline(admin.StackedInline):
             'fields': (
                 'work',
                 ('recording_title', 'recording_title_suffix',
-                    'complete_recording_title'),
+                 'complete_recording_title'),
                 ('version_title', 'version_title_suffix',
-                    'complete_version_title'),
+                 'complete_version_title'),
                 ('isrc', 'record_label', 'artist'),
                 ('duration', 'release_date'),
             ),
@@ -89,7 +88,7 @@ class ArtistAdmin(MusicPublisherAdmin):
     search_fields = ('last_name', 'isni',)
     fieldsets = (
         ('Name', {'fields': (('first_name', 'last_name'),)}),
-        ('ISNI', {'fields': ('isni',),}),
+        ('ISNI', {'fields': ('isni',), }),
     )
 
     def last_or_band(self, obj):
@@ -128,6 +127,7 @@ class ArtistAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_work_changelist')
         url += '?artists__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     work_count.short_description = 'Perf. Works'
     work_count.admin_order_field = 'work__count'
 
@@ -140,6 +140,7 @@ class ArtistAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?recording_artist__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recording__count'
 
@@ -147,13 +148,12 @@ class ArtistAdmin(MusicPublisherAdmin):
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
     actions = None
-    search_fields = ('name', )
+    search_fields = ('name',)
     list_display = (
         'name', 'recording_count', 'commercialrelease_count',
         'libraryrelease_count')
     readonly_fields = (
         'recording_count', 'commercialrelease_count', 'libraryrelease_count')
-
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -179,6 +179,7 @@ class LabelAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_commercialrelease_changelist')
         url += '?release_label__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     commercialrelease_count.short_description = 'Commercial releases'
     commercialrelease_count.admin_order_field = 'commercialrelease__count'
 
@@ -191,6 +192,7 @@ class LabelAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_libraryrelease_changelist')
         url += '?release_label__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     libraryrelease_count.short_description = 'Library releases'
     libraryrelease_count.admin_order_field = 'libraryrelease__count'
 
@@ -203,6 +205,7 @@ class LabelAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?record_label__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recording__count'
 
@@ -219,7 +222,7 @@ class LabelAdmin(MusicPublisherAdmin):
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
     actions = None
-    search_fields = ('name', )
+    search_fields = ('name',)
 
     list_display = ('name', 'libraryrelease_count', 'work_count')
     readonly_fields = ('libraryrelease_count', 'work_count')
@@ -243,6 +246,7 @@ class LibraryAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_libraryrelease_changelist')
         url += '?library__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     libraryrelease_count.short_description = 'Library releases'
     libraryrelease_count.admin_order_field = 'libraryrelease__count'
 
@@ -255,9 +259,9 @@ class LibraryAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_work_changelist')
         url += '?library_release__library__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     work_count.short_description = 'Works'
     work_count.admin_order_field = 'work__count'
-
 
     def save_model(self, request, obj, form, *args, **kwargs):
         """Save, then update ``last_change`` of the corresponding works.
@@ -378,6 +382,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_work_changelist')
         url += '?library_release__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     work_count.short_description = 'Works'
     work_count.admin_order_field = 'works__count'
 
@@ -390,6 +395,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?release__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
@@ -445,6 +451,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?release__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
@@ -466,7 +473,8 @@ class WriterAdmin(MusicPublisherAdmin):
         return (
             ('Name', {
                 'fields': (
-                    ('first_name', 'last_name'),)}),
+                    ('first_name', 'last_name'),)
+            }),
             ('IPI', {
                 'fields': (
                     ('ipi_name', 'ipi_base'),),
@@ -518,6 +526,7 @@ class WriterAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_work_changelist')
         url += '?writers__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     work_count.short_description = 'Works'
     work_count.admin_order_field = 'work__count'
 
@@ -768,6 +777,7 @@ class WorkAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_cwrexport_changelist')
         url += '?works__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     cwr_export_count.short_description = 'CWRs'
     cwr_export_count.admin_order_field = 'cwr_exports__count'
 
@@ -779,6 +789,7 @@ class WorkAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_recording_changelist')
         url += '?work__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recordings__count'
 
@@ -942,11 +953,13 @@ class WorkAdmin(MusicPublisherAdmin):
                 'work_id',
                 ('title', 'iswc'),
                 ('original_title', 'version_type')
-                )}),
+            )
+        }),
         ('Library (Production music only)', {
             'fields': (
                 ('library_release',),
-            )}),
+            )
+        }),
     )
 
     autocomplete_fields = ('library_release',)
@@ -983,6 +996,7 @@ class WorkAdmin(MusicPublisherAdmin):
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
+
     create_json.short_description = \
         'Export selected works (JSON).'
 
@@ -1080,6 +1094,7 @@ class RecordingAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_work_change', args=[obj.work.id])
         link = '<a href="{}">{}</a>'.format(url, obj.work)
         return mark_safe(link)
+
     work_link.short_description = 'Work'
     work_link.admin_order_field = 'work__id'
 
@@ -1090,6 +1105,7 @@ class RecordingAdmin(MusicPublisherAdmin):
             'admin:music_publisher_artist_change', args=[obj.artist.id])
         link = '<a href="{}">{}</a>'.format(url, obj.artist)
         return mark_safe(link)
+
     artist_link.short_description = 'Recording Artist'
     artist_link.admin_order_field = 'artist'
 
@@ -1100,6 +1116,7 @@ class RecordingAdmin(MusicPublisherAdmin):
             'admin:music_publisher_label_change', args=[obj.record_label.id])
         link = '<a href="{}">{}</a>'.format(url, obj.record_label)
         return mark_safe(link)
+
     label_link.short_description = 'Record Label'
     label_link.admin_order_field = 'record_label'
 
@@ -1125,6 +1142,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         url = reverse('admin:music_publisher_work_changelist')
         url += '?cwr_exports__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
     work_count.short_description = 'Works'
     work_count.admin_order_field = 'works__count'
 
@@ -1220,7 +1238,8 @@ class CWRExportAdmin(admin.ModelAdmin):
                 **self.admin_site.each_context(request),
                 'version': obj.version,
                 'lines': cwr.split('\r\n'),
-                'title': obj.filename})
+                'title': obj.filename
+            })
         elif 'download' in request.GET:
             response = HttpResponse(content_type='application/zip')
             zip_file = zipfile.ZipFile(response, 'w')
@@ -1403,5 +1422,3 @@ class ACKImportAdmin(admin.ModelAdmin):
         """Deleting ACK imports is a really bad idea.
         """
         return False
-
-
