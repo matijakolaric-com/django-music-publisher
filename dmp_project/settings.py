@@ -116,6 +116,9 @@ with open(path, 'r') as f:
          for row in reader),
         key=lambda row: row[1])
 
+    
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+    
 # The name of the publisher. Use no comma in the name!
 PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
 
