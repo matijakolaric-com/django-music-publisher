@@ -27,8 +27,9 @@ Deployment to Heroku
 --------------------
 
 This is the fastest and simplest option, using the free tier of Heroku,
-which is enough for up to ~1000 musical works. If you need more, for $16 per month,
-the limit raises to roughly one million works.
+which is enough for 500-1.000  musical works, depending on their complexity.
+If you need more, for $16 per month, the limit raises to hundreds of thousands, after which this tool is probably
+no longer the right one.
 
 .. raw:: html
 
