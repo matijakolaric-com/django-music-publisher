@@ -37,6 +37,8 @@ no longer the right one.
     Then press
     <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>.</p>
 
+You will be taken to the form you need to fill out correctly.
+
 Select a name for your app, choose the region, and enter the Config Vars described next.
 
 The first set is used for generating the superuser account. You should
@@ -60,15 +62,16 @@ All Config Vars can be changed at any point in the Heroku Dashboard.
 Please note that the data you enter must be valid, otherwise the installation
 will fail. If you fail to get the values right, you may test the next option.
 
-DMP Guru
---------
+Professional support
+---------------------------
 
-DMP Guru is a service,
-run by the author and maintainer of Django-Music-Publisher,
-that provides smart configuration, automatic upgrades and security/bugfix updates, maintenance and user
-support.
+The author and maintainer of Django-Music-Publisher runs a
+`professional support service <https://matijakolaric.com/dmp-prosupport/>`_,
+providing automatic upgrades and security/bugfix updates, maintenance and user support.
 
-See https://dmp.guru for details.
+It also provides a free (no registration required) `pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_ that fills out the form
+mentioned in the previous section with correct values.
+
 
 Other options - manual deployment
 ----------------------------------

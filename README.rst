@@ -31,7 +31,7 @@ Installation to a cloud platform, free tier, requires no technical skills.
 
 Documentation includes a detailed user manual and video tutorials.
 
-Professional maintenance and user support are available. See http://dmp.guru.
+Professional maintenance and user support are available.
 
 * Docs: https://django-music-publisher.readthedocs.io/
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
