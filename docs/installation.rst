@@ -82,10 +82,10 @@ Mac and Linux PCs and servers. For more information, consult the official
 
 
 Settings
-____________________________________
+===================================
 
 Publisher-related settings
-++++++++++++++++++++++++++++
+-----------------------------------
 
 * ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, required
 * ``PUBLISHER_CODE`` - Publisher's CWR Delivery code
@@ -93,13 +93,14 @@ Publisher-related settings
 * ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
 
 Affiliation settings
-++++++++++++++++++++++++++++
+-----------------------------------
+
 * ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO), required
 * ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO)
 * ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society, rarely used
 
 Agreement-related settings
-++++++++++++++++++++++++++++
+-----------------------------------
 
 * ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
 * ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
