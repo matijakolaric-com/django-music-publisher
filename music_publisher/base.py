@@ -68,7 +68,10 @@ class IPIBase(models.Model):
         ipi_name (django.db.models.CharField): IPI Name Number
         pr_society (django.db.models.CharField):
             Performing Rights Society Code
-        publisher_fee (django.db.models.DecimalField): Publisher Fee
+        mr_society (django.db.models.CharField):
+            Mechanical Rights Society Code
+        sr_society (django.db.models.CharField):
+            Sync. Rights Society Code
         saan (django.db.models.CharField):
             Society-assigned agreement number, in this context it is used for
             general agreements, for specific agreements use

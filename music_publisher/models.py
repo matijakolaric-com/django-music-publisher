@@ -27,7 +27,7 @@ WORLD_DICT = {
 }
 
 
-class Artist(PersonBase, models.Model):
+class Artist(PersonBase):
     """Performing artists.
 
     Attributes:

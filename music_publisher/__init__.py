@@ -1,13 +1,8 @@
 """
-This app is targeted at single original publishers, publishing original musical
-works. It holds data on musical works, including alternate titles, songwriters,
-performing artists, first recordings, music library and albums. It allows data
-imports and exports.
+This Django app is holds metadata about musical works and recordings,
+including songwriters, performing and recording artists, music library and
+albums. It allows data exports in JSON and CWR formats.
 
-Multiple writers, both controlled and uncontrolled, are covered, with minor
-limitations, but data on other publishers (other original publishers,
-administrators and sub-publishers) can not be entered.
+Django Admin is the only frontend.
 
-A special US situation where an original publisher may have one entity for
-every of the three PROs is also covered.
 """
