@@ -36,6 +36,9 @@ for batch registration of musical works, versions 2.1 (stable) and 3.0
 License
 *********************
 
+.. toctree::
+   :maxdepth: 1
+
     LICENSE
 
 General Documentation
