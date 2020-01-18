@@ -33,13 +33,6 @@ for batch registration of musical works, versions 2.1 (stable) and 3.0
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
-License
-*********************
-
-.. toctree::
-   :maxdepth: 1
-
-   LICENSE
 
 General Documentation
 *********************
@@ -74,3 +67,11 @@ For Developers
    :maxdepth: 1
 
    modules
+
+License
+*********************
+
+.. toctree::
+   :maxdepth: 1
+
+   LICENSE
