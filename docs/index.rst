@@ -39,7 +39,7 @@ License
 .. toctree::
    :maxdepth: 1
 
-    LICENSE
+   LICENSE
 
 General Documentation
 *********************
