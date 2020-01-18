@@ -163,12 +163,12 @@ class Release(models.Model):
         ean (django.db.models.CharField): EAN code
         library (django.db.models.ForeignKey): Foreign key to \
         :class:`.models.Library`
-        recordings (django.db.models.ManyToManyField): M2M to \
-        :class:`.models.Recording` through :class:`.models.Track`
         release_date (django.db.models.DateField): Date of the release
         release_label (django.db.models.ForeignKey): Foreign key to \
         :class:`.models.Label`
         release_title (django.db.models.CharField): Title of the release
+        recordings (django.db.models.ManyToManyField): M2M to \
+        :class:`.models.Recording` through :class:`.models.Track`
     """
 
     class Meta:
@@ -193,7 +193,6 @@ class Release(models.Model):
     release_label = models.ForeignKey(
         Label, verbose_name='Release (album) label', null=True, blank=True,
         on_delete=models.PROTECT)
-
     recordings = models.ManyToManyField(
         'Recording', through='Track')
 
@@ -334,7 +333,7 @@ class CommercialRelease(Release):
     objects = CommercialReleaseManager()
 
 
-class Writer(PersonBase, IPIBase, models.Model):
+class Writer(PersonBase, IPIBase):
     """Base class for writers, the second most important top-level class.
     """
 
@@ -427,6 +426,13 @@ class Writer(PersonBase, IPIBase, models.Model):
 
 class WorkManager(models.Manager):
     def get_queryset(self):
+        """
+        Get an optimized queryset.
+
+        Returns:
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.Work`
+        """
         return super().get_queryset().prefetch_related('writers')
 
     def get_dict(self, qs):
@@ -465,13 +471,19 @@ class Work(TitleBase):
     """Concrete class, with references to foreign objects.
 
     Attributes:
-        artists (django.db.models.ManyToManyField):
-            Artists performing the work
+        iswc (django.db.models.CharField): ISWC
+        original_title (django.db.models.CharField): title of the original \
+            work, implies modified work
+        release_label (django.db.models.ForeignKey): Foreign key to \
+            :class:`.models.LibraryRelease`
         last_change (django.db.models.DateTimeField):
             when the last change was made to this object or any of the child
             objects, basically used in filtering
+        artists (django.db.models.ManyToManyField):
+            Artists performing the work
         writers (django.db.models.ManyToManyField):
             Writers who created the work
+        objects (WorkManager): Database Manager
     """
 
     class Meta:
@@ -489,10 +501,8 @@ class Work(TitleBase):
         'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
         related_name='works',
         verbose_name='Library Release')
-
     last_change = models.DateTimeField(
         'Last Edited', editable=False, null=True)
-
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
     writers = models.ManyToManyField('Writer', through='WriterInWork')
 
@@ -667,6 +677,8 @@ class AlternateTitle(TitleBase):
 
     Attributes:
         work (django.db.models.ForeignKey): Foreign key to Work model
+        suffix (django.db.models.BooleanField): implies that the title should\
+            be appended to the work title
     """
 
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
@@ -736,18 +748,18 @@ class WriterInWork(models.Model):
     Capacity is limited to roles for original writers.
 
     Attributes:
-        capacity (django.db.models.CharField): Role of the writer in this work
-        controlled (django.db.models.BooleanField): A complete mistery field
-        publisher_fee (django.db.models.DecimalField): Percentage of royalties
-            kept by publisher
-        relative_share (django.db.models.DecimalField): Initial split among
-            writers, prior to publishing
+        work (django.db.models.ForeignKey): FK to Work
+        writer (django.db.models.ForeignKey): FK to Writer
         saan (django.db.models.CharField): Society-assigned agreement number
             between the writer and the original publisher, please note that
             this field is for SPECIFIC agreements, for a general agreement,
             use :attr:`.base.IPIBase.saan`
-        work (django.db.models.ForeignKey): FK to Work
-        writer (django.db.models.ForeignKey): FK to Writer
+        controlled (django.db.models.BooleanField): A complete mistery field
+        relative_share (django.db.models.DecimalField): Initial split among
+            writers, prior to publishing
+        capacity (django.db.models.CharField): Role of the writer in this work
+        publisher_fee (django.db.models.DecimalField): Percentage of royalties
+            kept by publisher
     """
 
     class Meta:
@@ -909,11 +921,11 @@ class Recording(models.Model):
     so only a single instance is allowed.
 
     Attributes:
+        release_date (django.db.models.DateField): Recording Release Date
         duration (django.db.models.TimeField): Recording Duration
         isrc (django.db.models.CharField):
             International Standard Recording Code
         record_label (django.db.models.CharField): Record Label
-        release_date (django.db.models.DateField): Recording Release Date
     """
 
     class Meta:
