@@ -1329,10 +1329,11 @@ class ACKImportAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     list_display = (
-        'filename', 'society_code', 'society_name', 'date')
+        'filename', 'society_code', 'society_name', 'date', 'view_link')
     list_filter = ('society_code', 'society_name')
     fields = readonly_fields = (
-        'filename', 'society_code', 'society_name', 'date', 'report')
+        'filename', 'society_code', 'society_name', 'date', 'report',
+        'view_link')
 
     add_fields = ('acknowledgement_file',)
 
@@ -1358,7 +1359,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         unknown_work_ids = []
         existing_work_ids = []
         report = ''
-        if (file_content[59:64] == '01.10'):
+        if file_content[59:64] == '01.10':
             pattern = self.RE_ACK_21
         else:
             pattern = self.RE_ACK_30
@@ -1405,8 +1406,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         """Custom save_model, it ignores changes, validates the form for new
             instances, if valid, it processes the file and, upon success,
             calls ``super().save_model``."""
-        if change:
-            return
+
         if form.is_valid():
             cd = form.cleaned_data
             obj.filename = cd['filename']
@@ -1416,9 +1416,59 @@ class ACKImportAdmin(admin.ModelAdmin):
             # TODO move process() to model, and handle messages here
             obj.report = self.process(
                 request, obj.society_code, cd['acknowledgement_file'])
+            obj.cwr = cd['acknowledgement_file']
             super().save_model(request, obj, form, change)
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
         """Deleting ACK imports is a really bad idea.
         """
         return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def get_preview(self, obj):
+        """Get CWR preview.
+
+        If you are using highlighing, then override this method."""
+
+        return obj.cwr
+
+    def view_link(self, obj):
+        if obj.cwr:
+            url = reverse(
+                'admin:music_publisher_ackimport_change', args=(obj.id,))
+            url += '?preview=true'
+            return mark_safe(
+                '<a href="{}" target="_blank">View CWR</a>'.format(url))
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """Normal change view with a sub-view defined by GET parameters:
+
+        Parameters:
+            preview: that returns the preview of CWR file."""
+        obj = get_object_or_404(ACKImport, pk=object_id)
+        if 'preview' in request.GET:
+            cwr = self.get_preview(obj)
+            if (cwr[59:64] == '01.10'):
+                version = '21'
+            else:
+                version = '30'  # never seen one yet
+            try:
+                return render(request, 'raw_cwr.html', {
+                    **self.admin_site.each_context(request),
+                    'version': version,
+                    'lines': cwr.split('\n'),
+                    'title': obj.filename
+                })
+            except:  # Parsing user garbage, could be anything
+                return render(request, 'raw_cwr.html', {
+                    **self.admin_site.each_context(request),
+                    'version': '',
+                    'lines': cwr.split('\n'),
+                    'title': obj.filename
+                })
+
+        return super().change_view(
+            request, object_id, form_url='', extra_context=extra_context)
+

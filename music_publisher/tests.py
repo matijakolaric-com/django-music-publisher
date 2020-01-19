@@ -656,9 +656,26 @@ class AdminTest(TestCase):
         data.update({'acknowledgement_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
+
+        mock.seek(1)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Incorrect CWR header', response.content)
+
         url = reverse(
             'admin:music_publisher_ackimport_change', args=(ackimport.id,))
         response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+        response = self.client.get(url+'?preview=1')
         self.assertEqual(response.status_code, 200)
 
         self.client.force_login(self.audituser)
@@ -1113,6 +1130,7 @@ ACK0000000100000000201805160910510000100000001NWRTWO                            
 ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607RA
 ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
 ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
-TRL000010000008000000839"""
+GRT000010000005000000007
+TRL000010000005000000009"""
 
 CWR_1 = b'HDR09000000020TEST PUBLISHER                               01.10'

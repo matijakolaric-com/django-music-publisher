@@ -133,3 +133,12 @@ def agreement_type(value):
         'OG': 'Original general',
         'OS': 'Original specific',
     }.get(value, 'Unknown')
+
+
+@register.filter(name='status')
+def status(value):
+    """Transaction Status"""
+
+    value = value.strip()
+    obj = models.WorkAcknowledgement(status=value)
+    return obj.get_status_display()

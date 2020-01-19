@@ -808,7 +808,7 @@ class WriterInWork(models.Model):
             **kwargs: passing through
 
         Returns:
-            TYPE: Description
+            str: SAAN in uppercase
         """
         if self.saan:
             self.saan = self.saan.upper()
@@ -1532,6 +1532,7 @@ class ACKImport(models.Model):
     society_name = models.CharField(max_length=45, editable=False)
     date = models.DateField(editable=False)
     report = models.TextField(editable=False)
+    cwr = models.TextField(blank=True, editable=False)
 
     def __str__(self):
         return self.filename
