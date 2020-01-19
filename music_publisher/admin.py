@@ -731,7 +731,6 @@ class WorkAdmin(MusicPublisherAdmin):
     """
 
     form = WorkForm
-    change_form_template = 'admin/work.html'
 
     inlines = (
         WriterInWorkInline,
