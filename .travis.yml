@@ -10,6 +10,6 @@ matrix:
 services: postgresql
 env: DATABASE_URL="postgres://postgres@localhost/dmp"
 install: pip install -r requirements.txt
-script: coverage run --source='music_publisher' --omit='music_publisher/migrations/*' manage.py test
+script: coverage run --source='music_publisher' manage.py test
 after_success: coveralls
 
