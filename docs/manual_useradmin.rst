@@ -5,6 +5,9 @@ This section is covering user administration. If you dont have the permission to
 
 If you do, then *read this very carefully!*
 
+First, if you have deployed DMP to Heroku, the password you used for the superuser account was written in plain text to the settings.
+It is recommended that you change the password upon the first login.
+
 Generally, it is a bad idea for superusers to do everyday tasks. Even if you are just one person, should create a "normal" user first.
 
 We do it by pressing on ``+ add`` link for the ``users`` in the ``Authentication and Authorization``. The following view is shown:

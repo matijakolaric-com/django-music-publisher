@@ -5,11 +5,17 @@ Societies and administrative agencies (that handle CWR registrations for some so
 
 Importing CWR acknowledgement files into Django-Music-Publisher is very simple, just select ``Add`` in the ``CWR ACK import``, choose the file and save. A brief report will be shown, and there will be an additional line in ``Change Work views`` for every work in the acknowledgement file.
 
-There is also a preview of the CWR acknowledgemet file that now includes basic syntax highlighting.
+There is also a preview of the CWR acknowledgement with basic syntax highlighting. Each ACK transaction has an ACK header,
+followed by the data from your registration with optionally additional MSG records. The receiving party should only return the data they have
+actually used, but many societies just return exactly what you sent.
+
+In the ACK record, the last two letters are the most important, they show the status of the transaction. More information can be found in the MSG records, they usually refer to the first record below.
 
 Dealing with issues is not covered by this user manual, you must consult the official CWR documentation as well as inquiry with your society.
+If you are instructed to contact the software vendor, according to the licence, it is you, not the creator of
+this software.
 
-The maintainer of this project has made two tools freely available that may assist you in this process:
+There are two external tools freely available that may assist you:
 
 * `ACK Tool <https://matijakolaric.com/free/cwr-x-ack-tool>`_ that creates summaries of CWR acknowledgement files
 
