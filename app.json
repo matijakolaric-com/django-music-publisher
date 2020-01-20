@@ -12,7 +12,7 @@
     }
   ],
   "scripts": {
-    "postdeploy": "python manage.py loaddata publishing_staff.json|python manage.py createsuperuser --noinput --skip-checks"
+    "postdeploy": "python manage.py loaddata publishing_staff.json|python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks"
   },
   "env": {
     "DJANGO_SUPERUSER_USERNAME": {
@@ -21,10 +21,6 @@
     },
     "DJANGO_SUPERUSER_PASSWORD": {
       "description": "Password for the administrator, used only during installation",
-      "required": true
-    },
-    "DJANGO_SUPERUSER_EMAIL": {
-      "description": "Email address for the administrator, used only during installation",
       "required": true
     },
     "SECRET_KEY": {
