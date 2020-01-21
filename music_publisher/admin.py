@@ -147,6 +147,8 @@ class ArtistAdmin(MusicPublisherAdmin):
 
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Label`.
+    """
     actions = None
     search_fields = ('name',)
     list_display = (
@@ -221,6 +223,8 @@ class LabelAdmin(MusicPublisherAdmin):
 
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Library`.
+    """
     actions = None
     search_fields = ('name',)
 
@@ -274,6 +278,8 @@ class LibraryAdmin(MusicPublisherAdmin):
 
 
 class TrackInline(admin.TabularInline):
+    """Inline interface for :class:`.models.Track`.
+    """
     model = Track
     autocomplete_fields = ('release', 'recording')
     extra = 0
@@ -293,23 +299,28 @@ class ReleaseAdmin(MusicPublisherAdmin):
     actions = None
 
     def has_module_permission(self, request):
+        """Return False"""
         return False
 
     def has_add_permission(self, request):
+        """Return False"""
         return False
 
     def has_change_permission(self, request, obj=None):
+        """Return False"""
         return False
 
     def has_delete_permission(self, request, obj=None):
+        """Return False"""
         return False
-
-    def has_view_permission(self, request, obj=None):
-        return super().has_view_permission(request, obj)
 
 
 class LibraryReleaseForm(forms.ModelForm):
+    """Custom form for :class:`.models.LibraryRelease`.
+    """
+
     def __init__(self, *args, **kwargs):
+        """Make cd_identifier and library fields required."""
         super().__init__(*args, **kwargs)
         self.fields['cd_identifier'].required = True
         self.fields['library'].required = True
@@ -495,6 +506,11 @@ class WriterAdmin(MusicPublisherAdmin):
 
     @staticmethod
     def get_society_list():
+        """List which society fields are required.
+
+        Mechanical and Sync affiliation is not required if writers don't
+        collect any of it, which is the most usual case."""
+
         societies = ['pr_society']
         if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
             societies.append('mr_society')
@@ -693,6 +709,10 @@ class WorkAcknowledgementInline(admin.TabularInline):
 
 
 class WorkForm(forms.ModelForm):
+    """Custom form for :class:`.models.Work`.
+
+    Calculate values for readonly field version_type."""
+
     class Meta:
         model = Work
         fields = [
@@ -1022,6 +1042,8 @@ class WorkAdmin(MusicPublisherAdmin):
 
 @admin.register(Recording)
 class RecordingAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Recording`."""
+
     actions = None
     inlines = [TrackInline]
     list_display = (
@@ -1087,9 +1109,12 @@ class RecordingAdmin(MusicPublisherAdmin):
         return qs
 
     def title(self, obj):
+        """Return the recording title, which is not the necessarily the
+        title field."""
         return str(obj)
 
     def work_link(self, obj):
+        """Link to the work the recording is based on."""
         url = reverse('admin:music_publisher_work_change', args=[obj.work.id])
         link = '<a href="{}">{}</a>'.format(url, obj.work)
         return mark_safe(link)
@@ -1098,6 +1123,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     work_link.admin_order_field = 'work__id'
 
     def artist_link(self, obj):
+        """Link to the recording artist."""
         if not obj.artist:
             return None
         url = reverse(
@@ -1109,6 +1135,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     artist_link.admin_order_field = 'artist'
 
     def label_link(self, obj):
+        """Link to the recording label."""
         if not obj.record_label:
             return None
         url = reverse(
@@ -1128,6 +1155,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     actions = None
 
     def has_add_permission(self, request):
+        """Return false if CWR delivery code is not present."""
         if not settings.PUBLISHER_CODE:
             return False
         return super().has_add_permission(request)
@@ -1153,6 +1181,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         return obj.cwr
 
     def view_link(self, obj):
+        """Link to the CWR preview."""
         if obj.cwr:
             url = reverse(
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
@@ -1161,6 +1190,7 @@ class CWRExportAdmin(admin.ModelAdmin):
                 '<a href="{}" target="_blank">View CWR</a>'.format(url))
 
     def download_link(self, obj):
+        """Link for downloading CWR file."""
         if obj.cwr:
             url = reverse(
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
@@ -1241,7 +1271,8 @@ class CWRExportAdmin(admin.ModelAdmin):
             })
         elif 'download' in request.GET:
             response = HttpResponse(content_type='application/zip')
-            zip_file = zipfile.ZipFile(response, 'w', zipfile.ZIP_DEFLATED)
+            zip_file = zipfile.ZipFile(
+                response, 'w', zipfile.ZIP_DEFLATED, compression=5)
             zip_file.writestr(obj.filename, obj.cwr.encode().decode('latin1'))
             if obj.version == '30':
                 cd = 'attachment; filename="{}.zip"'.format(
@@ -1252,10 +1283,6 @@ class CWRExportAdmin(admin.ModelAdmin):
             response['Content-Disposition'] = cd
             return response
 
-            response = HttpResponse(obj.cwr.encode().decode('latin1'))
-            cd = 'attachment; filename="{}"'.format(obj.filename)
-            response['Content-Disposition'] = cd
-            return response
         extra_context = {
             'show_save': False,
         }
