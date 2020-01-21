@@ -1331,7 +1331,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         'filename', 'society_code', 'society_name', 'date', 'view_link')
     list_filter = ('society_code', 'society_name')
     fields = readonly_fields = (
-        'filename', 'society_code', 'society_name', 'date', 'report',
+        'filename', 'society_code', 'society_name', 'date', 'print_report',
         'view_link')
 
     add_fields = ('acknowledgement_file',)
@@ -1388,8 +1388,10 @@ class ACKImportAdmin(admin.ModelAdmin):
                 status=status)
             if not c:
                 existing_work_ids.append(str(work_id))
-            report += '{} {} <{}>\n'.format(
-                work.work_id, work.title, wa.get_status_display())
+            url = reverse(
+                'admin:music_publisher_work_change', args=(work.id,))
+            report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
+                url, work.work_id, work.title, wa.get_status_display())
         if unknown_work_ids:
             messages.add_message(
                 request, messages.ERROR,
@@ -1440,6 +1442,9 @@ class ACKImportAdmin(admin.ModelAdmin):
             url += '?preview=true'
             return mark_safe(
                 '<a href="{}" target="_blank">View CWR</a>'.format(url))
+
+    def print_report(self, obj):
+        return mark_safe(obj.report)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with a sub-view defined by GET parameters:

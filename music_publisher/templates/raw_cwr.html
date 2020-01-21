@@ -4,7 +4,7 @@
     {{ block.super }}
     <style>
       .cwr {overflow: auto; font-family: monospace;}
-      .cwr pre {line-height: 1.3em; margin: 0; color: #666}
+      .cwr pre {padding: 1px 0; margin: 0; color: #666}
 
       .cwr div.HDR span.record_type,
       .cwr div.TRL span.record_type {color: #609; margin: 0 1em 0 0}
@@ -27,6 +27,7 @@
       .cwr div.OWT span.record_type {color: #00A; margin: 0 .1em 0 .9em}
       .cwr div.PER span.record_type {color: #069; margin: 0 .4em 0 .6em}
       .cwr div.OWK span.record_type {color: #060; margin: 0 .4em 0 .6em}
+      .cwr div.MSG span.record_type {color: #000; margin: 0 .4em 0 .6em}
       .cwr div span.record_type {color: #666; margin: 0 .4em 0 .6em}
       .cwr div span.counters {color: #999;}
       .cwr div span.prshare {color: #069;}
@@ -48,6 +49,7 @@
       .cwr div.PWR span.ipnumber,
       .cwr div span.publisher {color: #060;}
       .cwr div span.chain,
+      .cwr div span.message,
       .cwr div span.status {color: #B00;}
       .cwr div span.artist {color: #069;}
       .cwr div span.capacity {color: #B00;}
@@ -56,9 +58,23 @@
       .cwr div.WRK,
       .cwr div.NWR,
       .cwr div.REV,
-      .cwr div.GRT {margin-top:0.4em}
-      .cwr div.ACK {margin-bottom:-0.4em}
-
+      .cwr div.GRT {margin-top:0.5em}
+      .ACK + div.ISR,
+      .ACK + div.WRK,
+      .ACK + div.NWR,
+      .ACK + div.REV {margin-top:0.1em}
+      .MSG + div.ISR,
+      .MSG + div.WRK,
+      .MSG + div.NWR,
+      .MSG + div.REV {margin-top:0}
+      .cwr div.ACK.CO,
+      .cwr div.ACK.DU,
+      .cwr div.ACK.RJ,
+      .cwr div.ACK.NP,
+      .cwr div.ACK.RC,
+      .cwr div.ACK.NA,
+      .cwr div.ACK.WA {background-color: #fcc}
+      .cwr div.MSG {background-color: #fcc}
     </style>
 
 {% endblock %}
@@ -98,7 +114,11 @@
                 {% if rt == 'HDR' or rt == 'TRL' or rt == 'GRH' or rt == 'GRT' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span>{{ line|slice:'3:' }}</pre></div>
                 {% elif rt == 'ACK' %}
-                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:46' }}<span class="type" title="Original transaction type">{{ line|slice:'46:49' }}</span><span class="title" title="Work title">{{ line|slice:'49:109' }}</span>{{ line|slice:'109:157' }}<span class="status" title="Transaction Status: {{ line|slice:'157:159'|status }}">{{ line|slice:'157:159' }}</span>{{ line|slice:'159:' }}</pre></div>
+                    {% with line|slice:'157:159' as status_code %}
+                        <div class="{{ rt }} {{ status_code }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:46' }}<span class="type" title="Original transaction type">{{ line|slice:'46:49' }}</span><span class="title" title="Work title">{{ line|slice:'49:109' }}</span>{{ line|slice:'109:157' }}<span class="status" title="Transaction Status: {{ status_code|status }}">{{ line|slice:'157:159' }}</span>{{ line|slice:'159:' }}</pre></div>
+                    {% endwith %}
+                {% elif rt == 'MSG' %}
+                    <div class="{{ rt }} {{ status_code }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:35' }}<span class="message" title="Message Text">{{ line|slice:'35:' }}</span></pre></div>
                 {% elif rt == 'NWR' or rt == 'REV' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="title" title="Work title">{{ line|slice:'19:79' }}</span>{{ line|slice:'79:' }}</pre></div>
                 {% elif rt == 'SPU' or rt == 'OPU' %}
