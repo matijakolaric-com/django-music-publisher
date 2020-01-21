@@ -1272,7 +1272,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         elif 'download' in request.GET:
             response = HttpResponse(content_type='application/zip')
             zip_file = zipfile.ZipFile(
-                response, 'w', zipfile.ZIP_DEFLATED, compression=5)
+                response, 'w', zipfile.ZIP_DEFLATED)
             zip_file.writestr(obj.filename, obj.cwr.encode().decode('latin1'))
             if obj.version == '30':
                 cd = 'attachment; filename="{}.zip"'.format(
