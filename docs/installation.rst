@@ -55,8 +55,8 @@ providing automatic feature upgrades, security/bugfix updates, maintenance and u
 
 It also provides a free (no registration required)
 `pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_ that fills out the deployment
-form on Heroku. However, you can only select collecting societies (PROs, MROs, etc.) where batch registration
-process and rules compatibility with Django-Music-Publisher has been verified.
+form on Heroku. However, you can only select collecting societies (PROs, MROs, etc.) with which the
+compatibility with Django-Music-Publisher was verified.
 
 Direct Deployment
 +++++++++++++++++

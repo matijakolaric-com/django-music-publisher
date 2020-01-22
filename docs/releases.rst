@@ -33,11 +33,13 @@ Support for US publishers with entities in different PROs was dropped.
 20 Twenty
 ---------
 
-Twenty-twenty can now be deployed to the free tier of Heroku by non-techies and Heroku API
-can be used for maintenance.
+Twenty-twenty can now be deployed to the Free Heroku dyno (container) by non-techies.
 
 Support for custom global share splits was added, solving compatibility issues with some societies.
 This also requires MR/SR affiliations for writers, so that was added as well.
+
+Syntax highlighting for CWR acknowledgements was added, to make dealing with conflicts and other registration-related
+issues simpler.
 
 Normalized JSON export was dropped. Documentation has been stripped of techie jargon.
 
