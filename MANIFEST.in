@@ -2,3 +2,6 @@ include README.rst
 include LICENSE
 include music_publisher/templates/raw_cwr.html
 include music_publisher/templates/societies.csv
+music_publisher/tests/CW200001DMP_000.V21
+music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR
+music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB
