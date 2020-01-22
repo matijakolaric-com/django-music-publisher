@@ -14,7 +14,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template import Context
 
-from .base import (IPIBase, PersonBase, TitleBase, get_societies)
+from .base import (IPIBase, PersonBase, TitleBase)
 from .cwr_templates import TEMPLATES_21, TEMPLATES_30
 from .validators import CWRFieldValidator
 
@@ -425,6 +425,9 @@ class Writer(PersonBase, IPIBase):
 
 
 class WorkManager(models.Manager):
+    """Manager for class :class:`.models.Work`
+    """
+
     def get_queryset(self):
         """
         Get an optimized queryset.
@@ -437,7 +440,7 @@ class WorkManager(models.Manager):
 
     def get_dict(self, qs):
         """
-        Return a dictionary with workks from the queryset
+        Return a dictionary with works from the queryset
 
         Args:
             qs(django.db.models.query import QuerySet): works queryset
@@ -1057,6 +1060,8 @@ class Recording(models.Model):
 
 
 class Track(models.Model):
+    """Track, a recording on a release."""
+
     class Meta:
         unique_together = (('recording', 'release'), ('release', 'cut_number'))
         ordering = ('release', 'cut_number',)
@@ -1190,6 +1195,8 @@ class CWRExport(models.Model):
         return line
 
     def yield_ISWC_request_lines(self, works):
+        """Yield lines for an ISR (ISWC request) in CWR 3.x"""
+
         for work in works:
 
             # ISR
@@ -1216,6 +1223,8 @@ class CWRExport(models.Model):
             self.transaction_count += 1
 
     def yield_registration_lines(self, works):
+        """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
+        """
         for work in works:
 
             # WRK
@@ -1483,7 +1492,7 @@ class WorkAcknowledgement(models.Model):
 
     work = models.ForeignKey(Work, on_delete=models.PROTECT)
     society_code = models.CharField(
-        'Society', max_length=3, choices=get_societies())
+        'Society', max_length=3, choices=settings.SOCIETIES)
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(max_length=20, blank=True)

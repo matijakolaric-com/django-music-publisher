@@ -1,0 +1,28 @@
+HDRPBDMP TEST PUBLISHER                                          2020012214074420200122               3.0000                                                            CW200002DMP_0000_V3-0-0.SUB
+GRHWRK0000103.000000000000
+WRK0000000000000000MUSIC PUB CARTOONS                                            DMP000001     T123456789400000000            UNC000000Y      MOD   UNSUNSN00000000000                                                   N
+SPU000000000000000101DMP      TEST PUBLISHER                               NE 00000000009000000020              
+SPT0000000000000002001         037500750007500I213652  44  44                                  0000
+OPU000000000000000302                                                      YE 00000000000000000000              
+OPT0000000000000004001         012500250002500I2136                                            0000
+SWR0000000000000005W000001  KOLARIC                                      MATIJA                        NAR00000000000000000199I-123456789-3 N  
+SWT0000000000000006001W000001  025000000000000I213610                                          0000
+PWR000000000000000701DMP      W000001                    J44VA         OG
+SWR0000000000000008W000002  OTHER                                        ANN                           NAD00000000000000000297              N  
+SWT0000000000000009001W000002  025000000000000I213610                                          0000
+PWR000000000000001001DMP      W000002                                  OS
+PWR000000000000001102DMP      W000002                                    
+OWR0000000000000012                                                                                    YCA00000000000000000000              N  
+PWR000000000000001302DMP                                                 
+ALT0000000000000014MPC ACADEMY                                                 AT  
+ALT0000000000000015MUSIC PUB CARTOONS SUFFIX                                   AT  
+ALT0000000000000016MUSIC PUB CARTOONS SUFFIX CO-SUFFIX                         AT  
+ALT0000000000000017WORK RECORDING                                              AT  
+ALT0000000000000018WORK RECORDING FEAT. TESTING                                AT  
+OWK0000000000000019MUSIC PUB CARTOONS                                                                                                                                                                                                                                                                                                                                   
+REC000000000000002000000000000000            MUSIC PUB CARTOONS SUFFIX                                   MUSIC PUB CARTOONS SUFFIX CO-SUFFIX                                                                                                                                                                                                DMP000002R    
+REC000000000000002100000000000000            WORK RECORDING                                              WORK RECORDING FEAT. TESTING                                                                                                                       MUSIC LABEL                                                                     DMP000001R    
+ORN0000000000000022LIBML001          0000MUSIC LIBRARY                                                                                                                                                                                                                                                                    0000                                                                                                          
+XRF000000000000002351  REMOTE1       WY
+GRT000010000000100000026
+TRL000010000000100000028

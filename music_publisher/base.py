@@ -11,10 +11,6 @@ from django.db import models
 from .validators import CWRFieldValidator
 
 
-def get_societies():
-    return settings.SOCIETIES
-
-
 class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
 
@@ -97,15 +93,15 @@ class IPIBase(models.Model):
     pr_society = models.CharField(
         'Performance rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
-        choices=get_societies())
+        choices=settings.SOCIETIES)
     mr_society = models.CharField(
         'Mechanical rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
-        choices=get_societies())
+        choices=settings.SOCIETIES)
     sr_society = models.CharField(
         'Synchronization rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('writer_pr_society'),),
-        choices=get_societies())
+        choices=settings.SOCIETIES)
     saan = models.CharField(
         'Society-assigned general agreement number',
         help_text='Use this field for general agreements only.\n'

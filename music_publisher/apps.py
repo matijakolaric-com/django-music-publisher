@@ -1,3 +1,5 @@
+"""Django app definition for `music_publisher`."""
+
 from django.apps import AppConfig
 
 from .validators import validate_settings
@@ -17,4 +19,6 @@ class MusicPublisherConfig(AppConfig):
     verbose_name = 'Music Publisher'
 
     def ready(self):
+        """Validate settings when ready to prevent deployments with invalid
+        settings. """
         validate_settings()

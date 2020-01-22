@@ -71,12 +71,6 @@ class RecordingInline(admin.StackedInline):
     ordering = ('recording_title', 'version_title')
     extra = 0
 
-    def complete_recording_title(self, obj):
-        return obj.complete_recording_title
-
-    def complete_version_title(self, obj):
-        return obj.complete_version_title
-
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
@@ -101,7 +95,8 @@ class ArtistAdmin(MusicPublisherAdmin):
     actions = None
 
     def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
+        """Save, then update ``last_change`` of the works whose CWR
+        registration changes due to this change.
         """
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
@@ -328,7 +323,7 @@ class LibraryReleaseForm(forms.ModelForm):
 
 @admin.register(LibraryRelease)
 class LibraryReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.AlbumCD`.
+    """Admin interface for :class:`.models.LibraryRelease`.
     """
 
     actions = None
@@ -413,7 +408,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
 @admin.register(CommercialRelease)
 class CommercialReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.AlbumCD`.
+    """Admin interface for :class:`.models.CommercialRelease`.
     """
 
     actions = None
@@ -481,6 +476,10 @@ class WriterAdmin(MusicPublisherAdmin):
     readonly_fields = ('_can_be_controlled', 'work_count')
 
     def get_fieldsets(self, request, obj=None):
+        """Return the fieldsets.
+
+        Depending on settings, MR and PR affiliations may not be needed.
+        See :meth:`WriterAdmin.get_society_list`"""
         return (
             ('Name', {
                 'fields': (
@@ -590,6 +589,8 @@ class AlternateTitleInline(admin.TabularInline):
     fields = ('title', 'suffix', 'complete_alt_title')
 
     def complete_alt_title(self, obj):
+        """Return the complete title, see
+        :meth:`.models.AlternateTitle.__str__`"""
         return str(obj)
 
 
@@ -783,6 +784,7 @@ class WorkAdmin(MusicPublisherAdmin):
     percentage_controlled.short_description = '% controlled'
 
     def work_id(self, obj):
+        """Return :attr:`.models.Work.work_id`, make it sortable."""
         return obj.work_id
 
     work_id.short_description = 'Work ID'
@@ -984,9 +986,22 @@ class WorkAdmin(MusicPublisherAdmin):
     autocomplete_fields = ('library_release',)
 
     def save_model(self, request, obj, form, *args, **kwargs):
+        """Set last_change if the work form has changed."""
         if form.changed_data:
             obj.last_change = now()
         super().save_model(request, obj, form, *args, **kwargs)
+
+    def save_formset(self, request, form, formset, change):
+        """Set last_change for the work if any of the inline forms has changed.
+        """
+        save_instance = False
+        for form in formset:
+            if form.changed_data:
+                save_instance = True
+        super().save_formset(request, form, formset, change)
+        if save_instance:
+            formset.instance.last_change = now()
+            formset.instance.save()
 
     def create_cwr(self, request, qs):
         """Batch action that redirects to the add view for
@@ -1154,12 +1169,6 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     actions = None
 
-    def has_add_permission(self, request):
-        """Return false if CWR delivery code is not present."""
-        if not settings.PUBLISHER_CODE:
-            return False
-        return super().has_add_permission(request)
-
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
@@ -1231,15 +1240,22 @@ class CWRExportAdmin(admin.ModelAdmin):
         else:
             return ('nwr_rev', 'description', 'works')
 
+    def has_add_permission(self, request):
+        """Return false if CWR delivery code is not present."""
+        if not settings.PUBLISHER_CODE:
+            return False
+        return super().has_add_permission(request)
+
     def has_delete_permission(self, request, obj=None):
         """If CWR has been created, it can no longer be deleted, as it may
         have been sent. This may change once the delivery is automated."""
 
         if obj and obj.cwr:
-            return None
+            return False
         return super().has_delete_permission(request, obj)
 
     def get_form(self, request, obj=None, **kwargs):
+        """Set initial values for work IDs."""
         form = super().get_form(request, obj, **kwargs)
         if hasattr(self, 'work_ids'):
             form.base_fields['works'].initial = self.work_ids
@@ -1415,6 +1431,7 @@ class ACKImportAdmin(admin.ModelAdmin):
                 status=status)
             if not c:
                 existing_work_ids.append(str(work_id))
+                continue
             url = reverse(
                 'admin:music_publisher_work_change', args=(work.id,))
             report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
@@ -1453,6 +1470,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
+        """Deleting this would make no sense, since the data is processed."""
         return False
 
     def get_preview(self, obj):
@@ -1463,6 +1481,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         return obj.cwr
 
     def view_link(self, obj):
+        """Link to CWR ACK preview."""
         if obj.cwr:
             url = reverse(
                 'admin:music_publisher_ackimport_change', args=(obj.id,))
@@ -1471,6 +1490,7 @@ class ACKImportAdmin(admin.ModelAdmin):
                 '<a href="{}" target="_blank">View CWR</a>'.format(url))
 
     def print_report(self, obj):
+        """Mark report as HTML-safe."""
         return mark_safe(obj.report)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):

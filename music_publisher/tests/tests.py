@@ -1,10 +1,5 @@
-"""Tests for :mod:`music_publisher`.
-
-Please note that all these tests are functional
-(integration) tests, not unit tests.
-
-Attributes:
-    CONTENT (str): CWR ACK file contents
+"""
+Tests for :mod:`music_publisher`.
 """
 
 from datetime import datetime
@@ -26,10 +21,12 @@ from music_publisher.models import (
     AlternateTitle, Artist, CWRExport, CommercialRelease, Label, Library,
     LibraryRelease, Recording, Release, Work, Writer, WriterInWork,
 )
-from . import cwr_templates, validators
+from music_publisher import cwr_templates, validators
 
 
 def get_data_from_response(response):
+    """Helper for extracting data from HTTP response in a way that can be
+    fed back into POST that works with Django Admin."""
     adminform = response.context_data.get('adminform')
     data = {}
     for sc in response.context:
@@ -66,6 +63,7 @@ def get_data_from_response(response):
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
+    """Functional tests on the interface, and several related unit tests."""
     fixtures = ['publishing_staff.json']
     testing_admins = [
         'artist', 'label', 'library', 'work', 'commercialrelease', 'writer',
@@ -148,6 +146,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_writers(cls):
+        """Create four writers with different properties."""
         cls.generally_controlled_writer = Writer(first_name='John',
                                                  last_name='Smith',
                                                  ipi_name='00000000297',
@@ -177,6 +176,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_cwr2_export(cls):
+        """Create a NWR and a REV CWR2 Export. """
         cls.cwr2_export = CWRExport.objects.create(
             description='Test NWR', nwr_rev='NWR')
         cls.cwr2_export.works.add(cls.original_work)
@@ -191,6 +191,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_cwr3_export(cls):
+        """Create a WRK and an ISR CWR3 Export. """
         cls.cwr3_export = CWRExport.objects.create(
             description='Test WRK', nwr_rev='WRK')
         cls.cwr3_export.works.add(cls.original_work)
@@ -233,6 +234,7 @@ class AdminTest(TestCase):
         cls.create_cwr3_export()
 
     def test_strings(self):
+        """Test ___str__ methods for created objects."""
         self.assertEqual(
             str(self.original_work),
             'MK000002: THE WORK (DOE / DOE / SMITH)')
@@ -253,7 +255,8 @@ class AdminTest(TestCase):
             'JOHN DOE')
 
     def test_unknown_user(self):
-
+        """Several fast test to make sure that an unregistered user is blind.
+        """
         for testing_admin in self.testing_admins:
             url = reverse(
                 'admin:music_publisher_{}_changelist'.format(testing_admin))
@@ -270,7 +273,9 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 302)
 
     def test_staff_user(self):
+        """Test that a staff user can access some urls.
 
+        Please note that most of the work is in other tests."""
         self.client.force_login(self.staffuser)
         # General checks
         for testing_admin in self.testing_admins:
@@ -300,6 +305,7 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 302)
 
     def test_cwr_previews(self):
+        """Test that CWR preview works."""
         self.client.force_login(self.staffuser)
         for cwr_export in CWRExport.objects.all():
             url = reverse(
@@ -309,6 +315,7 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_cwr_downloads(self):
+        """Test that the CWR file can be downloaded."""
         self.client.force_login(self.staffuser)
         for cwr_export in CWRExport.objects.all():
             url = reverse(
@@ -318,6 +325,7 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_json(self):
+        """Test that JSON export works."""
         self.client.force_login(self.staffuser)
         response = self.client.post(
             reverse('admin:music_publisher_work_changelist'),
@@ -328,6 +336,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_label_change(self):
+        """Test that :class:`.models.Label` objects can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_label_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LABEL'}, follow=True)
@@ -335,6 +344,7 @@ class AdminTest(TestCase):
         self.assertEqual(Label.objects.get(pk=1).name, 'NEW LABEL')
 
     def test_library_change(self):
+        """Test that :class:`.models.Library` objects can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_library_change', args=(1,))
         response = self.client.post(url, {'name': 'NEW LIBRARY'}, follow=True)
@@ -342,6 +352,7 @@ class AdminTest(TestCase):
         self.assertEqual(Library.objects.get(pk=1).name, 'NEW LIBRARY')
 
     def test_artist_change(self):
+        """Test that :class:`.models.Artist` objects can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_artist_change', args=(1,))
         response = self.client.post(url, {
@@ -352,6 +363,7 @@ class AdminTest(TestCase):
         self.assertEqual(Artist.objects.get(pk=1).last_name, 'DOVE')
 
     def test_commercialrelease_change(self):
+        """Test that :class:`.models.CommercialRelease` can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_commercialrelease_change', args=(1,))
@@ -369,6 +381,7 @@ class AdminTest(TestCase):
             LibraryRelease.objects.get(pk=1)
 
     def test_libraryrelease_change(self):
+        """Test that :class:`.models.LibraryRelease` can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_libraryrelease_change', args=(2,)
@@ -399,6 +412,7 @@ class AdminTest(TestCase):
             CommercialRelease.objects.get(pk=2)
 
     def test_audit_user(self):
+        """Test that audit user can see, but not change things."""
         self.client.force_login(self.audituser)
         for testing_admin in self.testing_admins:
             url = reverse(
@@ -411,6 +425,8 @@ class AdminTest(TestCase):
             self.assertEqual(response.status_code, 403)
 
     def test_generally_controlled_not_controlled(self):
+        """Test that a `controlled` flag must be set for a writer who is
+        generally controlled."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -424,6 +440,8 @@ class AdminTest(TestCase):
             response.content)
 
     def test_generally_controlled_missing_capacity(self):
+        """Test that if `controlled` flag is set, the `capacity` must be set
+        as well."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -437,6 +455,7 @@ class AdminTest(TestCase):
             response.content)
 
     def test_controlled_but_no_writer(self):
+        """Test that a line without a writer can not have `controlled` set."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -450,6 +469,8 @@ class AdminTest(TestCase):
             response.content)
 
     def test_controlled_but_missing_data(self):
+        """The requirements for a controlled writer are higher, make sure
+        they are obeyed when setting a writer as controlled."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -466,6 +487,8 @@ class AdminTest(TestCase):
             response.content)
 
     def test_controllable_and_controlled_but_missing_saan(self):
+        """If SAAN is required, then it must be set in the Writer object,
+        or in the WriterInWork object or both."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -481,6 +504,8 @@ class AdminTest(TestCase):
             response.content)
 
     def test_controllable_and_controlled_but_missing_fee(self):
+        """If `publisher_fee` is required, then it must be set in the Writer,
+        or in the WriterInWork object or both."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -495,7 +520,26 @@ class AdminTest(TestCase):
             b'Must be set. (controlled, no general agreement)',
             response.content)
 
+    def test_writer_switch(self):
+        """Just replace one writer with another, just to test last change"""
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_work_change', args=(1,))
+        # Make sure last_change is set by changing a value
+        response = self.client.get(url, follow=False)
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.controllable_writer.id
+        self.client.post(url, data)
+        lc = Work.objects.filter(pk=1).first().last_change
+        # Now modify it back and save
+        data = get_data_from_response(response)
+        data['writerinwork_set-1-writer'] = self.other_writer.id
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertGreater(Work.objects.filter(pk=1).first().last_change, lc)
+
     def test_not_controlled_extra_saan(self):
+        """SAAN can not be set if a writer is not controlled."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -511,6 +555,7 @@ class AdminTest(TestCase):
             response.content)
 
     def test_not_controlled_extra_fee(self):
+        """Publisher fee can not be set if a writer is not controlled."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -526,6 +571,7 @@ class AdminTest(TestCase):
             response.content)
 
     def test_bad_alt_title(self):
+        """Test that alternate title can not have disallowed characters."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -539,8 +585,10 @@ class AdminTest(TestCase):
             response.content)
 
     def test_unallowed_capacity(self):
+        """Some capacieties are allowed only in modifications."""
         self.client.force_login(self.staffuser)
-        url = reverse('admin:music_publisher_work_change', args=(2,))
+        url = reverse('admin:music_publisher_work_change', args=(
+            self.original_work.id,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-capacity'] = 'AR'
@@ -551,8 +599,11 @@ class AdminTest(TestCase):
             response.content)
 
     def test_missing_capacity(self):
+        """At least one of the additional capacieties must be set for
+        modifications."""
         self.client.force_login(self.staffuser)
-        url = reverse('admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(
+            self.modified_work.id,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-capacity'] = 'CA'
@@ -563,6 +614,7 @@ class AdminTest(TestCase):
             response.content)
 
     def test_none_controlled(self):
+        """At least one Writer in Work line must be set as controlled."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
@@ -579,6 +631,7 @@ class AdminTest(TestCase):
             response.content)
 
     def test_wrong_sum_of_shares(self):
+        """Sum of shares must be (roughly) 100%"""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
@@ -592,12 +645,13 @@ class AdminTest(TestCase):
             response.content)
 
     def test_wrong_capacity_in_copublishing_modification(self):
+        """Test the situation where one writer appears in two rows,
+        once as controlled, once as not with different capacities."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-1-writer'] = self.controllable_writer.id
-        data['writerinwork_set-0-writer'] = self.controllable_writer.id
         data['writerinwork_set-0-writer'] = self.controllable_writer.id
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
@@ -605,6 +659,8 @@ class AdminTest(TestCase):
                       response.content)
 
     def test_altitle_sufix_too_long(self):
+        """A suffix plus the base title plus one space in between must be 60
+        characters or less."""
         self.client.force_login(self.staffuser)
         url = reverse(
             'admin:music_publisher_work_change', args=(1,))
@@ -619,21 +675,31 @@ class AdminTest(TestCase):
             response.content)
 
     def test_ack_import_and_work_filters(self):
-        """Must be together, ack import is used in filters."""
+        """Test ackknowledgement import and then filters on the change view.
+
+        These tests must be together, ack import is used in filters.
+        """
+
         self.client.force_login(self.staffuser)
         mock = StringIO()
         mock.write(ACK_CONTENT)
+
+        """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
-        mockfile = InMemoryUploadedFile(mock, 'acknowledgement_file',
-                                        'CX180001000_FOO.V22', 'text', 0, None)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CX180001000_FOO.V22',
+            'text', 0, None)
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
         data.update({'acknowledgement_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 200)
+
         ackimport = music_publisher.models.ACKImport.objects.first()
         self.assertIsNone(ackimport)
+
+        """Upload the file that works."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
@@ -646,6 +712,9 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
         ackimport = music_publisher.models.ACKImport.objects.first()
         self.assertIsNotNone(ackimport)
+
+        """And repeat the previous step, as duplicates are processed 
+        differently."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
@@ -656,7 +725,10 @@ class AdminTest(TestCase):
         data.update({'acknowledgement_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            music_publisher.models.ACKImport.objects.first().report, '')
 
+        """Test with a badly formatted file."""
         mock.seek(1)
         mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
@@ -669,6 +741,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Incorrect CWR header', response.content)
 
+        """Test the change view and the CWR preview."""
         url = reverse(
             'admin:music_publisher_ackimport_change', args=(ackimport.id,))
         response = self.client.get(url)
@@ -678,6 +751,7 @@ class AdminTest(TestCase):
         response = self.client.get(url+'?preview=1')
         self.assertEqual(response.status_code, 200)
 
+        """Test Work changelist filters."""
         self.client.force_login(self.audituser)
         base_url = reverse('admin:music_publisher_work_changelist')
         url = base_url + '?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y'
@@ -688,6 +762,8 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_recording_filters(self):
+        """Test Work changelist filters."""
+
         self.client.force_login(self.audituser)
         base_url = reverse('admin:music_publisher_recording_changelist')
         url = base_url + '?has_isrc=Y'
@@ -698,7 +774,8 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_search(self):
-        """Must be together, ack import is used in filters."""
+        """Test Work search."""
+
         self.client.force_login(self.staffuser)
         base_url = reverse('admin:music_publisher_work_changelist')
         url = base_url + '?q=01'
@@ -706,6 +783,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_simple_save(self):
+        """Test saving changed Work form."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
@@ -713,8 +791,10 @@ class AdminTest(TestCase):
         data['title'] = 'THE NEW TITLE'
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
+        self.assertIsNotNone(Work.objects.filter(pk=1).first().last_change)
 
     def test_create_cwr_wizard(self):
+        """Test if CWR creation action works as it should."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_work_changelist')
         response = self.client.get(url, follow=False)
@@ -729,6 +809,8 @@ class AdminTest(TestCase):
 
     @override_settings(PUBLISHER_CODE='')
     def test_create_cwr_wizard_no_publisher_code(self):
+        """Publisher code is required for CWR generation, it must fail
+        if attempted otherwise."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_work_changelist')
         response = self.client.get(url, follow=False)
@@ -742,11 +824,13 @@ class AdminTest(TestCase):
 
 
 class CWRTemplatesTest(SimpleTestCase):
+    """A test related to CWR Templates."""
     RECORD_TYPES = [
         'ALT', 'GRH', 'GRT', 'HDR', 'WRK', 'OPU', 'OPT', 'ORN', 'OWR', 'PER',
         'PWR', 'REC', 'SPT', 'SPU', 'SWR', 'SWT', 'TRL', 'OWK']
 
     def test_templates(self):
+        """Test CWR 2.1 and 3.0 generation with empty values."""
         self.assertIsInstance(cwr_templates.TEMPLATES_21, dict)
         for i, key in enumerate(self.RECORD_TYPES):
             self.assertIn(key, cwr_templates.TEMPLATES_21)
@@ -774,6 +858,9 @@ class CWRTemplatesTest(SimpleTestCase):
 
 
 class ValidatorsTest(TestCase):
+    """Test all validators.
+
+    Note that validators are also validating settings."""
 
     @override_settings(PUBLISHER_NAME='Publisher, Inc.')
     def test_setting_publisher_name(self):
@@ -895,6 +982,7 @@ class ValidatorsTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75')
 )
 class ModelsSimpleTest(TransactionTestCase):
+    """These tests are modifying objects directly."""
     reset_sequences = True
 
     def test_artist(self):
@@ -950,6 +1038,10 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(str(writer), 'MATIJA KOLARIC (*)')
 
     def test_work(self):
+        """A complex test where a complete Work objects with all related
+        objects is created.
+
+        """
         library = music_publisher.models.Library(name='Music Library')
         library.save()
         self.assertEqual(str(library), 'MUSIC LIBRARY')
@@ -1091,28 +1183,42 @@ class ModelsSimpleTest(TransactionTestCase):
             cut_number=2
         )
 
-        # normalized dict
+        # dict
         music_publisher.models.WorkManager().get_dict(
             qs=music_publisher.models.Work.objects.all())
 
-        # cwr uses denormalized dict
+        # test CWR 2.1 NWR
+        TEST_CONTENT = open(TEST_CWR2_FILENAME, 'rb').read()
         cwr = music_publisher.models.CWRExport(nwr_rev='NWR')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.cwr.encode()[0:64], CWR_1)
+        self.assertEqual(
+            cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
+        self.assertEqual(
+            cwr.cwr.encode()[86:], TEST_CONTENT[86:])
 
         # test also CWR 3.0 WRK
+        TEST_CONTENT = open(TEST_CWR3_FILENAME, 'rb').read()
         cwr = music_publisher.models.CWRExport(nwr_rev='WRK')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(
+            cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
+        self.assertEqual(
+            cwr.cwr.encode()[87:], TEST_CONTENT[87:])
 
         # test also CWR 3.0 ISR
+        TEST_CONTENT = open(TEST_ISR_FILENAME, 'rb').read()
         cwr = music_publisher.models.CWRExport(nwr_rev='ISR')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(
+            cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
+        self.assertEqual(
+            cwr.cwr.encode()[87:], TEST_CONTENT[87:])
 
         # raises error because this writer is controlled in a work
         writer.pr_society = None
@@ -1133,4 +1239,6 @@ ACK0000000400000000201805160910510000100000004NWRX                              
 GRT000010000005000000007
 TRL000010000005000000009"""
 
-CWR_1 = b'HDR09000000020TEST PUBLISHER                               01.10'
+TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'
+TEST_CWR3_FILENAME = 'music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB'
+TEST_ISR_FILENAME = 'music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR'

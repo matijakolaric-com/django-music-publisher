@@ -56,6 +56,7 @@ def soc(value):
 
 
 def calculate_value(value, share):
+    """Convert string to a decimal and multiply with share."""
     value = Decimal(value or 0)
     value *= share
     return value
@@ -63,36 +64,43 @@ def calculate_value(value, share):
 
 @register.filter(name='prw')
 def prw(value):
+    """Writer share, PR"""
     return calculate_value(value, PRW_SHARE)
 
 
 @register.filter(name='prp')
 def prp(value):
+    """Publisher share, PR"""
     return calculate_value(value, PRP_SHARE)
 
 
 @register.filter(name='mrw')
 def mrw(value):
+    """Writer share, MR"""
     return calculate_value(value, MRW_SHARE)
 
 
 @register.filter(name='mrp')
 def mrp(value):
+    """Publisher share, MR"""
     return calculate_value(value, MRP_SHARE)
 
 
 @register.filter(name='srw')
 def srw(value):
+    """Writer share, SR"""
     return calculate_value(value, SRW_SHARE)
 
 
 @register.filter(name='srp')
 def srp(value):
+    """Publisher share, SR"""
     return calculate_value(value, SRP_SHARE)
 
 
 @register.filter(name='cwrshare')
 def cwrshare(value):
+    """Get CWR-compatible output for the Share field."""
     value = (value * Decimal('10000')).quantize(
         Decimal('1.'), rounding=ROUND_HALF_UP)
     value = int(value)
