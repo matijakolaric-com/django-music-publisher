@@ -662,8 +662,8 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         if not (Decimal(99.98) <= total <= Decimal(100.02)):
             for form in self.forms:
                 form.add_error(
-                    'relative_share', 'Sum of relative shares must be 100%.')
-            raise ValidationError('Sum of relative shares must be 100%.')
+                    'relative_share', 'Sum of manuscript shares must be 100%.')
+            raise ValidationError('Sum of manuscript shares must be 100%.')
         if is_modification:
             writer_capacities = {}
             for form in self.forms:
@@ -922,7 +922,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 return queryset.filter(iswc__isnull=True)
 
     class HasRecordingListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of first recording.
+        """Custom list filter on the presence of recordings.
         """
         title = 'Has Recordings'
         parameter_name = 'has_rec'

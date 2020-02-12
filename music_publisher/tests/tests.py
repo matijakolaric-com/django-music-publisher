@@ -641,7 +641,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Sum of relative shares must be 100%.',
+            b'Sum of manuscript shares must be 100%.',
             response.content)
 
     def test_wrong_capacity_in_copublishing_modification(self):
