@@ -8,9 +8,10 @@ Creating CWR Export
 
 
 
-**For CWR export to work, your CWR delivery code must be defined in settings (``PUBLISHER_CODE``).
+**For CWR export to work, your CWR delivery code must be defined in settings.
 If you want to test CWR exports, you can make something up, any
-three letters will work. However, only send out CWR files with the code officially assigned to you.**
+three letters will work. However, only send out CWR files created after
+you entered the code officially assigned to you.**
 
 There are several ways to get to ``Add CWR Export`` view:
 
