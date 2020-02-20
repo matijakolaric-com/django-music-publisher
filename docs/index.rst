@@ -44,14 +44,6 @@ General Documentation
    installation
    releases
 
-User manual
-********************
-
-.. toctree::
-   :maxdepth: 2
-
-   manual
-
 Videos
 ********************
 
@@ -59,6 +51,14 @@ Videos
    :maxdepth: 2
 
    videos
+
+User manual
+********************
+
+.. toctree::
+   :maxdepth: 2
+
+   manual
 
 For Developers
 ********************
