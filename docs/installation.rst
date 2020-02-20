@@ -55,8 +55,9 @@ providing automatic feature upgrades, security/bugfix updates, maintenance and u
 
 It also provides a free (no registration required)
 `pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_ that fills out the deployment
-form on Heroku. However, you can only select collecting societies (PROs, MROs, etc.) with which the
-compatibility with Django-Music-Publisher was verified.
+form on Heroku. A society compatibility list is provided. If your society or society combination
+is not supported, use the next method.
+
 
 Direct Deployment
 +++++++++++++++++
@@ -87,7 +88,7 @@ Publisher-related settings
 -----------------------------------
 
 * ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, required
-* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code
+* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, without it CWR generation will not work.
 * ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
 * ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
 
