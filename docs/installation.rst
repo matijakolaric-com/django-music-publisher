@@ -88,7 +88,7 @@ Publisher-related settings
 -----------------------------------
 
 * ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, required
-* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code
+* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, without it CWR generation will not work.
 * ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
 * ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
 
