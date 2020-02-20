@@ -3,7 +3,7 @@ Introduction
 
 Django-Music-Publisher is open source software for original **music publishers**. It is based on `Django web framework <https://www.djangoproject.com/>`_, hence the name.
 
-Django-Music-Publisher is a tool for **managing metadata** for musical works and recordings. It has basic support for **royalty distribution processing** and uses `Common Works Registration (CWR) <https://matijakolaric.com/articles/1/>`_ for **batch registrations of musical works** with `collecting societies <https://en.wikipedia.org/wiki/Copyright_collective>`_.
+Django-Music-Publisher is a tool for **managing metadata** for musical works and recordings. It has basic support for **royalty distribution processing** and uses `Common Works Registration (CWR) <https://matijakolaric.com/articles/1/>`_ for **batch registrations of musical works** with `collecting societies <https://en.wikipedia.org/wiki/Copyright_collective>`_, DSPs, as well as metadata delivery to administrators and/or sub-publishers.
 
 Project Scope
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
