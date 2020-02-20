@@ -6,11 +6,11 @@ Creating CWR Export
 
    Add CWR export view
 
-For CWR export to work, your CWR delivery code must be set (``PUBLISHER_CODE``) in settings.
 
-It is a required setting, so a you can start entering your metadata before
-your society (PRO/CMO) assigns one. If you want to test CWR exports, you can make something up, any
-three letters will work. However, only send out CWR files with the code officially assigned to you.
+
+**For CWR export to work, your CWR delivery code must be defined in settings (``PUBLISHER_CODE``).
+If you want to test CWR exports, you can make something up, any
+three letters will work. However, only send out CWR files with the code officially assigned to you.**
 
 There are several ways to get to ``Add CWR Export`` view:
 
