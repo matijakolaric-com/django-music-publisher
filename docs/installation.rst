@@ -95,9 +95,11 @@ Publisher-related settings
 Affiliation settings
 -----------------------------------
 
-* ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO), required
-* ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO)
-* ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society, rarely used
+* ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO) numeric code, required
+* ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO) numeric code
+* ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society numeric code, rarely used
+
+For the list of codes, please refer to the official CISAC documentation.
 
 Agreement-related settings
 -----------------------------------
