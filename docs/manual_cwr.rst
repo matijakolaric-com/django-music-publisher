@@ -6,6 +6,10 @@ Creating CWR Export
 
    Add CWR export view
 
+*For CWR export to work, your CWR delivery code must be set (``PUBLISHER_CODE``) in settings.
+It is not among required settings, so a you can start entering your metadata before
+your society assigns one.*
+
 There are several ways to get to ``Add CWR Export`` view:
 
 * from the ``home`` page or app menu or ``CWR Export list`` view by pressing on ``Add CWR Export`` button or
