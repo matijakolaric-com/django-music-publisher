@@ -3,19 +3,6 @@ Installation / Deployment and Configuration
 
 Django-Music-Publisher can be installed/deployed as a stand-alone application, or used as a Python package.
 
-Installing as Python package (developers only)
-===================================================================
-
-If you plan to use Django-Music-Publisher as one of the apps in your Django project, there is nothing special about it::
-
-    pip install --upgrade django_music_publisher
-
-Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no URLs need to be added, as everything goes
-through the Django Admin.
-
-See `Settings`_.
-
-
 Standalone Deployment
 =====================
 
@@ -53,6 +40,9 @@ The author and maintainer of Django-Music-Publisher runs a
 `professional support service <https://matijakolaric.com/dmp-prosupport/>`_,
 providing automatic feature upgrades, security/bugfix updates, maintenance and user support.
 
+.. figure:: /images/pre_wizard.png
+   :width: 100%
+
 It also provides a free (no registration required)
 `pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_ that fills out the deployment
 form on Heroku. A society compatibility list is provided. If your society or society combination
@@ -68,6 +58,9 @@ Direct Deployment
     Then press
     <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20">here</a>.</p>
 
+.. figure:: /images/heroku.png
+   :width: 100%
+
 You will be taken directly to the deployment form. Please note that you must fill the form correctly, or
 Django-Music-Publisher will not be deployed. This is by design.
 
@@ -79,6 +72,18 @@ Other options - manual deployment
 Django-Music-Publisher is based on Django, which can be installed on Windows,
 Mac and Linux PCs and servers. For more information, consult the official
 `Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
+
+Installing as Python package (developers only)
+===================================================================
+
+If you plan to use Django-Music-Publisher as one of the apps in your Django project, there is nothing special about it::
+
+    pip install --upgrade django_music_publisher
+
+Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no URLs need to be added, as everything goes
+through the Django Admin.
+
+See `Settings`_.
 
 
 Settings
