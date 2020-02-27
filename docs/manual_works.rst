@@ -43,7 +43,7 @@ There is another way to add writers, which will be covered in the :doc:`writers 
 If left empty, it means that the writer is unknown. This is often used with modifications of traditional musical works.
 
 
-.. figure:: /images/popup_add_writer.png
+.. figure:: /images/add_writer.png
    :width: 100%
 
    Add writer pop-up view
