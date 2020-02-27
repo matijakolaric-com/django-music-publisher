@@ -7,7 +7,7 @@ Standalone Deployment
 =====================
 
 Depending on your needs and technical knowledge, there are several options here. They are listed below, starting with
-the simplest option.
+the simplest option, which can be performed without any technical skills in under 5 minutes.
 
 Deployment to Heroku (free tier)
 --------------------------------
