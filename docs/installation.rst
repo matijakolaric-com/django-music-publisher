@@ -56,7 +56,7 @@ Direct Deployment
 
     <p>First, you need to sign up with <a href="https://heroku.com">Heroku</a> and/or log in.
     Then press
-    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.1.2">here</a>.</p>
+    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.1.3">here</a>.</p>
 
 .. figure:: /images/heroku.png
    :width: 100%
