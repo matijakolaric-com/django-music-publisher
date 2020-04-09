@@ -29,7 +29,7 @@ author = 'Matija Kolarić'
 # The short X.Y version
 version = '20 Twenty'
 # The full version, including alpha/beta/rc tags
-release = '20.1.1'
+release = '20.1.2'
 
 rst_epilog = '''
 .. |version| replace:: {}
