@@ -1525,7 +1525,6 @@ class ACKImport(models.Model):
 
     Attributes:
         date (django.db.models.DateField): Acknowledgement date
-        date (django.db.models.DateField): Acknowledgement date
         filename (django.db.models.CharField): Description
         report (django.db.models.CharField): Basically a log
         society_code (models.CharField): 3-digit society code,

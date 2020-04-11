@@ -58,8 +58,6 @@ class IPIBase(models.Model):
     """Abstract base for all objects containing IPI numbers.
 
     Attributes:
-        generally_controlled (django.db.models.BooleanField):
-            General agreement (renamed in verbose_name)
         ipi_base (django.db.models.CharField): IPI Base Number
         ipi_name (django.db.models.CharField): IPI Name Number
         pr_society (django.db.models.CharField):
