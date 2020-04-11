@@ -8,7 +8,7 @@ For full functionality, watch it on YouTube.
 
 
 
-Saturday Seminar: Music Publishing
+Music Publishing
 ++++++++++++++++++++++++++++++++++
 
 .. raw:: html
@@ -36,4 +36,16 @@ The playlist starts with a general introduction, followed by videos explaining w
 covering deployment, basic and advanced metadata editing, and the use of CWR for registration of musical works.
 
 Total playlist duration is around 25 minutes.
+
+
+Music Metadata
++++++++++++++++++++++++++++++++++++
+
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt9bXFv66UVhNi0hfvhgAK8x" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+
+These short videos cover basic music metadata terminology.
+
+Total playlist duration is around 10 minutes.
 
