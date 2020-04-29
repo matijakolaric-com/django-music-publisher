@@ -138,7 +138,13 @@ class IPIBase(models.Model):
     def clean(self):
         """Clean the data and validate."""
 
-        self._can_be_controlled = bool(self.ipi_name) & bool(self.pr_society)
+        if self.ipi_name == '00000000000':
+            self._can_be_controlled = True
+            self.ipi_name = None
+        else:
+            self._can_be_controlled = (
+                    bool(self.ipi_name) &
+                    bool(self.pr_society))
         d = {}
         if not self.generally_controlled:
             if self.saan:
