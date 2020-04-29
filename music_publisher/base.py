@@ -155,7 +155,7 @@ class IPIBase(models.Model):
             if not self._can_be_controlled:
                 d['generally_controlled'] = (
                     'IPI name number and PR society fields are required for '
-                    'a controlled writer.')
+                    'a controlled writer. See "Writers" in the user manual.')
             if settings.REQUIRE_SAAN and not self.saan:
                 d['saan'] = 'This field is required.'
             if settings.REQUIRE_PUBLISHER_FEE and not self.publisher_fee:

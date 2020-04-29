@@ -357,7 +357,8 @@ class Writer(PersonBase, IPIBase):
         if self.writerinwork_set.filter(controlled=True).exists():
             raise ValidationError(
                 'This writer is controlled in at least one work. ' +
-                'Required fields are: Last name, IPI name and PR society.')
+                'Required fields are: Last name, IPI name and PR society. ' +
+                'See "Writers" in the user manual.')
 
     @property
     def writer_id(self):
@@ -837,7 +838,9 @@ class WriterInWork(models.Model):
                 d['writer'] = 'Must be set for a controlled writer.'
             else:
                 if not self.writer._can_be_controlled:
-                    d['writer'] = 'IPI name and PR society must be set.'
+                    d['writer'] = (
+                        'IPI name and PR society must be set. '
+                        'See "Writers" in the user manual')
                 if (settings.REQUIRE_SAAN and
                         not self.writer.generally_controlled and
                         not self.saan):

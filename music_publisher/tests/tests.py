@@ -168,8 +168,16 @@ class AdminTest(TestCase):
         cls.writer_no_first_name = Writer(last_name='Jones')
         cls.writer_no_first_name.clean()
         cls.writer_no_first_name.save()
+        # This one is controllable, but not yet affiliated
         cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
                                          ipi_name='00000000000')
+        cls.controllable_writer.clean()
+        cls.controllable_writer.save()
+        # Then he is affiliated.
+        cls.controllable_writer.ipi_name = '493'
+        cls.controllable_writer.pr_society = '52'
+        cls.controllable_writer.mr_society = '44'
+        cls.controllable_writer.sr_society = '44'
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
 
