@@ -169,8 +169,7 @@ class AdminTest(TestCase):
         cls.writer_no_first_name.clean()
         cls.writer_no_first_name.save()
         cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
-                                         ipi_name='493', pr_society='52',
-                                         mr_society='44', sr_society='44')
+                                         ipi_name='00000000000')
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
 

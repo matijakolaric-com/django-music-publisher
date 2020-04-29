@@ -28,16 +28,15 @@ Can be controlled flag
 For writers who are controlled (whose works are published by you), more data is required
 than for those who are not.
 
-It is your responsibility to register not just your shares,
-but also theirs with collecting societies and others, most notably performance rights
-organizations (PROs).
+It is your responsibility to register not just your shares, but also theirs.
 
 In order for them to get paid through societies, it is your responsibility to
-enter their society (or societies) and their IPI name number. In the case they
+enter their society (or societies) and their IPI name number. If they
 are not affiliated with any of them, you must advise them.
 
-If they choose not to become an affiliate of any PRO, you can enter ``00000000000``
-in the ``IPI name#`` field. This has to be re-entered on every save. If they choose to join,
+If they choose not to become an affiliate of any performance rights society,
+you can enter ``00000000000`` in the ``IPI name#`` field. This has to be
+re-entered on every save. If they choose to become affiliate later on,
 it is your responsibility to register the changes.
 
 It is always advisable to enter all the data you have
