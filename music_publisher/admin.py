@@ -22,6 +22,7 @@ from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
     SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
+    DataImport,
 )
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
@@ -1523,3 +1524,67 @@ class ACKImportAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
 
+
+class DataImportForm(ModelForm):
+    """Form used for data imports.
+
+    Attributes:
+        data_file (FileField): Field for file upload
+    """
+
+    class Meta:
+        model = ACKImport
+        fields = ('data_file',)
+
+    data_file = FileField()
+
+    def clean(self):
+        super().clean()
+
+        from .dataimport import DataImporter
+        from io import TextIOWrapper
+
+        cd = self.cleaned_data
+        f = cd['data_file']
+        report = ''
+        try:
+            importer = DataImporter(TextIOWrapper(f))
+            for work in importer.run():
+                url = reverse(
+                    'admin:music_publisher_work_change', args=(work.id,))
+                report += '<a href="{}">{}</a> {}<br/>\n'.format(
+                    url, work.work_id, work.title)
+        except Exception as e:
+            raise ValidationError(str(e))
+        self.cleaned_data['report'] = report
+
+@admin.register(DataImport)
+class DataImportAdmin(admin.ModelAdmin):
+    """Data import from CSV files."""
+
+    form = DataImportForm
+
+    list_display = ('filename', 'date')
+
+    def has_delete_permission(self, request, obj=None, *args, **kwargs):
+        """Deleting data imports is a really bad idea.
+        """
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        """Deleting this would make no sense, since the data is processed."""
+        return False
+
+    def add_view(self, request, *args, **kwargs):
+        return super().add_view(request, *args, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        """Custom save_model, it ignores changes, validates the form for new
+            instances, if valid, it processes the file and, upon success,
+            calls ``super().save_model``."""
+
+        if form.is_valid():
+            cd = form.cleaned_data
+            f = cd['data_file']
+            obj.filename = f.name
+            super().save_model(request, obj, form, change)

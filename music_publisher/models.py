@@ -771,6 +771,13 @@ class WriterInWork(models.Model):
         unique_together = (('work', 'writer', 'controlled'),)
         ordering = (
             '-controlled', 'writer__last_name', 'writer__first_name', '-id')
+    ROLES = (
+        ('CA', 'Composer&Lyricist'),
+        ('C ', 'Composer'),
+        ('A ', 'Lyricist'),
+        ('AR', 'Arranger'),
+        ('AD', 'Adaptor'),
+        ('TR', 'Translator'))
 
     work = models.ForeignKey(
         Work, on_delete=models.CASCADE)
@@ -787,13 +794,7 @@ class WriterInWork(models.Model):
         'Manuscript share', max_digits=5, decimal_places=2)
     capacity = models.CharField(
         'Role',
-        max_length=2, blank=True, choices=(
-            ('CA', 'Composer&Lyricist'),
-            ('C ', 'Composer'),
-            ('A ', 'Lyricist'),
-            ('AR', 'Arranger'),
-            ('AD', 'Adaptor'),
-            ('TR', 'Translator')))
+        max_length=2, blank=True, choices=ROLES)
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
@@ -1546,6 +1547,21 @@ class ACKImport(models.Model):
     date = models.DateField(editable=False)
     report = models.TextField(editable=False)
     cwr = models.TextField(blank=True, editable=False)
+
+    def __str__(self):
+        return self.filename
+
+
+class DataImport(models.Model):
+    """Importing basic work data from a CSV file."""
+
+    class Meta:
+        verbose_name = 'Data Import'
+        ordering = ('-date', '-id')
+
+    filename = models.CharField(max_length=60, editable=False)
+    report = models.TextField(editable=False)
+    date = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self):
         return self.filename

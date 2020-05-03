@@ -6,6 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 
+
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.auth.models import User
 from django.core import exceptions
@@ -21,7 +22,7 @@ from music_publisher.models import (
     AlternateTitle, Artist, CWRExport, CommercialRelease, Label, Library,
     LibraryRelease, Recording, Release, Work, Writer, WriterInWork,
 )
-from music_publisher import cwr_templates, validators
+from music_publisher import cwr_templates, validators, dataimport
 
 
 def get_data_from_response(response):
@@ -48,6 +49,25 @@ def get_data_from_response(response):
         else:
             data[key] = value
     return data
+
+
+@override_settings(
+    PUBLISHER_NAME='TEST PUBLISHER',
+    PUBLISHER_CODE='MK',
+    PUBLISHER_IPI_NAME='0000000199',
+    PUBLISHER_SOCIETY_PR='10',
+    PUBLISHER_SOCIETY_MR='34',
+    PUBLISHER_SOCIETY_SR=None,
+    REQUIRE_SAAN=False,
+    REQUIRE_PUBLISHER_FEE=False)
+class DataImportTest(TestCase):
+    """Functional test for data import from CSV files."""
+
+    def test_data_import(self):
+        with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
+            data_import = dataimport.DataImporter(csvfile)
+            data_import.run()
+
 
 
 @override_settings(
@@ -1246,6 +1266,7 @@ ACK0000000400000000201805160910510000100000004NWRX                              
 GRT000010000005000000007
 TRL000010000005000000009"""
 
+TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR'
