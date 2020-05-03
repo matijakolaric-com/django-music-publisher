@@ -1359,8 +1359,15 @@ class ACKImportForm(ModelForm):
         self.cleaned_data['acknowledgement_file'] = content
 
 
+class AdminWithReport(admin.ModelAdmin):
+    def print_report(self, obj):
+        """Mark report as HTML-safe."""
+        return mark_safe(obj.report)
+    print_report.short_description = 'Report'
+
+
 @admin.register(ACKImport)
-class ACKImportAdmin(admin.ModelAdmin):
+class ACKImportAdmin(AdminWithReport):
     """Admin interface for :class:`.models.ACKImport`.
     """
 
@@ -1490,10 +1497,6 @@ class ACKImportAdmin(admin.ModelAdmin):
             return mark_safe(
                 '<a href="{}" target="_blank">View CWR</a>'.format(url))
 
-    def print_report(self, obj):
-        """Mark report as HTML-safe."""
-        return mark_safe(obj.report)
-
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with a sub-view defined by GET parameters:
 
@@ -1556,15 +1559,27 @@ class DataImportForm(ModelForm):
                     url, work.work_id, work.title)
         except Exception as e:
             raise ValidationError(str(e))
+        print(report)
         self.cleaned_data['report'] = report
 
+
 @admin.register(DataImport)
-class DataImportAdmin(admin.ModelAdmin):
+class DataImportAdmin(AdminWithReport):
     """Data import from CSV files."""
 
     form = DataImportForm
 
     list_display = ('filename', 'date')
+    fields = readonly_fields = ('filename', 'date', 'print_report')
+
+    add_fields = ('data_file',)
+
+    def get_fields(self, request, obj=None):
+        """Return different fields for add vs change.
+        """
+        if obj:
+            return self.fields
+        return self.add_fields
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
         """Deleting data imports is a really bad idea.
@@ -1587,4 +1602,5 @@ class DataImportAdmin(admin.ModelAdmin):
             cd = form.cleaned_data
             f = cd['data_file']
             obj.filename = f.name
+            obj.report = cd['report']
             super().save_model(request, obj, form, change)
