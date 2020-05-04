@@ -1559,7 +1559,6 @@ class DataImportForm(ModelForm):
                     url, work.work_id, work.title)
         except Exception as e:
             raise ValidationError(str(e))
-        print(report)
         self.cleaned_data['report'] = report
 
 

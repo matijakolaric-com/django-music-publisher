@@ -138,16 +138,25 @@ class DataImporter(object):
                 first_name=lookup_writer.first_name,
                 ipi_name=lookup_writer.ipi_name).first()
             if writer:
+                # No existing general agreement for this writer
+                if (lookup_writer.generally_controlled and
+                        not writer.generally_controlled and
+                        lookup_writer.saan):
+                    writer.saan = saan
+                    writer.generally_controlled = True
+                    writer.save()
+
                 # Writer must be exactly same, except if marked "generally
                 # controlled" in the database, and not in the file
-                if (
-                        (
-                            lookup_writer.generally_controlled and
-                            writer.generally_controlled and
-                            writer.saan != lookup_writer.saan
-                        ) or writer.pr_society != lookup_writer.pr_society):
+                if (lookup_writer.generally_controlled and
+                        writer.generally_controlled and
+                        writer.saan != lookup_writer.saan):
                     raise ValueError(
-                        'Writer exists with different values: "{}".'.format(
+                        'Two different general agreement numbers for: '
+                        '"{}".'.format(writer))
+                if writer.pr_society != lookup_writer.pr_society:
+                    raise ValueError(
+                        'Writer exists with different PRO: "{}".'.format(
                             writer
                         ))
             else:
