@@ -1551,7 +1551,7 @@ class DataImportForm(ModelForm):
         f = cd['data_file']
         report = ''
         try:
-            importer = DataImporter(TextIOWrapper(f))
+            importer = DataImporter(TextIOWrapper(f), self.user)
             for work in importer.run():
                 url = reverse(
                     'admin:music_publisher_work_change', args=(work.id,))
@@ -1589,8 +1589,10 @@ class DataImportAdmin(AdminWithReport):
         """Deleting this would make no sense, since the data is processed."""
         return False
 
-    def add_view(self, request, *args, **kwargs):
-        return super().add_view(request, *args, **kwargs)
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.user = request.user
+        return form
 
     def save_model(self, request, obj, form, change):
         """Custom save_model, it ignores changes, validates the form for new

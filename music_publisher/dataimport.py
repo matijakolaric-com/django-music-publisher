@@ -8,12 +8,14 @@ from django.utils.text import slugify
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
     Library, LibraryRelease)
-from .admin import WorkForm, WriterInWorkFormSet
+from .admin import WriterInWorkFormSet
 import re
 from django.conf import settings
 from decimal import Decimal
 from django.forms import inlineformset_factory
-from django.core.exceptions import ValidationError
+from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
+from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError, transaction
 
 
@@ -25,8 +27,17 @@ class DataImporter(object):
     WRITER_FIELDS = [
         'last', 'first', 'ipi', 'pro', 'role', 'share', 'controlled', 'saan']
 
-    def __init__(self, filelike):
+    def __init__(self, filelike, user=None):
+        self.user = user
+        self.user_id = self.user.id if self.user else None
         self.reader = csv.DictReader(filelike)
+
+    def log(self, action_flag, obj, message):
+        if not self.user_id:
+            return
+        LogEntry.objects.log_action(
+            self.user_id, get_content_type_for_model(obj).id, obj.id, str(obj),
+            action_flag, message)
 
     @staticmethod
     def get_clean_key(value, tup):
@@ -116,8 +127,7 @@ class DataImporter(object):
                 raise AttributeError('Unknown column: "{}".'.format(key))
         return out_dict
 
-    @staticmethod
-    def get_writers(writer_dict):
+    def get_writers(self, writer_dict):
         for value in writer_dict.values():
             # variables used more than once or too complex
             general_agreement = value.get('general_agreement', False)
@@ -140,11 +150,12 @@ class DataImporter(object):
             if writer:
                 # No existing general agreement for this writer
                 if (lookup_writer.generally_controlled and
-                        not writer.generally_controlled and
-                        lookup_writer.saan):
+                        not writer.generally_controlled):
                     writer.saan = saan
                     writer.generally_controlled = True
                     writer.save()
+                    self.log(
+                        CHANGE, writer, 'General agreement set during import.')
 
                 # Writer must be exactly same, except if marked "generally
                 # controlled" in the database, and not in the file
@@ -163,6 +174,8 @@ class DataImporter(object):
                 writer = lookup_writer
                 try:
                     writer.save()
+                    self.log(
+                        ADDITION, writer, 'Added during import.')
                 except IntegrityError:
                     raise ValueError(
                         'A writer with this IPI or general SAAN already '
@@ -172,8 +185,7 @@ class DataImporter(object):
                         ))
             yield writer
 
-    @staticmethod
-    def get_artists(artist_dict):
+    def get_artists(self, artist_dict):
         for value in artist_dict.values():
             lookup_artist = Artist(
                 last_name=value.get('last', ''),
@@ -189,16 +201,20 @@ class DataImporter(object):
             if not artist:
                 artist = lookup_artist
                 artist.save()
+                self.log(
+                    ADDITION, artist, 'Added during import.')
             yield artist
 
-    @staticmethod
-    def get_library_release(library_name, cd_identifier):
+
+    def get_library_release(self, library_name, cd_identifier):
         lookup_library = Library(name=library_name)
         lookup_library.clean_fields()
         library = Library.objects.filter(name=lookup_library.name).first()
         if not library:
             library = lookup_library
             library.save()
+            self.log(
+                ADDITION, library, 'Added during import.')
         lookup_library_release = LibraryRelease(
             library_id=library.id,
             cd_identifier=cd_identifier)
@@ -209,6 +225,8 @@ class DataImporter(object):
         if not library_release:
             library_release = lookup_library_release
             library_release.save()
+            self.log(
+                ADDITION, library_release, 'Added during import.')
         return library_release
 
     def process_row(self, row):
@@ -234,6 +252,8 @@ class DataImporter(object):
         work.clean_fields()
         work.clean()
         work.save()
+        self.log(
+            ADDITION, work, 'Added during import.')
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
         wiws = []
