@@ -709,7 +709,7 @@ class AdminTest(TestCase):
 
         self.client.force_login(self.staffuser)
         mock = StringIO()
-        mock.write(ACK_CONTENT)
+        mock.write(ACK_CONTENT_21)
 
         """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
@@ -785,6 +785,77 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
         url = base_url + '?in_cwr=N&ack_status=RA&has_iswc=N&has_rec=N'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
+        """Test dummy CWR ACK 3.0"""
+        self.client.force_login(self.staffuser)
+        mock = StringIO()
+        mock.write(ACK_CONTENT_30)
+
+        """Upload the file that works."""
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNotNone(ackimport)
+
+        """Test the change view and the CWR preview."""
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+        response = self.client.get(url+'?preview=1')
+        self.assertEqual(response.status_code, 200)
+
+        """Upload the file that works."""
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNotNone(ackimport)
+
+    @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
+    def test_data_import(self):
+        """Test data import."""
+
+        self.client.force_login(self.superuser)
+        with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+
+        """Upload the file that works, but with a wrong filename."""
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'dataimport.csv',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_dataimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'data_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        data_import = music_publisher.models.DataImport.objects.first()
+        self.assertIsNotNone(data_import)
+        self.assertIsNot(data_import.report, '')
+        url = reverse('admin:music_publisher_dataimport_change',
+                      args=(data_import.id,))
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -1256,7 +1327,7 @@ class ModelsSimpleTest(TransactionTestCase):
             writer.clean()
 
 
-ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
+ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
 ACK0000000000000000201805160910510000100000000NWRONE                                                         MK000001            123                 20180607AS
 ACK0000000100000000201805160910510000100000001NWRTWO                                                         DMP000002                               20180607RA
@@ -1265,6 +1336,12 @@ ACK0000000300000000201805160910510000100000003NWRTHREE                          
 ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
 GRT000010000005000000007
 TRL000010000005000000009"""
+
+ACK_CONTENT_30 = """HDRSOBMI BMI                                          2018060715153220180607               3.0000
+GRHACK0000102.100020180607
+ACK0000000000000000201805160910510000100000000WRKONE                                                         MK000001            123                                     20180607AS
+GRT000010000001000000003
+TRL000010000001000000005"""
 
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'

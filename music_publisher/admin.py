@@ -1334,8 +1334,11 @@ class ACKImportForm(ModelForm):
 
     acknowledgement_file = FileField()
 
-    RE_HDR = re.compile(
+    RE_HDR_21 = re.compile(
         r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
+
+    RE_HDR_30 = re.compile(
+        r'^HDR(?:SO|AA)(.{4})(.{45})(\d{8})\d{6}(\d{8}).{15}3\.0000')
 
     def clean(self):
         """Perform usual clean, then process the file, returning the content
@@ -1348,7 +1351,9 @@ class ACKImportForm(ModelForm):
             raise ValidationError('Wrong file name format.')
         self.cleaned_data['filename'] = filename
         content = ack.file.read().decode('latin1')
-        match = re.match(self.RE_HDR, content)
+        match = re.match(self.RE_HDR_21, content)
+        if not match:
+            match = re.match(self.RE_HDR_30, content)
         if not match:
             raise ValidationError('Incorrect CWR header')
         code, name, date1, date2 = match.groups()
