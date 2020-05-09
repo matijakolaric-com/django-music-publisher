@@ -5,3 +5,4 @@ include music_publisher/societies.csv
 include music_publisher/tests/CW200001DMP_000.V21
 include music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR
 include music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB
+include music_publisher/tests/dataimport.csv
