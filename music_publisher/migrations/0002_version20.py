@@ -12,6 +12,15 @@ import music_publisher.validators
 # music_publisher.migrations.0002_auto_20191204_1255
 
 
+def strip_zeros_from_societies(apps, schema_editor):
+    """In older versions, society keys had leading zero, removed in CWR3.x."""
+
+    writer_cls = apps.get_model('music_publisher', 'Writer')
+    for writer in writer_cls.objects.filter(pr_society__isnull=False):
+        writer.pr_society = writer.pr_society.lstrip('0')
+        writer.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,6 +28,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(
+            code=strip_zeros_from_societies,
+            reverse_code=django.db.migrations.operations.special.RunPython.noop,
+        ),
         migrations.AlterField(
             model_name='release',
             name='release_title',
