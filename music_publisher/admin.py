@@ -1521,7 +1521,7 @@ class ACKImportAdmin(AdminWithReport):
                     'lines': cwr.split('\n'),
                     'title': obj.filename
                 })
-            except:  # Parsing user garbage, could be anything
+            except Exception:  # Parsing user garbage, could be anything
                 return render(request, 'raw_cwr.html', {
                     **self.admin_site.each_context(request),
                     'version': '',
@@ -1562,7 +1562,7 @@ class DataImportForm(ModelForm):
                     'admin:music_publisher_work_change', args=(work.id,))
                 report += '<a href="{}">{}</a> {}<br/>\n'.format(
                     url, work.work_id, work.title)
-        except Exception as e:
+        except Exception as e:  # user garbage, too many possibilities
             raise ValidationError(str(e))
         self.cleaned_data['report'] = report
 

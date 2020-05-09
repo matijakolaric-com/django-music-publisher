@@ -53,7 +53,7 @@ class DataImporter(object):
             if new_value:
                 break
         else:
-            raise ValueError('Unknown: "{}".'.format(value))
+            raise ValueError('Unknown column: "{}".'.format(value))
         return new_value
 
     def process_writer_value(self, key, key_elements, value):
@@ -97,7 +97,8 @@ class DataImporter(object):
             'artists': defaultdict(OrderedDict),
         }
         for key, value in in_dict.items():
-            value = value.strip()
+            if isinstance(value, str):
+                value = value.strip()
             clean_key = slugify(key).replace('-', '_')
             prefix = clean_key.split('_')[0]
             if value == '':
@@ -298,4 +299,3 @@ class DataImporter(object):
         with transaction.atomic():
             for row in self.reader:
                 yield from self.process_row(row)
-

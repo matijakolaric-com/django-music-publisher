@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 
-
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.auth.models import User
 from django.core import exceptions
@@ -63,11 +63,158 @@ def get_data_from_response(response):
 class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.superuser = User.objects.create_superuser(
+            'superuser', '', 'password')
+        cls.obj = Artist(last_name='Artist One')
+
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             data_import = dataimport.DataImporter(csvfile)
             data_import.run()
 
+    def test_log(self):
+        """Test logging during import."""
+
+        """This does nothing, as user is unknown."""
+        di = dataimport.DataImporter([], user=None)
+        di.log(dataimport.ADDITION, None, 'no message')
+        self.assertEqual(LogEntry.objects.count(), 0)
+
+        """This logs."""
+        di = dataimport.DataImporter([], user=self.superuser)
+        di.log(dataimport.ADDITION, self.obj, 'test message')
+        self.assertEqual(LogEntry.objects.count(), 1)
+        le = LogEntry.objects.first()
+        self.assertEqual(str(le), 'Added “ARTIST ONE”.')
+        self.assertEqual(le.change_message, 'test message')
+
+    def test_unknown_key_exceptions(self):
+        """Test exceptions not tested in functional tests."""
+
+        di = dataimport.DataImporter([], user=None)
+
+        with self.assertRaises(ValueError) as ve:
+            di.get_clean_key('a', [])
+        self.assertEqual(str(ve.exception), 'Unknown column: "a".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.process_writer_value('a', ['Writer', '1', 'b'], 'X')
+        self.assertEqual(str(ve.exception), 'Unknown column: "a".')
+
+        value, general_agreement = di.process_writer_value(
+            'a', ['writer', '1', 'controlled'], 1)
+        self.assertEqual(value, True)
+
+        value, general_agreement = di.process_writer_value(
+            'a', ['writer', '2', 'controlled'], 0)
+        self.assertEqual(value, False)
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'alt_work_title_1': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "alt_work_title_1".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "alt_title".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "artist_1".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "artist_1_name".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "wtf_1".')
+
+        # mismatching general agreement numbers
+        with self.assertRaises(ValueError) as ve:
+            d = {
+                '1': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '10',
+                    'general_agreement': True,
+                    'saan': 'A',
+                },
+                '2': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '10',
+                    'general_agreement': True,
+                    'saan': 'B',
+                }
+            }
+            writers = list(di.get_writers(d))
+        self.assertEqual(
+            str(ve.exception),
+            'Two different general agreement numbers for: "X Y (*)".')
+
+        # mismatching PR societies
+        with self.assertRaises(ValueError) as ve:
+            d = {
+                '1': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '10',
+                },
+                '2': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '52',
+                }
+            }
+            writers = list(di.get_writers(d))
+        self.assertEqual(
+            str(ve.exception),
+            'Writer exists with different PRO: "X Y (*)".')
+
+        # integrity errrors
+        with self.assertRaises(ValueError) as ve:
+            d = {
+                '1': {
+                    'first': 'A',
+                    'last': 'B',
+                    'ipi': '199',
+                    'pro': '10',
+                },
+                '2': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '52',
+                }
+            }
+            writers = list(di.get_writers(d))
+        self.assertEqual(
+            str(ve.exception),
+            (
+                'A writer with this IPI or general SAAN already exists in the '
+                'database, but is not exactly the same as one provided in the '
+                'importing data: A B'))
+
+        f = StringIO("Work Title,Library\nX,Y")
+        di = dataimport.DataImporter(f, user=None)
+        with self.assertRaises(ValueError) as ve:
+            list(di.run())
+        self.assertEqual(
+            str(ve.exception),
+            ('Library and CD Identifier fields must both be either '
+                'present or empty.'))
 
 
 @override_settings(
