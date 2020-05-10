@@ -244,8 +244,9 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_original_work(cls):
-        cls.original_work = Work.objects.create(title='The Work',
-                                                iswc='T1234567893')
+        cls.original_work = Work.objects.create(
+            title='The Work', iswc='T1234567893',
+            library_release=cls.library_release)
         WriterInWork.objects.create(work=cls.original_work,
                                     writer=cls.generally_controlled_writer,
                                     capacity='C ',
@@ -267,6 +268,7 @@ class AdminTest(TestCase):
         Recording.objects.create(work=cls.original_work,
                                  record_label=cls.label, artist=cls.artist,
                                  isrc='US-S1Z-99-00001')
+
 
     @classmethod
     def create_modified_work(cls):
@@ -511,6 +513,17 @@ class AdminTest(TestCase):
             reverse('admin:music_publisher_work_changelist'),
             data={
                 'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.original_work.id
+            })
+        self.assertEqual(response.status_code, 200)
+
+    def test_csv(self):
+        """Test that CSV export works."""
+        self.client.force_login(self.staffuser)
+        response = self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_csv', 'select_across': 1,
                 'index': 0, '_selected_action': self.original_work.id
             })
         self.assertEqual(response.status_code, 200)

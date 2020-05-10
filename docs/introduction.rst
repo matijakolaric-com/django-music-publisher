@@ -31,12 +31,11 @@ and customs.
 
 Data is also sufficient for simple royalty distribution processing, which is not yet fully implemented.
 
-Registrations can be exported as CWR 2.1 and CWR 3.0 zipped files, as well as ISRC requests (CWR 3.0 only).
+Registrations can be exported as CWR 2.1 (zipped) files. Acknowledgement files in CWR format can be imported.
 CWR preview features syntax highlighting with additional data on mouse-over.
+There is an experimental support for and CWR 3.0, including ISRC requests.
 
-Acknowledgement files in CWR format can be imported.
-
-Data for selected works can be exported in JSON format.
+New works can be imported from a CSV format. Data for selected works can be exported as JSON.
 
 Limitations
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -50,3 +49,5 @@ When creating CWR, many fields are left with blank/zero values. When the fields 
 * *Musical Work Distribution* is set to *Unclassified*
 * *Recorded indicator* is set to *Yes* or *Unknown*, depending if a recording was entered
 * *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First Recording Refusal Indicator* are set to No
+
+Importing work IDs from other solutions is not supported.

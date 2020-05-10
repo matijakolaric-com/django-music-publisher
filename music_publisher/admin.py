@@ -2,6 +2,7 @@
 """
 import re
 import zipfile
+from csv import DictWriter
 from datetime import datetime
 from decimal import Decimal
 
@@ -12,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.forms import FileField, ModelForm
 from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
@@ -1035,7 +1036,123 @@ class WorkAdmin(MusicPublisherAdmin):
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    actions = (create_cwr, create_json)
+    def get_labels_for_csv(self, works):
+        """Return the list of labels for the CSV file."""
+        labels = [
+            'Work ID',
+            'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
+        ]
+        alt_title_max = 0
+        writer_max = 0
+        artist_max = 0
+        for work in works:
+            alt_title_max = max(alt_title_max, len(work.get('other_titles')))
+            writer_max = max(writer_max, len(work.get('writers')))
+            artist_max = max(artist_max, len(work.get('performing_artists')))
+        for i in range(alt_title_max):
+            labels.append('Alt Title {}'.format(i))
+        for i in range(writer_max):
+            labels.append('Writer {} Last'.format(i))
+            labels.append('Writer {} First'.format(i))
+            labels.append('Writer {} IPI'.format(i))
+            labels.append('Writer {} PRO'.format(i))
+            labels.append('Writer {} Role'.format(i))
+            labels.append('Writer {} Share'.format(i))
+            labels.append('Writer {} Controlled'.format(i))
+            labels.append('Writer {} SAAN'.format(i))
+        for i in range(artist_max):
+            labels.append('Artist {} Last'.format(i))
+            labels.append('Artist {} First'.format(i))
+            labels.append('Artist {} ISNI'.format(i))
+        return labels
+
+    def get_rows_for_csv(self, works):
+        """Return rows for the CSV file, including the header."""
+
+        class EchoWriter:
+            """Class with write() method just echoing values."""
+            def write(self, value):
+                return value
+
+        pseudo_buffer = EchoWriter()
+        labels = self.get_labels_for_csv(works)
+        writer = DictWriter(pseudo_buffer, labels)
+        header = dict(zip(labels, labels))
+        yield writer.writerow(header)
+        # yield writer.writeheader()  # In Python 3.8
+        for work in works:
+            ows = work.get('original_works')
+            row = {
+                'Work ID': work['code'],
+                'Work Title': work['work_title'],
+                'ISWC': work.get('iswc', ''),
+            }
+            if ows:
+                row['Original Title'] = ows[0]['work_title']
+            origin = work.get('origin')
+            if origin:
+                row['Library'] = origin['library']['name']
+                row['CD Identifier'] = origin['cd_identifier']
+            for i, alt in enumerate(work['other_titles']):
+                row['Alt Title {}'.format(i)] = alt['title']
+            for i, wiw in enumerate(work['writers']):
+                w = wiw.get('writer') or {}
+                row['Writer {} Last'.format(i)] = w.get('last_name', '')
+                row['Writer {} First'.format(i)] = w.get('first_name', '')
+                row['Writer {} IPI'.format(i)] = w.get('ipi_name_number', '')
+                role = wiw.get('writer_role', {})
+                if role:
+                    row['Writer {} Role'.format(i)] = '{} - {}'.format(
+                        role['code'], role['name'])
+                row['Writer {} Share'.format(i)] = wiw.get('relative_share')
+                for aff in w.get('affiliations', []):
+                    if aff['affiliation_type']['code'] == 'PR':
+                        pro = aff['organization']
+                        row['Writer {} PRO'.format(i)] = '{} - {}'.format(
+                        pro['code'], pro['name'])
+                ops = wiw.get('original_publishers')
+                if ops:
+                    op = ops[0]
+                    agreement = op.get('agreement')
+                    saan = agreement.get('recipient_agreement_number', '')
+                    row['Writer {} SAAN'.format(i)] = saan
+                    agreement_type = agreement['agreement_type']['code']
+                    if agreement_type == 'OG':
+                        controlled = 'General Agreement'
+                    else:
+                        controlled = 'Yes'
+                else:
+                    controlled = 'No'
+                row['Writer {} Controlled'.format(i)] = controlled
+            for i, aiw in enumerate(work['performing_artists']):
+                artist = aiw.get('artist')
+                row['Artist {} Last'.format(i)] = artist.get('last_name', '')
+                row['Artist {} First'.format(i)] = artist.get('first_name', '')
+                row['Artist {} ISNI'.format(i)] = artist.get('isni', '')
+            yield writer.writerow(row)
+
+    def create_csv(self, request, qs):
+        """Batch action that downloads a CSV file containing selected works.
+
+        Returns:
+            JsonResponse: JSON file with selected works
+        """
+
+        j = Work.objects.get_dict(qs)
+        works = j.get('works', [])
+        response = HttpResponse(
+            self.get_rows_for_csv(works),
+            content_type="text/csv")
+        name = '{}{}'.format(
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.csv"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+
+    create_csv.short_description = \
+        'Export selected works (CSV).'
+
+    actions = (create_cwr, create_json, create_csv)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""

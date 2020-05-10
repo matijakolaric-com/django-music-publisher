@@ -15,9 +15,7 @@ from decimal import Decimal
 from django.forms import inlineformset_factory
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError, transaction
-
 
 class DataImporter(object):
     FLAT_FIELDS = [
@@ -133,11 +131,20 @@ class DataImporter(object):
             general_agreement = value.get('general_agreement', False)
             saan = value.get('saan') if general_agreement else None
             pr_society = value.get('pro')
+            last_name = value.get('last', '')
+            first_name = value.get('first', '')
+            ipi_name = value.get('ipi', None)
+            # maybe writer is unknown
+            if not any([
+                    last_name, first_name, ipi_name, pr_society, saan,
+                    general_agreement]):
+                yield None
+                continue
             # find this writer
             lookup_writer = Writer(
-                last_name=value.get('last', ''),
-                first_name=value.get('first', ''),
-                ipi_name=value.get('ipi', None),
+                last_name=last_name,
+                first_name=first_name,
+                ipi_name=ipi_name,
                 pr_society=pr_society,
                 generally_controlled=general_agreement,
                 saan=saan)
@@ -260,7 +267,7 @@ class DataImporter(object):
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
             saan = w_dict.get('saan')
-            if saan == writer.saan:
+            if writer and saan == writer.saan:
                 saan = None
             wiw = WriterInWork(
                 writer=writer, work=work,
