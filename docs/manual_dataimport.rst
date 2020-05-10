@@ -52,6 +52,11 @@ as described in :ref:`exporting_csv`.
 
 Open the file in your spreadsheet editor, remove the ``Work ID`` column, and save in the native format.
 
+Repeating column groups for alternate titles, writers and artists are created so that the selected data can fit.
+You can create additional columns by copying the column group and giving it a different counter.
+(Alt Title 1, Alt Title 2, Writer 1, Writer 2, Artist 1, Artist 2). There is no limit to the number of column groups.
+
+
 Filling out the template
 ______________________________
 

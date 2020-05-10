@@ -1042,9 +1042,9 @@ class WorkAdmin(MusicPublisherAdmin):
             'Work ID',
             'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
         ]
-        alt_title_max = 0
-        writer_max = 0
-        artist_max = 0
+        alt_title_max = 1
+        writer_max = 1
+        artist_max = 1
         for work in works:
             alt_title_max = max(alt_title_max, len(work.get('other_titles')))
             writer_max = max(writer_max, len(work.get('writers')))
