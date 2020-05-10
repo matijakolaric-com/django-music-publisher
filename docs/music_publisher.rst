@@ -36,7 +36,7 @@ music\_publisher.admin module
 music\_publisher.tests module
 -----------------------------
 
-.. automodule:: music_publisher.tests
+.. automodule:: music_publisher.tests.tests
     :members:
     :show-inheritance:
 
