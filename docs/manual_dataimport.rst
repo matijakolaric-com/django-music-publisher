@@ -1,7 +1,7 @@
 Importing Data
 ==============================
 
-Simple musical works can be imported from a CSV file. The template is provided.
+Simple musical works can be imported from a CSV file.
 
 Caveats
 -------------------
@@ -41,8 +41,28 @@ All imported works get **new work IDs**. If you already registered these works w
 registrations **will** be overwritten.
 
 
+Professional support
+--------------------
+
+The creator of Django-Music-Publisher runs a `professional support service <https://matijakolaric.com/dmp-prosupport/>`_
+for users of DMP. Subscribers can receive support with all aspects of data import,
+including a professionally made spreadsheet template.
+
+
 How to import?
 ------------------------------
+
+Creating a template
+______________________________
+
+First, you are advised to create a template. To do that, export several works as CSV,
+as described in :ref:`exporting_csv`.
+
+Open the file in your spreadsheet editor, remove the ``Work ID`` column, and save in the native format.
+
+
+Filling out the template
+______________________________
 
 Open the spreadsheet template. Fill out the ``Registrations`` sheet. Save this sheet as CSV.
 

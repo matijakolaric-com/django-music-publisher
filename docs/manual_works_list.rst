@@ -22,12 +22,25 @@ Exporting JSON
 
    Exporting musical works in JSON format.
 
-Select several (or all) works in the ``musical work list`` view, select the ``Export selected works JSON`` action and
-press on ``Go``. A JSON file will be downloaded, containing all the information about your works.
+Select several (or all) works in the ``musical work list`` view, select the ``Export selected works (JSON)`` action and
+press on ``Go``. A JSON file will be downloaded, containing **all** the information about your works.
 
 If you ever choose to stop using Django-Music-Publisher and move on, there is no lock-in. While these JSON formats might
 be confusing, there are free on-line tools that will convert JSON to just about any other format you need.
 
+.. _exporting_csv:
+
+Exporting CSV
+++++++++++++++++++++++++++
+
+Select several (or all) works in the ``musical work list`` view, select the ``Export selected works (CSV)`` action and
+press on ``Go``. A CSV file will be downloaded, containing **only basic** information about your works.
+
+It contains no data about the controlling publisher (you) and recordings, including recording
+artists, labels, tracks and releases.
+
+This CSV format is the same as the one used for :doc:`Importing data <manual_dataimport>`, with
+additional columns: ``Work ID``.
 
 CWR Exporting Wizard
 ++++++++++++++++++++
