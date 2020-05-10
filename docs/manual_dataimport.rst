@@ -70,8 +70,8 @@ example, as described before.
 Data upload
 ______________________________
 
-Then upload the CSV file through the data import form. If all goes well,
-the report will show the link to imported works.
+Upload the CSV file through the data import form. If all goes well,
+the import report will show links to imported works.
 
 Professional support
 --------------------
@@ -83,4 +83,4 @@ including a professionally made spreadsheet template.
 .. figure:: /images/import_template.png
    :width: 100%
 
-   Exporting musical works in JSON format.
+   Professionally made import template with basic validation.
