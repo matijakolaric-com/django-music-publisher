@@ -40,21 +40,19 @@ class DataImporter(object):
             action_flag, message)
 
     @staticmethod
-    def get_clean_key(value, tup):
+    def get_clean_key(value, tup, name):
         """Try to match either key or value from a user input mess."""
 
-        values = re.sub(r'[^0-9A-Za-z&]+', '-', value).split('-', 1)
-        new_value = None
-        for v in values:
-            for k, l in tup:
-                if v in [k.strip(), l]:
-                    new_value = k
-                    break
-            if new_value:
-                break
+        key_match = re.match(r'^([0-9]+|[A-Z]+)', value)
+        if not key_match:
+            raise ValueError(
+                'Unknown value: "{}" for "{}".'.format(value, name))
+        key = key_match.group(0)
+        if key.upper() in [t[0] for t in tup]:
+            return key
         else:
-            raise ValueError('Unknown column: "{}".'.format(value))
-        return new_value
+            raise ValueError(
+                'Unknown value: "{}" for "{}".'.format(value, name))
 
     def process_writer_value(self, key, key_elements, value):
         """Clean a value for a writer and return it.
@@ -67,9 +65,10 @@ class DataImporter(object):
                 key_elements[2] not in self.WRITER_FIELDS):
             raise AttributeError('Unknown column: "{}".'.format(key))
         if key_elements[2] == 'role':
-            value = self.get_clean_key(value, WriterInWork.ROLES)
+            value = self.get_clean_key(
+                value, WriterInWork.ROLES, 'writer role')
         elif key_elements[2] == 'pro':
-            value = self.get_clean_key(value, settings.SOCIETIES)
+            value = self.get_clean_key(value, settings.SOCIETIES, 'society')
         elif key_elements[2] == 'share':
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])

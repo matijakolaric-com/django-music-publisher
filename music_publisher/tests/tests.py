@@ -96,9 +96,15 @@ class DataImportTest(TestCase):
 
         di = dataimport.DataImporter([], user=None)
 
+        # No key in dict
         with self.assertRaises(ValueError) as ve:
-            di.get_clean_key('a', [])
-        self.assertEqual(str(ve.exception), 'Unknown column: "a".')
+            di.get_clean_key('A', [], 'test')
+        self.assertEqual(str(ve.exception), 'Unknown value: "A" for "test".')
+
+        # Regex mismatch
+        with self.assertRaises(ValueError) as ve:
+            di.get_clean_key('-', [], 'test')
+        self.assertEqual(str(ve.exception), 'Unknown value: "-" for "test".')
 
         with self.assertRaises(AttributeError) as ve:
             di.process_writer_value('a', ['Writer', '1', 'b'], 'X')
