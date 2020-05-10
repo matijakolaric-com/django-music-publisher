@@ -79,3 +79,8 @@ Professional support
 The creator of Django-Music-Publisher runs a `professional support service <https://matijakolaric.com/dmp-prosupport/>`_
 for users of DMP. Subscribers can receive support with all aspects of data import,
 including a professionally made spreadsheet template.
+
+.. figure:: /images/import_template.png
+   :width: 100%
+
+   Exporting musical works in JSON format.
