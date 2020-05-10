@@ -22,7 +22,7 @@ In the last group, we have three fields:
 
 The last column is a counter and link to the :doc:`list of works <manual_works_list>` by this writer.
 
-Can be controlled flag
+``Can be controlled`` flag
 ------------------------------------
 
 For writers who are controlled (whose works are published by you), more data is required

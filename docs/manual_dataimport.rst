@@ -1,7 +1,7 @@
 Importing Data
 ==============================
 
-Simple musical works can be imported from a CSV file. This functionality is considered
+Simple musical works can be imported from a CSV file. This advanced functionality is considered
 **experimental**.
 
 Caveats

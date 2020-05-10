@@ -40,7 +40,7 @@ It contains no data about the controlling publisher (you) and recordings, includ
 artists, labels, tracks and releases.
 
 This CSV format is the same as the one used for :doc:`Importing data <manual_dataimport>`, with
-additional columns: ``Work ID``.
+one additional column: ``Work ID``.
 
 CWR Exporting Wizard
 ++++++++++++++++++++

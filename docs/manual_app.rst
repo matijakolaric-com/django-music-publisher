@@ -1,4 +1,4 @@
-Music Publishing App
+Music Publisher App
 ====================
 
 .. figure:: /images/home.png
