@@ -1,7 +1,8 @@
 Importing Data
 ==============================
 
-Simple musical works can be imported from a CSV file.
+Simple musical works can be imported from a CSV file. This functionality is considered
+**experimental**.
 
 Caveats
 -------------------
@@ -40,15 +41,6 @@ All imported works get **new work IDs**. If you already registered these works w
 **will** result in double registrations. If new work IDs are the same as the ones you used before, then old
 registrations **will** be overwritten.
 
-
-Professional support
---------------------
-
-The creator of Django-Music-Publisher runs a `professional support service <https://matijakolaric.com/dmp-prosupport/>`_
-for users of DMP. Subscribers can receive support with all aspects of data import,
-including a professionally made spreadsheet template.
-
-
 How to import?
 ------------------------------
 
@@ -60,11 +52,25 @@ as described in :ref:`exporting_csv`.
 
 Open the file in your spreadsheet editor, remove the ``Work ID`` column, and save in the native format.
 
-
 Filling out the template
 ______________________________
 
 Open the spreadsheet template. Fill out the ``Registrations`` sheet. Save this sheet as CSV.
 
+Values in ``Writer PRO``, ``Writer Role`` and ``Writer Controlled`` columns must
+start with correct codes. ``10``, ``10 ASCAP``, ``10 - ASCAP`` or ``10 - BMI`` will all resolve as ASCAP.
+``ASCAP`` without the code will throw an error. You can get all the codes from the source or by creating a CSV export
+example, as described before.
+
+Data upload
+______________________________
+
 Then upload the CSV file through the data import form. If all goes well,
 the report will show the link to imported works.
+
+Professional support
+--------------------
+
+The creator of Django-Music-Publisher runs a `professional support service <https://matijakolaric.com/dmp-prosupport/>`_
+for users of DMP. Subscribers can receive support with all aspects of data import,
+including a professionally made spreadsheet template.
