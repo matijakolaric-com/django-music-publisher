@@ -1372,6 +1372,12 @@ class CWRExportAdmin(admin.ModelAdmin):
             return False
         return super().has_delete_permission(request, obj)
 
+    def has_change_permission(self, request, obj=None):
+        """If object exists, it can only be edited in changelist."""
+        if obj:
+            return False
+        return super().has_delete_permission(request, obj)
+
     def get_form(self, request, obj=None, **kwargs):
         """Set initial values for work IDs."""
         form = super().get_form(request, obj, **kwargs)

@@ -454,12 +454,23 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
 
+    def test_super_user(self):
+        """Testing index for superuser covers all the cases."""
+        self.client.force_login(self.superuser)
+        url = reverse('admin:index')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
     def test_staff_user(self):
         """Test that a staff user can access some urls.
 
         Please note that most of the work is in other tests."""
         self.client.force_login(self.staffuser)
         # General checks
+        url = reverse('admin:index')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
         for testing_admin in self.testing_admins:
             url = reverse(
                 'admin:music_publisher_{}_changelist'.format(testing_admin))
@@ -480,6 +491,8 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             data = get_data_from_response(response)
+            if testing_admin in ['cwrexport']:  # no change permission
+                continue
             if 'first_name' in data:
                 data['first_name'] += ' JR.'
             response = self.client.post(

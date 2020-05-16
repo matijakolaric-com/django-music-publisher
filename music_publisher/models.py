@@ -82,7 +82,7 @@ class Label(models.Model):
     """
 
     class Meta:
-        verbose_name_plural = '  Music Labels'
+        verbose_name_plural = 'Music Labels'
         ordering = ('name',)
 
     name = models.CharField(
@@ -339,7 +339,7 @@ class Writer(PersonBase, IPIBase):
 
     class Meta:
         ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name_plural = '  Writers'
+        verbose_name_plural = ' Writers'
 
     def __str__(self):
         name = super().__str__()
@@ -491,7 +491,7 @@ class Work(TitleBase):
     """
 
     class Meta:
-        verbose_name = '    Musical Work'
+        verbose_name = 'Musical Work'
         ordering = ('-id',)
 
     iswc = models.CharField(
