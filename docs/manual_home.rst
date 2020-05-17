@@ -18,4 +18,6 @@ The ``home view`` will show up after a successfully login, in this example, it i
 In the header, the left part shows the name of the (main) publisher and the link to the maintainer's website.
 The right shows links to this user manual, for changing the password and logging out. This header is present in all views.
 
-We have two columns, the left one shows the list of modules, with links to change and add views. The right one shows the last 10 actions of the current user. It is empty, as we have not done anything yet.
+We have two columns, the left one shows the list of modules, with links to change and add views.
+The right one shows up to 10 latest actions of the current user. In this case, a user was created and edited,
+as described in the next section.

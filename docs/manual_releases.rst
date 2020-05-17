@@ -12,13 +12,15 @@ Under the hood of Django-Music-Publisher, there is very little difference betwee
 
 We will first cover simpler Commercial Releases.
 
-Commercial Releases
-+++++++++++++++++++
+Commercial (General) Releases
++++++++++++++++++++++++++++++
+
+Note that *Commercial* is used here as a synonym for *General*.
 
 The most typical example of a release used to be a vinyl record album, then a CD.
 
-Django-Music-Publisher, as open source software, is easily extendable. While currently there is no real use for ``commercial releases`` model with vanilla Django-Music-Publisher, because this data is not included in CWR registrations,
-it may become useful with a custom extension, or with one of the upcoming publicly available extensions.
+Django-Music-Publisher, as open source software, is easily extendable. While currently there is no real use for ``commercial releases`` model with vanilla Django-Music-Publisher, because this data is not included in CWR registrations.
+It will be used in the future versions of the software.
 
 The ``Commercial release list`` view is quite simple, only three columns, ``Release (album) title``, ``Release (album) label`` and count of tracks with link to ``Recordings``.
 

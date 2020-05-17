@@ -49,8 +49,8 @@ Normalized JSON export was dropped. Documentation has been stripped of techie ja
 Features already present in the 20.7 branch:
 
 * Clearer index page
-* Controlled writers without IPI name numbers and PR affiliations
 * Data import for new musical works
+* Controlled writers without IPI name numbers and PR affiliations
 
 20.7 and beyond
 ---------------
