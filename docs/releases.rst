@@ -1,11 +1,11 @@
 Release Policy
 ##############
 
+There are two versions per year with new features, in January and July.
+Minor versions are released as required.
+
 Features Releases
 =================
-
-There were 4 releases with new features in 2018.
-Since 2019, there are two releases per year with new features, in January and July. Here is a brief overview.
 
 18.7 - 18.11
 ------------
@@ -13,44 +13,38 @@ Since 2019, there are two releases per year with new features, in January and Ju
 Initial release in July 2018 had a very simple data structure. It used external API
 for CWR generation. The code was open-source, but it was dependant on a commercial service.
 
-Features were gradually added. Support was added for multiple US publishers, removed later.
-
 19.1 Epiphany
 -------------
 
 CWR generation and complete data validation was added to the open-source code. Full support for
 modified works was added, as well as basic co-publishing support.
-Two JSON formats were added (one has been removed since).
+Data export in JSON format was added.
 
 19.7 Metanoia
 -------------
 
-Multiple recordings per work can be added. CWR 3.0 generation was added, labeled as "experimental".
-CWR preview, for both versions, now includes basic syntax highlighting. CWR files are now zipped before the download.
-
-Support for US publishers with entities in different PROs was dropped.
+Support for multiple recordings per work and CWR 3.0 generation, labeled as "experimental", were added.
+CWR preview, for both versions, received basic syntax highlighting. CWR files are zipped before the download.
 
 20 Twenty
 ---------
 
 Twenty-twenty can now be deployed to the Free Heroku dyno (container) by non-techies.
 
-Support for custom global share splits was added, solving compatibility issues with some societies.
-This also requires MR/SR affiliations for writers, so that was added as well.
+Support for custom global share splits was added. MR/SR affiliations for writers are available when
+implied by share split settings.
 
 Syntax highlighting for CWR acknowledgements was added, to make dealing with conflicts and other registration-related
 issues simpler.
 
-Normalized JSON export was dropped. Documentation has been stripped of techie jargon.
+Documentation was completely rewritten.
 
-20.7
----------------
+20.7 Endemic
+------------
 
-Features already present in the 20.7 branch:
-
-* Clearer index page
-* Data import for new musical works
-* Controlled writers without IPI name numbers and PR affiliations
+Index (home) page became clearer, models are split into groups.
+CSV export of musical work metadata, import from CSV for *new* musical works, and support for controlled writers with no
+society affiliation were added.
 
 20.7 and beyond
 ---------------
@@ -64,7 +58,7 @@ The main areas for further development are:
 Minor Releases
 ==============
 
-Minor releases are bugfix/security releases.
+Minor versions are bugfix/security releases.
 
 They are released when a real security issue is detected in Django-Music-Publisher or any of the dependencies.
 Bugfixes are released when needed, the speed of it depends on the severity of a bug.
