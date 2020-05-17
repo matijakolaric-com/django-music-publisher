@@ -46,14 +46,14 @@ Index (home) page became clearer, models are split into groups.
 CSV export of musical work metadata, import from CSV for *new* musical works, and support for controlled writers with no
 society affiliation were added.
 
-20.7 and beyond
+21 and beyond
 ---------------
 
 The main areas for further development are:
 
 * Royalty distribution
-* DDEX (MWN/RIN) support
-* CWR 3.x
+* DDEX support
+* CWR 3.1
 
 Minor Releases
 ==============
