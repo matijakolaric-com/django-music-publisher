@@ -1485,6 +1485,10 @@ class ModelsSimpleTest(TransactionTestCase):
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
             cwr.cwr.encode()[87:], TEST_CONTENT[87:])
+        # should just return when once created
+        num = cwr.num_in_year
+        cwr.create_cwr()
+        self.assertEqual(cwr.num_in_year, num)
 
         # test also CWR 3.0 ISR
         TEST_CONTENT = open(TEST_ISR_FILENAME, 'rb').read()
