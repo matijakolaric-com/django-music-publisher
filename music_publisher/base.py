@@ -162,3 +162,128 @@ class IPIBase(models.Model):
                 d['publisher_fee'] = 'This field is required.'
         if d:
             raise django.core.exceptions.ValidationError(d)
+
+
+class ArtistBase(PersonBase):
+    """Performing artist base class.
+
+    Attributes:
+        isni (django.db.models.CharField): International Standard Name Id
+    """
+
+    class Meta:
+        verbose_name = 'Performing Artist'
+        verbose_name_plural = 'Performing Artists'
+        ordering = ('last_name', 'first_name', '-id')
+        abstract = True
+
+    isni = models.CharField(
+        'ISNI',
+        max_length=16, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('isni'),))
+
+    def clean_fields(self, *args, **kwargs):
+        """ISNI cleanup"""
+        if self.isni:
+            self.isni = self.isni.rjust(16, '0').upper()
+        return models.Model.clean_fields(self, *args, **kwargs)
+
+
+class WriterBase(PersonBase, IPIBase):
+    """Base class for writers.
+    """
+
+    class Meta:
+        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
+        verbose_name_plural = 'Writers'
+        abstract = True
+
+
+class LabelBase(models.Model):
+    """Music Label base class.
+
+    Attributes:
+        name (django.db.models.CharField): Label Name
+    """
+
+    class Meta:
+        verbose_name_plural = 'Music Labels'
+        ordering = ('name',)
+        abstract = True
+
+    name = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('label'),))
+
+
+class LabelBase(models.Model):
+    """Music Label base class.
+
+    Attributes:
+        name (django.db.models.CharField): Label Name
+    """
+
+    class Meta:
+        verbose_name_plural = 'Music Labels'
+        ordering = ('name',)
+        abstract = True
+
+    name = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('label'),))
+
+
+class LibraryBase(models.Model):
+    """Music Library base class.
+
+    Attributes:
+        name (django.db.models.CharField): Library Name
+    """
+
+    class Meta:
+        verbose_name_plural = 'Music Libraries'
+        ordering = ('name',)
+        abstract = True
+
+    name = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('library'),))
+
+
+class ReleaseBase(models.Model):
+    """Music Release base class
+
+    Attributes:
+        cd_identifier (django.db.models.CharField): CD Identifier, used when \
+        origin is library
+        ean (django.db.models.CharField): EAN code
+        name (django.db.models.CharField): Library Name
+        release_date (django.db.models.DateField): Date of the release
+        name (django.db.models.CharField): Label Name
+        release_title (django.db.models.CharField): Title of the release
+    """
+
+    class Meta:
+        ordering = ('release_title', 'cd_identifier', '-id')
+        abstract = True
+
+    cd_identifier = models.CharField(
+        'CD identifier',
+        max_length=15, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('cd_identifier'),))
+    library = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('library'),))
+    release_date = models.DateField(
+        blank=True, null=True)
+    release_title = models.CharField(
+        'Release (album) title ',
+        max_length=60, blank=True, null=True,
+        validators=(CWRFieldValidator('release_title'),))
+    ean = models.CharField(
+        'Release (album) EAN',
+        max_length=13, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('ean'),))
+    release_label = models.CharField(
+        max_length=60, unique=True,
+        validators=(CWRFieldValidator('label'),))

@@ -14,7 +14,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template import Context
 
-from .base import (IPIBase, PersonBase, TitleBase)
+from .base import (
+    ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
+    TitleBase, WriterBase,
+)
 from .cwr_templates import TEMPLATES_21, TEMPLATES_30
 from .validators import CWRFieldValidator
 
@@ -27,28 +30,9 @@ WORLD_DICT = {
 }
 
 
-class Artist(PersonBase):
-    """Performing artists.
-
-    Attributes:
-        isni (django.db.models.CharField): International Standard Name Id
+class Artist(ArtistBase):
+    """Performing artist.
     """
-
-    class Meta:
-        verbose_name = 'Performing Artist'
-        verbose_name_plural = '  Performing Artists'
-        ordering = ('last_name', 'first_name', '-id')
-
-    isni = models.CharField(
-        'ISNI',
-        max_length=16, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('isni'),))
-
-    def clean_fields(self, *args, **kwargs):
-        """ISNI cleanup"""
-        if self.isni:
-            self.isni = self.isni.rjust(16, '0').upper()
-        return models.Model.clean_fields(self, *args, **kwargs)
 
     def get_dict(self):
         """Get the object in an internal dictionary format
@@ -74,20 +58,9 @@ class Artist(PersonBase):
         return 'A{:06d}'.format(self.id)
 
 
-class Label(models.Model):
+class Label(LabelBase):
     """Music Label.
-
-    Attributes:
-        name (django.db.models.CharField): Label Name
     """
-
-    class Meta:
-        verbose_name_plural = 'Music Labels'
-        ordering = ('name',)
-
-    name = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('label'),))
 
     def __str__(self):
         return self.name.upper()
@@ -114,11 +87,8 @@ class Label(models.Model):
         }
 
 
-class Library(models.Model):
+class Library(LibraryBase):
     """Music Library.
-
-    Attributes:
-        name (django.db.models.CharField): Library Name
     """
 
     class Meta:
@@ -154,42 +124,20 @@ class Library(models.Model):
         }
 
 
-class Release(models.Model):
+class Release(ReleaseBase):
     """Music Release (album / other product)
 
     Attributes:
-        cd_identifier (django.db.models.CharField): CD Identifier, used when \
-        origin is library
-        ean (django.db.models.CharField): EAN code
         library (django.db.models.ForeignKey): Foreign key to \
         :class:`.models.Library`
-        release_date (django.db.models.DateField): Date of the release
         release_label (django.db.models.ForeignKey): Foreign key to \
         :class:`.models.Label`
-        release_title (django.db.models.CharField): Title of the release
         recordings (django.db.models.ManyToManyField): M2M to \
         :class:`.models.Recording` through :class:`.models.Track`
     """
 
-    class Meta:
-        ordering = ('release_title', 'cd_identifier', '-id')
-
-    cd_identifier = models.CharField(
-        'CD identifier',
-        max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('cd_identifier'),))
     library = models.ForeignKey(
         Library, null=True, blank=True, on_delete=models.PROTECT)
-    release_date = models.DateField(
-        blank=True, null=True)
-    release_title = models.CharField(
-        'Release (album) title ',
-        max_length=60, blank=True, null=True,
-        validators=(CWRFieldValidator('release_title'),))
-    ean = models.CharField(
-        'Release (album) EAN',
-        max_length=13, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('ean'),))
     release_label = models.ForeignKey(
         Label, verbose_name='Release (album) label', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -333,8 +281,8 @@ class CommercialRelease(Release):
     objects = CommercialReleaseManager()
 
 
-class Writer(PersonBase, IPIBase):
-    """Base class for writers, the second most important top-level class.
+class Writer(WriterBase):
+    """Writers.
     """
 
     class Meta:
