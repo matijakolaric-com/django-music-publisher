@@ -133,7 +133,7 @@ class CWRFieldValidator:
         """
 
         name = self.field
-        if 'title' in name:
+        if name == 'title':
             if not re.match(RE_TITLE, value.upper()):
                 raise ValidationError('Title contains invalid characters.')
         elif name == 'isni':
@@ -161,9 +161,7 @@ class CWRFieldValidator:
                 raise ValidationError(
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
-        elif ('name' in name or
-              'label' in name or
-              name in ['cd_identifier', 'saan', 'library']):
+        elif name == 'name':
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
 

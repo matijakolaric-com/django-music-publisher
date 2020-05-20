@@ -24,7 +24,7 @@ class TitleBase(models.Model):
 
     title = models.CharField(
         max_length=60, db_index=True,
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
 
     def __str__(self):
         return self.title.upper()
@@ -43,10 +43,10 @@ class PersonBase(models.Model):
 
     first_name = models.CharField(
         max_length=30, blank=True,
-        validators=(CWRFieldValidator('artist_first_name'),))
+        validators=(CWRFieldValidator('name'),))
     last_name = models.CharField(
         max_length=45, db_index=True,
-        validators=(CWRFieldValidator('artist_last_name'),))
+        validators=(CWRFieldValidator('name'),))
 
     def __str__(self):
         if self.first_name:
@@ -84,21 +84,21 @@ class IPIBase(models.Model):
 
     ipi_name = models.CharField(
         'IPI Name #', max_length=11, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('writer_ipi_name'),))
+        validators=(CWRFieldValidator('ipi_name'),))
     ipi_base = models.CharField(
         'IPI Base #', max_length=15, blank=True, null=True,
-        validators=(CWRFieldValidator('writer_ipi_base'),))
+        validators=(CWRFieldValidator('ipi_base'),))
     pr_society = models.CharField(
         'Performance rights society', max_length=3, blank=True, null=True,
-        validators=(CWRFieldValidator('writer_pr_society'),),
+        validators=(CWRFieldValidator('pr_society'),),
         choices=settings.SOCIETIES)
     mr_society = models.CharField(
         'Mechanical rights society', max_length=3, blank=True, null=True,
-        validators=(CWRFieldValidator('writer_pr_society'),),
+        validators=(CWRFieldValidator('pr_society'),),
         choices=settings.SOCIETIES)
     sr_society = models.CharField(
         'Synchronization rights society', max_length=3, blank=True, null=True,
-        validators=(CWRFieldValidator('writer_pr_society'),),
+        validators=(CWRFieldValidator('pr_society'),),
         choices=settings.SOCIETIES)
     saan = models.CharField(
         'Society-assigned general agreement number',
@@ -213,24 +213,7 @@ class LabelBase(models.Model):
 
     name = models.CharField(
         max_length=60, unique=True,
-        validators=(CWRFieldValidator('label'),))
-
-
-class LabelBase(models.Model):
-    """Music Label base class.
-
-    Attributes:
-        name (django.db.models.CharField): Label Name
-    """
-
-    class Meta:
-        verbose_name_plural = 'Music Labels'
-        ordering = ('name',)
-        abstract = True
-
-    name = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('label'),))
+        validators=(CWRFieldValidator('name'),))
 
 
 class LibraryBase(models.Model):
@@ -247,7 +230,7 @@ class LibraryBase(models.Model):
 
     name = models.CharField(
         max_length=60, unique=True,
-        validators=(CWRFieldValidator('library'),))
+        validators=(CWRFieldValidator('name'),))
 
 
 class ReleaseBase(models.Model):
@@ -270,20 +253,20 @@ class ReleaseBase(models.Model):
     cd_identifier = models.CharField(
         'CD identifier',
         max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('cd_identifier'),))
+        validators=(CWRFieldValidator('name'),))
     library = models.CharField(
         max_length=60, unique=True,
-        validators=(CWRFieldValidator('library'),))
+        validators=(CWRFieldValidator('name'),))
     release_date = models.DateField(
         blank=True, null=True)
     release_title = models.CharField(
         'Release (album) title ',
         max_length=60, blank=True, null=True,
-        validators=(CWRFieldValidator('release_title'),))
+        validators=(CWRFieldValidator('title'),))
     ean = models.CharField(
         'Release (album) EAN',
         max_length=13, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('ean'),))
     release_label = models.CharField(
         max_length=60, unique=True,
-        validators=(CWRFieldValidator('label'),))
+        validators=(CWRFieldValidator('name'),))

@@ -1185,7 +1185,7 @@ class ValidatorsTest(TestCase):
             validators.validate_settings()
 
     def test_title(self):
-        validator = validators.CWRFieldValidator('work_title')
+        validator = validators.CWRFieldValidator('title')
         self.assertIsNone(validator('VALID TITLE'))
         with self.assertRaises(exceptions.ValidationError):
             validator('|Invalid')
@@ -1239,7 +1239,7 @@ class ValidatorsTest(TestCase):
             validator('I-123456789-4')
 
     def test_name(self):
-        validator = validators.CWRFieldValidator('last_name')
+        validator = validators.CWRFieldValidator('name')
         self.assertIsNone(validator('VALID NAME'))
         with self.assertRaises(exceptions.ValidationError):
             validator('NAME, INVALID')
