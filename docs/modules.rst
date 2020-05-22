@@ -1,7 +1,7 @@
 API Docs
 ========
 
-This is where it gets really technical and unless you are a developer, you should really not dig into this.
+This is where it gets really technical. Unless you are a developer, you should really not dig into this.
 
 music\_publisher Package
 ++++++++++++++++++++++++

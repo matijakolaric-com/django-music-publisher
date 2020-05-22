@@ -100,23 +100,8 @@ class IPIBase(models.Model):
         'Synchronization rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
         choices=settings.SOCIETIES)
-    saan = models.CharField(
-        'Society-assigned general agreement number',
-        help_text='Use this field for general agreements only.\n'
-                  'For specific agreements use the field in the Work form,\n'
-                  'in Writers In Work section.',
-        validators=(CWRFieldValidator('saan'),),
-        max_length=14, blank=True, null=True, unique=True)
 
     _can_be_controlled = models.BooleanField(editable=False, default=False)
-    generally_controlled = models.BooleanField(
-        'General agreement', default=False)
-    publisher_fee = models.DecimalField(
-        max_digits=5, decimal_places=2, blank=True, null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text=
-        'Percentage of royalties kept by the publisher,\n'
-        'in a general agreement.')
 
     def clean_fields(self, *args, **kwargs):
         """
@@ -145,6 +130,45 @@ class IPIBase(models.Model):
             self._can_be_controlled = (
                     bool(self.ipi_name) &
                     bool(self.pr_society))
+
+
+class IPIWithGeneralAgreementBase(IPIBase):
+    """Abstract base for all objects with general agreements.
+
+    Attributes:
+        saan (django.db.models.CharField):
+            Society-assigned agreement number, in this context it is used for
+            general agreements, for specific agreements use
+            :attr:`.models.WriterInWork.saan`.
+        generally_controlled (django.db.models.BooleanField):
+            flags if a writer is generally controlled (in all works)
+        publisher_fee (django.db.models.DecimalField):
+            this field is used in calculating publishing fees
+    """
+
+    class Meta:
+        abstract = True
+
+    saan = models.CharField(
+        'Society-assigned general agreement number',
+        help_text='Use this field for general agreements only.\n'
+                  'For specific agreements use the field in the Work form,\n'
+                  'in Writers In Work section.',
+        validators=(CWRFieldValidator('saan'),),
+        max_length=14, blank=True, null=True, unique=True)
+
+    generally_controlled = models.BooleanField(
+        'General agreement', default=False)
+    publisher_fee = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text=
+        'Percentage of royalties kept by the publisher,\n'
+        'in a general agreement.')
+
+    def clean(self):
+        """Clean the data and validate."""
+        super().clean()
         d = {}
         if not self.generally_controlled:
             if self.saan:
@@ -189,7 +213,7 @@ class ArtistBase(PersonBase):
         return models.Model.clean_fields(self, *args, **kwargs)
 
 
-class WriterBase(PersonBase, IPIBase):
+class WriterBase(PersonBase, IPIWithGeneralAgreementBase):
     """Base class for writers.
     """
 
