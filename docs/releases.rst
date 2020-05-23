@@ -4,8 +4,8 @@ Release Policy
 There are two versions per year with new features, in January and July.
 Minor versions are released as required.
 
-Features Releases
-=================
+Past versions with new features
+===============================
 
 18.7 - 18.11
 ------------
@@ -29,13 +29,14 @@ CWR preview, for both versions, received basic syntax highlighting. CWR files ar
 20 Twenty
 ---------
 
-Twenty-twenty can now be deployed to the Free Heroku dyno (container) by non-techies.
+Twenty-twenty was primarily about simplified deployment. Since thsi version, DMP can be deployed to the Free Heroku dyno
+(container) by non-techies.
 
-Support for custom global share splits was added. MR/SR affiliations for writers are available when
-implied by share split settings.
+Support for custom global share splits was added. MR/SR affiliations for writers are available when implied by share
+split settings.
 
-Syntax highlighting for CWR acknowledgements was added, to make dealing with conflicts and other registration-related
-issues simpler.
+Syntax highlighting for CWR acknowledgements was added, for simpler dealing with conflicts and other registration-related
+issues.
 
 Documentation was completely rewritten.
 
@@ -46,19 +47,11 @@ Index (home) page became clearer, models are split into groups.
 CSV export of musical work metadata, import from CSV for *new* musical works, and support for controlled writers with no
 society affiliation were added.
 
-21 and beyond
----------------
+Future features
+===============
 
 The main areas for further development are:
 
 * Royalty distribution
 * DDEX support
 * CWR 3.1
-
-Minor Releases
-==============
-
-Minor versions are bugfix/security releases.
-
-They are released when a real security issue is detected in Django-Music-Publisher or any of the dependencies.
-Bugfixes are released when needed, the speed of it depends on the severity of a bug.
