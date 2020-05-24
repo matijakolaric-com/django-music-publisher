@@ -40,12 +40,11 @@ User manual
 
    manual
 
-.. only:: html
 
-    For Developers
-    ********************
+For Developers
+********************
 
-    .. toctree::
-       :maxdepth: 1
+.. toctree::
+   :maxdepth: 1
 
-       modules
+   modules

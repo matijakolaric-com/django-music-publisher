@@ -138,7 +138,7 @@ latex_elements = {
     #
     'figure_align': 'H',
 
-    'printindex': '',
+    'printindex': '\\footnotesize\\raggedright\\printindex',
 }
 
 
