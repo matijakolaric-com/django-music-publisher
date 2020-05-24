@@ -27,9 +27,9 @@ copyright = '2018-2020, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = '20 Twenty'
+version = '20.7 Endemic'
 # The full version, including alpha/beta/rc tags
-release = '20.1.3'
+release = '20.7'
 
 rst_epilog = '''
 .. |version| replace:: {}
