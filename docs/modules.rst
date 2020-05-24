@@ -1,5 +1,5 @@
-API Docs
-========
+For Developers
+==============
 
 This is where it gets really technical. Unless you are a developer, you should really not dig into this.
 
