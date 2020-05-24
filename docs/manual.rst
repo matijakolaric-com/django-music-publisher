@@ -3,7 +3,7 @@
 User Manual
 ############
 
-This is the user manual for Django-Music-Publisher 20 Twenty.
+This is the user manual for Django-Music-Publisher 20.7 Endemic.
 
 .. toctree::
    :maxdepth: 2
@@ -14,10 +14,10 @@ This is the user manual for Django-Music-Publisher 20 Twenty.
    manual_works
    manual_works_list
    manual_releases
-   manual_labels_libraries
-   manual_artists
-   manual_recordings
    manual_writers
+   manual_artists
+   manual_labels_libraries
+   manual_recordings
    manual_cwr
    manual_ack
    manual_dataimport
