@@ -1,11 +1,19 @@
 Introduction
 =================================
 
-Django-Music-Publisher (DMP) is open source software for **managing music metadata**,
-(works, writers, recordings, artists, labels, releases and libraries). It uses
+Django-Music-Publisher (DMP) is open source software for **managing music metadata**:
+
+    * works,
+    * writers,
+    * recordings,
+    * artists,
+    * labels,
+    * releases and
+    * libraries.
+
+It uses
 `Common Works Registration (CWR) <https://matijakolaric.com/articles/1/>`_
-for batch registration/licencing of musical works with collective management organizations (CMOs, AKA PROs, MROs,
-collecting societies, etc.) and DSPs, as well as data delivery to sub-publishers.
+for batch registration/licencing of musical works with `Collective Management Organizations (CMOs) <https://en.wikipedia.org/wiki/Collective_rights_management#Collective_management_organisations>`_ and Digital Service Providers (DSPs), as well as data delivery to sub-publishers.
 
 Django-Music-Publisher is based on `Django web framework <https://www.djangoproject.com/>`_, hence the name.
 

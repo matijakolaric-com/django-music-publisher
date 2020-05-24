@@ -263,10 +263,10 @@ class ReleaseBase(models.Model):
     Attributes:
         cd_identifier (django.db.models.CharField): CD Identifier, used when \
         origin is library
+        library (django.db.models.CharField): Library Name
         ean (django.db.models.CharField): EAN code
-        name (django.db.models.CharField): Library Name
         release_date (django.db.models.DateField): Date of the release
-        name (django.db.models.CharField): Label Name
+        release_label (django.db.models.CharField): Label Name
         release_title (django.db.models.CharField): Title of the release
     """
 
