@@ -20,6 +20,7 @@ General Documentation
    introduction
    installation
    releases
+   LICENSE
 
 Videos
 ********************
@@ -37,20 +38,10 @@ User manual
 
    manual
 
-License
-*********************
+For Developers
+********************
 
 .. toctree::
    :maxdepth: 1
 
-   LICENSE
-
-.. only:: html
-
-    For Developers
-    ********************
-
-    .. toctree::
-       :maxdepth: 1
-
-       modules
+   modules
