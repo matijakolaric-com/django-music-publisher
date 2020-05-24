@@ -137,6 +137,8 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     'figure_align': 'H',
+
+    'printindex': '',
 }
 
 
