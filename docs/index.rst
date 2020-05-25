@@ -15,7 +15,7 @@ General Documentation
 *********************
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    introduction
    installation
