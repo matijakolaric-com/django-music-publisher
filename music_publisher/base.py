@@ -54,40 +54,21 @@ class PersonBase(models.Model):
         return self.last_name.upper()
 
 
-class IPIBase(models.Model):
-    """Abstract base for all objects containing IPI numbers.
+class AffiliationBase(models.Model):
+    """Abstract base for all objects with CMO affiliations
 
     Attributes:
-        ipi_base (django.db.models.CharField): IPI Base Number
-        ipi_name (django.db.models.CharField): IPI Name Number
         pr_society (django.db.models.CharField):
             Performing Rights Society Code
         mr_society (django.db.models.CharField):
             Mechanical Rights Society Code
         sr_society (django.db.models.CharField):
             Sync. Rights Society Code
-        saan (django.db.models.CharField):
-            Society-assigned agreement number, in this context it is used for
-            general agreements, for specific agreements use
-            :attr:`.models.WriterInWork.saan`.
-        _can_be_controlled (django.db.models.BooleanField):
-            used to determine if there is enough data for a writer
-            to be controlled.
-        generally_controlled (django.db.models.BooleanField):
-            flags if a writer is generally controlled (in all works)
-        publisher_fee (django.db.models.DecimalField):
-            this field is used in calculating publishing fees
     """
 
     class Meta:
         abstract = True
 
-    ipi_name = models.CharField(
-        'IPI Name #', max_length=11, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('ipi_name'),))
-    ipi_base = models.CharField(
-        'IPI Base #', max_length=15, blank=True, null=True,
-        validators=(CWRFieldValidator('ipi_base'),))
     pr_society = models.CharField(
         'Performance rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
@@ -101,6 +82,34 @@ class IPIBase(models.Model):
         validators=(CWRFieldValidator('pr_society'),),
         choices=settings.SOCIETIES)
 
+
+class IPIBase(models.Model):
+    """Abstract base for all objects containing IPI numbers.
+
+    Attributes:
+        ipi_base (django.db.models.CharField): IPI Base Number
+        ipi_name (django.db.models.CharField): IPI Name Number
+        pr_society (django.db.models.CharField):
+            Performing Rights Society Code
+        mr_society (django.db.models.CharField):
+            Mechanical Rights Society Code
+        sr_society (django.db.models.CharField):
+            Sync. Rights Society Code
+        _can_be_controlled (django.db.models.BooleanField):
+            used to determine if there is enough data for a writer
+            to be controlled.
+    """
+
+    class Meta:
+        abstract = True
+
+    ipi_name = models.CharField(
+        'IPI Name #', max_length=11, blank=True, null=True, unique=True,
+        validators=(CWRFieldValidator('ipi_name'),))
+    ipi_base = models.CharField(
+        'IPI Base #', max_length=15, blank=True, null=True,
+        validators=(CWRFieldValidator('ipi_base'),))
+
     _can_be_controlled = models.BooleanField(editable=False, default=False)
 
     def clean_fields(self, *args, **kwargs):
@@ -108,8 +117,6 @@ class IPIBase(models.Model):
         Data cleanup, allowing various import formats to be converted into
         consistently formatted data.
         """
-        if self.saan:
-            self.saan = self.saan.upper()  # only in CWR, uppercase anyway
         if self.ipi_name:
             self.ipi_name = self.ipi_name.rjust(11, '0')
         if self.ipi_base:
@@ -130,9 +137,10 @@ class IPIBase(models.Model):
             self._can_be_controlled = (
                     bool(self.ipi_name) &
                     bool(self.pr_society))
+        return super().clean()
 
 
-class IPIWithGeneralAgreementBase(IPIBase):
+class IPIWithGeneralAgreementBase(IPIBase, AffiliationBase):
     """Abstract base for all objects with general agreements.
 
     Attributes:
@@ -187,6 +195,14 @@ class IPIWithGeneralAgreementBase(IPIBase):
         if d:
             raise django.core.exceptions.ValidationError(d)
 
+    def clean_fields(self, *args, **kwargs):
+        """
+        Data cleanup, allowing various import formats to be converted into
+        consistently formatted data.
+        """
+        if self.saan:
+            self.saan = self.saan.upper()  # only in CWR, uppercase anyway
+        super().clean_fields(*args, **kwargs)
 
 class ArtistBase(PersonBase):
     """Performing artist base class.
