@@ -54,7 +54,7 @@ class PersonBase(models.Model):
         return self.last_name.upper()
 
 
-class AffiliationBase(models.Model):
+class SocietyAffiliationBase(models.Model):
     """Abstract base for all objects with CMO affiliations
 
     Attributes:
@@ -127,20 +127,8 @@ class IPIBase(models.Model):
                 self.ipi_base)
         return super().clean_fields(*args, **kwargs)
 
-    def clean(self):
-        """Clean the data and validate."""
 
-        if self.ipi_name == '00000000000':
-            self._can_be_controlled = True
-            self.ipi_name = None
-        else:
-            self._can_be_controlled = (
-                    bool(self.ipi_name) &
-                    bool(self.pr_society))
-        return super().clean()
-
-
-class IPIWithGeneralAgreementBase(IPIBase, AffiliationBase):
+class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
     """Abstract base for all objects with general agreements.
 
     Attributes:
@@ -176,7 +164,14 @@ class IPIWithGeneralAgreementBase(IPIBase, AffiliationBase):
 
     def clean(self):
         """Clean the data and validate."""
-        super().clean()
+
+        if self.ipi_name == '00000000000':
+            self._can_be_controlled = True
+            self.ipi_name = None
+        else:
+            self._can_be_controlled = (
+                    bool(self.ipi_name) &
+                    bool(self.pr_society))
         d = {}
         if not self.generally_controlled:
             if self.saan:

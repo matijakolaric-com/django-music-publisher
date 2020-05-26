@@ -1174,6 +1174,13 @@ class CWRExport(models.Model):
 
             self.transaction_count += 1
 
+    def yield_publisher_lines(self, controlled_relative_share):
+        yield self.get_transaction_record(
+            'SPU', {'share': controlled_relative_share})
+        if controlled_relative_share:
+            yield self.get_transaction_record(
+                'SPT', {'share': controlled_relative_share})
+
     def yield_registration_lines(self, works):
         """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
         """
@@ -1215,12 +1222,7 @@ class CWRExport(models.Model):
                     copublished_writer_ids.add(key)
                     other_publisher_share += share
                     controlled_shares[key] += share
-            yield self.get_transaction_record(
-                'SPU', {'share': controlled_relative_share})
-            if controlled_relative_share:
-                yield self.get_transaction_record(
-                    'SPT', {'share': controlled_relative_share})
-
+            yield from self.yield_publisher_lines(controlled_relative_share)
             # OPU, co-publishing only
             if other_publisher_share:
                 yield self.get_transaction_record(
