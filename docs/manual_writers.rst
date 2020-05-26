@@ -6,11 +6,31 @@ Writers
 
    Writer list view, note how lack of data influences ``can be controlled`` value.
 
-As every musical work requires at least one writer, this makes ``Writer`` views to be a very important one.
+Add/Change View
+---------------
 
-``Add`` and ``change`` views have four field groups. ``Last name`` and ``first name`` fields in the first,
-``IPI name #`` and ``IPI Base #`` in the second and ``Performance Rights Society`` in the third. Depending on settings,
-societies for mechanical and even synchronization rights might appear.
+``Add`` and ``change`` views for writers have four field groups.
+
+Name
+++++
+
+``Last name`` and ``first name`` fields in the first, quite self-explanatory.
+
+IPI
++++
+
+``IPI name #`` and ``IPI Base #`` in the second. If you are unfamiliar with these
+identifiers, see `IPI <https://matijakolaric.com/articles/identifiers/ipi/>`.
+
+Societies
++++++++++
+
+``Performance Rights Society`` in the third. Depending on settings,
+societies for mechanical (and even synchronization rights) might appear in this group as well.
+Note that in most cases, writers are only affiliated with performance rights societies.
+
+General Agreement
++++++++++++++++++
 
 In the last group, we have three fields:
 
@@ -18,26 +38,26 @@ In the last group, we have three fields:
 * ``Society-assigned agreement number`` for the original general agreement between you and this writer (required in some societies)
 * ``Publisher fee`` is the fee kept by the publisher when royalties are paid and distributed. **This field is not used in registrations.** It is used only for royalty statement processing. Most small publishers don't use it.
 
-``Writer list`` view filters and most of the columns in the table are self-explanatory. ``Can be controlled`` may not be. There is a minimal set of data for controlled writers. This field shows if provided data fulfills the criteria. See below.
+List view
+---------
 
-The last column is a counter and link to the :doc:`list of works <manual_works_list>` by this writer.
-
-``Can be controlled`` flag
-------------------------------------
+The ``list`` is quite self-explanatory, except the ``Can be controlled`` column.
 
 For writers who are controlled (whose works are published by you), more data is required
-than for those who are not.
+than for those who are not. This column shows if data is sufficient for the writer to be
+marked as controlled.
 
-It is your responsibility to register not just your shares, but also theirs.
-
-In order for them to get paid through societies, it is your responsibility to
-enter their society (or societies) and their IPI name number. If they
-are not affiliated with any of them, you must advise them.
+It is your responsibility to register not just your shares, but also theirs. Also, it is
+your responsibility to advise them about becoming an affiliate of a collecting society.
 
 If they choose not to become an affiliate of any performance rights society,
 you can enter ``00000000000`` in the ``IPI name#`` field. This has to be
-re-entered on every save. If they choose to become affiliate later on,
+re-entered on *every* save. If they choose to become affiliate later on,
 it is your responsibility to register the changes.
 
-It is always advisable to enter all the data you have
-for all writers, not just controlled ones.
+For writers you do not control, you should still provide as much data as possible.
+Please note that if not all writers are identified with their IPI numbers,
+the work may not receive an
+`International Standard Musical Work Code (ISWC) <https://matijakolaric.com/articles/identifiers/iswc/>`_
+
+The last column is a counter and link to the :doc:`list of works <manual_works_list>` by this writer.
