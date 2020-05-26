@@ -6,14 +6,6 @@ Django-Music-Publisher
 Django-Music-Publisher (DMP) is open source software for **managing music metadata, registrations/licencing of
 musical works and basic royalty processing**.
 
-* Docs: https://django-music-publisher.readthedocs.io/
-* Code: https://github.com/matijakolaric-com/django-music-publisher/
-* PYPI: https://pypi.org/project/django-music-publisher/
-
-
-General Documentation
-*********************
-
 .. toctree::
    :maxdepth: 2
 
@@ -24,27 +16,20 @@ General Documentation
 
 .. only:: html
 
-    Videos
-    ********************
-
     .. toctree::
        :maxdepth: 2
 
        videos
-
-User manual
-********************
 
 .. toctree::
    :maxdepth: 2
 
    manual
 
-
-For Developers
-********************
-
 .. toctree::
    :maxdepth: 1
 
    modules
+
+* Code: https://github.com/matijakolaric-com/django-music-publisher/
+* PYPI: https://pypi.org/project/django-music-publisher/
