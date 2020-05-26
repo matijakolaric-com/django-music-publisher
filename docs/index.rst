@@ -13,8 +13,8 @@ musical works and basic royalty processing**.
    installation
    releases
    LICENSE
-   videos
    manual
+   videos
    modules
 
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
