@@ -75,6 +75,3 @@ defaults, e.g.:
 * *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First Recording Refusal Indicator* are set to No
 
 Importing *work IDs* from other systems is *not* supported.
-
-.. note::
-    Many of these features are available as commercial extensions to Django-Music-Publisher.
