@@ -20,7 +20,7 @@ IPI
 +++
 
 ``IPI name #`` and ``IPI Base #`` in the second. If you are unfamiliar with these
-identifiers, see `IPI <https://matijakolaric.com/articles/identifiers/ipi/>`.
+identifiers, see `IPI <https://matijakolaric.com/articles/identifiers/ipi/>_`.
 
 Societies
 +++++++++
