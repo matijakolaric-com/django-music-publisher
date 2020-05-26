@@ -13,22 +13,8 @@ musical works and basic royalty processing**.
    installation
    releases
    LICENSE
-
-.. only:: html
-
-    .. toctree::
-       :maxdepth: 2
-
-       videos
-
-.. toctree::
-   :maxdepth: 2
-
+   videos
    manual
-
-.. toctree::
-   :maxdepth: 1
-
    modules
 
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
