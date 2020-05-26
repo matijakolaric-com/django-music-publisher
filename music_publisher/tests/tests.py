@@ -1018,8 +1018,6 @@ class AdminTest(TestCase):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             mock = StringIO()
             mock.write(csvfile.read())
-
-        """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
             mock, 'acknowledgement_file', 'dataimport.csv',
@@ -1037,6 +1035,27 @@ class AdminTest(TestCase):
                       args=(data_import.id,))
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
+    def test_bad_data_import(self):
+        """Test bad data import."""
+
+        """Upload the completely bad file (CWR file in this case)."""
+        self.client.force_login(self.superuser)
+        with open(TEST_CWR2_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'dataimport.csv',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_dataimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'data_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Unknown column', response.content)
 
     def test_recording_filters(self):
         """Test Work changelist filters."""
