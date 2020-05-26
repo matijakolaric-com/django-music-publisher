@@ -35,7 +35,7 @@ Total playlist duration is around 55 minutes.
 Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++
 
-Videos specifically about `Django-Music-Publisher <https://www.youtube.com/watch?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP&v=duqgzK3JitU>`.
+Videos specifically about `Django-Music-Publisher <https://www.youtube.com/watch?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP&v=duqgzK3JitU>`_.
 
 The playlist starts with a general introduction, followed by videos explaining who is the target group, specifically original publishers, the benefits of open source and several tutorials,
 covering deployment, basic and advanced metadata editing, and the use of CWR for registration of musical works.
