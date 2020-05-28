@@ -479,8 +479,7 @@ class Work(TitleBase):
 
     @work_id.setter
     def work_id(self, value):
-        if self._work_id:
-            raise AttributeError('Already set.')
+        assert self._work_id is None  # this should not be called if set
         if value:
             self._work_id = value
 
