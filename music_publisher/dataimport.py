@@ -17,8 +17,10 @@ from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import IntegrityError, transaction
 
+
 class DataImporter(object):
     FLAT_FIELDS = [
+        'work_id',
         'work_title', 'iswc', 'original_title', 'library', 'cd_identifier']
     ARTIST_FIELDS = [
         'last', 'first', 'isni']
@@ -252,6 +254,7 @@ class DataImporter(object):
         else:
             library_release = None
         work = Work(
+            work_id=row_dict.get('work_id', None),
             title=row_dict.get('work_title', ''),
             iswc=row_dict.get('iswc'),
             original_title=row_dict.get('original_title', ''),

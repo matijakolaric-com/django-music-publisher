@@ -442,6 +442,10 @@ class Work(TitleBase):
         verbose_name = 'Musical Work'
         ordering = ('-id',)
 
+    _work_id = models.CharField(
+        'Work ID', max_length=14, blank=True, null=True, unique=True,
+        editable=False,
+        validators=(CWRFieldValidator('name'),))
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('iswc'),))
@@ -467,9 +471,18 @@ class Work(TitleBase):
         Returns:
             str: Internal Work ID
         """
+        if self._work_id:
+            return self._work_id
         if self.id is None:
             return ''
         return '{}{:06}'.format(settings.PUBLISHER_CODE, self.id)
+
+    @work_id.setter
+    def work_id(self, value):
+        if self._work_id:
+            raise AttributeError('Already set.')
+        if value:
+            self._work_id = value
 
     def is_modification(self):
         """
@@ -1146,7 +1159,7 @@ class CWRExport(models.Model):
             self.record_sequence += 1
         return line
 
-    def yield_ISWC_request_lines(self, works):
+    def yield_iswc_request_lines(self, works):
         """Yield lines for an ISR (ISWC request) in CWR 3.x"""
 
         for work in works:
@@ -1381,7 +1394,7 @@ class CWRExport(models.Model):
         yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
 
         if self.nwr_rev == 'ISR':
-            lines = self.yield_ISWC_request_lines(works)
+            lines = self.yield_iswc_request_lines(works)
         else:
             lines = self.yield_registration_lines(works)
 
@@ -1411,6 +1424,9 @@ class CWRExport(models.Model):
             self.num_in_year = 1
         self.cwr = ''.join(self.yield_lines())
         self.save()
+        for work in self.works.filter(_work_id__isnull=True):
+            work.work_id = work.work_id
+            work.save()
 
 
 class WorkAcknowledgement(models.Model):

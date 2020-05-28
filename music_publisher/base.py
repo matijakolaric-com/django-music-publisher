@@ -199,6 +199,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
             self.saan = self.saan.upper()  # only in CWR, uppercase anyway
         super().clean_fields(*args, **kwargs)
 
+
 class ArtistBase(PersonBase):
     """Performing artist base class.
 

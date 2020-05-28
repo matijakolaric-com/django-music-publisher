@@ -10,7 +10,8 @@ Caveats
 Who should import data?
 _______________________
 
-Data imports should not be regarded as a part of the standard work flow and should not be performed by staff users.
+Data imports should not be regarded as a part of the standard work flow and should not be performed by
+staff users.
 Many failsafes, present during the manual data input and editing, are not available during data imports.
 Therefore, the default user groups ``Publishing Staff`` and ``Publishing Audit`` don't allow importing.
 
@@ -20,7 +21,7 @@ backup. If you don't know how to back up and restore your database, do not impor
 What is being imported?
 _______________________
 
-The import process will add works, including alternative titles, writers, artists, libraries
+The import process will *add* works, including alternative titles, writers, artists, libraries
 and library releases.
 
 No data is changed, with only one exception. A general agreement for an existing writer may be set and a
@@ -37,9 +38,11 @@ When an error is thrown, no changes to the database occur.
 Work IDs
 ________
 
-All imported works get **new work IDs**. If you already registered these works with different work IDs, this
-**will** result in double registrations. If new work IDs are the same as the ones you used before, then old
-registrations **will** be overwritten.
+The template contains ``Work ID`` column. If you never gave your works your own IDs, leave this blank.
+The system will generate work IDs. Note that this is *not* the ID given by your society or any third party.
+
+On the other hand, work IDs must be maintained when moving from one software to another. Failing to do so
+may overwrite your existing registrations at collecting societies or create duplicates.
 
 How to import?
 ------------------------------
@@ -50,7 +53,8 @@ ______________________________
 First, you are advised to create a template. To do that, export several works as CSV,
 as described in :ref:`exporting_csv`.
 
-Open the file in your spreadsheet editor, remove the ``Work ID`` column, and save in the native format.
+Open the file in your spreadsheet editor and save in the native format. Then delete the data and save again.
+Use the first file as an example and the second one as a template.
 
 Repeating column groups for alternate titles, writers and artists are created so that the selected data can fit.
 You can create additional columns by copying the column group and giving it a different counter.
