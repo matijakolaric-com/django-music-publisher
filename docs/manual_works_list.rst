@@ -8,7 +8,9 @@ Musical Works: List View
 
 The ``work list`` view, just as all other list views, has a ``search field``, an ``action bar``, a table with works and, once there are over 100 works in the database, pagination, all on the left side. On the right side, there is the ``add musical work`` button, which takes you to the appropriate view, and the set of ``filters``.
 
-Filters change, based on the number of options. For four options or less, they are simple links, and for more, it turns into a pull-down menu,
+Filters change, based on the number of options. For four options or less, they are simple links, and for more, it turns into a pull-down menu.
+``Last edited`` filter allows find all works that have been changed recently. This applies to
+all objects that participate in work registrations, e.g. writers.
 
 Search works on titles, writer's last names, ISWCs, ISRCs (in related recordings) and work IDs (numeric part).
 
