@@ -1,12 +1,12 @@
 Installation / Deployment and Configuration
 *******************************************
 
-Django-Music-Publisher can be installed/deployed as a stand-alone application, or used as a Python package.
+Django-Music-Publisher (DMP) can be installed/deployed as a stand-alone application, or used as a Python package.
 
 Standalone Deployment
 =====================
 
-Depending on your needs and technical knowledge, there are several options here. They are listed below, starting with
+Depending on your needs and technical knowledge, there are several options. They are listed below, starting with
 the simplest option, which can be performed without any technical skills in under 5 minutes.
 
 Deployment to Heroku (free tier)
@@ -18,12 +18,10 @@ Deployment to Heroku (free tier)
   -- https://www.heroku.com/what
 
 Django-Music-Publisher can simply be deployed to a Free dyno (container) on Heroku with a free database with up to
-10.000 rows. Depending on complexity of your metadata, this is enough for 500-1.000 musical works.
+10.000 rows. Depending on complexity of your metadata, this is enough for up to 1.000 musical works.
 
-If you need more, plans costing between $9 and $16 per months will increase the limits to hundreds of thousands of
-works. If you ever need more, this will no longer be the right software anyway.
-
-See https://www.heroku.com/pricing for details.
+.. note::
+    See `Heroku prices <https://www.heroku.com/pricing>`_ for more information.
 
 You will have to sign up with Heroku at https://signup.heroku.com/ and verify your e-mail,
 no payment information is required.
@@ -38,16 +36,17 @@ Guided Deployment to Heroku
 
 The author and maintainer of Django-Music-Publisher runs a
 `professional support service <https://matijakolaric.com/dmp-prosupport/>`_,
-providing automatic feature upgrades, security/bugfix updates, maintenance and user support.
+providing regular feature upgrades, security/bugfix updates, maintenance and user support.
 
 .. figure:: /images/pre_wizard.png
    :width: 100%
 
-It also provides a free (no registration required)
-`pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_ that fills out the deployment
-form on Heroku. A society compatibility list is provided. If your society or society combination
-is not supported, use the next method.
+It features a free
+`pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_.
+No registration is required to use it.
 
+There is also a compatibility list for many collective management organizations. If your
+CMO or combination of CMOs is not supported, you can use the next method.
 
 Direct Deployment
 +++++++++++++++++
@@ -56,7 +55,7 @@ Direct Deployment
 
     <p>First, you need to sign up with <a href="https://heroku.com">Heroku</a> and/or log in.
     Then press
-    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.1.3">here</a>.</p>
+    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.7">here</a>.</p>
 
 .. figure:: /images/heroku.png
    :width: 100%
@@ -64,7 +63,7 @@ Direct Deployment
 You will be taken directly to the deployment form. Please note that you must fill the form correctly, or
 Django-Music-Publisher will not be deployed. This is by design.
 
-See `Settings`_.
+See `Settings`_ for more information.
 
 Other options - manual deployment
 ----------------------------------
@@ -83,8 +82,7 @@ If you plan to use Django-Music-Publisher as one of the apps in your Django proj
 Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no URLs need to be added, as everything goes
 through the Django Admin.
 
-See `Settings`_.
-
+There are several required `settings`_.
 
 Settings
 ===================================
@@ -104,7 +102,8 @@ Affiliation settings
 * ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO) numeric code
 * ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society numeric code, rarely used
 
-For the list of codes, please refer to the official CISAC documentation.
+For the list of codes, please refer to the official CISAC documentation. Society codes must
+be entered *without* leading zeros.
 
 Agreement-related settings
 -----------------------------------
