@@ -489,6 +489,34 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
+    def create_json(self, request, qs):
+        """Batch action that downloads a JSON file containing comercial releases.
+
+        Returns:
+            JsonResponse: JSON file with selected commercial releases
+        """
+
+        j = CommercialRelease.objects.get_dict(qs)
+
+        response = JsonResponse(j, json_dumps_params={'indent': 4})
+        name = '{}-libraryreleases-{}'.format(
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.json"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+
+    create_json.short_description = \
+        'Export selected commercial releases (JSON).'
+
+    actions = ['create_json']
+
+    def get_actions(self, request):
+        """Custom action disabling the default ``delete_selected``."""
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
 
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
