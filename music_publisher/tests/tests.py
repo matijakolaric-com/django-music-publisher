@@ -546,6 +546,24 @@ class AdminTest(TestCase):
             })
         self.assertEqual(response.status_code, 200)
 
+    def test_cwr_nwr(self):
+        """Test that CWR export works."""
+        self.client.force_login(self.staffuser)
+        response = self.client.post(
+            reverse('admin:music_publisher_cwrexport_add'),
+            data={
+                'nwr_rev': 'NWR',
+                'works': [
+                    self.original_work.id,
+                    self.modified_work.id,
+                    self.copublished_work.id,
+                ]
+            })
+        self.assertEqual(response.status_code, 302)
+        cwr = CWRExport.objects.first().cwr
+        self.assertIn('NWR0000000000000000THE MODIFIED WORK', cwr)
+        self.assertIn('THE MODIFIED WORK BEHIND THE MODIFIED WORK', cwr)
+
     def test_csv(self):
         """Test that CSV export works."""
         self.client.force_login(self.staffuser)
