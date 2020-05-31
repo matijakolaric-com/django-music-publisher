@@ -1020,8 +1020,6 @@ class Recording(models.Model):
             j['tracks'] = []
             for track in self.tracks.all():
                 d = track.release.get_dict()
-                if not d:
-                    continue
                 j['tracks'].append({
                     'release': d,
                     'cut_number': track.cut_number,
