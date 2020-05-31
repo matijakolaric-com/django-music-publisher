@@ -1,4 +1,4 @@
-Creating CWR Export
+CWR Exports
 ===================
 
 .. figure:: /images/add_cwr.png

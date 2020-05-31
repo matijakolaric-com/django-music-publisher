@@ -1,4 +1,4 @@
-Labels and Libraries
+Labels
 ====================
 
 .. figure:: /images/libraries.png

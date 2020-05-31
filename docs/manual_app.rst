@@ -21,8 +21,8 @@ Every model has at least 4 views:
 
 ``Add`` and ``change`` are usually very similar. They often contain forms for editing related models. E.g. in ``add musical work``, one can also add alternate titles.
 
-Models
-++++++
+Models Groups
++++++++++++++
 
 Each model is a representation of an aspect of something from the real world. It has attributes that describe this aspect, and performs actions representing real world actions.
 
@@ -32,75 +32,39 @@ separated in several logical groups.
 Group Musical Works
 ___________________
 
-``Musical Works`` group contains four models, for the work itself, for writers and two related to the Common Works Registration (CWR) protocol.
+.. toctree::
+   :maxdepth: 1
 
-Musical Works
--------------
+   manual_works
+   manual_writers
+   manual_cwr
+   manual_ack
 
-`Musical Work` model represents musical works and it is the workhorse model in Django-Music-Publisher. And it's ``add`` and ``change`` views are the most complex ones, with data on related recordings, writers, performing artists, alternate titles etc.
-It also has several batch actions, e.g. data export.
-
-Writers
--------
-
-Composers and lyricists are usually called "writers", the term dating back to days when sheet music was the only way of music distribution. This model is very important, though simple,
-as it holds not only data about the writers, but also about their affiliations, agreements, etc.
-
-CWR Exports
------------
-
-Common Works Registration is a file format for batch registration of musical works in collecting societies (aka PROs/MROs). This model is used for creating these files.
-
-CWR ACK Imports
----------------
-
-Once a collecting society processes a CWR file, they send an acknowledgement file (or several files). This model is used for data import from these files.
 
 Group Recordings
 ________________
 
-``Recordings`` group contains three models, for the recording itself, performing artists and labels.
+.. toctree::
+   :maxdepth: 1
 
-Recordings
-----------
-
-This model contains data about recordings.
-
-The views for recordings are, strictly speaking, not needed at hsi point. This data is accessible from other views: ``Musical Works``, ``Commercial Releases`` and ``Library Releases``. It is recommended not to use this model for editing. On the other hand, it's ``list`` view is handy for searching and filtering.
-
-However, this will change in future releases of the software, when more functionality related to recordings, releases and labels will be added.
-
-Performing Artists
-------------------
-
-One of the simpler models, beside the data about the artist, it's views also show recordings the artists made and works they perform.
-
-Music Labels
---------------------
-
-A simple model containing only a label name. This will be extended in future releases of the software.
+   manual_recordings
+   manual_artists
+   manual_labels
 
 Group Releases
-______________
+________________
 
-``Releases`` group contains three models, for commercial and library releases, as well as music libraries.
+.. toctree::
+   :maxdepth: 1
 
-Commercial and Library Releases
--------------------------------
-
-Release is, generally speaking, a product containing one or more recordings, e.g. records and albums.
-The importance of the physical forms is diminishing, but they are still important enough to be part of a music
-publishing software, especially for music libraries.
-
-The releases are split into Commercial (General) and Library.
-
-Music Libraries
---------------------
-
-Two very simple models, but their importance will grow with the upcoming extensions to Django-Music-Publisher.
+   manual_releases
+   manual_libraries
 
 Group Other
-___________
+________________
 
-This group holds additional models, such as ``Data Import`` or custom ones. These models may not be visible to the
-members of ``Publishing Staff`` group.
+.. toctree::
+   :maxdepth: 1
+
+   manual_dataimport
+

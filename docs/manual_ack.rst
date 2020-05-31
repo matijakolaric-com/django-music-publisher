@@ -1,4 +1,4 @@
-Importing CWR Acknowledgements
+CWR Acknowledgements
 ==============================
 
 Societies and administrative agencies (that handle CWR registrations for some societies) will send acknowledgement files, which are also in CWR format. You may receive more than one acknowledgement file for every CWR file you delivered.

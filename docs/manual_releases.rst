@@ -6,23 +6,13 @@ Commercial and Library Releases
 
    Library release, note that ``Library`` and ``CD Identifier`` fields are required.
 
-In the previous versions of Django-Music-Publisher, this was called "Albums and Library CDs", in accordance with CWR 2.x terminology. As these features don't exist in CWR 3.0, they have been renamed.
-
-Under the hood of Django-Music-Publisher, there is very little difference between Commercial and Library releases, they share the same database table. However, the differences how they are used are significant.
-
-We will first cover simpler Commercial Releases.
-
 Commercial (General) Releases
 +++++++++++++++++++++++++++++
 
-Note that *Commercial* is used here as a synonym for *General*.
-
 The most typical example of a release used to be a vinyl record album, then a CD.
 
-Django-Music-Publisher, as open source software, is easily extendable. While currently there is no real use for ``commercial releases`` model with vanilla Django-Music-Publisher, because this data is not included in CWR registrations.
-It will be used in the future versions of the software.
-
-The ``Commercial release list`` view is quite simple, only three columns, ``Release (album) title``, ``Release (album) label`` and count of tracks with link to ``Recordings``.
+The ``Commercial release list`` view is quite simple, only three columns, ``Release (album) title``, ``Release (album)
+label`` and count of tracks with link to ``Recordings``.
 
 The ``Add/change commercial release`` views are also simple, four fields and a list of tracks with optional cut numbers.
 
