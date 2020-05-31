@@ -529,6 +529,13 @@ class AdminTest(TestCase):
                 'index': 0, '_selected_action': self.original_work.id
             })
         self.assertEqual(response.status_code, 200)
+        response = self.client.post(
+            reverse('admin:music_publisher_libraryrelease_changelist'),
+            data={
+                'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.library_release.id
+            })
+        self.assertEqual(response.status_code, 200)
 
     def test_csv(self):
         """Test that CSV export works."""
@@ -1350,7 +1357,7 @@ class ModelsSimpleTest(TransactionTestCase):
             library=library, cd_identifier='ML001')
         release.save()
         self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
-        self.assertIsNone(release.get_dict())
+        self.assertIsNone(release.get_dict().get('title'))
         release.ean = '1X'
         with self.assertRaises(exceptions.ValidationError):
             release.clean()

@@ -328,7 +328,6 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.LibraryRelease`.
     """
 
-    actions = None
     form = LibraryReleaseForm
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
@@ -357,7 +356,6 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
     list_filter = ('release_label', 'library')
     search_fields = ('release_title', '^cd_identifier')
-    actions = None
 
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
@@ -406,6 +404,34 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
+
+    def create_json(self, request, qs):
+        """Batch action that downloads a JSON file containing library releases.
+
+        Returns:
+            JsonResponse: JSON file with selected works
+        """
+
+        j = LibraryRelease.objects.get_dict(qs)
+
+        response = JsonResponse(j, json_dumps_params={'indent': 4})
+        name = '{}-libraryreleases-{}'.format(
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.json"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+
+    create_json.short_description = \
+        'Export selected library releases (JSON).'
+
+    actions = ['create_json']
+
+    def get_actions(self, request):
+        """Custom action disabling the default ``delete_selected``."""
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 
 @admin.register(CommercialRelease)
@@ -1027,7 +1053,7 @@ class WorkAdmin(MusicPublisherAdmin):
         j = Work.objects.get_dict(qs)
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
-        name = '{}{}'.format(
+        name = '{}-works-{}'.format(
             settings.PUBLISHER_CODE, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd

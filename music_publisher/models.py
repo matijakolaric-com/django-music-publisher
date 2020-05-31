@@ -169,18 +169,14 @@ class Release(ReleaseBase):
         """
         return 'RE{:06d}'.format(self.id)
 
-    def get_dict(self):
+    def get_dict(self, with_tracks=False):
         """Get the object in an internal dictionary format
 
         Returns:
             dict: internal dict format
         """
-        if not (self.release_title or
-                self.release_label or
-                self.release_date or
-                self.ean):
-            return None
-        return {
+
+        d = {
             'id': self.id,
             'code': self.release_id,
             'title':
@@ -193,6 +189,9 @@ class Release(ReleaseBase):
             'ean':
                 self.ean,
         }
+        if with_tracks:
+            d['tracks'] = [track.get_dict() for track in self.tracks.all()]
+        return d
 
 
 class LibraryReleaseManager(models.Manager):
@@ -207,6 +206,11 @@ class LibraryReleaseManager(models.Manager):
             :class:`.models.LibraryRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=False)
+
+    def get_dict(self, qs):
+        return {
+            'releases': [release.get_dict(with_tracks=True) for release in qs]
+        }
 
 
 class LibraryRelease(Release):
@@ -265,6 +269,11 @@ class CommercialReleaseManager(models.Manager):
             :class:`.models.CommercialRelease`
         """
         return super().get_queryset().filter(cd_identifier__isnull=True)
+
+    def get_dict(self, qs):
+        return {
+            'releases': [release.get_dict(with_tracks=True) for release in qs]
+        }
 
 
 class CommercialRelease(Release):
@@ -573,7 +582,7 @@ class Work(TitleBase):
 
         return j
 
-    def get_dict(self):
+    def get_dict(self, with_recordings=True):
         """Create a data structure that can be serialized as JSON.
 
         Normalize the structure if required.
@@ -602,7 +611,6 @@ class Work(TitleBase):
                 else None),
             'writers': [],
             'performing_artists': [],
-            'recordings': [],
             'original_works': [],
             'cross_references': []
         }
@@ -621,10 +629,8 @@ class Work(TitleBase):
             d = wiw.get_dict()
             j['writers'].append(d)
 
-        # add recording data, normalize if required
-        for recording in self.recordings.all():
-            rec = recording.get_dict(with_releases=True)
-            j['recordings'].append(rec)
+        if with_recordings:
+            j['recordings'] = [recording.get_dict(with_releases=True) for recording in self.recordings.all()]
 
         # add cross references, currently only society work ids from ACKs
         for wa in self.workacknowledgement_set.all():
@@ -982,7 +988,7 @@ class Recording(models.Model):
             return ''
         return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
 
-    def get_dict(self, with_releases=False):
+    def get_dict(self, with_releases=False, with_work=True):
         """Create a data structure that can be serialized as JSON.
 
         Returns:
@@ -1020,6 +1026,8 @@ class Recording(models.Model):
                     'release': d,
                     'cut_number': track.cut_number,
                 })
+        if with_work:
+            j['works'] = {'work': self.work.get_dict(with_recordings=False)}
         return j
 
 
@@ -1038,6 +1046,11 @@ class Track(models.Model):
         blank=True, null=True,
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
 
+    def get_dict(self):
+        return {
+            'cut_number': self.cut_number,
+            'recording': self.recording.get_dict(with_releases=False, with_work=True)
+        }
 
 class CWRExport(models.Model):
     """Export in CWR format.
