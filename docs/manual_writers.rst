@@ -38,7 +38,7 @@ In the last group, we have three fields:
 * ``Society-assigned agreement number`` for the original general agreement between you and this writer (required in some societies)
 * ``Publisher fee`` is the fee kept by the publisher when royalties are paid and distributed. **This field is not used in registrations.** It is used only for royalty statement processing. Most small publishers don't use it.
 
-List view
+List View
 ---------
 
 The ``list`` is quite self-explanatory, except the ``Can be controlled`` column.
@@ -60,4 +60,4 @@ Please note that if not all writers are identified with their IPI numbers,
 the work may not receive an
 `International Standard Musical Work Code (ISWC) <https://matijakolaric.com/articles/identifiers/iswc/>`_
 
-The last column is both a work counter and link to the :doc:`list of works <manual_works_list>` by this writer.
+The last column is both a work counter and link to the list of :doc:`works <manual_works>` by this writer.

@@ -1,7 +1,7 @@
 Musical Works
 _____________
 
-Add, Change and Delete Views
+Add/Change View
 ============================================
 
 .. figure:: /images/add_work.png
@@ -25,7 +25,7 @@ Please note that the difference between modifications of works in public domain 
 Library
 +++++++
 
-Django-Music-Publisher has good support for music libraries. If a work is part of a :doc:`library <manual_labels_libraries>`, then a :doc:`library release <manual_releases>` must be set here.
+Django-Music-Publisher has good support for music libraries. If a work is part of a :doc:`library <manual_libraries>`, then a :doc:`library release <manual_releases>` must be set here.
 
 Writers in Work
 +++++++++++++++
@@ -166,7 +166,7 @@ At the bottom, there is a delete button and three save buttons. Delete is obviou
 * ``Save and add another`` (when adding new work) saves the work and then opens a new, empty form for the next one.
 * ``Save as new`` (when editing existing work) saves this data as a new work (with a different work ID)
 * ``Save and continue editing`` saves the work and then opens the same work for further editing.
-* ``SAVE`` saves the work and returns to the :doc:`work list view <manual_works_list>`, covered next.
+* ``SAVE`` saves the work and returns to the ``list view``, covered next.
 
 The combination is extremely powerful, especially when the changes between works is small, as is often the case for production music.
 One enters the first work, using suffixes as much as possible, presses on ``save and continue editing``.

@@ -3,7 +3,7 @@
 User Manual
 ############
 
-This is the user manual for Django-Music-Publisher 20.7 Endemic.
+For version *20.7 Endemic*.
 
 .. toctree::
    :maxdepth: 2

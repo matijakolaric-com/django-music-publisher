@@ -103,17 +103,16 @@ released as open-source code, all or most of the following must apply:
 * A feature must not require customisations or complex deployments.
   Open source solutions for end-users make no sense if a professional is required to
   deploy and/or customise it.
-  E.g. registrations in GEMA and licencing of production music are not supported
+  E.g. registrations in GEMA and licencing of production music are not supported.
 
 * A feature should be self-evident to experienced professionals, so no user support is
   required. This is not an absolute rule, the author and maintainer runs a
   `professional support service <https://matijakolaric.com/dmp-prosupport/>`_.
   Some confusing features were removed in the past, e.g. two JSON formats.
 
-* It must be legal. E.g. integrating DDEX into open source is currently not.
+* It must be legal. E.g. integrating DDEX into open-source code is currently not legal.
 
 .. note::
 
-    All of the aforementioned examples are available in DMP's commercial extensions,
-    sibling and another solution.
-    See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_.
+    All of the aforementioned examples are available in DMP's commercial sibling and
+    other solutions. See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_.
