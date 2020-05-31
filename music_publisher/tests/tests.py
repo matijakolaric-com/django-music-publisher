@@ -20,7 +20,7 @@ from django.urls import reverse
 import music_publisher.models
 from music_publisher.models import (
     AlternateTitle, Artist, CWRExport, CommercialRelease, Label, Library,
-    LibraryRelease, Recording, Release, Work, Writer, WriterInWork,
+    LibraryRelease, Recording, Release, Work, Writer, WriterInWork, Track
 )
 from music_publisher import cwr_templates, validators, dataimport
 
@@ -265,10 +265,10 @@ class AdminTest(TestCase):
         AlternateTitle.objects.create(work=cls.original_work, suffix=True,
                                       title='Behind the Work')
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
-        Recording.objects.create(work=cls.original_work,
+        recording = Recording.objects.create(work=cls.original_work,
                                  record_label=cls.label, artist=cls.artist,
                                  isrc='US-S1Z-99-00001')
-
+        Track.objects.create(release=cls.commercial_release, recording=recording)
 
     @classmethod
     def create_modified_work(cls):
@@ -407,6 +407,8 @@ class AdminTest(TestCase):
         cls.release = Release.objects.create(release_title='ALBUM')
         cls.library_release = Release.objects.create(
             release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
+        cls.commercial_release = Release.objects.create(
+            release_title='COMRELEASE')
 
         cls.create_writers()
         cls.create_modified_work()
