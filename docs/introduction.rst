@@ -20,7 +20,7 @@ for batch registration/licencing of musical works with `Collective Management Or
 <https://en.wikipedia.org/wiki/Collective_rights_management#Collective_management_organisations>`_ and Digital
 Service Providers (DSPs), as well as data delivery to sub-publishers.
 
-Registration/licencing of recordings and royalty processing are is in active development.
+Registration/licencing of recordings and royalty processing are in active development.
 
 Django-Music-Publisher (DMP) is based on `Django web framework <https://www.djangoproject.com/>`_, hence the name.
 
