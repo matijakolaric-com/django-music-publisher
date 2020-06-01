@@ -50,44 +50,6 @@ Controlled writers with no society affiliation are now fully supported.
 Future open-source features
 ===========================
 
-DDEX
-----
-
-DDEX is a set of standards for music metadata exchange. Sadly, their licence is not compatible
-with open-source licences. If it ever becomes compatible with MIT License, support for it will
-be added to the open-source code.
-
-.. note::
-
-    See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_ for commercial options.
-
-
-Royalty processing for music publishers
----------------------------------------
-
-When it comes to music publishing, the royalty processing is the only unfinished area.
-The main challenge here is that incoming statements come in many different formats.
-Processing of the most common ones will be added to open-source code.
-
-.. note::
-
-    See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_ for commercial options.
-
-Support for small music labels
-------------------------------
-
-It took just over two years to come to the point where most needs of most small publishers
-are covered. From late 2020, focus will shift toward supporting small labels.
-
-Any feature that is fully sponsored
------------------------------------
-
-If you believe that a feature should be available as open-source code, feel free to pay for
-the development.
-
-Closed-source features
-=========================================================
-
 There is a business model behind Django-Music-Publisher. In order for a feature to be
 released as open-source code, all or most of the following must apply:
 
@@ -116,3 +78,44 @@ released as open-source code, all or most of the following must apply:
 
     All of the aforementioned examples are available in DMP's commercial sibling and
     other solutions. See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_.
+
+Some of the features that are likely to become part of the open-source code are listed next.
+
+DDEX
+----
+
+DDEX is a set of standards for music metadata exchange. Sadly, their licence is not compatible
+with open-source licences. If it ever becomes compatible with MIT License, support for it will
+be added to the open-source code.
+
+
+Royalty processing for music publishers
+---------------------------------------
+
+When it comes to music publishing, the royalty processing is the only unfinished area.
+The main challenge here is that incoming statements come in many different formats.
+Processing of the most common ones will be added to open-source code.
+
+.. note::
+
+    See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_ for commercial options.
+
+Support for small music labels
+------------------------------
+
+It took just over two years to come to the point where most needs of most small publishers
+are covered. From late 2020, focus will shift toward supporting small labels.
+
+Any feature that is fully sponsored
+-----------------------------------
+
+If you believe that a feature should be available as open-source code, feel free to pay for
+the development. It still has to comply with most of the aforementioned criteria, because
+the code must be maintainable.
+
+Closed-source features
+=========================================================
+
+Anything that does not fit the aforementioned criteria, will not be made open-source by the creator
+of DMP. Of course, you may create any feature yourself, of hire someone to do it for you.
+The creator of DMP sometimes accepts such jobs.
