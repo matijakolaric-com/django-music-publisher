@@ -1616,9 +1616,7 @@ class ACKImportAdmin(AdminWithReport):
             dat = datetime.strptime(dat, '%Y%m%d').date()
             work = Work.objects.filter(_work_id=work_id).first()
             if not work:
-                messages.add_message(
-                    request, messages.ERROR,
-                    'Unknown work ID: {}'.format(work_id))
+                unknown_work_ids.append(work_id)
                 continue
             if import_iswcs and iswc:
                 if work.iswc:
