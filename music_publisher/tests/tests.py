@@ -1005,6 +1005,8 @@ class AdminTest(TestCase):
         response = self.client.get(url)
         data = get_data_from_response(response)
         data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
 
         """Test with a badly formatted file."""
         mock.seek(1)
