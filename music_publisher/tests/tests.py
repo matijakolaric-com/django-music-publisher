@@ -995,7 +995,7 @@ class AdminTest(TestCase):
 
         """This file has bad ISWC codes."""
         mock = StringIO()
-        mock.write(ACK_CONTENT_21_EXT)
+        mock.write(ACK_CONTENT_21_ERR)
 
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
