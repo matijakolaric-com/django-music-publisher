@@ -1510,7 +1510,7 @@ class ACKImportForm(ModelForm):
         fields = ('acknowledgement_file',)
 
     acknowledgement_file = FileField()
-    import_iswcs = BooleanField(label='Import ISWCs if present')
+    import_iswcs = BooleanField(label='Import ISWCs if present', required=False)
 
     RE_HDR_21 = re.compile(
         r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
