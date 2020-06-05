@@ -1568,7 +1568,7 @@ class ACKImportAdmin(AdminWithReport):
         'filename', 'society_code', 'society_name', 'date', 'print_report',
         'view_link')
 
-    add_fields = ('acknowledgement_file',)
+    add_fields = ('acknowledgement_file', 'import_iswcs')
 
     def get_fields(self, request, obj=None):
         """Return different fields for add vs change.
