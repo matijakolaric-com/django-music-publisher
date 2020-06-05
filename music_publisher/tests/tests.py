@@ -980,8 +980,18 @@ class AdminTest(TestCase):
         response = self.client.get(url)
         data = get_data_from_response(response)
         data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        # At this point, there is a different ISWC in one of the works
+        with self.assertRaises(exceptions.ValidationError):
+            self.client.post(url, data, follow=False)
+        # Let's delete the one in the database and try again!
+        mock.seek(0)
+        self.original_work = Work.objects.get(id=self.original_work.id)
+        self.original_work.iswc = None
+        self.original_work.save()
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
+        self.original_work = Work.objects.get(id=self.original_work.id)
+        self.assertEqual(self.original_work.iswc, 'T9270264761')
 
         """Test with a badly formatted file."""
         mock.seek(1)

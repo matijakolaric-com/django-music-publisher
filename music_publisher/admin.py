@@ -1604,8 +1604,12 @@ class ACKImportAdmin(AdminWithReport):
             tt, work_id, remote_work_id, dat, status, rest = x
             if import_iswcs and rest:
                 header = rest.strip().split('\n')[0]
-                iswc = header[95:106]
-                validator(iswc)
+                iswc = header[95:106].strip() or None
+                if iswc:
+                    try:
+                        validator(iswc)
+                    except ValidationError:
+                        iswc = None
             # work ID is numeric with an optional string
             work_id = work_id.strip()
             remote_work_id = remote_work_id.strip()
@@ -1616,7 +1620,16 @@ class ACKImportAdmin(AdminWithReport):
                     request, messages.ERROR,
                     'Unknown work ID: {}'.format(work_id))
                 continue
-            print(work)
+            if import_iswcs and iswc:
+                if work.iswc:
+                    if work.iswc != iswc:
+                        raise ValidationError(
+                            'A different ISWC exists for work {}: {} vs {}.'.format(
+                                work, work.iswc, iswc
+                            ))
+                else:
+                    work.iswc = iswc
+                    work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,
                 remote_work_id=remote_work_id,
