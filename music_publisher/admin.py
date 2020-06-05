@@ -1507,7 +1507,7 @@ class ACKImportForm(ModelForm):
 
     class Meta:
         model = ACKImport
-        fields = ('acknowledgement_file',)
+        fields = ('acknowledgement_file', 'import_iswcs')
 
     acknowledgement_file = FileField()
     import_iswcs = BooleanField(label='Import ISWCs if present', required=False)
