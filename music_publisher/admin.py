@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import FileField, ModelForm
+from django.forms import FileField, ModelForm, BooleanField
 from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -1508,9 +1508,10 @@ class ACKImportForm(ModelForm):
 
     class Meta:
         model = ACKImport
-        fields = ('acknowledgement_file',)
+        fields = ('acknowledgement_file', 'import_iswcs')
 
     acknowledgement_file = FileField()
+    import_iswcs = BooleanField(label='Import ISWCs if present', required=False)
 
     RE_HDR_21 = re.compile(
         r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
@@ -1568,7 +1569,7 @@ class ACKImportAdmin(AdminWithReport):
         'filename', 'society_code', 'society_name', 'date', 'print_report',
         'view_link')
 
-    add_fields = ('acknowledgement_file',)
+    add_fields = ('acknowledgement_file', 'import_iswcs')
 
     def get_fields(self, request, obj=None):
         """Return different fields for add vs change.
