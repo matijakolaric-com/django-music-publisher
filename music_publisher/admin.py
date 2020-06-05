@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
+from .validators import CWRFieldValidator
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
@@ -1577,16 +1578,19 @@ class ACKImportAdmin(AdminWithReport):
         return self.add_fields
 
     RE_ACK_21 = re.compile(re.compile(
-        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})', re.S))
+        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M))
     RE_ACK_30 = re.compile(re.compile(
-        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})', re.S))
+        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M))
 
-    def process(self, request, society_code, file_content):
+    def process(self, request, society_code, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
 
         Big part of this code should be moved to the model, left here because
         messaging is simpler.
         """
+
+        if import_iswcs:
+            validator = CWRFieldValidator('iswc')
 
         unknown_work_ids = []
         existing_work_ids = []
@@ -1596,25 +1600,24 @@ class ACKImportAdmin(AdminWithReport):
         else:
             pattern = self.RE_ACK_30
         for x in re.findall(pattern, file_content):
-            tt, work_id, remote_work_id, dat, status = x
+            tt, work_id, remote_work_id, dat, status, rest = x
+            if import_iswcs and rest:
+                header = rest.strip().split('\n')[0]
+                iswc = header[95:106]
+                validator(iswc)
             # work ID is numeric with an optional string
             work_id = work_id.strip()
-            if work_id.startswith(settings.PUBLISHER_CODE):
-                work_id = work_id[len(settings.PUBLISHER_CODE):]
-            if not work_id.isnumeric():
-                unknown_work_ids.append(work_id)
-                continue
-            work_id = int(work_id)
             remote_work_id = remote_work_id.strip()
             dat = datetime.strptime(dat, '%Y%m%d').date()
-            work = Work.objects.filter(id=work_id).first()
+            work = Work.objects.filter(_work_id=work_id).first()
             if not work:
                 messages.add_message(
                     request, messages.ERROR,
                     'Unknown work ID: {}'.format(work_id))
                 continue
+            print(work)
             wa, c = WorkAcknowledgement.objects.get_or_create(
-                work_id=work_id,
+                work_id=work.id,
                 remote_work_id=remote_work_id,
                 society_code=society_code,
                 date=dat,
@@ -1650,7 +1653,8 @@ class ACKImportAdmin(AdminWithReport):
             obj.date = cd['date']
             # TODO move process() to model, and handle messages here
             obj.report = self.process(
-                request, obj.society_code, cd['acknowledgement_file'])
+                request, obj.society_code, cd['acknowledgement_file'],
+                cd['import_iswcs'])
             obj.cwr = cd['acknowledgement_file']
             super().save_model(request, obj, form, change)
 

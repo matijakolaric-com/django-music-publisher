@@ -947,7 +947,7 @@ class AdminTest(TestCase):
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
-        data.update({'acknowledgement_file': mockfile})
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         ackimport = music_publisher.models.ACKImport.objects.first()
@@ -967,6 +967,21 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             music_publisher.models.ACKImport.objects.first().report, '')
+
+        """This fine has also ISWC codes."""
+        mock = StringIO()
+        mock.write(ACK_CONTENT_21_EXT)
+
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
 
         """Test with a badly formatted file."""
         mock.seek(1)
@@ -1572,6 +1587,35 @@ ACK0000000300000000201805160910510000100000003NWRTHREE                          
 ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
 GRT000010000005000000007
 TRL000010000005000000009"""
+
+
+ACK_CONTENT_21_EXT = """HDRSO000000052PRS for Music                                01.102018060715153220180607
+GRHACK0000102.100000000000
+ACK0000000000000000202006031357150000100000000REVTHE MODIFIED WORK                                           MK000001            337739ES            20200603AS
+REV0000000000000001THE MODIFIED WORK                                             MK000001      T927026487400000000            UNC000000Y      ORI                                                   N00000000000                                                   N
+SPU000000000000000201MK       TEST PUBLISHER                                E 00000000000000000004              0520500004410000   10000 N
+SPT0000000000000003MK             050001000010000I2136N001
+SWR0000000000000004W000001  TESTIC                                       TESTO                          C 0000000000000000000005205000   00000   00000 N
+SWT0000000000000005W000001  050000000000000I2136N001
+PWR0000000000000006MK       TEST PUBLISHER                                                           W000001
+ALT0000000000000007THE MODIFIED WORK 1                                         AT
+ALT0000000000000008THE MODIFIED WORK 2                                         AT
+ALT0000000000000009THE MODIFIED WORK 3                                         AT
+ALT0000000000000010THE MODIFIED WORK 4                                         AT
+REC000000000000001120200407                                                            000030                                                                                                                                                                        
+REC000000000000001220170407                                                            000010                                                                                                                                                                        
+REC000000000000001320170407                                                            000030                                                                                                                                                                        
+REC000000000000001420170407                                                            000456                                                                                                                                                                        
+ORN0000000000000015LIB                                                            MK001          0000TEST LIBRARY                                                                                                                                                                      0000
+ACK0000000100000000202006031357150000100000001REVTHE WORK                                                    MK000002            337739DU            20200603AS
+REV0000000100000001THE WORK                                                      MUM000002     T927026476100000000            UNC000000Y      ORI                                                   N00000000000                                                   N
+SPU000000010000000201MK       TEST PUBLISHER                                E 00000000000000000004              0520500004410000   10000 N
+SPT0000000100000003MK             050001000010000I2136N001
+SWR0000000100000004W000001  TESTIC                                       TESTO                          C 0000000000000000000005205000   00000   00000 N
+SWT0000000100000005W000001  050000000000000I2136N001
+PWR0000000100000006MK       TEST PUBLISHER                                                           W000001
+GRT000010000002000000025
+TRL000010000002000000027"""
 
 ACK_CONTENT_30 = """HDRSOBMI BMI                                          2018060715153220180607               3.0000
 GRHACK0000102.100020180607
