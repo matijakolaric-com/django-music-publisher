@@ -165,3 +165,8 @@ if SENTRY_DSN:
         send_default_pii=True
     )
     sentry_sdk.capture_message('Starting.')
+
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 0 if DEBUG else 300
+SECURE_HSTS_PRELOAD = DEBUG

@@ -1,4 +1,5 @@
 """
+Interface for :mod:`music_publisher`.
 """
 import re
 import zipfile
