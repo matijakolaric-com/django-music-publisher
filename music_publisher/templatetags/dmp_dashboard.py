@@ -27,7 +27,7 @@ def dmp_model_groups(model_list):
     model_dict = OrderedDict([(el['object_name'], el) for el in model_list])
     sections = {
         'Musical Works': [
-            'Work', 'Publisher', 'Writer', 'CWRExport', 'ACKImport'],
+            'Work', 'Publisher', 'Writer', 'CWRExport', 'ACKImport', 'DataImport', 'RoyaltyCalculation'],
         'Recordings': ['Recording', 'Artist', 'Label'],
         'Releases': [
             'CommercialRelease', 'LibraryRelease', 'Library']
