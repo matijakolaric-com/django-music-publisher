@@ -60,7 +60,7 @@
       "required": false
     },
     "REQUIRE_PUBLISHER_FEE": {
-      "description": "Enter '1' to make Publisher Fee a required field. If unsure - leave it empty.",
+      "description": "Enter '1' to make Publisher Fee a required field. If unsure, leave it empty.",
       "required": false
     },
     "PUBLISHING_AGREEMENT_PUBLISHER_PR": {
