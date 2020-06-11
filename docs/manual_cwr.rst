@@ -15,7 +15,7 @@ you entered the code officially assigned to you.**
 
 There are several ways to get to ``Add CWR Export`` view:
 
-* from the ``home`` page or app menu or ``CWR Export list`` view by pressing on ``Add CWR Export`` button or
+* from the ``home`` page or app menu or ``CWR Export list`` view by clicking ``Add CWR Export`` button or
 * from the ``Create CWR from selected works`` batch action in ``Work list`` view.
 
 Please note that the field ``Works`` uses auto-complete, and if you don't come here through the action, you must add works in this view one at a time.
