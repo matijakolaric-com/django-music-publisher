@@ -1,7 +1,7 @@
 User Administration
 ===================
 
-This section is covering user administration. If you dont have the permission to manage other users, meaning you dont see the ``Authentication and Authorization`` module on your home screen, then just skip this section.
+This section is covering user administration. If you don't have the permission to manage other users, meaning you don't see the ``Authentication and Authorization`` module on your home screen, then just skip this section.
 
 If you do, then *read this very carefully!*
 
@@ -38,6 +38,6 @@ Select one of them and press on the icon that will move it to ``chosen groups``.
 
    User list view
 
-You will be taken to the ``user list`` view. All users are shown here. Just as the add and change views, list views are very standard. They will be covered a bit later.
+You will be taken to the ``user list`` view. All users are shown here. Just as the add and change views, list views are quite standard. They will be covered a bit later.
 
-You can log out now, and log in as the newly added user. The ``home view`` is a bit different, according to the assigned permissions.
+Now you can log out, and log in as the newly added user. The ``home view`` is a bit different, according to the assigned permissions.

@@ -26,7 +26,7 @@ Models Groups
 
 Each model is a representation of an aspect of something from the real world. It has attributes that describe this aspect, and performs actions representing real world actions.
 
-We are just briefly going to describe the top level models here, each will be then described in detail in a separate section. Models are
+We are just briefly going to describe the top-level models here, each will be then described in detail in a separate section. Models are
 separated in several logical groups.
 
 Group Musical Works

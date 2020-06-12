@@ -54,7 +54,7 @@ If left empty, it means that the writer is unknown. This is often used with modi
 Capacity
 --------
 
-This where you select how this writer contributed to the work. This field is required for controlled writers. Please note that at least one of the writers should be a ``composer`` or a ``composer and lyricist``.
+This is where you select how this writer contributed to the work. This field is required for controlled writers. Please note that at least one of the writers should be a ``composer`` or a ``composer and lyricist``.
 
 The options are ``composer``, ``lyricist`` and ``composer and lyricist`` for original works. ``Arranger``, ``adaptor`` or ``translator`` can only be used in modifications. For them, at least two rows are required, one being (original) ``composer`` or a ``composer and lyricist``, and one being ``arranger``, ``adaptor`` or ``translator``.
 
@@ -116,7 +116,7 @@ field.
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Since version 19.7, Django-Music-Publisher has full CWR 3.0 compatibility, except that id does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
+Since version 19.7, Django-Music-Publisher has full CWR 3.0 compatibility, except that it does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
 
 Please note that there is a separate set of views for :doc:`recordings <manual_recordings>`.
 
@@ -222,5 +222,5 @@ one additional column: ``Work ID``.
 CWR Exporting Wizard
 ++++++++++++++++++++
 
-Currently the only other available action is to ``create CWR from selected works``. Once you run it, you will be taken
+Currently, the only other available action is to ``create CWR from selected works``. Once you run it, you will be taken
 to ``add CWR export`` view, described :doc:`here <manual_cwr>`.
