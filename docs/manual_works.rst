@@ -64,7 +64,7 @@ Manuscript Share
 ----------------
 
 Django-Music-Publisher uses a very simple single-field share model. The principle is very simple.
-Writers create work and decide how they want to split the shares among themselves. This is referred to as
+Writers create a work and decide how they want to split the shares among themselves. This is referred to as
 ``manuscript share``. (The term comes form CWR 3.0 specification.) Then each of the writers may choose a publisher
 and transfer some of their manuscript share to the publisher, according to their publishing agreement.
 This does not influence other writers.
