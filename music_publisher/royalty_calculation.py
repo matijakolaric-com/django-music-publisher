@@ -171,7 +171,7 @@ class RoyaltyCalculation(object):
             qs = qs.filter(work__iswc__in=work_ids)
             qs = qs.extra(select={'query_id': "iswc"})
         else:
-            qs = qs.filter(work__workacknowledgement__society_code=self.source)
+            qs = qs.filter(work__workacknowledgement__society_code=self.work_id_source)
             qs = qs.filter(work__workacknowledgement__remote_work_id__in=work_ids)
             qs = qs.extra(select={'query_id': "music_publisher_workacknowledgement.remote_work_id"})
         writer_ids = set()
