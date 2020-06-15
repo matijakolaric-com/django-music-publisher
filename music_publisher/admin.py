@@ -27,7 +27,6 @@ from .models import (
     SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
     DataImport,
 )
-from .royalty_calculation import RoyaltyCalculationAdmin
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 

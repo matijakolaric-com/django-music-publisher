@@ -450,6 +450,7 @@ class Work(TitleBase):
     class Meta:
         verbose_name = 'Musical Work'
         ordering = ('-id',)
+        permissions = (('can_process_royalties', 'Can perform royalty calculations'),)
 
     _work_id = models.CharField(
         'Work ID', max_length=14, blank=True, null=True, unique=True,
