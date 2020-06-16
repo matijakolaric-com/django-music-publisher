@@ -16,8 +16,3 @@ musical works** and **royalty processing**.
    manual
    videos
    modules
-
-* Home: https://dmp.matijakolaric.com/
-* Docs: https://django-music-publisher.readthedocs.io/
-* Code: https://github.com/matijakolaric-com/django-music-publisher/
-* PYPI: https://pypi.org/project/django-music-publisher/
