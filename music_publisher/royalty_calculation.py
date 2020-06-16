@@ -174,6 +174,7 @@ class RoyaltyCalculation(object):
             qs = qs.filter(work__workacknowledgement__society_code=self.work_id_source)
             qs = qs.filter(work__workacknowledgement__remote_work_id__in=work_ids)
             qs = qs.extra(select={'query_id': "music_publisher_workacknowledgement.remote_work_id"})
+        qs = qs.distinct()
         writer_ids = set()
         for wiw in qs:
             assert(wiw.work_id is not None)
@@ -251,7 +252,7 @@ class RoyaltyCalculation(object):
                 out_row = row.copy()
                 out_row.append('{}, [{}]'.format(settings.PUBLISHER_NAME, settings.PUBLISHER_IPI_NAME))
                 out_row.append('Original Publisher')
-                out_row.append('{0:.6f}'.format(share_split))
+                out_row.append('{0:.6f}'.format(share_split * controlled))
                 out_row.append('{0:.6f}'.format(share_split))
                 net_amount = amount * share_split
                 out_row.append('{}'.format(net_amount))
@@ -281,6 +282,11 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
     template_name = 'music_publisher/royalty_calculation.html'
     form_class = RoyaltyCalculationForm
     permission_required = ('music_publisher.can_process_royalties',)
+
+    def render_to_response(self, context, **response_kwargs):
+        context['site_header'] = settings.PUBLISHER_NAME
+        context['has_permission'] = True
+        return super().render_to_response(context, **response_kwargs)
 
     def form_valid(self, form):
         rc = RoyaltyCalculation(form)
