@@ -32,7 +32,8 @@ DMP can be used out-of-the-box by most small original publishers, both for comme
 production music.
 
 Each DMP installation supports a **single original publisher**. It is not intended to be used by
-administrators or sub-publishers, nor by publishing companies with multiple entities.
+administrators or sub-publishers, nor by publishing companies with multiple entities (including
+US publishers affiliated with multiple PROs).
 
 Features
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -58,7 +59,7 @@ for *CWR 3.0*, including *ISRC requests*.
 Data for selected works can be exported as *JSON* (complete) or *CSV* (basic). Importing
 basic data about works from *CSV* files is supported.
 
-Incoming *royalty statements* in *CSV* format can be processed and augmented with all data required for outgoing statements.
+Incoming *royalty statements* in *CSV* format can be processed and augmented with data required for outgoing statements.
 
 Limitations
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
