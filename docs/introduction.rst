@@ -18,9 +18,9 @@ It uses
 `Common Works Registration (CWR) <https://matijakolaric.com/articles/1/>`_
 for batch registration/licencing of musical works with `Collective Management Organizations (CMOs)
 <https://en.wikipedia.org/wiki/Collective_rights_management#Collective_management_organisations>`_ and Digital
-Service Providers (DSPs), as well as data delivery to sub-publishers.
+Service Providers (DSPs).
 
-Registration/licencing of recordings and royalty processing are in active development.
+It processes royalty statements in various CSV formats. Registration/licencing of recordings is in active development.
 
 Django-Music-Publisher (DMP) is based on `Django web framework <https://www.djangoproject.com/>`_, hence the name.
 
@@ -58,8 +58,7 @@ for *CWR 3.0*, including *ISRC requests*.
 Data for selected works can be exported as *JSON* (complete) or *CSV* (basic). Importing
 basic data about works from *CSV* files is supported.
 
-Data is also sufficient for *simple royalty distribution* to controlled writers, which is not yet fully implemented.
-
+Incoming *royalty statements* in *CSV* format can be processed and augmented with all data required for outgoing statements.
 
 Limitations
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
