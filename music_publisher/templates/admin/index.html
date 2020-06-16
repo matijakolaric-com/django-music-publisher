@@ -15,7 +15,7 @@
     {% for app in app_list %}
         {% if app.app_label == 'music_publisher' %}
             {% for group in app.models|dmp_model_groups %}
-                <div class="app-{{ app.app_label }} module">
+<div class="app-{{ app.app_label }} module">
                     <table>
                     <caption>
                         <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=group.name %}Models in the {{ name }} application{% endblocktrans %}">{{ group.name }}</a>
@@ -45,6 +45,11 @@
                         {% endif %}
                         </tr>
                     {% endfor %}
+                    {% if perms.music_publisher.camn_process_royalties %}
+                        <tr>
+                        <th scope="row"><a href="{% url 'royalty_calculation' %}">Royalty Calculation</a></th>
+                        </tr>
+                    {% endif %}
                     </table>
                 </div>
             {% endfor %}
