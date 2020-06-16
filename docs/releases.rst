@@ -43,79 +43,30 @@ issues.
 
 Index (home) page became clearer due to grouping of views.
 
-Basic CSV imports and exports for musical works, and JSON exports of releases were added.
+Basic CSV imports and exports for musical works, and JSON exports for releases were added.
 
 Controlled writers with no society affiliation are now fully supported.
+
+Processing of royalty statements was added.
 
 Future open-source features
 ===========================
 
 There is a business model behind Django-Music-Publisher. In order for a feature to be
-released as open-source code, all or most of the following must apply:
+released as open-source code, all of the following must apply:
 
-* Code must be global, or near-global. Special cases that apply to just one or a small
-  number of countries are not covered in open-source, unless fully sponsored.
+* Code must be global, or near-global. Features that apply to one or couple of 
+  countries will not be included.
   E.g. US publishers with multiple affiliations and BUMA/STEMRA
   share split rules are not covered.
 
 * Code must be applicable to small publishers (and soon labels). The goal is to help them
-  grow. If a feature is required only by established companies, it will not come into
-  open-source, unless fully sponsored. E.g. administrators and sub-publishers.
+  grow. If a feature is required only by established companies, it will not be included. 
+  E.g. administrators and sub-publishers.
 
-* A feature must not require customisations or complex deployments.
-  Open source solutions for end-users make no sense if a professional is required to
-  deploy and/or customise it.
-  E.g. registrations in GEMA and licencing of production music are not supported.
+* A feature must not require complex customisations or deployments.
+  Open-source solutions for end-users must be deployable by end-users.
+  E.g. registrations in GEMA and licencing of production music.
 
-* A feature should be self-evident to experienced professionals, so no user support is
-  required. This is not an absolute rule, the author and maintainer runs a
-  `professional support service <https://matijakolaric.com/dmp-prosupport/>`_.
-  Some confusing features were removed in the past, e.g. two JSON formats.
-
-* It must be legal. E.g. integrating DDEX into open-source code is currently not legal.
-
-.. note::
-
-    All of the aforementioned examples are available in DMP's commercial sibling and
-    other solutions. See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_.
-
-Some of the features that are likely to become part of the open-source code are listed next.
-
-DDEX
-----
-
-DDEX is a set of standards for music metadata exchange. Sadly, their licence is not compatible
-with open-source licences. If it ever becomes compatible with MIT License, support for it will
-be added to the open-source code.
-
-
-Royalty processing for music publishers
----------------------------------------
-
-When it comes to music publishing, the royalty processing is the only unfinished area.
-The main challenge here is that incoming statements come in many different formats.
-Processing of the most common ones will be added to open-source code.
-
-.. note::
-
-    See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_ for commercial options.
-
-Support for small music labels
-------------------------------
-
-It took just over two years to come to the point where most needs of most small publishers
-are covered. From late 2020, focus will shift toward supporting small labels.
-
-Any feature that is fully sponsored
------------------------------------
-
-If you believe that a feature should be available as open-source code, feel free to pay for
-the development. It still has to comply with most of the aforementioned criteria, because
-the code must be maintainable.
-
-Closed-source features
-=========================================================
-
-Anything that does not fit the aforementioned criteria, will not be made open-source by the creator
-of DMP. Of course, you may create any feature yourself, of hire someone to do it for you.
-The creator of DMP sometimes accepts such jobs.
+* It must be legal. E.g. integrating DDEX into open-source code is currently not legal
+  because DDEX licence is not compatible with MIT license.
