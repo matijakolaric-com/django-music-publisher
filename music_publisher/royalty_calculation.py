@@ -103,6 +103,7 @@ class RoyaltyCalculationForm(forms.Form):
 
 
 class RoyaltyCalculation(object):
+    """The process of royalty calculation."""
 
     def __init__(self, form):
         self.file = form.file
@@ -117,19 +118,23 @@ class RoyaltyCalculation(object):
             self.right = None
         self.ac = int(form.cleaned_data.get('amount_column'))
         self._fieldnames = []
+        self.writer_ids = set()
         self.writers = {}
         self.works = defaultdict(list)
+
 
     def __str__(self):
         return self.filename
 
     @property
     def filename(self):
+        """Return the filename of the output file."""
         in_name = self.in_file.name.rsplit('.', 1)[0]
         return in_name + '-output-' + self.algo + '.csv'
 
     @property
     def fieldnames(self):
+        """Return the list of field names in the output file."""
         if self._fieldnames:
             return self._fieldnames
         self.file.seek(0)
@@ -155,7 +160,7 @@ class RoyaltyCalculation(object):
         self._fieldnames.append('Net amount')
         return self._fieldnames
 
-    def get_works_and_writers(self):
+    def get_work_ids(self):
         self.file.seek(0)
         csv_reader = csv.reader(self.file)
         work_ids = set()
@@ -164,7 +169,10 @@ class RoyaltyCalculation(object):
             if self.work_id_source == 'ISWC':
                 id = id.replace('.', '').replace('-', '')
             work_ids.add(id)
+        return work_ids
 
+    def get_work_queryset(self, work_ids):
+        """Return the appropriate queryset based on work ID source and ids."""
         qs = WriterInWork.objects.filter(controlled=True)
         if self.work_id_source == settings.PUBLISHER_CODE:
             qs = qs.filter(work___work_id__in=work_ids)
@@ -181,10 +189,13 @@ class RoyaltyCalculation(object):
                 'query_id':
                     "music_publisher_workacknowledgement.remote_work_id"})
         qs = qs.distinct()
-        writer_ids = set()
+        return qs
+
+    def generate_works_dict(self, qs):
+        """Generate the work dictionary."""
         for wiw in qs:
             assert (wiw.work_id is not None)
-            writer_ids.add(wiw.writer_id)
+            self.writer_ids.add(wiw.writer_id)
             d = {
                 'writer_id': wiw.writer_id,
                 'role': wiw.get_capacity_display(),
@@ -192,7 +203,10 @@ class RoyaltyCalculation(object):
                 'fee': wiw.publisher_fee,
             }
             self.works[wiw.query_id].append(d)
-        qs = Writer.objects.filter(id__in=writer_ids)
+
+    def generate_writer_dict(self):
+        """Generate the writer dictionary."""
+        qs = Writer.objects.filter(id__in=self.writer_ids)
         for writer in qs:
             if writer.first_name:
                 name = '{}, {} [{}]'.format(
@@ -209,29 +223,53 @@ class RoyaltyCalculation(object):
                 'fee': writer.publisher_fee
             }
 
+    def get_works_and_writers(self):
+        """Get work and writer data.
+
+        Extract all work IDs, then perform the queries and put them in
+        dictionaries. When the actual file processing happens, no further
+        queries are required.
+        """
+
+        work_ids = self.get_work_ids()
+
+        qs = self.get_work_queryset(work_ids)
+
+        self.generate_works_dict(qs)
+        self.generate_writer_dict()
+
     def process_row(self, row):
+        """Process one incoming row, yield multiple output rows."""
         id = row[self.wc]
         work = self.works.get(id)
         if not work:
             row.append('ERROR: Work not found')
             yield row
             return
+
         amount = Decimal(row[self.ac])
         right = (self.right or row[self.rc][0]).lower()
-        if self.algo == 'share':
-            row.append({'p': 'Perf.', 'm': 'Mech.', 's': 'Sync'}[right])
-        controlled = sum([line['relative_share'] for line in work]) / 100
-        row.append('{0:.4f}'.format(controlled))
         share_split = {
             'p': settings.PUBLISHING_AGREEMENT_PUBLISHER_PR,
             'm': settings.PUBLISHING_AGREEMENT_PUBLISHER_MR,
             's': settings.PUBLISHING_AGREEMENT_PUBLISHER_SR}[right]
+
+        # Add data to all output rows
+        if self.algo == 'share':
+            row.append({'p': 'Perf.', 'm': 'Mech.', 's': 'Sync'}[right])
+        controlled = sum([line['relative_share'] for line in work]) / 100
+        row.append('{0:.4f}'.format(controlled))
+
+        # Prepare output lines, one per controlled writer in work
         for line in work:
+
+            # Common fields for all algorithms
             out_row = row.copy()
             writer = self.writers[line.get('writer_id')]
             out_row.append(writer['name'])
             out_row.append(line['role'])
             relative_share = line['relative_share'] / 100
+
             if self.algo == 'fee':
                 out_row.append('{0:.4f}'.format(relative_share))
                 share = (relative_share / controlled).quantize(
@@ -245,17 +283,25 @@ class RoyaltyCalculation(object):
                 out_row.append('{}'.format(fee_amount))
                 net_amount = amount_before_fee - fee_amount
                 out_row.append('{}'.format(net_amount))
+
             elif self.algo == 'share':
+
+                # do not show lines when writers get nothing
                 if share_split == Decimal(1):
                     continue
+
                 owned_share = relative_share * (1 - share_split)
                 out_row.append('{0:.6f}'.format(owned_share))
                 share = (owned_share / controlled).quantize(Decimal('.000001'))
                 net_amount = amount * share
                 out_row.append('{0:.6f}'.format(share))
                 out_row.append('{}'.format(net_amount))
+
             yield out_row
+
         else:
+
+            # "Share" algorithm has one additional row with the publisher
             if self.algo == 'share':
                 out_row = row.copy()
                 out_row.append('{}, [{}]'.format(settings.PUBLISHER_NAME,
@@ -265,6 +311,7 @@ class RoyaltyCalculation(object):
                 out_row.append('{0:.6f}'.format(share_split))
                 net_amount = amount * share_split
                 out_row.append('{}'.format(net_amount))
+
                 yield out_row
 
     @property
