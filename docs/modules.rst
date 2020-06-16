@@ -1,6 +1,11 @@
 For Developers
 ==============
 
+* Home: https://dmp.matijakolaric.com/
+* Docs: https://django-music-publisher.readthedocs.io/
+* Code: https://github.com/matijakolaric-com/django-music-publisher/
+* PYPI: https://pypi.org/project/django-music-publisher/
+
 This is where it gets really technical. Unless you are a developer, you should really not dig into this.
 
 music\_publisher Package
