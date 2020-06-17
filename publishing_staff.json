@@ -220,11 +220,6 @@
                 "release"
             ],
             [
-                "add_royaltycalculation",
-                "music_publisher",
-                "royaltycalculation"
-            ],
-            [
                 "add_track",
                 "music_publisher",
                 "track"
@@ -246,6 +241,11 @@
             ],
             [
                 "add_work",
+                "music_publisher",
+                "work"
+            ],
+            [
+                "can_process_royalties",
                 "music_publisher",
                 "work"
             ],

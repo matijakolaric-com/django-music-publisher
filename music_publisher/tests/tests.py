@@ -13,16 +13,14 @@ from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template import Context
 from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, override_settings,
-)
+    override_settings, SimpleTestCase, TestCase, TransactionTestCase)
 from django.urls import reverse
 
 import music_publisher.models
-from music_publisher.models import (
-    AlternateTitle, Artist, CWRExport, CommercialRelease, Label, Library,
-    LibraryRelease, Recording, Release, Work, Writer, WriterInWork, Track
-)
-from music_publisher import cwr_templates, validators, dataimport
+from music_publisher import cwr_templates, dataimport, validators
+from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
+    CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
+    Writer, WriterInWork)
 
 
 def get_data_from_response(response):
@@ -234,7 +232,7 @@ class DataImportTest(TestCase):
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests."""
     fixtures = ['publishing_staff.json']
@@ -455,6 +453,9 @@ class AdminTest(TestCase):
                 args=(1,))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
+            url = reverse('royalty_calculation')
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 302)
 
     def test_super_user(self):
         """Testing index for superuser covers all the cases."""
@@ -500,6 +501,9 @@ class AdminTest(TestCase):
             response = self.client.post(
                 url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_cwr_previews(self):
         """Test that CWR preview works."""
@@ -687,6 +691,7 @@ class AdminTest(TestCase):
             'admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
+        data['writerinwork_set-0-capacity'] = ''
         data['writerinwork_set-0-capacity'] = ''
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
@@ -1084,9 +1089,22 @@ class AdminTest(TestCase):
         ackimport = music_publisher.models.ACKImport.objects.first()
         self.assertIsNotNone(ackimport)
 
+        # required after acknowledgement imports because it lists
+        # ack sources
+        url = reverse('royalty_calculation')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        data = get_data_from_response(response)
+
+
+
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
-    def test_data_import(self):
-        """Test data import."""
+    def test_data_import_and_royalty_calculations(self):
+        """Test data import, ack import and royalty calculations.
+
+        This is the normal process, work data is entered, then the registration
+        follows and then it can be processed in royalty statements.
+        """
 
         self.client.force_login(self.superuser)
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
@@ -1109,6 +1127,74 @@ class AdminTest(TestCase):
                       args=(data_import.id,))
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+
+        self.client.force_login(self.staffuser)
+
+        mock = StringIO()
+        mock.write(ACK_CONTENT_21_EXT)
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+
+        with open(TEST_ROYALTY_PROCESSING_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'statement_file', 'statement.csv',
+            'text', 0, None)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'in_file': mockfile})
+        # Not enough data
+        response = self.client.post(url, data, follow=False)
+        self.assertFalse(hasattr(response, 'streaming_content'))
+
+        # Enough data, fee, p
+        mock.seek(0)
+        data.update({
+            'work_id_column': '1',
+            'work_id_source': '52',
+            'amount_column': '5',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, share, with rights column, ISWC
+        mock.seek(0)
+        data.update({
+            'algo': 'share',
+            'right_type_column': '3',
+            'work_id_source': 'ISWC',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, fee, sync
+        mock.seek(0)
+        data.update({
+            'right_type_column': 's',
+            'work_id_source': 'MK',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, fee, sync
+        mock.seek(0)
+        data.update({
+            'right_type_column': 'm',
+            'work_id_source': 'MK',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
 
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
@@ -1677,6 +1763,7 @@ GRT000010000001000000003
 TRL000010000001000000005"""
 
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
+TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR'

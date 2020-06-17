@@ -27,12 +27,11 @@ def dmp_model_groups(model_list):
     model_dict = OrderedDict([(el['object_name'], el) for el in model_list])
     sections = {
         'Musical Works': [
-            'Work', 'Publisher', 'Writer', 'CWRExport', 'ACKImport', 'DataImport', 'RoyaltyCalculation'],
+            'Work', 'Publisher', 'Writer', 'CWRExport', 'ACKImport',
+            'DataImport', 'RoyaltyCalculation'],
         'Recordings': ['Recording', 'Artist', 'Label'],
         'Releases': [
             'CommercialRelease', 'LibraryRelease', 'Library']
     }
     # Works
     yield from yield_sections(model_dict, sections)
-    if model_dict:
-        yield {'name': 'Other', 'models': model_dict.values()}

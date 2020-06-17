@@ -62,20 +62,20 @@ class RoyaltyCalculationForm(forms.Form):
         help_text='Select the column containing work IDs.'
     )
     work_id_source = forms.ChoiceField(
-        choices=get_id_sources, label='Work ID Source',
+        choices=get_id_sources, initial=settings.PUBLISHER_CODE,
+        label='Work ID Source',
         help_text='You or CWR acknowledgement source.',
-        initial=settings.PUBLISHER_CODE
     )
     amount_column = forms.ChoiceField(
         choices=[], label='Amount', initial=-1,
         help_text='Select the column containing received amount.'
     )
     right_type_column = forms.ChoiceField(
-        choices=get_right_types, label='Right type',
+        choices=get_right_types, initial='p', label='Right type',
         help_text='Select the right type or the column specifying it.'
     )
     algo = forms.ChoiceField(
-        choices=ALGOS, label='Algorithm type',
+        choices=ALGOS, initial='fee', label='Algorithm type',
         help_text='Choose the algorithm type, see user manual for details.'
     )
     default_fee = forms.DecimalField(
@@ -96,8 +96,6 @@ class RoyaltyCalculationForm(forms.Form):
                 self.fields['amount_column'].choices.append((str(i), field))
             valid = super().is_valid()
         except Exception as e:
-            if settings.DEBUG:
-                raise
             return False
         return valid
 
@@ -117,14 +115,9 @@ class RoyaltyCalculation(object):
             self.rc = int(self.right)
             self.right = None
         self.ac = int(form.cleaned_data.get('amount_column'))
-        self._fieldnames = []
         self.writer_ids = set()
         self.writers = {}
         self.works = defaultdict(list)
-
-
-    def __str__(self):
-        return self.filename
 
     @property
     def filename(self):
@@ -135,30 +128,28 @@ class RoyaltyCalculation(object):
     @property
     def fieldnames(self):
         """Return the list of field names in the output file."""
-        if self._fieldnames:
-            return self._fieldnames
         self.file.seek(0)
         csv_reader = csv.DictReader(self.file)
-        self._fieldnames = csv_reader.fieldnames
+        fieldnames = csv_reader.fieldnames
         if self.algo == 'share':
-            self._fieldnames.append('Right Type')
-        self._fieldnames += [
+            fieldnames.append('Right Type')
+        fieldnames += [
             'Controlled by publisher (%)',
             'Interested party',
             'Role']
         if self.algo == 'fee':
-            self._fieldnames += [
+            fieldnames += [
                 'Manuscript share (%)',
                 'Share in amount received (%)',
                 'Amount before fee',
                 'Fee (%)',
                 'Fee amount']
         elif self.algo == 'share':
-            self._fieldnames += [
+            fieldnames += [
                 'Owned Share (%)',
                 'Share in amount received (%)']
-        self._fieldnames.append('Net amount')
-        return self._fieldnames
+        fieldnames.append('Net amount')
+        return fieldnames
 
     def get_work_ids(self):
         self.file.seek(0)
@@ -280,7 +271,7 @@ class RoyaltyCalculation(object):
                 fee = (line['fee'] or writer['fee'] or self.default_fee) / 100
                 out_row.append('{}'.format(fee))
                 fee_amount = amount_before_fee * fee
-                out_row.append('{}'.format(fee_amount))
+                out_row.append('{}'.format(fee_amount or '0'))
                 net_amount = amount_before_fee - fee_amount
                 out_row.append('{}'.format(net_amount))
 
@@ -326,7 +317,6 @@ class RoyaltyCalculation(object):
         csv_writer.writerow(self.fieldnames)
         for row in csv_reader:
             for out_row in self.process_row(row):
-                print(out_row)
                 csv_writer.writerow(out_row)
         f.filename = self.filename
         f.close()
