@@ -21,5 +21,6 @@ For version *20.7 Endemic*.
    manual_releases
    manual_libraries
    manual_dataimport
+   manual_royaltycalculations
 
 

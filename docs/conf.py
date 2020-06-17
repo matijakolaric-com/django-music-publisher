@@ -100,7 +100,10 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_extra_path = ['googleb5723862796807b2.html']
+html_extra_path = [
+    'googleb5723862796807b2.html',
+    'work_import_template.csv'
+]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
