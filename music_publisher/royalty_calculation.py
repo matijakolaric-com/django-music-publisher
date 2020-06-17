@@ -8,7 +8,9 @@ from tempfile import NamedTemporaryFile
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.core.files.uploadhandler import TemporaryFileUploadHandler
 from django.http import FileResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import FormView
 
 from .models import SOCIETY_DICT, WorkAcknowledgement, Writer, WriterInWork
@@ -341,3 +343,8 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
             return FileResponse(f, filename=rc.filename, as_attachment=False)
         finally:
             os.remove(path)
+
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        request.upload_handlers = [TemporaryFileUploadHandler()]
+        return super().dispatch(request, *args, **kwargs)

@@ -83,9 +83,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-FILE_UPLOAD_HANDLERS = [
-     "django.core.files.uploadhandler.TemporaryFileUploadHandler"]
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
