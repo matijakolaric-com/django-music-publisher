@@ -15,12 +15,12 @@ For version *20.7 Endemic*.
    manual_writers
    manual_cwr
    manual_ack
-   manual_recordings
-   manual_labels
-   manual_artists
-   manual_releases
-   manual_libraries
    manual_dataimport
    manual_royaltycalculations
+   manual_recordings
+   manual_artists
+   manual_labels
+   manual_releases
+   manual_libraries
 
 
