@@ -924,9 +924,12 @@ class WorkAdmin(MusicPublisherAdmin):
             """Simple Yes/No filter
             """
 
-            codes = WorkAcknowledgement.objects.values_list(
+            codes = WorkAcknowledgement.objects.order_by()
+            codes = codes.values_list(
                 'society_code', flat=True).distinct()
-            return [(code, SOCIETY_DICT.get(code, code)) for code in codes]
+            return sorted(
+                [(code, SOCIETY_DICT.get(code, code)) for code in codes],
+                key=lambda code: code[1])
 
         def queryset(self, request, queryset):
             """Filter on society sending ACKs.
@@ -1623,11 +1626,11 @@ class ACKImportAdmin(AdminWithReport):
                 if work.iswc:
                     if work.iswc != iswc:
                         raise ValidationError(
-                            'A different ISWC exists for work {}: {} vs {}.'.format(
-                                work, work.iswc, iswc
-                            ))
+                            'A different ISWC exists for work {}: {} vs {}.'
+                            ''.format(work, work.iswc, iswc                            ))
                 else:
                     work.iswc = iswc
+                    work.last_change = now()
                     work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,

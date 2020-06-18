@@ -596,6 +596,7 @@ class Work(TitleBase):
             'id': self.id,
             'code': self.work_id,
             'work_title': self.title,
+            'last_change': self.last_change,
             'version_type': {
                 'code': 'MOD',
                 'name': 'Modified Version of a musical work',
