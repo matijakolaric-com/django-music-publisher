@@ -232,7 +232,7 @@ class DataImportTest(TestCase):
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests."""
     fixtures = ['publishing_staff.json']
@@ -919,6 +919,7 @@ class AdminTest(TestCase):
             b'Too long for suffix, work title plus suffix must be 59',
             response.content)
 
+    @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
     def test_ack_import_and_work_filters(self):
         """Test ackknowledgement import and then filters on the change view.
 
@@ -997,6 +998,11 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.original_work = Work.objects.get(id=self.original_work.id)
         self.assertEqual(self.original_work.iswc, 'T9270264761')
+        url = reverse(
+            'admin:music_publisher_work_history',
+            args=(self.original_work.id,))
+        response = self.client.get(url)
+        self.assertIn('staffuser'.encode(), response.content)
 
         """This file has bad ISWC codes."""
         mock = StringIO()

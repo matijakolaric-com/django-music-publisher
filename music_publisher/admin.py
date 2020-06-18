@@ -1631,6 +1631,12 @@ class ACKImportAdmin(AdminWithReport):
                 else:
                     work.iswc = iswc
                     work.last_change = now()
+                    from django.contrib.admin.models import CHANGE, LogEntry
+                    LogEntry.objects.log_action(
+                        request.user.id,
+                        admin.options.get_content_type_for_model(work).id,
+                        work.id, str(work), CHANGE,
+                        'ISWC imported from ACK file.')
                     work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,
