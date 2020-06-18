@@ -919,7 +919,6 @@ class AdminTest(TestCase):
             b'Too long for suffix, work title plus suffix must be 59',
             response.content)
 
-    @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
     def test_ack_import_and_work_filters(self):
         """Test ackknowledgement import and then filters on the change view.
 
@@ -1102,9 +1101,9 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = get_data_from_response(response)
 
-
-
-    @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
+    @override_settings(
+        REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False,
+        PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
     def test_data_import_and_royalty_calculations(self):
         """Test data import, ack import and royalty calculations.
 
