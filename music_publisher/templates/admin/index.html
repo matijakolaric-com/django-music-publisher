@@ -45,7 +45,7 @@
                         {% endif %}
                         </tr>
                     {% endfor %}
-                    {% if perms.music_publisher.camn_process_royalties %}
+                    {% if perms.music_publisher.can_process_royalties and group.name=='Musical Works' %}
                         <tr>
                         <th scope="row"><a href="{% url 'royalty_calculation' %}">Royalty Calculation</a></th>
                         </tr>
