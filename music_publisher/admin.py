@@ -1756,7 +1756,7 @@ class DataImportForm(ModelForm):
         from io import TextIOWrapper
 
         cd = self.cleaned_data
-        f = cd['data_file']
+        f = cd.get('data_file')
         report = ''
         try:
             importer = DataImporter(TextIOWrapper(f), self.user)
