@@ -29,9 +29,12 @@ class RoyaltyCalculationForm(forms.Form):
         """
         Yield choices, fixed and societies.
         """
+        yield None, 'Publisher Work ID:'
         yield settings.PUBLISHER_CODE, settings.PUBLISHER_NAME
+        yield None, 'International Standard Codes:'
         yield 'ISWC', 'ISWC'
-        yield None, '-' * 40
+        yield 'ISRC', 'ISRC'
+        yield None, 'Sender Work ID:'
         codes = WorkAcknowledgement.objects.order_by(
             'society_code').values_list('society_code', flat=True).distinct()
         codes = [(code, SOCIETY_DICT.get(code, '')) for code in codes]
@@ -45,7 +48,7 @@ class RoyaltyCalculationForm(forms.Form):
 
         They will be extended with columns in JS and prior to validation.
         """
-        yield 'p', ' Performance for all rows'
+        yield 'p', 'Performance for all rows'
         yield 'm', 'Mechanical for all rows'
         yield 's', 'Sync for all rows'
         yield None, '-' * 40
@@ -159,7 +162,7 @@ class RoyaltyCalculation(object):
         work_ids = set()
         for row in csv_reader:
             id = row[self.wc]
-            if self.work_id_source == 'ISWC':
+            if self.work_id_source in ['ISWC', 'ISRC']:
                 id = id.replace('.', '').replace('-', '')
             work_ids.add(id)
         return work_ids
@@ -173,6 +176,9 @@ class RoyaltyCalculation(object):
         elif self.work_id_source == 'ISWC':
             qs = qs.filter(work__iswc__in=work_ids)
             qs = qs.extra(select={'query_id': "iswc"})
+        elif self.work_id_source == 'ISRC':
+            qs = qs.filter(work__recordings__isrc__in=work_ids)
+            qs = qs.extra(select={'query_id': "isrc"})
         else:
             qs = qs.filter(
                 work__workacknowledgement__society_code=self.work_id_source)
@@ -234,6 +240,8 @@ class RoyaltyCalculation(object):
     def process_row(self, row):
         """Process one incoming row, yield multiple output rows."""
         id = row[self.wc]
+        if self.work_id_source in ['ISWC', 'ISRC']:
+            id = id.replace('.', '').replace('-', '')
         work = self.works.get(id)
         if not work:
             row.append('ERROR: Work not found')

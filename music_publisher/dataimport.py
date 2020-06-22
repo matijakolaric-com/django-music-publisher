@@ -7,7 +7,7 @@ from collections import defaultdict, OrderedDict
 from django.utils.text import slugify
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
-    Library, LibraryRelease)
+    Library, LibraryRelease, Recording)
 from .admin import WriterInWorkFormSet
 import re
 from django.conf import settings
@@ -20,8 +20,8 @@ from django.db import IntegrityError, transaction
 
 class DataImporter(object):
     FLAT_FIELDS = [
-        'work_id',
-        'work_title', 'iswc', 'original_title', 'library', 'cd_identifier']
+        'work_id', 'work_title', 'iswc', 'original_title',
+        'library', 'cd_identifier']
     ARTIST_FIELDS = [
         'last', 'first', 'isni']
     WRITER_FIELDS = [
@@ -94,6 +94,7 @@ class DataImporter(object):
             'alt_titles': [],
             'writers': defaultdict(OrderedDict),
             'artists': defaultdict(OrderedDict),
+            'recordings': defaultdict(OrderedDict),
         }
         for key, value in in_dict.items():
             if isinstance(value, str):
@@ -123,6 +124,10 @@ class DataImporter(object):
                         key_elements[2] not in self.ARTIST_FIELDS):
                     raise AttributeError('Unknown column: "{}".'.format(key))
                 out_dict['artists'][key_elements[1]][key_elements[2]] = value
+            elif prefix == 'recording':
+                key_elements = clean_key.split('_', 2)
+                if (len(key_elements) == 3 and key_elements[2] == 'isrc'):
+                    out_dict['recordings'][key_elements[1]] = value
             else:
                 raise AttributeError('Unknown column: "{}".'.format(key))
         return out_dict
@@ -214,7 +219,6 @@ class DataImporter(object):
                     ADDITION, artist, 'Added during import.')
             yield artist
 
-
     def get_library_release(self, library_name, cd_identifier):
         lookup_library = Library(name=library_name)
         lookup_library.clean_fields()
@@ -266,6 +270,11 @@ class DataImporter(object):
             ADDITION, work, 'Added during import.')
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
+        for isrc in row_dict['recordings'].values():
+            recording = Recording(work=work, isrc=isrc)
+            recording.clean_fields()
+            recording.clean()
+            recording.save()
         wiws = []
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
