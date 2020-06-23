@@ -29,8 +29,7 @@ In the header, the left part shows the name of the (main) publisher and the link
 The right shows links to this user manual, for changing the password and logging out. This header is present in all views.
 
 We have two columns, the left one shows sections of modules, with links to change and add views.
-The right one shows up to 10 latest actions of the current user. In this case, a user was created and edited,
-as described in :doc:`User Administration <manual_useradmin>`.
+The right column shows up to 10 latest actions of the current user.
 
 Model Views
 +++++++++++++++

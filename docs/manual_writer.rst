@@ -60,4 +60,4 @@ Please note that if not all writers are identified with their IPI numbers,
 the work may not receive an
 `International Standard Musical Work Code (ISWC) <https://matijakolaric.com/articles/identifiers/iswc/>`_
 
-The last column is both a work counter and link to the list of :doc:`works <manual_works>` by this writer.
+The last column is both a work counter and link to the list of :doc:`works <manual_work>` by this writer.

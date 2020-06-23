@@ -1426,13 +1426,14 @@ class CWRExportAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         """If CWR has been created, it can no longer be deleted, as it may
         have been sent. This may change once the delivery is automated."""
-
         if obj and obj.cwr:
             return False
         return super().has_delete_permission(request, obj)
 
     def has_change_permission(self, request, obj=None):
         """If object exists, it can only be edited in changelist."""
+        if not settings.PUBLISHER_CODE:
+            return False
         if obj:
             return False
         return super().has_delete_permission(request, obj)
@@ -1679,6 +1680,12 @@ class ACKImportAdmin(AdminWithReport):
                 cd['import_iswcs'])
             obj.cwr = cd['acknowledgement_file']
             super().save_model(request, obj, form, change)
+
+    def has_add_permission(self, request):
+        """Return false if CWR delivery code is not present."""
+        if not settings.PUBLISHER_CODE:
+            return False
+        return super().has_add_permission(request)
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
         """Deleting ACK imports is a really bad idea.

@@ -460,14 +460,14 @@ class Work(TitleBase):
         'ISWC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('iswc'),))
     original_title = models.CharField(
-        verbose_name='Title of the Original Work',
+        verbose_name='Title of original work',
         max_length=60, db_index=True, blank=True,
         help_text='Use only for modification of existing works.',
         validators=(CWRFieldValidator('work_title'),))
     library_release = models.ForeignKey(
         'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
         related_name='works',
-        verbose_name='Library Release')
+        verbose_name='Library release')
     last_change = models.DateTimeField(
         'Last Edited', editable=False, null=True)
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
@@ -1478,7 +1478,8 @@ class WorkAcknowledgement(models.Model):
         'Society', max_length=3, choices=settings.SOCIETIES)
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
-    remote_work_id = models.CharField(max_length=20, blank=True)
+    remote_work_id = models.CharField(
+        'Remote work ID', max_length=20, blank=True)
 
     # def __str__(self):
     #     return '{}: {}'.format(

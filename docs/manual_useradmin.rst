@@ -24,7 +24,7 @@ the ``Authentication and Authorization``. The following view is shown:
 
    Add User view
 
-Add a username and a password twice and press on ``save and continue
+Add a username and a password twice and press on ``Save and continue
 editing``. Then, in the next view, add additional data.
 
 .. figure:: /images/dmp_change_user.png
@@ -33,8 +33,8 @@ editing``. Then, in the next view, add additional data.
    Change User view
 
 .. note::
-    Passwords are not visible, and if a superuser must change a password
-    for another user, ``this form`` link in the password field must be used.
+    Passwords are not visible, and not saved in plaintext.
+    To change a password for another user, use ``this form`` link.
 
 ``Staff status`` has to be set for all users of Django-Music-Publisher,
 and they have to be assigned to an appropriate permission group. Two
@@ -54,4 +54,4 @@ Select one of them and press on the icon that will move it to ``chosen groups``.
 
 You will be taken to the ``user list`` view. All users are shown here. Just as the add and change views, list views are quite standard. They will be covered a bit later.
 
-Now you can log out, and log in as the newly added user. The ``home view`` is a bit different, according to the assigned permissions.
+Now you can log out, and log in as the newly added staff user. The ``home view`` is a bit different, according to the assigned permissions.
