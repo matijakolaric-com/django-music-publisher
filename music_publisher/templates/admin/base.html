@@ -36,7 +36,11 @@
             {% block welcome-msg %}
             {% endblock %}
             {% block userlinks %}
-                <a href="https://django-music-publisher.readthedocs.io/en/latest/manual.html" target="_blank">User Manual</a> /
+                {% if opts.app_label == 'music_publisher' %}
+                    <a href="https://django-music-publisher.readthedocs.io/en/latest/manual_{{ opts.model_name }}.html" target="_blank">User Manual</a> /
+                {% else %}
+                    <a href="https://django-music-publisher.readthedocs.io/en/latest/manual_{{ opts.model_name }}.html" target="_blank">User Manual</a> /
+                {% endif %}
                 {% if user.has_usable_password %}
                     <a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a> /
                 {% endif %}

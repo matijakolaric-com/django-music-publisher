@@ -856,10 +856,10 @@ table#change-history tbody th {
 
 #header {
     width: auto;
-    height: 40px;
+    min-height: 40px;
     padding: 10px 40px;
     background: #d50000;
-    line-height: 40px;
+    /*line-height: 40px;*/
     color: white;
     overflow: hidden;
 }
@@ -914,6 +914,7 @@ table#change-history tbody th {
     letter-spacing: 1px;
     text-transform: uppercase;
     text-align: right;
+    margin: 14px 0 0 0;
 }
 
 #user-tools a {
