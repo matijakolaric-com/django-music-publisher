@@ -158,7 +158,9 @@
             const inFile = $("#id_in_file");
             const workIdColumn = $("#id_work_id_column")[0];
             const rightType = $("#id_right_type_column")[0];
+            $("#id_work_id_source")[0][0].disabled = true;
             $("#id_work_id_source")[0][2].disabled = true;
+            $("#id_work_id_source")[0][5].disabled = true;
             rightType[3].disabled = true;
             rightType[3].selected = false;
             const amountColumn = $("#id_amount_column")[0];
@@ -246,12 +248,12 @@
                                     continue;
                                 }
 
-                                /* Work ID is 14, ISWC 11-15 characters long */
+                                /* Work ID is 14, ISWC 11-15 characters long, ISRC 12-15 */
                                 if (value.length > 15) {
                                     workIdHdrs[i] = false
                                 }
 
-                                /* If not number, it can not be amount */
+                                /* If not a number, it can not be amount */
                                 if (isNaN(value)) {
                                     amountIdHdrs[i] = false;
 

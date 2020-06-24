@@ -1,6 +1,7 @@
 /*
     DJANGO Admin styles
 */
+
 @import url(fonts.css);
 
 #changelist-filter li.selected a, #changelist-filter li a:hover {
@@ -59,9 +60,11 @@ a:link, a:visited {
     font-weight: 200;
 }
 
-a:hover, a:focus {
+a:focus, a:hover {
+    color: #d50000;
     text-decoration: underline;
 }
+
 
 a img {
     border: none;
@@ -70,6 +73,10 @@ a img {
 a.section:link, a.section:visited {
     color: #fff;
     text-decoration: none;
+}
+
+a.section:focus, a.section:hover {
+    text-decoration: underline;
 }
 
 /* GLOBAL DEFAULTS */
@@ -478,6 +485,8 @@ select:not(.filtered) {
 }
 
 select[multiple] {
+    /* Allow HTML size attribute to override the height in the rule above. */
+    height: auto;
     min-height: 150px;
 }
 
@@ -701,7 +710,13 @@ div.breadcrumbs {
 }
 
 
+
 /* ACTION ICONS */
+
+.viewlink, .inlineviewlink {
+    padding-left: 16px;
+    background: url(../img/icon-viewlink.svg) 0 1px no-repeat;
+}
 
 .addlink {
     padding-left: 16px;
@@ -770,7 +785,11 @@ a.deletelink:focus, a.deletelink:hover {
     text-decoration: underline;
 }
 
-.object-tools a.viewsitelink, .object-tools a.golink, .object-tools a.addlink {
+.object-tools a:focus{
+    text-decoration: none;
+}
+
+.object-tools a.viewsitelink, .object-tools a.golink,.object-tools a.addlink {
     background-repeat: no-repeat;
     background-position: right 7px center;
     padding-right: 26px;
@@ -856,10 +875,10 @@ table#change-history tbody th {
 
 #header {
     width: auto;
-    height: 40px;
+    min-height: 40px;
     padding: 10px 40px;
     background: #d50000;
-    line-height: 40px;
+    /*line-height: 40px;*/
     color: white;
     overflow: hidden;
 }
@@ -905,6 +924,7 @@ table#change-history tbody th {
 #branding a:hover {
     text-decoration: none;
 }
+
 #user-tools {
     float: right;
     padding: 0;
@@ -914,6 +934,7 @@ table#change-history tbody th {
     letter-spacing: 1px;
     text-transform: uppercase;
     text-align: right;
+    margin: 14px 0 0 0;
 }
 
 #user-tools a {
@@ -965,7 +986,7 @@ table#change-history tbody th {
 
 #content-related .module h2 {
     background: none;
-    /* padding: 16px; */
+    padding: 0;
     margin-bottom: 16px;
     border-bottom: 1px solid #eaeaea;
     font-size: 18px;

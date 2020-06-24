@@ -9,54 +9,74 @@ Add/Change View
 
    Add work view, minimal example with default settings
 
-The view for adding and changing works is shown in the image above. It is the most complex view in Django-Music-Publisher. It has several parts, so let us cover them one by one.
+The view for adding and changing works is shown in the image above.
+It is the most complex view in Django-Music-Publisher (DMP).
+It has several parts, so let us cover them one by one.
 
 General
 +++++++
 
-This part contains basic fields. Field ``work ID``, which is set automatically upon first save. This field is extremely important for registrations. The proper explanation is beyond the scope of this manual.
+This part contains basic fields. Field ``work ID``, which is set automatically upon first save. This field is extremely important for data exchange, including registrations and royalty processing.
 
-``title`` should be obvious. Please note that the label ``title`` is bold, representing that this field is required. ``ISWC`` is a unique identifier assigned to works by collecting societies.
+.. note::
+   ``Work ID`` can not be set manually, but it is kept if present in imported data.
+   See :doc:`Importing Data <manual_dataimport>` for details.
 
-Fields ``original title`` and ``version type``, with only the former being editable, are used for modifications. By filling out ``original title`` field, the ``version type`` will be set to ``modification`` and a more complex set of validation rules will apply.
+Work title is entered into ``title`` field.
 
-Please note that the difference between modifications of works in public domain and those where copyright still exists is set through ``writers in work`` section.
+``ISWC`` is a unique identifier assigned to works by collecting societies. It can be edited manually or imported
+either through :doc:`data imports <manual_dataimport>` or :doc:`CWR acknowledgements <manual_ack`.
+
+Fields ``title of original work`` and ``version type``, with only the former being
+editable, are used for modifications. By filling out ``title of original work``
+field, the ``version type`` will be set to ``modification`` and a more
+complex set of validation rules will apply.
 
 Library
 +++++++
 
-Django-Music-Publisher has good support for music libraries. If a work is part of a :doc:`library <manual_libraries>`, then a :doc:`library release <manual_releases>` must be set here.
+DMP has support for music libraries. If a work is part of
+a music library, then a
+:doc:`library release <manual_releases>` must be set here.
 
 Writers in Work
 +++++++++++++++
 
-This is where you put in the information about :doc:`writers <manual_writers>` (composers and lyricists) who created this musical work. At least one is required, to add more, click on ``add another writer in work``.
+This is where you put in the information about :doc:`writers <manual_writer>` (composers and lyricists) who created this musical work. At least one is required, to add more, click on ``add another writer in work``.
 
 Each column is described next.
 
 Writer
 ------
 
-This is where you select a :doc:`writer <manual_writers>`. The field is conditionally required for a controlled writer, and at least one writer must be controlled.
+This is where you select a :doc:`writer <manual_writer>`. The field is conditionally required for a controlled writer, and at least one writer must be controlled.
 
 To add a writer, press on the green plus ``+`` sign next to it. A pop-up window will appear. Fill out ``first name``, ``last name``, ``IPI name #`` and ``performance rights society``, and press on ``save``. The newly added writer will appear in this field.
 
-There is another way to add writers, which will be covered in the :doc:`writers <manual_writers>` section.
-
-If left empty, it means that the writer is unknown. This is often used with modifications of traditional musical works.
-
-
-.. figure:: /images/add_writer.png
+.. figure:: /images/add_writer_popup.png
    :width: 100%
 
    Add writer pop-up view
 
-Capacity
+There is another way to add writers, which is covered in the :doc:`writers <manual_writer>` section.
+Details about this form are explained there.
+
+If ``writer`` field is left empty, it means that the writer is unknown.
+This is often used with modifications of traditional musical works.
+
+
+Role
 --------
 
-This is where you select how this writer contributed to the work. This field is required for controlled writers. Please note that at least one of the writers should be a ``composer`` or a ``composer and lyricist``.
+This is where you select how this writer contributed to the work. This field
+is required for controlled writers.
 
-The options are ``composer``, ``lyricist`` and ``composer and lyricist`` for original works. ``Arranger``, ``adaptor`` or ``translator`` can only be used in modifications. For them, at least two rows are required, one being (original) ``composer`` or a ``composer and lyricist``, and one being ``arranger``, ``adaptor`` or ``translator``.
+At least one of the writers should be a ``composer`` or a ``composer and lyricist``.
+
+Options for original works are ``composer``, ``lyricist`` and ``composer and lyricist``.
+
+``Arranger``, ``adaptor`` or ``translator`` can only be used in modifications.
+For modifications, at least two rows are required, one being (original) ``composer`` or a ``composer and lyricist``, and one being ``arranger``, ``adaptor`` or ``translator``.
 
 For modifications of traditional works, set the capacity of the unknown writer to ``composer and lyricist``.
 
@@ -65,14 +85,15 @@ Manuscript Share
 
 Django-Music-Publisher uses a very simple single-field share model. The principle is very simple.
 Writers create a work and decide how they want to split the shares among themselves. This is referred to as
-``manuscript share``. (The term comes form CWR 3.0 specification.) Then each of the writers may choose a publisher
+``manuscript share``. Each of the writers may choose a publisher
 and transfer some of their manuscript share to the publisher, according to their publishing agreement.
 This does not influence other writers.
 
-In Django-Music-Publisher, publishing agreements between all controlled writers and you as the original publisher have
-the same splits, globally defined in settings.
+In DMP, publishing agreements between all controlled writers and you as the original publisher have
+same splits, globally defined in settings.
 
-The sum of relative shares for each work must be 100%.
+.. note::
+    The sum of relative shares in a work must be 100%.
 
 For a musical work that is a modification of a public domain one, set the share of original writers
 (``composer``, ``lyricist``, ``composer and lyricist``) to 0.
@@ -98,17 +119,17 @@ Society-assigned agreement number
 ---------------------------------
 
 In this field, society-assigned agreement numbers for **specific agreements** are entered. For **general agreements**,
-they are set when defining the :doc:`writer <manual_writers>`. If both exist and are different, the **specific** one is
+they are set when defining the :doc:`writer <manual_writer>`. If both exist and are different, the **specific** one is
 used.
 
-This field may be set as required for controlled writers.
+This field may be set as required for controlled writers, by setting ``REQUIRE_SAAN`` to ``True``.
 
 
 Publisher fee
 -------------
 
 This is the fee kept by the publisher when royalties are paid and distributed. **This field is not used in
-registrations.** It is used only for royalty statement processing. Most small publishers don't use it.
+registrations.** It is used only for :doc:`royalty statement processing <manual_royalty_calculation>`. Most small publishers don't use it.
 
 It may also be set as required for controlled writers. Same rules apply as for ``society-assigned agreement number``
 field.
@@ -116,14 +137,13 @@ field.
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Since version 19.7, Django-Music-Publisher has full CWR 3.0 compatibility, except that it does not allow for recordings based on multiple works (medleys). This means that data about recordings is now quite complex and detailed.
+This is where the details about a recording based on this musical works are
+added. Athough there is a separate set of views for
+:doc:`recordings <manual_recordings>`, fields in this section are explained
+only here.
 
-Please note that there is a separate set of views for :doc:`recordings <manual_recordings>`.
-
-.. figure:: /images/works_recordings.png
-   :width: 100%
-
-   Add work view, recordings section, note the use of recording and version title suffix checkboxes
+.. note::
+    For this version of DMP, it is recommended to edit recordings here.
 
 Recording title
 ---------------
@@ -156,7 +176,10 @@ Here you list the artists who are performing the work, there is no need to repea
 Registration Acknowledgements
 +++++++++++++++++++++++++++++++++++
 
-This is where the work registration acknowledgements are recorded. Please note that only superusers (in the default configuration) can modify this section, as it is automatically filled out from :doc:`uploaded acknowledgement files <manual_ack>`.
+This is where the work registration acknowledgements are recorded.
+
+.. note::
+    In the default configuration, only superusers can modify this section, as it is automatically filled out from :doc:`uploaded acknowledgement files <manual_ack>`.
 
 Saving and Deleting
 +++++++++++++++++++

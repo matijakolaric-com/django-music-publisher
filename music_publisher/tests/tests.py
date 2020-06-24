@@ -265,7 +265,7 @@ class AdminTest(TestCase):
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
         recording = Recording.objects.create(work=cls.original_work,
                                  record_label=cls.label, artist=cls.artist,
-                                 isrc='US-S1Z-99-00001')
+                                 isrc='JM-K40-14-00001')
         Track.objects.create(release=cls.commercial_release, recording=recording)
 
     @classmethod
@@ -1179,6 +1179,14 @@ class AdminTest(TestCase):
             'algo': 'share',
             'right_type_column': '3',
             'work_id_source': 'ISWC',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, share, with rights column, ISRC
+        mock.seek(0)
+        data.update({
+            'work_id_source': 'ISRC',
         })
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))

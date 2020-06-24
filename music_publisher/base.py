@@ -104,10 +104,10 @@ class IPIBase(models.Model):
         abstract = True
 
     ipi_name = models.CharField(
-        'IPI Name #', max_length=11, blank=True, null=True, unique=True,
+        'IPI name #', max_length=11, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('ipi_name'),))
     ipi_base = models.CharField(
-        'IPI Base #', max_length=15, blank=True, null=True,
+        'IPI base #', max_length=15, blank=True, null=True,
         validators=(CWRFieldValidator('ipi_base'),))
 
     _can_be_controlled = models.BooleanField(editable=False, default=False)

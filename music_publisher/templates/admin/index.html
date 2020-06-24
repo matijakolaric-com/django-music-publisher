@@ -9,8 +9,8 @@
 
 {% block breadcrumbs %}{% endblock %}
 
-{% block title %}Home{{ block.super }}{% endblock %}
-
+{% block title %}{% if not title %}Home{% endif %}{{ block.super }}{% endblock %}
+{% block content_title %}{% endblock %}
 {% block content %}
 <div id="content-main">
 {% if app_list %}
