@@ -29,7 +29,7 @@ registrations, various types of publishing agreements, etc.
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/1IQyUM-5aAM/?list=PLQ3e-DuNTFt-HjNC2jTRdmN1DZW1URvJ0" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
 
-Total playlist duration is around 55 minutes.
+Total playlist duration is around 50 minutes.
 
 
 Django-Music-Publisher
@@ -37,11 +37,11 @@ Django-Music-Publisher
 
 Videos specifically about `Django-Music-Publisher <https://www.youtube.com/watch?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP&v=duqgzK3JitU>`_.
 
-The playlist starts with a general introduction, followed by videos explaining who is the target group, specifically original publishers, the benefits of open source and several tutorials,
-covering deployment, basic and advanced metadata editing, and the use of CWR for registration of musical works.
+The playlist starts with a general introduction, followed by videos explaining who is the target group, the benefits of open source and several tutorials,
+covering deployment, basic and advanced metadata editing, data import, registration of musical works, acknowledgements and royalty processing.
 
 .. raw:: html
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
-Total playlist duration is around 25 minutes.
+Total playlist duration is around 40 minutes.
