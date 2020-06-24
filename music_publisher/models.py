@@ -460,6 +460,7 @@ class Work(TitleBase):
         'ISWC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('iswc'),))
     original_title = models.CharField(
+        verbose_name='Title of the Original Work',
         max_length=60, db_index=True, blank=True,
         help_text='Use only for modification of existing works.',
         validators=(CWRFieldValidator('work_title'),))
