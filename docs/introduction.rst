@@ -20,7 +20,7 @@ for batch registration/licencing of musical works with `Collective Management Or
 <https://en.wikipedia.org/wiki/Collective_rights_management#Collective_management_organisations>`_ and Digital
 Service Providers (DSPs).
 
-It processes royalty statements in various CSV formats. Registration/licencing of recordings is in active development.
+It processes royalty statements in various CSV formats.
 
 Django-Music-Publisher (DMP) is based on `Django web framework <https://www.djangoproject.com/>`_, hence the name.
 
@@ -29,7 +29,7 @@ Project Scope
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 DMP can be used out-of-the-box by most small original publishers, both for commercial (general) and
-production music.
+production (library) music.
 
 Each DMP installation supports a **single original publisher**. It is not intended to be used by
 administrators or sub-publishers, nor by publishing companies with multiple entities (including
@@ -76,11 +76,16 @@ defaults, e.g.:
 * *Recorded indicator* is set to *Yes* or *Unknown*, depending if a recording was entered
 * *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First Recording Refusal Indicator* are set to No
 
-Beyond Django-Music-Publisher
+It does not have any kind of client access.
+
+Future of Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DMP can be used as a foundation for development of both open-source or proprietary solutions.
+DMP 20.7 Endemic has many important features for music publishers within the project scope. And the scope will not change. 
+While new features will be added, the described limitations are permanent.
 
 .. note::
 
-    See `Beyond DMP <https://matijakolaric.com/articles/2/beyond/>`_ for commercial options.
+    See `Beyond DMP <https://matijakolaric.com/beyond/>`_ for commercial options for music publishers.
+    
+In next versions, development will focus on library music, and basic support for music labels will be added.
