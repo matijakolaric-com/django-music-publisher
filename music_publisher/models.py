@@ -62,6 +62,9 @@ class Label(LabelBase):
     """Music Label.
     """
 
+    class Meta:
+        verbose_name = 'Label'
+
     def __str__(self):
         return self.name.upper()
 
@@ -92,7 +95,8 @@ class Library(LibraryBase):
     """
 
     class Meta:
-        verbose_name_plural = '  Music Libraries'
+        verbose_name = 'Library'
+        verbose_name_plural = 'Music Libraries'
         ordering = ('name',)
 
     name = models.CharField(
@@ -135,6 +139,9 @@ class Release(ReleaseBase):
         recordings (django.db.models.ManyToManyField): M2M to \
         :class:`.models.Recording` through :class:`.models.Track`
     """
+
+    class Meta:
+        verbose_name = 'Release'
 
     library = models.ForeignKey(
         Library, null=True, blank=True, on_delete=models.PROTECT)
@@ -222,7 +229,8 @@ class LibraryRelease(Release):
 
     class Meta:
         proxy = True
-        verbose_name_plural = '  Library Releases'
+        verbose_name = 'Library Release'
+        verbose_name_plural = 'Library Releases'
 
     objects = LibraryReleaseManager()
 
@@ -285,7 +293,8 @@ class CommercialRelease(Release):
 
     class Meta:
         proxy = True
-        verbose_name_plural = '  Commercial Releases'
+        verbose_name = 'Commercial Release'
+        verbose_name_plural = 'Commercial Releases'
 
     objects = CommercialReleaseManager()
 
@@ -296,7 +305,8 @@ class Writer(WriterBase):
 
     class Meta:
         ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name_plural = ' Writers'
+        verbose_name = 'Writer'
+        verbose_name_plural = 'Writers'
 
     def __str__(self):
         name = super().__str__()
@@ -662,6 +672,7 @@ class AlternateTitle(TitleBase):
     class Meta:
         unique_together = (('work', 'title'),)
         ordering = ('-suffix', 'title')
+        verbose_name = 'Alternative Title'
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -736,6 +747,7 @@ class WriterInWork(models.Model):
     """
 
     class Meta:
+        verbose_name = 'Writer in Work'
         verbose_name_plural = 'Writers in Work'
         unique_together = (('work', 'writer', 'controlled'),)
         ordering = (
@@ -905,7 +917,8 @@ class Recording(models.Model):
     """
 
     class Meta:
-        verbose_name_plural = '  Recordings'
+        verbose_name = 'Recording'
+        verbose_name_plural = 'Recordings'
         ordering = ('-id',)
 
     recording_title = models.CharField(
@@ -1036,6 +1049,7 @@ class Track(models.Model):
     """Track, a recording on a release."""
 
     class Meta:
+        verbose_name = 'Track'
         unique_together = (('recording', 'release'), ('release', 'cut_number'))
         ordering = ('release', 'cut_number',)
 
@@ -1068,7 +1082,7 @@ class CWRExport(models.Model):
 
     class Meta:
         verbose_name = 'CWR Export'
-        verbose_name_plural = ' CWR Exports'
+        verbose_name_plural = 'CWR Exports'
         ordering = ('-id',)
 
     nwr_rev = models.CharField(
@@ -1457,6 +1471,7 @@ class WorkAcknowledgement(models.Model):
     class Meta:
         verbose_name = 'Registration Acknowledgement'
         ordering = ('-date', '-id')
+        index_together = (('society_code', 'remote_work_id'),)
 
     TRANSACTION_STATUS_CHOICES = (
         ('CO', 'Conflict'),
@@ -1479,12 +1494,7 @@ class WorkAcknowledgement(models.Model):
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(
-        'Remote work ID', max_length=20, blank=True)
-
-    # def __str__(self):
-    #     return '{}: {}'.format(
-    #         self.work_id,
-    #         self.get_status_display())
+        'Remote work ID', max_length=20, blank=True, db_index=True)
 
     def get_dict(self):
         """

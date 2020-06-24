@@ -9,7 +9,7 @@ This section is covering user administration.
 
 .. warning::
     If you have deployed DMP to Heroku, the password you used for the
-    superuser account was written in plain text to the settings.
+    superuser account was written in plain text to the config variables.
     It is strongly recommended that you change the password upon the
     first login.
 

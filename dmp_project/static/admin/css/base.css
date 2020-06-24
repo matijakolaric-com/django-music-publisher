@@ -986,7 +986,7 @@ table#change-history tbody th {
 
 #content-related .module h2 {
     background: none;
-    /* padding: 16px; */
+    padding: 0;
     margin-bottom: 16px;
     border-bottom: 1px solid #eaeaea;
     font-size: 18px;
