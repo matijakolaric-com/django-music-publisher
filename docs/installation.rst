@@ -17,10 +17,12 @@ Deployment to Heroku (free tier)
 
   -- https://www.heroku.com/what
 
-Django-Music-Publisher can simply be deployed to a Free dyno (container) on Heroku with a free database with up to
+Django-Music-Publisher can simply be deployed to a *Free dyno* on Heroku with a free *Dev* database with up to
 10.000 rows. Depending on complexity of your metadata, this is enough for up to 1.000 musical works.
 
 .. note::
+    With *Hobby Basic* database ($9 per month), the database limit raises to 10.000.000 rows, which should be more
+    than enough for any user od DMP.
     See `Heroku prices <https://www.heroku.com/pricing>`_ for more information.
 
 You will have to sign up with Heroku at https://signup.heroku.com/ and verify your e-mail,
@@ -34,16 +36,15 @@ There are two ways to do it:
 Guided Deployment to Heroku
 +++++++++++++++++++++++++++
 
-The author and maintainer of Django-Music-Publisher runs a
-`professional support service <https://matijakolaric.com/dmp-prosupport/>`_,
-providing regular feature upgrades, security/bugfix updates, maintenance and user support.
+The author and maintainer of Django-Music-Publisher offers
+`Professional Support <https://matijakolaric.com/dmp-prosupport/>`_,
+providing paid technical maintenance and user support.
 
 .. figure:: /images/pre_wizard.png
    :width: 100%
 
-It features a free
-`pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_.
-No registration is required to use it.
+The site features a free pre-installation wizard (no registration required),
+which will guide you through the deployment process.
 
 There is also a compatibility list for many collective management organizations. If your
 CMO or combination of CMOs is not supported, you can use the next method.
@@ -55,7 +56,8 @@ Direct Deployment
 
     <p>First, you need to sign up with <a href="https://heroku.com">Heroku</a> and/or log in.
     Then press
-    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.7">here</a>.</p>
+    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.7">here</a>.
+    This we deploy the latest code in 20.7 Endemic branch.</p>
 
 .. figure:: /images/heroku.png
    :width: 100%
@@ -65,8 +67,8 @@ Django-Music-Publisher will not be deployed. This is by design.
 
 See `Settings`_ for more information.
 
-Other options - manual deployment
-----------------------------------
+Other options - manual deployment (developers or system engineers)
+--------------------------------------------------------------------------------
 
 Django-Music-Publisher is based on Django, which can be installed on Windows,
 Mac and Linux PCs and servers. For more information, consult the official
@@ -79,8 +81,18 @@ If you plan to use Django-Music-Publisher as one of the apps in your Django proj
 
     pip install --upgrade django_music_publisher
 
-Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``, no URLs need to be added, as everything goes
-through the Django Admin.
+Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``. Almost everything goes
+through the Django Admin. The only exception is royalty calculation, which has to be added to
+``urls.py``
+
+.. code:: python
+
+    from music_publisher.royalty_calculation import RoyaltyCalculationView
+
+    urlpatterns = [
+        ...
+        path('royalty_calculation/', RoyaltyCalculationView.as_view(), name='royalty_calculation'),
+    ]
 
 There are several required `settings`_.
 
