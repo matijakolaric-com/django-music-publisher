@@ -162,10 +162,9 @@ This is the fee kept by the publisher when royalties are paid and distributed.
 .. note::
     This field is not used in registrations. It is used only for
     :doc:`royalty statement processing <manual_royaltycalculations>`.
-    Details are explained in that section.
-
-It may also be set as required for controlled writers. Same rules apply as for ``society-assigned agreement number``
-field.
+    Details are explained in that section. It may also be set as required for
+    controlled writers. Same rules apply as for ``society-assigned agreement number``
+    field.
 
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
