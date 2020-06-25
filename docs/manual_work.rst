@@ -16,7 +16,10 @@ It has several parts, so let us cover them one by one.
 General
 +++++++
 
-This part contains basic fields. Field ``work ID``, which is set automatically upon first save. This field is extremely important for data exchange, including registrations and royalty processing.
+This fieldset contains basic fields.
+
+Field ``work ID``, is set automatically upon first save. This field is extremely
+important for data exchange, including registrations and royalty processing.
 
 .. note::
    ``Work ID`` can not be set manually, but it is kept if present in imported data.
@@ -24,8 +27,10 @@ This part contains basic fields. Field ``work ID``, which is set automatically u
 
 Work title is entered into ``title`` field.
 
-``ISWC`` is a unique identifier assigned to works by collecting societies. It can be edited manually or imported
-either through :doc:`data imports <manual_dataimport>` or :doc:`CWR acknowledgements <manual_ack`.
+``ISWC`` (International Standard Musical Work Code) is a unique identifier assigned
+to works by a central authority through collecting societies.
+It can be edited manually or imported either through
+:doc:`data imports <manual_dataimport>` or :doc:`CWR acknowledgements <manual_ackimport>`.
 
 Fields ``title of original work`` and ``version type``, with only the former being
 editable, are used for modifications. By filling out ``title of original work``
@@ -36,33 +41,45 @@ Library
 +++++++
 
 DMP has support for music libraries. If a work is part of
-a music library, then a
-:doc:`library release <manual_releases>` must be set here.
+a music library, then a ``Library release`` must be set here.
+Details can be found in :doc:`library release <manual_libraryrelease>`.
 
 Writers in Work
 +++++++++++++++
 
-This is where you put in the information about :doc:`writers <manual_writer>` (composers and lyricists) who created this musical work. At least one is required, to add more, click on ``add another writer in work``.
+This is where you put in the information about writers (composers and lyricists) of the work.
+At least one record is required, to add more, click on ``add another writer in work``.
 
-Each column is described next.
+Each column in this table described next.
 
 Writer
 ------
 
-This is where you select a :doc:`writer <manual_writer>`. The field is conditionally required for a controlled writer, and at least one writer must be controlled.
+This is where you select a writer.
 
-To add a writer, press on the green plus ``+`` sign next to it. A pop-up window will appear. Fill out ``first name``, ``last name``, ``IPI name #`` and ``performance rights society``, and press on ``save``. The newly added writer will appear in this field.
+This field is conditionally required for controlled writers, and at least one writer in work
+must be controlled.
+
+Like many other fields, this field is searchable. You can search by writer's ``last name`` or
+``ipi name number``. Click on the desired writer to select them.
+To unselect a writer, click the black **x** icon **in the box**.
+
+
+To add a new writer, click the green plus sign next to it.
+To edit the selected writer, click the yellow pencil icon.
+To delete the selected writer, click the red **X** icon **outside the box**.
+For all three cases,  a pop-up window will appear.
 
 .. figure:: /images/add_writer_popup.png
    :width: 100%
 
    Add writer pop-up view
 
-There is another way to add writers, which is covered in the :doc:`writers <manual_writer>` section.
-Details about this form are explained there.
+The details about the fields in the pop-up window are covered in :doc:`writer <manual_writer>`.
 
-If ``writer`` field is left empty, it means that the writer is unknown.
-This is often used with modifications of traditional musical works.
+.. note::
+    If ``writer`` field is left empty, it means that the writer is unknown.
+    This is often used with modifications of traditional musical works.
 
 
 Role
@@ -75,28 +92,34 @@ At least one of the writers should be a ``composer`` or a ``composer and lyricis
 
 Options for original works are ``composer``, ``lyricist`` and ``composer and lyricist``.
 
-``Arranger``, ``adaptor`` or ``translator`` can only be used in modifications.
-For modifications, at least two rows are required, one being (original) ``composer`` or a ``composer and lyricist``, and one being ``arranger``, ``adaptor`` or ``translator``.
+Roles ``arranger``, ``adaptor`` or ``translator`` can only be used in modifications.
 
-For modifications of traditional works, set the capacity of the unknown writer to ``composer and lyricist``.
+For modifications, at least two rows are required, one being (original) ``composer`` or a ``composer and lyricist``,
+and one being ``arranger``, ``adaptor`` or ``translator``.
+
+For modifications of traditional works, set the capacity of the unknown writer to ``composer and lyricist`` or
+``composer``, depending on whether the original work has lyrics or not.
 
 Manuscript Share
 ----------------
 
-Django-Music-Publisher uses a very simple single-field share model. The principle is very simple.
+Django-Music-Publisher (DMP) uses a very simple single-field share model.
+
 Writers create a work and decide how they want to split the shares among themselves. This is referred to as
-``manuscript share``. Each of the writers may choose a publisher
-and transfer some of their manuscript share to the publisher, according to their publishing agreement.
-This does not influence other writers.
+``manuscript share``.
+
+Each of the writers may choose a publisher and transfer some of their manuscript share to the publisher,
+according to their publishing agreement. This does not influence other writers.
 
 In DMP, publishing agreements between all controlled writers and you as the original publisher have
-same splits, globally defined in settings.
+same splits, globally defined in :ref:`settings`.
 
 .. note::
     The sum of relative shares in a work must be 100%.
 
-For a musical work that is a modification of a public domain one, set the share of original writers
-(``composer``, ``lyricist``, ``composer and lyricist``) to 0.
+.. note::
+    For a musical work that is a modification of a work in public domain, set the share of
+    original writers (``composer``, ``lyricist``, ``composer and lyricist``) to 0.
 
 .. figure:: /images/works_pd.png
    :width: 100%
@@ -115,6 +138,9 @@ A writer can be entered in two rows, once as controlled, once as not. This allow
 
    Writers in work for a co-published work
 
+.. note::
+    Co-publishing is advanced functionality. You are advised to seek :doc:`professional support <support>`.
+
 Society-assigned agreement number
 ---------------------------------
 
@@ -122,14 +148,21 @@ In this field, society-assigned agreement numbers for **specific agreements** ar
 they are set when defining the :doc:`writer <manual_writer>`. If both exist and are different, the **specific** one is
 used.
 
-This field may be set as required for controlled writers, by setting ``REQUIRE_SAAN`` to ``True``.
+.. note::
+    This field may be set as required for controlled writers, by setting ``REQUIRE_SAAN`` to ``True``.
+    If you used guided deployment, then this value was set automatically to the correct
+    value for your society (or societies).
 
 
 Publisher fee
 -------------
 
-This is the fee kept by the publisher when royalties are paid and distributed. **This field is not used in
-registrations.** It is used only for :doc:`royalty statement processing <manual_royalty_calculation>`. Most small publishers don't use it.
+This is the fee kept by the publisher when royalties are paid and distributed.
+
+.. note::
+    This field is not used in registrations. It is used only for
+    :doc:`royalty statement processing <manual_royaltycalculations>`.
+    Details are explained in that section.
 
 It may also be set as required for controlled writers. Same rules apply as for ``society-assigned agreement number``
 field.
@@ -179,7 +212,7 @@ Registration Acknowledgements
 This is where the work registration acknowledgements are recorded.
 
 .. note::
-    In the default configuration, only superusers can modify this section, as it is automatically filled out from :doc:`uploaded acknowledgement files <manual_ack>`.
+    In the default configuration, only superusers can modify this section, as it is automatically filled out from :doc:`uploaded acknowledgement files <manual_ackimport>`.
 
 Saving and Deleting
 +++++++++++++++++++

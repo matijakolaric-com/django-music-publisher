@@ -23,6 +23,6 @@ workhorse in this software.
    manual_work
    manual_writer
    manual_cwr
-   manual_ack
+   manual_ackimport
    manual_dataimport
    manual_royaltycalculations

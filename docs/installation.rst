@@ -96,6 +96,8 @@ through the Django Admin. The only exception is royalty calculation, which has t
 
 There are several required `settings`_.
 
+.. _settings:
+
 Settings
 ===================================
 

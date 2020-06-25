@@ -43,3 +43,5 @@ Every model has at least 4 views:
 
 ``Add`` and ``change`` are usually very similar. They often contain forms for editing related models.
 E.g. in ``add musical work``, one can also add alternate titles, recordings, etc.
+
+The views are explained in detail in :doc:`manual_work`.

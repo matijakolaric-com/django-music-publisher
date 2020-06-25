@@ -63,7 +63,7 @@ class Label(LabelBase):
     """
 
     class Meta:
-        verbose_name = 'Label'
+        verbose_name = 'Music Label'
 
     def __str__(self):
         return self.name.upper()
@@ -95,8 +95,8 @@ class Library(LibraryBase):
     """
 
     class Meta:
-        verbose_name = 'Library'
-        verbose_name_plural = 'Music Libraries'
+        verbose_name = 'Music Library'
+        verbose_name = 'Music Libraries'
         ordering = ('name',)
 
     name = models.CharField(

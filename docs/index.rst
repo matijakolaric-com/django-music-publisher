@@ -15,4 +15,5 @@ musical works** and **royalty processing**.
    LICENSE
    manual
    videos
+   support
    modules
