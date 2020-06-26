@@ -1,28 +1,31 @@
 Musical Works
 _____________
 
+This part explains views for Musical Work model specifically, but
+much of it applies to views of other models as well.
+
+
 Add/Change View
 ============================================
 
 .. figure:: /images/add_work.png
    :width: 100%
 
-   Add work view, minimal example with default settings
+   Add work view
 
-The view for adding and changing works is shown in the image above.
+The view for adding and changing works is shown in this screenshot.
 It is the most complex view in Django-Music-Publisher (DMP).
-It has several parts, so let us cover them one by one.
+It has several parts, which will be covered one by one.
 
 General
 +++++++
 
 This fieldset contains basic fields.
 
-Field ``work ID``, is set automatically upon first save. This field is extremely
-important for data exchange, including registrations and royalty processing.
+Field ``work ID`` is not editable in this view.
 
 .. note::
-   ``Work ID`` can not be set manually, but it is kept if present in imported data.
+   ``Work ID`` is set by DMP, but it can also be imported.
    See :doc:`Importing Data <manual_dataimport>` for details.
 
 Work title is entered into ``title`` field.
