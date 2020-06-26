@@ -1009,7 +1009,6 @@ class WorkAdmin(MusicPublisherAdmin):
         HasRecordingListFilter,
         ('library_release__library', admin.RelatedOnlyFieldListFilter),
         ('library_release', admin.RelatedOnlyFieldListFilter),
-        ('artists', admin.RelatedOnlyFieldListFilter),
         ('writers', admin.RelatedOnlyFieldListFilter),
         'last_change',
         InCWRListFilter,
@@ -1018,7 +1017,7 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     search_fields = (
-        'title', 'alternatetitle__title', '^iswc', '^id',
+        'title', 'alternatetitle__title', '^iswc', '^id', '^_work_id',
         'recordings__recording_title', 'recordings__version_title',
         '^recordings__isrc', 'writerinwork__writer__last_name')
 

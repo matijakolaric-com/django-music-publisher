@@ -7,6 +7,6 @@ closely related models and actions.
 .. toctree::
    :maxdepth: 2
 
-   manual_recordings
-   manual_artists
-   manual_labels
+   manual_recording
+   manual_artist
+   manual_label

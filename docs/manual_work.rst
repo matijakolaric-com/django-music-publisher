@@ -157,7 +157,9 @@ they are set when defining the :doc:`writer <manual_writer>`. If both exist and 
 used.
 
 .. note::
-    This field may be set as required for controlled writers, by setting ``REQUIRE_SAAN`` to ``True``.
+    This field is required for controlled writers in some collecting societies,
+    while not used in most.
+    You can make it a required field by setting ``REQUIRE_SAAN`` to ``True``.
     With guided deployment, this value was is automatically to the correct
     value for your collecting society (or societies).
 
@@ -180,40 +182,35 @@ Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 This is where the details about a recording based on this musical works are
-added. Athough there is a separate set of views for
-:doc:`recordings <manual_recordings>`, fields in this section are explained
-only here.
-
-.. note::
-    For this version of DMP, it is recommended to edit recordings here.
-
-Recording title
----------------
-
-There are three fields in this row. ``Recording title`` is where one enters the title of the recording. If ``recording title suffix`` is checked, then the former field is used as a suffix to the ``work title``. This is a huge benefit in production music, where there are multiple recordings per work, usually with same suffixes, e.g. "drums", "bed", etc. The result is then shown in the ``complete recording title`` field.
-
-Version title
--------------
-
-Same is valid for the ``version title``, except that the suffix is added to the ``recording title``.
-
-Other fields
-------------
-
-``ISRC`` is a unique identifier, issued by record labels. ``Recording artist``, ``record label``, ``duration`` and ``release date`` are quite obvious.
-
-Note that after a successful save, there is a ``change`` link in the recording header.
+added. There is a separate set of views for
+:doc:`recordings <manual_recording>`, fields are explained there.
 
 
 Alternative Titles
 ++++++++++++++++++
 
-Alternative titles section is for alternative titles. There is no need to enter the recording or version titles from recordings section. The suffixes work the same way as for ``recording titles``.
+Alternative titles section is for alternative titles. There is no need
+to enter the recording or version titles already entered in the recordings section.
+
+Field ``alternative title`` is where you enter the title, or it's suffix,
+based on the field ``suffix``. If the latter is checked, then the suffix
+will be appended to the work ``title``. The actual alternative title always
+shown in the read-only field ``complete alt title``.
+
+.. note::
+    Title suffixes are advanced functionality.
+    You are advised to seek :doc:`professional support <support>` before
+    using them.
+
 
 Artists Performing Works
 ++++++++++++++++++++++++
 
-Here you list the artists who are performing the work, there is no need to repeat the artists set as ``recording artist`` in the ``recordings`` section.
+Here you list the artists who are performing the work, there is no need to
+repeat the artists already set as ``recording artists`` in the ``recordings`` section.
+
+The field ``artist`` behaves similarly to the field `Writer`_.
+section.
 
 Registration Acknowledgements
 +++++++++++++++++++++++++++++++++++
@@ -226,17 +223,32 @@ This is where the work registration acknowledgements are recorded.
 Saving and Deleting
 +++++++++++++++++++
 
-At the bottom, there is a delete button and three save buttons. Delete is obvious. The save buttons do following:
+At the bottom, there is a delete button and three save buttons.
+
+``Delete`` button starts the deletion of the work and all related objects.
+A confirmation screen shows all objects being deleted.
+
+.. note::
+    Deleting a work is not always allowed, regardless of user permissions. E.g.
+    if a :doc:`CWR acknowledgement <manual_ackimport>` for this work exists.
+    If you are sure you want to delete the work, a superuser must delete
+    such linked objects first. You are advised to seek
+    :doc:`professional support <support>` before doing that.
+
+The save buttons do following:
 
 * ``Save and add another`` (when adding new work) saves the work and then opens a new, empty form for the next one.
-* ``Save as new`` (when editing existing work) saves this data as a new work (with a different work ID)
+* ``Save as new`` (when editing existing work) saves this data as a new work
+  (with a different work ID). Note that you must change all unique fields as well, e.g.
+  ISWC.
 * ``Save and continue editing`` saves the work and then opens the same work for further editing.
 * ``SAVE`` saves the work and returns to the ``list view``, covered next.
 
-The combination is extremely powerful, especially when the changes between works is small, as is often the case for production music.
-One enters the first work, using suffixes as much as possible, presses on ``save and continue editing``.
-If save was successful, then the data can be changed for the next work, and then one presses on ``save as new``, and this new work is saved.
-The process can be repeated for all the works in the set.
+The combination is extremely powerful, especially when the changes between works is small.
+
+Enter the first work, using suffixes as much as possible, click on ``save and continue editing``.
+If successful, then data make the changes for the next work, and click on ``save as new``,
+and this new work is saved.
 
 List View
 ========================
@@ -246,15 +258,40 @@ List View
 
    Work list view
 
-The ``work list`` view, just as all other list views, has a ``search field``, an ``action bar``, a table with works and, once there are over 100 works in the database, pagination, all on the left side. On the right side, there is the ``add musical work`` button, which takes you to the appropriate view, and the set of ``filters``.
+The ``work list`` view, just as all other list views, has a ``search field``,
+an ``action bar``, a table with works and, once there are over 100 works,
+pagination, all on the left side.
 
-Filters change, based on the number of options. For four options or less, they are simple links, and for more, it turns into a pull-down menu.
-``Last edited`` filter allows find all works that have been changed recently. This applies to
-all objects that participate in work registrations, e.g. writers.
+Search looks for titles, writer's last names, ISWCs, ISRCs
+(in related recordings) and work IDs.
 
-Search works on titles, writer's last names, ISWCs, ISRCs (in related recordings) and work IDs (numeric part).
+Data table can be sorted by almost any column or combination of the columns.
 
-Data table can be sorted by almost any column, or combination of the columns, and counts are also links to :doc:`recording <manual_recordings>` and :doc:`CWR export <manual_cwr>` ``list`` views..
+Counts of related objects are also links to
+:doc:`recording <manual_recording>` and
+:doc:`CWR export <manual_cwrexport>` ``list``
+views, filtered for this work.
+
+On the right side, there is the ``add musical work`` button,
+which takes you to the appropriate view, and the set of ``filters``.
+
+Filters change, based on the number of options. For four options or less,
+they are simple links, and for more, they turn into a pull-down menus.
+
+``Has ISWC`` will show only works with ISWCs or only works without them.
+
+``Has recordings`` will show only works with recordings or only works without them.
+
+``Library`` will list only works in a particular :doc:`library <manual_library>`.
+
+``Library Release`` will list only works in a particular :doc:`library release <manual_libraryrelease>`.
+
+``Writers`` will list only works by a particular :doc:`writer <manual_writer>`.
+
+``Last edited`` filter allows find all works that have been changed recently,
+including related objects, e.g. writers.
+
+Filters and search can be combined. Only works fulfilling all the criteria will be shown.
 
 Exporting JSON
 ++++++++++++++++++++++++++
@@ -265,10 +302,7 @@ Exporting JSON
    Exporting musical works in JSON format.
 
 Select several (or all) works in the ``musical work list`` view, select the ``Export selected works (JSON)`` action and
-press on ``Go``. A JSON file will be downloaded, containing **all** the information about your works.
-
-If you ever choose to stop using Django-Music-Publisher and move on, there is no lock-in. While these JSON formats might
-be confusing, there are free on-line tools that will convert JSON to just about any other format you need.
+click ``Go``. A JSON file will be downloaded, containing **all** the information about your works.
 
 .. _exporting_csv:
 
@@ -276,16 +310,20 @@ Exporting CSV
 ++++++++++++++++++++++++++
 
 Select several (or all) works in the ``musical work list`` view, select the ``Export selected works (CSV)`` action and
-press on ``Go``. A CSV file will be downloaded, containing **only basic** information about your works.
+click ``Go``. A CSV file will be downloaded, containing **only basic** information about your works.
 
 It contains no data about the controlling publisher (you) and recordings, including recording
 artists, labels, tracks and releases.
 
-This CSV format is the same as the one used for :doc:`Importing data <manual_dataimport>`, with
-one additional column: ``Work ID``.
+This CSV format is the same as the one used for :doc:`Importing data <manual_dataimport>`.
 
 CWR Exporting Wizard
 ++++++++++++++++++++
 
-Currently, the only other available action is to ``create CWR from selected works``. Once you run it, you will be taken
-to ``add CWR export`` view, described :doc:`here <manual_cwr>`.
+Currently, the only other available action is to ``create CWR from selected works``.
+Once you run it, you will be taken to :doc:`CWR Export <manual_dataimport>` view
+with your work selection.
+
+.. note::
+    ``Create CWR from selected works`` action is only visible if
+    ``PUBLISHER_CODE`` is defined in :ref:`settings`.

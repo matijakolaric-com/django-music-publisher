@@ -14,3 +14,22 @@ Compared to the ``Recordings`` section in ``Works``, there is only one additiona
 and a ``Tracks`` section at the bottom, connecting a recording with a :doc:`release <manual_releases>`.
 
 Note that a ``Work`` popup holds only a subset of fields compared to the normal view. The data that is not visible will **not** be lost when saving through popup.
+
+
+Recording title
+---------------
+
+There are three fields in this row. ``Recording title`` is where one enters the title of the recording. If ``recording title suffix`` is checked, then the former field is used as a suffix to the ``work title``. This is a huge benefit in production music, where there are multiple recordings per work, usually with same suffixes, e.g. "drums", "bed", etc. The result is then shown in the ``complete recording title`` field.
+
+Version title
+-------------
+
+Same is valid for the ``version title``, except that the suffix is added to the ``recording title``.
+
+Other fields
+------------
+
+``ISRC`` is a unique identifier, issued by record labels. ``Recording artist``, ``record label``, ``duration`` and ``release date`` are quite obvious.
+
+Note that after a successful save, there is a ``change`` link in the recording header.
+
