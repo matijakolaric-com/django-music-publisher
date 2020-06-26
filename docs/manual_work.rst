@@ -194,7 +194,7 @@ to enter the recording or version titles already entered in the recordings secti
 
 Field ``alternative title`` is where you enter the title, or it's suffix,
 based on the field ``suffix``. If the latter is checked, then the suffix
-will be appended to the work ``title``. The actual alternative title always
+will be appended to the work ``title``. The actual alternative title is always
 shown in the read-only field ``complete alt title``.
 
 .. note::
@@ -210,7 +210,6 @@ Here you list the artists who are performing the work, there is no need to
 repeat the artists already set as ``recording artists`` in the ``recordings`` section.
 
 The field ``artist`` behaves similarly to the field `Writer`_.
-section.
 
 Registration Acknowledgements
 +++++++++++++++++++++++++++++++++++
@@ -231,7 +230,7 @@ A confirmation screen shows all objects being deleted.
 .. note::
     Deleting a work is not always allowed, regardless of user permissions. E.g.
     if a :doc:`CWR acknowledgement <manual_ackimport>` for this work exists.
-    If you are sure you want to delete the work, a superuser must delete
+    If you are sure you want to delete a work, a superuser must delete
     such linked objects first. You are advised to seek
     :doc:`professional support <support>` before doing that.
 
