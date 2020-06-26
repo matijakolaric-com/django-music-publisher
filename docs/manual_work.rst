@@ -4,6 +4,11 @@ _____________
 This part explains views for Musical Work model specifically, but
 much of it applies to views of other models as well.
 
+.. contents::
+   :backlinks: none
+   :local:
+   :depth: 2
+
 
 Add/Change View
 ============================================
@@ -153,8 +158,8 @@ used.
 
 .. note::
     This field may be set as required for controlled writers, by setting ``REQUIRE_SAAN`` to ``True``.
-    If you used guided deployment, then this value was set automatically to the correct
-    value for your society (or societies).
+    With guided deployment, this value was is automatically to the correct
+    value for your collecting society (or societies).
 
 
 Publisher fee
@@ -165,9 +170,11 @@ This is the fee kept by the publisher when royalties are paid and distributed.
 .. note::
     This field is not used in registrations. It is used only for
     :doc:`royalty statement processing <manual_royaltycalculations>`.
-    Details are explained in that section. It may also be set as required for
-    controlled writers. Same rules apply as for ``society-assigned agreement number``
-    field.
+    Details are explained in that section.
+
+.. note::
+    This field may be set as required for controlled writers, by setting ``REQUIRE_PUBLISHER_FEE`` to ``True``.
+    
 
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
