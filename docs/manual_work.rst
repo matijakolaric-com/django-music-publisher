@@ -160,7 +160,7 @@ used.
     This field is required for controlled writers in some collecting societies,
     while not used in most.
     You can make it a required field by setting ``REQUIRE_SAAN`` to ``True``.
-    With guided deployment, this value was is automatically to the correct
+    With guided deployment, this value is automatically set to the correct
     value for your collecting society (or societies).
 
 
