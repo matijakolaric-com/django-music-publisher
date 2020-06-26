@@ -53,7 +53,7 @@ Writers in Work
 This is where you put in the information about writers (composers and lyricists) of the work.
 At least one record is required, to add more, click on ``add another writer in work``.
 
-Each column in this table described next.
+Each column in this table is described next.
 
 Writer
 ------
