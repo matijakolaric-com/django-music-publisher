@@ -55,12 +55,14 @@ __________________________________________________
 Download `CSV Template <work_import_template.csv>`_.
 You can edit it in Excel or another spreadsheet tool. 
 
-It contains 4 columns for alternate titles, as well as
+It contains 4 columns for alternative titles, as well as
 4 column sets for writers and 4 column sets for artists.
 
 For another writer column set, add all of:
 ``Writer 5 Last``, ``Writer 5 First``, ``Writer 5 IPI``, ``Writer 5 PRO``, ``Writer 5 Role``,
-``Writer 5 Share``, ``Writer 5 Controlled``, ``Writer 5 SAAN``
+``Writer 5 Share``, ``Writer 5 Controlled``, ``Writer 5 SAAN``. 
+
+You can add as many writer, artist and alternative title sets as you require.
 
 Note that this file has the same form as CSV exports, described in :ref:`exporting_csv`.
 
@@ -75,24 +77,11 @@ Values in ``Writer PRO``, ``Writer Role`` and ``Writer Controlled`` columns must
 ``10``, ``10 ASCAP``, ``10 - ASCAP`` or ``10 - BMI`` will all resolve as ASCAP. ``ASCAP`` without the code
 will throw an error.
 
-``Writer Role`` must start with one of ``C``, ``A``, ``CA``, ``AR``, ``TR``  or ``AD``.
+``Writer Role`` must start with one of ``C``, ``A``, ``CA``, ``AR``, ``TR``  or ``AD``, e.g. ``C - Composer``.
 
-``Writer Controlled`` should be set to ``No``, ``Yes`` or ``General``.
+``Writer Controlled`` should be set to ``No``, ``Yes`` or ``General`` (see :doc:`Writer <manual_writer>` for details).
 
 Data upload
 ______________________________
 
-Upload the CSV file through the data import form. If all goes well,
-the import report will show links to imported works.
-
-Professional support
---------------------
-
-The creator of Django-Music-Publisher runs a `professional support service <https://matijakolaric.com/dmp-prosupport/>`_
-for users of DMP. Subscribers can receive support with all aspects of data import,
-including a professionally made spreadsheet template.
-
-.. figure:: /images/import_template.png
-   :width: 100%
-
-   Professionally made import template with basic validation.
+Upload the CSV file through the data import form. If all goes well, the import report will show links to imported works.
