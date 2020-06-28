@@ -287,8 +287,7 @@ they are simple links, and for more, they turn into a pull-down menus.
 
 ``Writers`` will list only works by a particular :doc:`writer <manual_writer>`.
 
-``Last edited`` filter allows find all works that have been changed recently,
-including related objects, e.g. writers.
+``Last edited`` filter allows you to find all works that have changed recently.
 
 Filters and search can be combined. Only works fulfilling all the criteria will be shown.
 
