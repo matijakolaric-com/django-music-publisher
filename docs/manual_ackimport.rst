@@ -31,7 +31,13 @@ Once you click on ``Save`` (any of them), the file is processed.
 .. note::
     If an error is encountered, **nothing** is saved.
     
-A brief report is created, with links to all works that received work acknowledgements, work titles and statuses. Actual work acknowledgements are shown in the last section of the :doc:`change work view <manual_work>`.
+A brief report is created, with links to all works that received work acknowledgements, work titles and statuses. Actual work acknowledgements are shown in the last section of the ``change work view``, described *below*.
+
+List view
+*************************
+
+List view is very simple and self-explanatory. Just as with ``CWR exports``, the file name is a link to a page with slightly more information, and the last one opens the CWR file with syntax highlighting. See :doc:`CWR exports <manual_cwrexport>` for more information.
+
 
 Work registration acknowledgements
 *************************************
