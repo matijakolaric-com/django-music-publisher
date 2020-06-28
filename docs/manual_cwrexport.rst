@@ -41,22 +41,30 @@ There are only three fields:
     
 * ``Works`` is a multi-select field for works to be included in CWR exports.
 
+CWR Export model does not have ``change view``, nor ``delete`` button. CWR files once created should
+NOT be deleted, although they may not be used. Use `internal note` to mark a CWR file as not sent.
+
 List View
 +++++++++++++++++++++
 
 .. figure:: /images/cwr_list.png
    :width: 100%
 
-   CWR export list view
+   List CWR export view
 
-Upon save, you will be taken to the ``CWR export list`` view. It has two links in each row: ``View CWR`` and ``Download``. The latter will download the zipped CWR file, and the former will take you to the preview:
+``CWR export list`` view. Besides the link in the first column with the file name, which
+opens a view with additional information, and the counter that opens the list of works in this file,
+it has two additional links in each row: ``View CWR`` and ``Download``.
 
-CWR Preview
+The latter downloads the zipped CWR file, and the former opens the CWR file for viewing.
+
+View CWR
 --------------------
 
 .. figure:: /images/highlight.png
    :width: 100%
 
-   CWR 2.1 NWR (work registration) preview with basic syntax highlighting
+   CWR 2.1 NWR (work registration) file with basic syntax highlighting
 
-The example shown above shows the CWR file with basic syntax highlighting. When you hover over the fields with your cursor, additional information is shown.
+The example shown above shows the CWR file with basic syntax highlighting. When you hover over the 
+fields with your cursor, additional information is shown.
