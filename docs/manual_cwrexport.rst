@@ -5,6 +5,13 @@ Common Works Registration (CWR) is a protocol and file format for batch registra
 
 Unofficially, CWRs are also used for data exchange among publishers.
 
+CWR is an extremely complex topic. Only technical aspects creating CWR files and :doc:`importing acknowledgements <manual_ackimport>` are covered in this manual.
+
+.. note::
+    Collecting societies and other receivers of CWR files may, if issues arise, refer you to the software **vendor** for support. 
+    According to the :doc:`MIT license <LICENSE>`, that is you, not the **creator** of this software.
+
+
 Add View
 +++++++++++++++++++++
 
