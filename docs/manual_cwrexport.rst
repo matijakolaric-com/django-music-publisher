@@ -1,28 +1,48 @@
 CWR Exports
 ===================
 
+Common Works Registration (CWR) is a protocol and file format for batch registrations of musical works with collecting societies worldwide. Publishers send registrations and societies reply with acknowledgement files. Registrations in this formats are usually called CWRs and acknowledgement ACKs.
+
+Unofficially, CWRs are also used for data exchange among publishers.
+
+Add View
++++++++++++++++++++++
+
 .. figure:: /images/add_cwr.png
    :width: 100%
 
    Add CWR export view
 
+.. note::
+    CWR exports can be created only if *CWR delivery code* is entered as ``PUBLISHER_CODE`` in :ref:`settings`.
 
-
-**For CWR export to work, your CWR delivery code must be defined in settings.
-If you want to test CWR exports, you can make something up, any
-three letters will work. However, only send out CWR files created after
-you entered the code officially assigned to you.**
-
+.. warning::
+    Do NOT use an arbitratry CWR delivery code for creating CWR exports. If you did, you should either start over 
+    with a clean installation of DMP, or seek :doc:`professional support <support>`.
+    
 There are several ways to get to ``Add CWR Export`` view:
 
-* from the ``home`` page or app menu or ``CWR Export list`` view by clicking ``Add CWR Export`` button or
-* from the ``Create CWR from selected works`` batch action in ``Work list`` view.
+* by clicking ``Add CWR Export`` button or
+* by using ``Create CWR from selected works`` batch action in :doc:`manual_work`.
 
-Please note that the field ``Works`` uses auto-complete, and if you don't come here through the action, you must add works in this view one at a time.
+There are only three fields:
 
-``CWR version/type`` field selects the CWR version and transaction type. CWR 2.1 makes a distinction between ``New Work Registrations`` and ``Revisions``, while CWR 3.0 (not yet in use anywhere) has no such distinction for registrations.
+* ``CWR version/type`` is where you select the version of CWR and transaction type. Here are current options: 
 
-``Internal note`` is what the name says, you can enter whatever helps you to keep track. It can even be edited from the ``list`` view.
+  * CWR 2.1: New work registrations
+  * CWR 2.1: Revisions of registered works
+  * CWR 3.0: Work registration (experimental)
+  * CWR 3.0: ISWC request (experimental)
+
+* ``Internal note`` is a field where you can put a meaningful description of the export. 
+
+.. warning::
+    File naming is part of the CWR specifications. CWR file names should NOT be changed.
+    
+* ``Works`` is a multi-select field for works to be included in CWR exports.
+
+List View
++++++++++++++++++++++
 
 .. figure:: /images/cwr_list.png
    :width: 100%
@@ -31,26 +51,12 @@ Please note that the field ``Works`` uses auto-complete, and if you don't come h
 
 Upon save, you will be taken to the ``CWR export list`` view. It has two links in each row: ``View CWR`` and ``Download``. The latter will download the zipped CWR file, and the former will take you to the preview:
 
-Preview and Download
+CWR Preview
 --------------------
 
 .. figure:: /images/highlight.png
    :width: 100%
 
-   CWR 3.0 WRK (work registration) preview with basic syntax highlighting
+   CWR 2.1 NWR (work registration) preview with basic syntax highlighting
 
 The example shown above shows the CWR file with basic syntax highlighting. When you hover over the fields with your cursor, additional information is shown.
-
-.. figure:: /images/cwr_isr.png
-   :width: 100%
-
-   CWR 3.0 ISR (ISWC request) preview with basic syntax highlighting
-
-CWR 3.0 introduces a new mechanism for obtaining ISWCs. The short version is that publishers send ISWC requests (ISR), an example is shown here, and societies send answers (ISA).
-Please note that CWR 3.0 support is still experimental.
-
-
-CWR Delivery
-------------
-
-CWR Delivery is currently not implemented. CWR 2.1 manual delivery is a relatively simple task and CWR 3.0 is not accepted by any societies yet.

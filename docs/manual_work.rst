@@ -160,7 +160,7 @@ used.
     This field is required for controlled writers in some collecting societies,
     while not used in most.
     You can make it a required field by setting ``REQUIRE_SAAN`` to ``True``.
-    With guided deployment, this value was is automatically to the correct
+    With guided deployment, this value is automatically set to the correct
     value for your collecting society (or societies).
 
 
@@ -194,7 +194,7 @@ to enter the recording or version titles already entered in the recordings secti
 
 Field ``alternative title`` is where you enter the title, or it's suffix,
 based on the field ``suffix``. If the latter is checked, then the suffix
-will be appended to the work ``title``. The actual alternative title always
+will be appended to the work ``title``. The actual alternative title is always
 shown in the read-only field ``complete alt title``.
 
 .. note::
@@ -210,7 +210,6 @@ Here you list the artists who are performing the work, there is no need to
 repeat the artists already set as ``recording artists`` in the ``recordings`` section.
 
 The field ``artist`` behaves similarly to the field `Writer`_.
-section.
 
 Registration Acknowledgements
 +++++++++++++++++++++++++++++++++++
@@ -231,7 +230,7 @@ A confirmation screen shows all objects being deleted.
 .. note::
     Deleting a work is not always allowed, regardless of user permissions. E.g.
     if a :doc:`CWR acknowledgement <manual_ackimport>` for this work exists.
-    If you are sure you want to delete the work, a superuser must delete
+    If you are sure you want to delete a work, a superuser must delete
     such linked objects first. You are advised to seek
     :doc:`professional support <support>` before doing that.
 
@@ -275,7 +274,7 @@ views, filtered for this work.
 On the right side, there is the ``add musical work`` button,
 which takes you to the appropriate view, and the set of ``filters``.
 
-Filters change, based on the number of options. For three options or less,
+Filters change, based on the number of options. For four options or less,
 they are simple links, and for more, they turn into a pull-down menus.
 
 ``Has ISWC`` will show only works with ISWCs or only works without them.
@@ -288,7 +287,7 @@ they are simple links, and for more, they turn into a pull-down menus.
 
 ``Writers`` will list only works by a particular :doc:`writer <manual_writer>`.
 
-``Last edited`` filter allows find all works that have changed recently.
+``Last edited`` filter allows you to find all works that have changed recently.
 
 Filters and search can be combined. Only works fulfilling all the criteria will be shown.
 
