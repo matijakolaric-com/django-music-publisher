@@ -116,7 +116,7 @@ Django-Music-Publisher (DMP) uses a very simple single-field share model.
 Writers create a work and decide how they want to split the shares among themselves. This is referred to as
 ``manuscript share``.
 
-Each of the writers may choose a publisher and transfer some of their manuscript share to the publisher,
+Each of the writers may choose a publisher and transfer part of their manuscript shares to the publisher,
 according to their publishing agreement. This does not influence other writers.
 
 In DMP, publishing agreements between all controlled writers and you as the original publisher have
@@ -275,7 +275,7 @@ views, filtered for this work.
 On the right side, there is the ``add musical work`` button,
 which takes you to the appropriate view, and the set of ``filters``.
 
-Filters change, based on the number of options. For four options or less,
+Filters change, based on the number of options. For three options or less,
 they are simple links, and for more, they turn into a pull-down menus.
 
 ``Has ISWC`` will show only works with ISWCs or only works without them.
@@ -288,8 +288,7 @@ they are simple links, and for more, they turn into a pull-down menus.
 
 ``Writers`` will list only works by a particular :doc:`writer <manual_writer>`.
 
-``Last edited`` filter allows find all works that have been changed recently,
-including related objects, e.g. writers.
+``Last edited`` filter allows find all works that have changed recently.
 
 Filters and search can be combined. Only works fulfilling all the criteria will be shown.
 
