@@ -36,7 +36,7 @@ A brief report is created, with links to all works that received work acknowledg
 List view
 *************************
 
-List view is very simple and self-explanatory. Just as with ``CWR exports``, the file name is a link to a page with slightly more information, and the last one opens the CWR file with syntax highlighting. See :doc:`CWR exports <manual_cwrexport>` for more information.
+List view is very simple and self-explanatory. Just as with ``CWR exports``, the file name is a link to a page with slightly more information, and the last one opens the CWR file with **syntax highlighting**. See :doc:`CWR exports <manual_cwrexport>` for more information.
 
 
 Work registration acknowledgements
@@ -44,10 +44,13 @@ Work registration acknowledgements
 
 They show the aforementioned information, with the exception of imported ISWCs, that go into the ISWC field at the top of the :doc:`change work view <manual_work>`. Column ``status`` is the most important one.
 
-The registration process should end with ``Registration accepted``. ``Registration accepted with changes`` is usually also OK. 
+The registration process should end with ``Registration accepted``. 
+
+``Registration accepted with changes`` is usually also OK. 
+
 ``Transaction accepted`` is sent by societies with a two-step process of importing CWR files. This means that the first step for this work was succesfull, and the second step is pending.
 
-Any other status requires investigation. That is far beyond the scope of this user manual. Or any manual. Syntax highlighting of CWR acknowledgement files, described below, may help in the process. Consult the official CWR documentation as well as inquiry with your society.
+Any other status requires investigation. That is far beyond the scope of this user manual. Or any manual. Syntax highlighting of CWR acknowledgement files, mentioned above, may help in the process. Consult the official CWR documentation as well as inquiry with your society.
 
 .. note::
     If you are instructed to contact the software **vendor**, according to the :doc:`MIT license <LICENSE>`, it is you, not the **creator** of this software.
@@ -55,5 +58,4 @@ Any other status requires investigation. That is far beyond the scope of this us
 There are two external tools freely available that may assist you:
 
 * `ACK Tool <https://matijakolaric.com/free/cwr-x-ack-tool>`_ that creates summaries of CWR acknowledgement files
-* `CWR Syntax Highlighter <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ with complete syntax highlighting
-
+* `CWR Syntax Highlighter <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ with complete syntax highlighting, more detailed than the one in DMP.
