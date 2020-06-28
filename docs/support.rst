@@ -32,7 +32,7 @@ Still, this is not good enough for most small music publishers.
 User support
 ------------------------------
 
-A lot of effort was put into keeping it intuitive and seemingly simple, 
+A lot of effort was put into keeping DMP intuitive and seemingly simple, 
 while offering many advanced features, e.g. CWR and royalty processing.
 But, it is far from being simple.
 
