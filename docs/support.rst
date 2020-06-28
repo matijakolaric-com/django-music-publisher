@@ -24,8 +24,8 @@ We made the deployment to Heroku extremely simple, requiring no technical skills
 However, keeping it up-to-date is a bit more complicated. 
 And online software must be kept up-to-date for security reasons, if not new features.
 
-It is withing reach of a junior system administrator or Python/Django developer,
-just as installing it on any other platform, including personal computers.
+It is within reach of a junior system administrator or Python/Django developer.
+So is installing it on any other platform, including personal computers.
 
 Still, this is not good enough for most small music publishers.
 
