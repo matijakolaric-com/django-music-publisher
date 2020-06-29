@@ -24,9 +24,8 @@ It has all the columns from the incoming file plus several more. For one
 row in the incoming file, the resulting file will have one or more rows.
 
 .. note::
-   No changes to the database occur during this process. Incoming file is
-   only temporarily saved to the server filesystem. Outgoing file is never saved.
-
+   No changes to the database occur during this process.
+   
 Preparing the ingoing CSV file
 -----------------------------------------
 
