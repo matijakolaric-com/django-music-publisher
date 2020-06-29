@@ -77,9 +77,9 @@ fee is deducted from this gross amount, resulting in net amount to be paid to th
 
 Publisher fee is taken from the first available of:
 
-* `writer in work`
-* `writer (for general agreements only)
-* `default publisher fee` from this form
+* ``writer in work``
+* ``writer`` (for general agreements only)
+* ``default publisher fee`` from this form
 
 .. note::
     If publisher fee is empty, it is not used, and the next option is taken.
