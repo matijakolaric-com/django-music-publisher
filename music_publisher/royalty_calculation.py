@@ -151,7 +151,7 @@ class RoyaltyCalculation(object):
                 'Fee amount']
         elif self.algo == 'share':
             fieldnames += [
-                'Owned Share (%)',
+                'Owned share (%)',
                 'Share in amount received (%)']
         fieldnames.append('Net amount')
         return fieldnames
