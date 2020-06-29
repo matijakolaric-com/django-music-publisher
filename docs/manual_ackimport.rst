@@ -21,6 +21,11 @@ Only CWR 2.1 acknowledgement files are fully supported, with an experimental sup
 Add view
 ***************************
 
+.. figure:: /images/add_ack.png
+   :width: 100%
+
+   Add view
+
 This view only has two fields:
 
 * ``Acknowledgement file`` is where you select the file from your file system
@@ -30,8 +35,19 @@ Once you click on ``Save`` (any of them), the file is processed.
 
 .. note::
     If an error is encountered, **nothing** is saved.
-    
-A brief report is created, with links to all works that received work acknowledgements, work titles and statuses. Actual work acknowledgements are shown in the last section of the ``change work view``, described *below*.
+
+.. figure:: /images/view_ack.png
+   :width: 100%
+
+   Brief report
+
+
+A brief report is created, with links to all works that received work acknowledgements, work titles and statuses. 
+
+.. note::
+    Only works present in at least one of :doc:`CWR exports <manual_cwrexport>` are matched.
+
+Actual work acknowledgements are shown in the last section of the ``change work view``, described *below*.
 
 List view
 *************************
@@ -41,6 +57,11 @@ List view is very simple and self-explanatory. Just as with ``CWR exports``, the
 
 Work registration acknowledgements
 *************************************
+
+.. figure:: /images/workack.png
+   :width: 100%
+
+   Work registration acknowledgement
 
 They show the aforementioned information, with the exception of imported ISWCs, that go into the ISWC field at the top of the :doc:`change work view <manual_work>`. Column ``status`` is the most important one.
 
