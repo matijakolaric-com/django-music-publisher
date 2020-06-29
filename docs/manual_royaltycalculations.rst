@@ -1,51 +1,54 @@
 Royalty Calculations
 ==============================
 
-Publishers receive royalty statements and payments from collective
-societies, DSPs, administrators, sub-publishers, etc. They usually
-keep only part of the revenues, while the rest is distribute to clients.
+DMP is extremely fast in calculating royalty distributions. Incoming
+royalty statements in almost any CSV format can be processed. Output
+will be in a similar CSV format, with several additional columns.
 
-For this, outgoing royalties must be calculated. These calculations are
-the basis for outgoing statements and payments.
+Incoming formats
+----------------------------------------
 
-Django-Music-Publisher is fast and precise in calculating royalties. And
-it does only this crucial part. 
+Incoming statement must be a CSV file with a header row. 
+It can have any number of columns, in any order, as long as it has:
 
-Generation of outgoing royalty statements, and sometimes even pre-processing,
-can be performed in more suitable tools, e.g. Excel.
+* a column with one of these identifiers:
 
-Process overview
------------------------------------------
+  * internal work ID
+  * sender's work ID, imported through work acknowledgements
+  * ISWC
+  * ISRC
 
-After the user selects a CSV file and appropriate values for all fields 
-and submits, the resulting CSV file is downloaded.
-
-It has all the columns from the incoming file plus several more. For one 
-row in the incoming file, the resulting file will have one or more rows.
-
-.. note::
-   No changes to the database occur during this process.
+* a column with amount to be distributed
    
-Preparing the ingoing CSV file
------------------------------------------
-
 In most cases, no pre-processing is required. Most of societies and other 
 senders of royalty statements have an option of sending them in CSV format. 
 
-Other formats can be converted to CSV.
+Outgoing formats
+------------------------------------------
 
-Sometimes it is required to remove some data from the incoming file,
-or split it in several files to be processed differently. This can
-usually be done in Excel.
+Outgoing format is a CSV file. It has all the columns of the incoming file.
+Each incoming row will be copied for every participant who shares in distribution. 
+Additional data will be providded in additional columns at the end.
+
+Additional columns depend on the used algorithm.
 
 Algorithms
 -------------------------------------------
 
+DMP has two different algorighms for calculating royalty distribution.
+
 In both algorithms, user has to select:
 
 * column containing the identifier
-* type of identifier (internal work ID, sender's work ID, ISWC, ISRC)
+* type of identifier
 * column containing the amount
+
+Both algorithms add these columns:
+
+* Controlled by publisher (%)
+* Interested party
+* Role
+* Net amount
 
 Split by calculated share
 +++++++++++++++++++++++++++++++++++++++
@@ -58,8 +61,13 @@ In this algorithm, one additional information is required:
 The amount in each row is split between controlled writers and the publisher,
 using the publishing agreement shares from the settings and manuscript shares.
 
-For each incoming row, each controlled writer in work receives one 
-row in the output file, and so does the publisher.
+Outgoing rows are generated for each controlled writer in work and the publisher.
+
+In addition to columns added by both algorithms, this one also adds:
+
+* Right type
+* Owned Share (%)
+* Share in amount received (%)
 
 Split by manuscript share and apply fees
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -84,6 +92,21 @@ Publisher fee is taken from the first available of:
 .. note::
     If publisher fee is empty, it is not used, and the next option is taken.
     If it has value 0, then no fee is applied (zero fee), and next option is not considered.
-    
+
+In addition to columns added by both algorithms, this one also adds:
+
+* Manuscript share (%)
+* Share in amount received (%)
+* Amount before fee
+* Fee (%)
+* Fee amount
+
 Post-processing
 -------------------------------------------------
+
+Excel or an alternative is the best tool for post-processing,
+especially creating outgoing statements.
+
+For creating outgoing statement, use pivot tables, filtering by 
+``Interested party`` column. You can design outgoing statemens
+however you wish.
