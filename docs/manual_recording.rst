@@ -1,19 +1,38 @@
 Recordings
 ==========
 
-.. figure:: /images/recordings.png
-   :width: 100%
+.. note::
+    Django-Music-**Publisher** is primarily software for music publishers. It can store metadata about recordings, but not audio files.
 
-   Recording list view, note the use of search and filters
+Add/Change view
+-------------------------------
 
-``Recording list`` view provides a nice overview, with it's search and filter capabilities and links for the :doc:`work <manual_works>`, :doc:`recording artist <manual_artists>` and :doc:`record label <manual_labels_libraries>`.
+.. note::
+    DMP only supports recordings based on a single musical works. The link between a recording and the underlying musical work is required.
 
-``Add recording`` and ``Change recording`` views are currently redundant. Users are discouraged to use them. Recordings can be edited through :doc:`works <manual_works>`, and tracks can be edited through :doc:`releases <manual_releases>`.
+There are actually three ways to add or edit recordings in DMP, in order of importance:
+
+* in ``add/change view`` of :doc:`musical works <manual_work>`, in section ``Recordings``
+* in ``add/change view`` of releases (:doc:`commercial <manual_commercialrelease>` and :doc:`library <manual_libraryrelease>`), through pop-ups in ``tracks``
+* in ``add/change view`` of recordings (described here)
+
+The first exists because that is the most natural way for publishers to add them. The second exists because recordings are released on releases (albums, products) as ``tracks``. The last, for consistent user experience.
+
 
 Compared to the ``Recordings`` section in ``Works``, there is only one additional field at the top, where the work can be chosen or added through a popup,
 and a ``Tracks`` section at the bottom, connecting a recording with a :doc:`release <manual_releases>`.
 
 Note that a ``Work`` popup holds only a subset of fields compared to the normal view. The data that is not visible will **not** be lost when saving through popup.
+
+List view
+------------------------------------------------
+
+.. figure:: /images/recordings.png
+   :width: 100%
+
+   Recording list view, note the use of search and filters
+
+``Recording list`` view provides a nice overview, with it's search and filter capabilities and links for :doc:`work <manual_work>`, :doc:`recording artist <manual_artist>` and :doc:`record label <manual_labels>`.
 
 
 Recording title
