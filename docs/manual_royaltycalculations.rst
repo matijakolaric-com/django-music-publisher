@@ -109,6 +109,22 @@ Post-processing
 Excel or an alternative is the best tool for post-processing,
 especially creating outgoing statements.
 
+Outgoing royalty statements
++++++++++++++++++++++++++++++++++++++++
+
 For creating outgoing statement, use pivot tables, filtering by 
 ``Interested party`` column. You can design outgoing statemens
 however you wish.
+
+Foreign currencies
++++++++++++++++++++++++++++++++++++++++
+
+All amounts calculated by DMP are in the same currency as the incoming data.
+Use a dedicated exchange rate table and VLOOKUP function for conversions.
+
+Precision
++++++++++++++++++++++++++++++++++++++++
+
+For calculations, precision exceeds the number of decimal places in any currency.
+You are advised to round up only the totals, not the amounts in rows.
+
