@@ -137,7 +137,7 @@ class RoyaltyCalculation(object):
         csv_reader = csv.DictReader(self.file)
         fieldnames = csv_reader.fieldnames
         if self.algo == 'share':
-            fieldnames.append('Right Type')
+            fieldnames.append('Right type')
         fieldnames += [
             'Controlled by publisher (%)',
             'Interested party',
