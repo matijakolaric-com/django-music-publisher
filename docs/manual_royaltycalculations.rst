@@ -18,7 +18,9 @@ It can have any number of columns, in any order, as long as it has:
   * ISWC
   * ISRC
 
-* a column with amount to be distributed
+* a column with amount to be distributed, values must be numeric
+
+Values for these columns must be present in all rows.
    
 In most cases, no pre-processing is required. Most of societies and other 
 senders of royalty statements have an option of sending them in CSV format. 
@@ -28,14 +30,14 @@ Outgoing formats
 
 Outgoing format is a CSV file. It has all the columns of the incoming file.
 Each incoming row will be copied for every participant who shares in distribution. 
-Additional data will be providded in additional columns at the end.
+Additional data will be provided in additional columns at the end.
 
 Additional columns depend on the used algorithm.
 
 Algorithms
 -------------------------------------------
 
-DMP has two different algorighms for calculating royalty distribution.
+DMP has two different algorithms for calculating royalty distributions.
 
 In both algorithms, user has to select:
 
@@ -61,7 +63,7 @@ In this algorithm, one additional information is required:
 The amount in each row is split between controlled writers and the publisher,
 using the publishing agreement shares from the settings and manuscript shares.
 
-Outgoing rows are generated for each controlled writer in work and the publisher.
+Outgoing rows are generated for each controlled ``writer in work`` and the publisher.
 
 In addition to columns added by both algorithms, this one also adds:
 
