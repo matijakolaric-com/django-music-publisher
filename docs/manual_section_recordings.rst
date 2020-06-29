@@ -2,7 +2,7 @@ Section: Recordings
 _____________________
 
 This section contains the model ``Recordings`` and
-closely related models and actions.
+closely related models ``Performing Artists`` and ``Music Labels``.
 
 .. toctree::
    :maxdepth: 2
