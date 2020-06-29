@@ -1,6 +1,11 @@
 Royalty Calculations
 ==============================
 
+.. figure:: /images/royaltystatement.png
+   :width: 100%
+
+   Outgoing royalty statement
+
 DMP is extremely fast in calculating royalty distributions. Incoming
 royalty statements in almost any CSV format can be processed. Output
 will be in a similar CSV format, with several additional columns.
@@ -55,6 +60,12 @@ Both algorithms add these columns:
 Split by calculated share
 +++++++++++++++++++++++++++++++++++++++
 
+.. figure:: /images/royaltycalculation_share.png
+   :width: 100%
+
+   Royalty calculation form: 
+   Split by calculated share
+
 In this algorithm, one additional information is required:
 
 * **column** containing the type of right (performance, mechanical, sync) or 
@@ -73,6 +84,12 @@ In addition to columns added by both algorithms, this one also adds:
 
 Split by manuscript share and apply fees
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. figure:: /images/royaltycalculation_fee.png
+   :width: 100%
+
+   Royalty calculation form: 
+   Split by manuscript share and apply fees
 
 This is default algorithm.
 
