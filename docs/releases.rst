@@ -41,13 +41,18 @@ issues.
 20.7 Endemic
 ------------
 
-Index (home) page became clearer due to grouping of views.
+Index (home) page became clearer due to grouping of views. User manual was reorganised to follow
+the same structure. ``User manual`` links now lead to the relevant page.
 
 Basic CSV imports and exports for musical works, and JSON exports for releases were added.
+ISWCs can now be imported from CWR acknowledgements.
+
+Processing of royalty statements was added. It is the most important new feature since the 
+initial release. It can import statements in **any** CSV format. And processing is 
+extremely fast.  
 
 Controlled writers with no society affiliation are now fully supported.
 
-Processing of royalty statements was added.
 
 Future open-source features
 ===========================
