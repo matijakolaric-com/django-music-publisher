@@ -1208,6 +1208,32 @@ class AdminTest(TestCase):
         })
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
+        
+        # 200K rows
+        with open(TEST_ROYALTY_PROCESSING_LARGE_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'statement_file', 'statement.csv',
+            'text', 0, None)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({
+            'in_file': mockfile,
+            'algo': 'share',
+            'work_id_column': '0',
+            'work_id_source': 'MK',
+            'right_type_column': '4',
+            'amount_column': '5',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 20 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 20)
 
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
@@ -1777,6 +1803,7 @@ TRL000010000001000000005"""
 
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
+TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR'
