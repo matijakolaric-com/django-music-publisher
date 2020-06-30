@@ -1,14 +1,13 @@
 Labels
 ====================
 
-.. figure:: /images/libraries.png
+.. figure:: /images/labels.png
    :width: 100%
 
-   Library list view, note the counters for releases and works with links
-
-Labels and libraries are extremely simple, these models only have a single field: ``name``.
+Label model only has a single field: ``name``.
 
 However, the list views have counters with links:
 
-* ``Labels`` has counters for :doc:`recordings <manual_recordings>` as well as :doc:`commercial and library releases <manual_releases>` and
-* ``Library`` has counters for :doc:`library releases <manual_releases>` and :doc:`works <manual_works_list>`.
+* for :doc:`recordings <manual_recording>`, where this label was the ``record label``,
+* for :doc:`library releases <manual_libraryrelease>`,  where this label is the ``release (album) label``,
+* for :doc:`commercial releases <manual_commercialrelease>`, where this label is the ``release (album) label``.

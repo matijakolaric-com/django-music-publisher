@@ -155,6 +155,8 @@ class LabelAdmin(MusicPublisherAdmin):
         'libraryrelease_count')
     readonly_fields = (
         'recording_count', 'commercialrelease_count', 'libraryrelease_count')
+    
+    fields = ('name',)
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -229,6 +231,7 @@ class LibraryAdmin(MusicPublisherAdmin):
 
     list_display = ('name', 'libraryrelease_count', 'work_count')
     readonly_fields = ('libraryrelease_count', 'work_count')
+    fields = ('name',)
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -1236,7 +1239,6 @@ class RecordingAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Recording`."""
 
     actions = None
-    inlines = [TrackInline]
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
         'label_link')

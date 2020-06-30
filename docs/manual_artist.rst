@@ -1,11 +1,27 @@
 Performing Artists
 ==================
 
-.. figure:: /images/libraries.png
+Add View
+---------------------
+
+.. figure:: /images/add_artist.png
    :width: 100%
 
-   Performing artist list view
+    Add view
 
-``Performing artist list`` view is a simple one, there are no filters, only a search field, and beside the three fields, there are two counters with links, to the :doc:`list of recordings <manual_recordings>` where this artist is a recording artist and to the :doc:`list of works <manual_works_list>`, where this artists performs LIVE (or recording data is not available).
+Django-Music-Publisher, as a software for primarily music publishers, holds only basic
+data about an artist: ``First Name``, ``Last Name`` and ``ISNI``. For bands, the band name 
+goes into ``last name`` field. 
 
-``Add`` and ``change`` views are minimalistic. ``Last name`` (also used for band names) and ``first name`` fields, as well as ``ISNI``, unique artist identifier.
+List View
+-----------------------------
+
+.. figure:: /images/artists.png
+   :width: 100%
+
+    List view
+
+There are no filters, only a search field. In the table, beside the three fields, 
+there are two counters with links, to the :doc:`list of recordings <manual_recordings>` 
+by this artist the :doc:`list of works <manual_works_list>` performed by this artist LIVE.
+It is also used if the recording data is not available.

@@ -275,6 +275,8 @@ class DataImporter(object):
             recording.clean_fields()
             recording.clean()
             recording.save()
+            self.log(
+                ADDITION, recording, 'Added during import.')
         wiws = []
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
