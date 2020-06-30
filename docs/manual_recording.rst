@@ -46,5 +46,5 @@ List view
 
    Recording list view
 
-``Recording list`` view provides a nice overview, with search and filter capabilities and links for :doc:`work <manual_work>`, :doc:`recording artist <manual_artist>` and :doc:`record label <manual_labels>`.
+``Recording list`` view provides a nice overview, with search and filter capabilities and links for :doc:`work <manual_work>`, :doc:`recording artist <manual_artist>` and :doc:`record label <manual_label>`.
 

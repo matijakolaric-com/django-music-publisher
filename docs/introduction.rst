@@ -1,7 +1,7 @@
 Introduction
 =================================
 
-.. figure:: /images/home.png
+.. figure:: /images/dmp_home.png
    :width: 100%
 
 Django-Music-Publisher (DMP) is open source software for **managing music metadata**:
