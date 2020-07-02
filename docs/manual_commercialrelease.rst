@@ -1,7 +1,7 @@
 Commercial (General) Releases
 ===============================
 
-.. figure:: /images/genereleases.png
+.. figure:: /images/generalreleases.png
    :width: 100%
 
 The most typical example of a release used to be a vinyl record album, then a CD. It is often referred to as *product*.
@@ -25,7 +25,7 @@ They share basic 4 fields, as well as inline ``tracks``:
   * ``Cut number``
   
 .. note::
-   **Track** in this software does not have the same meaning as *recording*. It means *recording in a release*.
+   **Track** in this software means *recording in a release*.
 
 List view
 +++++++++++++++++++++++
