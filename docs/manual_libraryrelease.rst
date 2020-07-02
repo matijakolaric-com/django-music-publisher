@@ -1,28 +1,21 @@
-Commercial and Library Releases
+Library Releases
 ===============================
 
-.. figure:: /images/releases.png
+.. figure:: /images/libraryreleases.png
    :width: 100%
 
-   Library release, note that ``Library`` and ``CD Identifier`` fields are required.
 
-Commercial (General) Releases
-+++++++++++++++++++++++++++++
+Add view
++++++++++++++++++++++++
 
-The most typical example of a release used to be a vinyl record album, then a CD.
+:doc:`Commercial (general) <manual_commercialrelease>` and *library* releases are actually one model with two different sets of views.
+The only difference is that *library* releases have two additional fields both required:
 
-The ``Commercial release list`` view is quite simple, only three columns, ``Release (album) title``, ``Release (album)
-label`` and count of tracks with link to ``Recordings``.
+* ``Library``
+* ``CD identifier`` - a CWR field name for *release code*
 
-The ``Add/change commercial release`` views are also simple, four fields and a list of tracks with optional cut numbers.
 
-Library Releases
-++++++++++++++++
+List view
++++++++++++++++++++++++
 
-Library releases are not only useful, but actually required for production (library) music. To register a work as a library work, in the ``Add/change work`` view, a library release must be selected.
-
-While this may be enough for registrations, a library release can also have tracks (recordings with optional cut numbers). This can be quite useful for integrations with music library software, including the upcoming extension to Django-Music-Publisher.
-
-The ``Library release list`` view is similar to the one for commercial releases, with three additional columns: ``CD identifier``, ``Library`` and work count with a link to the :doc:`list of works <manual_works_list>` in this library..
-
-The ``Add/change library release`` views are extensions to commercial release views with an additional ``Library`` section.
+``List view`` has 6 columns, 3 more than *commercial* releases. Two of them are for the two aforementioned field. The last one is a counter and a link to :doc:`works <manual_work>`. This field will list works that have ``library release`` field set to this library release.
