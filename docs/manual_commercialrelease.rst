@@ -1,9 +1,6 @@
 Commercial (General) Releases
 ===============================
 
-.. figure:: /images/generalreleases.png
-   :width: 100%
-
 The most typical example of a release used to be a vinyl record album, then a CD. It is often referred to as *product*.
 
 Add view
