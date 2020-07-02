@@ -1,7 +1,7 @@
 Library Releases
 ===============================
 
-.. figure:: /images/libraryreleases.png
+.. figure:: /images/releases.png
    :width: 100%
 
 
