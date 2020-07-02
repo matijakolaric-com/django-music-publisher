@@ -44,7 +44,7 @@ TEMPLATES_21 = {
         ' E 000000000{{ settings.PUBLISHER_IPI_NAME|rjust:11 }}              '
         '{{ settings.PUBLISHER_SOCIETY_PR|soc }}{{ share|prp|cwrshare }}'
         '{{ settings.PUBLISHER_SOCIETY_MR|soc }}{{ share|mrp|cwrshare }}'
-        '{{ PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
+        '{{ settings.PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
         ' N {{ settings.PUBLISHER_IPI_BASE|ljust:13 }}'
         '                               '
         '\r\n{% endautoescape %}'),
