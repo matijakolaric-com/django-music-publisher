@@ -1214,7 +1214,7 @@ class AdminTest(TestCase):
         for i, work in enumerate(Work.objects.all()):
             work._work_id = work.work_id
             work.save()
-            status = WorkAcknowledgement.TRANSACTION_STATUS_CHOICES[i % 12]
+            status = WorkAcknowledgement.TRANSACTION_STATUS_CHOICES[i % 12][0]
             society = ['52', '52', '52', '52', '44'][i % 5]
             WorkAcknowledgement(
                 work=work, status=status, remote_work_id=work._work_id,
