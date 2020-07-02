@@ -96,7 +96,7 @@ class Library(LibraryBase):
 
     class Meta:
         verbose_name = 'Music Library'
-        verbose_name = 'Music Libraries'
+        verbose_name_plural = 'Music Libraries'
         ordering = ('name',)
 
     name = models.CharField(
