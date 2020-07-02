@@ -20,7 +20,7 @@ import music_publisher.models
 from music_publisher import cwr_templates, dataimport, validators
 from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
-    Writer, WriterInWork)
+    Writer, WriterInWork, WorkAcknowledgement)
 
 
 def get_data_from_response(response):
@@ -1208,18 +1208,31 @@ class AdminTest(TestCase):
         })
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
-        
+
+        # lets do one more thing here, copy work IDs to foreign work IDs.
+        # to test the slowest use case, and fix work._work_id
+        for i, work in enumerate(Work.objects.all()):
+            work._work_id = work.work_id
+            work.save()
+            status = WorkAcknowledgement.TRANSACTION_STATUS_CHOICES[i % 12]
+            society = ['52', '52', '52', '52', '44'][i % 5]
+            WorkAcknowledgement(
+                work=work, status=status, remote_work_id=work._work_id,
+                society_code=society, date=datetime.now()).save()
+
         # 200K rows
         with open(TEST_ROYALTY_PROCESSING_LARGE_FILENAME) as csvfile:
             mock = StringIO()
             mock.write(csvfile.read())
-        mock.seek(0)
         mockfile = InMemoryUploadedFile(
             mock, 'statement_file', 'statement.csv',
             'text', 0, None)
         url = reverse('royalty_calculation')
         response = self.client.get(url)
         data = get_data_from_response(response)
+
+        # our ID
+        mock.seek(0)
         data.update({
             'in_file': mockfile,
             'algo': 'share',
@@ -1227,6 +1240,42 @@ class AdminTest(TestCase):
             'work_id_source': 'MK',
             'right_type_column': '4',
             'amount_column': '5',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 20 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 20)
+
+        mock.seek(0)
+        data.update({
+            'algo': 'fee',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 20 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 20)
+
+        mock.seek(0)
+        data.update({
+            'work_id_source': '52',
+            'default_fee': '10.00',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 20 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 20)
+
+        mock.seek(0)
+        data.update({
+            'algo': 'share',
+            'work_id_column': '6',
+            'work_id_source': 'ISRC',
         })
         time_before = datetime.now()
         response = self.client.post(url, data, follow=False)
