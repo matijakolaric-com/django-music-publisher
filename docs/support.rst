@@ -8,52 +8,41 @@ Professional Support
 
 DMP is free open-source software, released under :doc:`MIT license <LICENSE>`. 
 
-The creator of Django-Music-Publisher (DMP) runs a 
+There is an optional 
 `professional (paid) support service <https://matijakolaric.com/dmp-prosupport/>`_
-for users of DMP.
+for DMP users.
 
-It really has two parts:
+While we are commited to keep developing DMP as free software, we can not offer free
+support to its growing number of users around the world.
 
-* technical maintenance
+It really has two aspects:
+
 * user support
+* technical maintenance
+
+User support
+------------------------------
+
+The world of music publishing is extremely complex. And DMP is not simple software.
+
+No matter how good and detailed this documentation is, or how many 
+`videos <https://youtube.com/c/musicmetadata>`_ we make,
+there are always specific questions that remain unanswered.
+
+They may be strictly related to DMP, or about data formats, or about quirks 
+of various collecting societies.
 
 Technical maintenance
 ---------------------------------
 
 We made the deployment to Heroku extremely simple, requiring no technical skills.
 However, keeping it up-to-date is a bit more complicated. 
-And online software must be kept up-to-date for security reasons, if not new features.
+And online software must be kept up-to-date for security reasons, if not for new features.
 
-It is within reach of a junior system administrator or Python/Django developer.
-So is installing it on any other platform, including personal computers.
+This can be done by a junior system administrator or Python/Django developer.
+So can installing it on any other platform, including personal computers.
 
-Still, this is not good enough for most small music publishers.
+Still, this is not good enough for most small music publishers, as they do not have 
+these skills in-house. 
 
-User support
-------------------------------
-
-A lot of effort was put into keeping DMP intuitive and seemingly simple, 
-while offering many advanced features, e.g. CWR and royalty processing.
-But, it is far from being simple.
-
-On the other hand, the environment is really complex.
-
-CWR alone has dozens of very different implementations in various collecting societies. 
-Even applying for it is simple in some, while complex in others.
-Royalty statements came in many, many different formats.
-
-No matter how good and detailed the documentation is, or how many videos we make,
-there are always specific questions that remain unanswered.
-
-Some questions are strictly related to DMP, some about data formats, some about quirks 
-of some collecting society.
-
-Quite often, it is just about showing data to an expert before sending it to a society 
-or a sub-publisher. Just to make sure that all is well.
-
-Should you use it?
----------------------------
-
-No. Unless...
-
-
+Technical maintenance without user support is also available.
