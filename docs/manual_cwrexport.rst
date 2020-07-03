@@ -24,9 +24,8 @@ Add View
     CWR exports can be created only if *CWR delivery code* is entered as ``PUBLISHER_CODE`` in :ref:`settings`.
 
 .. warning::
-    Do NOT use an arbitratry CWR delivery code for creating CWR exports. If you did, you should either start over 
-    with a clean installation of DMP, or seek :doc:`professional support <support>`.
-    
+    Do NOT use an arbitratry CWR delivery code for creating CWR exports.
+
 There are several ways to get to ``Add CWR Export`` view:
 
 * by clicking ``Add CWR Export`` button or
