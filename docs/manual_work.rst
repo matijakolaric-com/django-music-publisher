@@ -146,9 +146,6 @@ A writer can be entered in two rows, once as controlled, once as not. This allow
 
    Writers in work for a co-published work
 
-.. note::
-    Co-publishing is advanced functionality. You are advised to seek :doc:`professional support <support>`.
-
 Society-assigned agreement number
 ---------------------------------
 
@@ -197,11 +194,6 @@ based on the field ``suffix``. If the latter is checked, then the suffix
 will be appended to the work ``title``. The actual alternative title is always
 shown in the read-only field ``complete alt title``.
 
-.. note::
-    Title suffixes are advanced functionality.
-    You are advised to seek :doc:`professional support <support>` before
-    using them.
-
 
 Artists Performing Works
 ++++++++++++++++++++++++
@@ -231,8 +223,7 @@ A confirmation screen shows all objects being deleted.
     Deleting a work is not always allowed, regardless of user permissions. E.g.
     if a :doc:`CWR acknowledgement <manual_ackimport>` for this work exists.
     If you are sure you want to delete a work, a superuser must delete
-    such linked objects first. You are advised to seek
-    :doc:`professional support <support>` before doing that.
+    such linked objects first.
 
 The save buttons do following:
 
