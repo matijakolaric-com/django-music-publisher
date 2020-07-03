@@ -67,10 +67,6 @@ If a writer chooses not to become an affiliate of any society,
 you can enter ``00000000000`` in the ``IPI name#`` field. This has to be
 re-entered on *every* save.
 
-.. note::
-    You are advised to seek both legal advice and
-    :doc:`professional support <support>` in such cases.
-
 
 Other writers
 ------------------------------------------
