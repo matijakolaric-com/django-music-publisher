@@ -86,6 +86,4 @@ While new features will be added, the described limitations are permanent.
 
 .. note::
 
-    See `Beyond DMP <https://matijakolaric.com/beyond/>`_ for commercial options for music publishers.
-    
-In next versions, development will focus on library music, and basic support for music labels will be added.
+    See `Beyond DMP <https://matijakolaric.com/beyond/>`_ for commercial options with more features.
