@@ -89,12 +89,6 @@ class IPIBase(models.Model):
     Attributes:
         ipi_base (django.db.models.CharField): IPI Base Number
         ipi_name (django.db.models.CharField): IPI Name Number
-        pr_society (django.db.models.CharField):
-            Performing Rights Society Code
-        mr_society (django.db.models.CharField):
-            Mechanical Rights Society Code
-        sr_society (django.db.models.CharField):
-            Sync. Rights Society Code
         _can_be_controlled (django.db.models.BooleanField):
             used to determine if there is enough data for a writer
             to be controlled.
