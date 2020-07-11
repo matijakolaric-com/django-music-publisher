@@ -1,5 +1,18 @@
 """
 Tests for :mod:`music_publisher`.
+
+This software has almost full test coverage. The only exceptions are
+instances of :class:`Exception` being caught during data imports.
+(User idiocy is boundless.)
+
+Most of the tests are functional end-to-end tests. While they test that
+code works, they don't always test that it works as expected.
+
+Still, it must be noted that exports are tested against provided
+templates (made in a different software, not using the same code beyond
+Python standard library).
+
+More precise tests would be better.
 """
 
 from datetime import datetime
@@ -234,7 +247,10 @@ class DataImportTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
-    """Functional tests on the interface, and several related unit tests."""
+    """Functional tests on the interface, and several related unit tests.
+
+    Note that tests build one atop another, simulating typical work flow."""
+
     fixtures = ['publishing_staff.json']
     testing_admins = [
         'artist', 'label', 'library', 'work', 'commercialrelease', 'writer',
@@ -242,6 +258,9 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_original_work(cls):
+        """
+        Create original work, three writers, one controlled,
+        with recording, alternate titles, included in a commercial release."""
         cls.original_work = Work.objects.create(
             title='The Work', iswc='T1234567893',
             library_release=cls.library_release)
@@ -263,13 +282,16 @@ class AdminTest(TestCase):
         AlternateTitle.objects.create(work=cls.original_work, suffix=True,
                                       title='Behind the Work')
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
-        recording = Recording.objects.create(work=cls.original_work,
-                                 record_label=cls.label, artist=cls.artist,
-                                 isrc='JM-K40-14-00001')
-        Track.objects.create(release=cls.commercial_release, recording=recording)
+        recording = Recording.objects.create(
+            work=cls.original_work, record_label=cls.label, artist=cls.artist,
+            isrc='JM-K40-14-00001')
+        Track.objects.create(
+            release=cls.commercial_release, recording=recording)
 
     @classmethod
     def create_modified_work(cls):
+        """Create modified work, original writer plus arranger,
+        with recording, alternate titles."""
         cls.modified_work = Work.objects.create(
             title='The Modified Work', original_title='The Work')
         WriterInWork.objects.create(
@@ -292,6 +314,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_copublished_work(cls):
+        """Create work, two writers, one co-published."""
         cls.copublished_work = Work.objects.create(title='Copublished')
         WriterInWork.objects.create(
             work=cls.copublished_work,
@@ -320,33 +343,32 @@ class AdminTest(TestCase):
     @classmethod
     def create_writers(cls):
         """Create four writers with different properties."""
-        cls.generally_controlled_writer = Writer(first_name='John',
-                                                 last_name='Smith',
-                                                 ipi_name='00000000297',
-                                                 pr_society='52',
-                                                 ipi_base='I-123456789-3',
-                                                 sr_society='44',
-                                                 mr_society='44',
-                                                 generally_controlled=True,
-                                                 saan='A1B2C3',
-                                                 publisher_fee=Decimal('0.25'))
+        cls.generally_controlled_writer = Writer(
+            first_name='John', last_name='Smith',
+            ipi_name='00000000297', ipi_base='I-123456789-3',
+            pr_society='52', sr_society='44', mr_society='44',
+            generally_controlled=True, saan='A1B2C3',
+            publisher_fee=Decimal('0.25'))
         cls.generally_controlled_writer.clean()
         cls.generally_controlled_writer.clean_fields()
         cls.generally_controlled_writer.save()
-        cls.other_writer = Writer(first_name='Jane', last_name='Doe',
-                                  ipi_name='395')
+
+        cls.other_writer = Writer(
+            first_name='Jane', last_name='Doe', ipi_name='395')
         cls.other_writer.clean()
         cls.other_writer.save()
 
         cls.writer_no_first_name = Writer(last_name='Jones')
         cls.writer_no_first_name.clean()
         cls.writer_no_first_name.save()
-        # This one is controllable, but not yet affiliated
-        cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
-                                         ipi_name='00000000000')
+
+        # This one is controllable, but not yet affiliated, testing
+        # "00000000000" hack
+        cls.controllable_writer = Writer(
+            first_name='Jack', last_name='Doe', ipi_name='00000000000')
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
-        # Then he is affiliated.
+        # Later, he is affiliated.
         cls.controllable_writer.ipi_name = '493'
         cls.controllable_writer.pr_society = '52'
         cls.controllable_writer.mr_society = '44'
@@ -386,6 +408,17 @@ class AdminTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Class setup.
+
+        Creating users. Creating instances of classes of less importance:
+
+        * label,
+        * library,
+        * artist,
+        * releases,
+
+        then calling the methods above.
+        """
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
             'superuser', '', 'password')
@@ -397,7 +430,6 @@ class AdminTest(TestCase):
             username='audituser', password='password', is_active=True,
             is_staff=True)
         cls.audituser.groups.add(2)
-
         cls.label = Label.objects.create(name='LABEL')
         cls.library = Library.objects.create(name='LIBRARY')
         cls.artist = Artist.objects.create(
@@ -416,7 +448,7 @@ class AdminTest(TestCase):
         cls.create_cwr3_export()
 
     def test_strings(self):
-        """Test ___str__ methods for created objects."""
+        """Test __str__ methods for created objects."""
         self.assertEqual(
             str(self.original_work),
             'MK000002: THE WORK (DOE / DOE / SMITH)')
@@ -920,7 +952,8 @@ class AdminTest(TestCase):
             response.content)
 
     def test_ack_import_and_work_filters(self):
-        """Test ackknowledgement import and then filters on the change view.
+        """Test acknowledgement import and then filters on the change view,
+        as well as other related views.
 
         These tests must be together, ack import is used in filters.
         """
@@ -1109,8 +1142,11 @@ class AdminTest(TestCase):
 
         This is the normal process, work data is entered, then the registration
         follows and then it can be processed in royalty statements.
-        """
 
+        This test also includes load testing, 200.000 rows must be imported
+        in under 10-15 seconds, performed 4 times with different algos and
+        ID types.
+        """
         self.client.force_login(self.superuser)
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             mock = StringIO()
@@ -1245,8 +1281,8 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 20 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 20)
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 10)
 
         mock.seek(0)
         data.update({
@@ -1256,8 +1292,8 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 20 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 20)
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 10)
 
         mock.seek(0)
         data.update({
@@ -1268,8 +1304,8 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 20 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 20)
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
         data.update({
@@ -1281,8 +1317,8 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 20 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 20)
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 10)
 
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
