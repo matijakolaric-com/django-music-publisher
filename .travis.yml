@@ -9,7 +9,7 @@ matrix:
       python: "3.6"
 services: postgresql
 env: DATABASE_URL="postgres://postgres@localhost/dmp"
-install: pip install -r requirements.txt
+install: pip install -r requirements.txt coverage coveralls
 script: coverage run --source='music_publisher' manage.py test
 after_success: coveralls
 
