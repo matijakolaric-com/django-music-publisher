@@ -36,15 +36,12 @@ There are two ways to do it:
 Guided Deployment to Heroku
 +++++++++++++++++++++++++++
 
-The author and maintainer of Django-Music-Publisher offers
-`Professional Support <https://matijakolaric.com/dmp-prosupport/>`_,
-providing paid technical maintenance and user support.
+The author and maintainer of Django-Music-Publisher provides a
+`are-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_,
+which will guide you through the deployment process.
 
 .. figure:: /images/pre_wizard.png
    :width: 100%
-
-The site features a free pre-installation wizard (no registration required),
-which will guide you through the deployment process.
 
 There is also a compatibility list for many collective management organizations. If your
 CMO or combination of CMOs is not supported, you can use the next method.
