@@ -301,7 +301,9 @@ class CommercialRelease(Release):
 
 class OriginalPublishingAgreement(models.Model):
     """Original Publishing Agreement for controlled writers."""
-    pass
+
+    class Meta:
+        managed = False
 
 
 class Writer(WriterBase):
