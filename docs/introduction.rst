@@ -81,9 +81,10 @@ It does not have any kind of client access.
 Future of Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DMP 20.7 Endemic has many important features for music publishers within the project scope. And the scope will not change. 
+DMP |version| has many important features for music publishers within the project scope. And the scope will not change.
 While new features will be added, the described limitations are permanent.
 
-.. note::
+Beyond Django-Music-Publisher
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    See `Beyond DMP <https://matijakolaric.com/beyond/>`_ for commercial options with more features.
+See `Beyond DMP <https://matijakolaric.com/beyond/>`_ for commercial options with more features.

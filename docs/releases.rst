@@ -53,7 +53,6 @@ extremely fast.
 
 Controlled writers with no society affiliation are now fully supported.
 
-
 Future open-source features
 ===========================
 

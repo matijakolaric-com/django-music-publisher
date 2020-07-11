@@ -49,12 +49,9 @@ CMO or combination of CMOs is not supported, you can use the next method.
 Direct Deployment
 +++++++++++++++++
 
-.. raw:: html
-
-    <p>First, you need to sign up with <a href="https://heroku.com">Heroku</a> and/or log in.
-    Then press
-    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.7">here</a>.
-    This we deploy the latest code in 20.7 Endemic branch.</p>
+First, you need to sign up with `Heroku <https://heroku.com>`_ and/or log in.
+Then press `here <https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/tree/20.7>`_.
+This will deploy the latest code in |version| branch.
 
 .. figure:: /images/heroku.png
    :width: 100%

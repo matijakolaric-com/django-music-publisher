@@ -3,7 +3,7 @@
 User Manual
 ############
 
-For version *20.7 Endemic*.
+For version |version|.
 
 .. toctree::
    :maxdepth: 2

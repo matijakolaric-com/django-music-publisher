@@ -17,7 +17,7 @@ from django.test import (
 from django.urls import reverse
 
 import music_publisher.models
-from music_publisher import cwr_templates, dataimport, validators
+from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
     Writer, WriterInWork, WorkAcknowledgement)
@@ -70,20 +70,20 @@ class DataImportTest(TestCase):
 
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
-            data_import = dataimport.DataImporter(csvfile)
+            data_import = data_import.DataImporter(csvfile)
             data_import.run()
 
     def test_log(self):
         """Test logging during import."""
 
         """This does nothing, as user is unknown."""
-        di = dataimport.DataImporter([], user=None)
-        di.log(dataimport.ADDITION, None, 'no message')
+        di = data_import.DataImporter([], user=None)
+        di.log(data_import.ADDITION, None, 'no message')
         self.assertEqual(LogEntry.objects.count(), 0)
 
         """This logs."""
-        di = dataimport.DataImporter([], user=self.superuser)
-        di.log(dataimport.ADDITION, self.obj, 'test message')
+        di = data_import.DataImporter([], user=self.superuser)
+        di.log(data_import.ADDITION, self.obj, 'test message')
         self.assertEqual(LogEntry.objects.count(), 1)
         le = LogEntry.objects.first()
         self.assertEqual(str(le), 'Added “ARTIST ONE”.')
@@ -92,7 +92,7 @@ class DataImportTest(TestCase):
     def test_unknown_key_exceptions(self):
         """Test exceptions not tested in functional tests."""
 
-        di = dataimport.DataImporter([], user=None)
+        di = data_import.DataImporter([], user=None)
 
         # No key in dict
         with self.assertRaises(ValueError) as ve:
@@ -212,7 +212,7 @@ class DataImportTest(TestCase):
                 'importing data: A B'))
 
         f = StringIO("Work Title,Library\nX,Y")
-        di = dataimport.DataImporter(f, user=None)
+        di = data_import.DataImporter(f, user=None)
         with self.assertRaises(ValueError) as ve:
             list(di.run())
         self.assertEqual(

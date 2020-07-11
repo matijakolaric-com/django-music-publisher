@@ -1760,7 +1760,7 @@ class DataImportForm(ModelForm):
     def clean(self):
         super().clean()
 
-        from .dataimport import DataImporter
+        from .data_import import DataImporter
         from io import TextIOWrapper
 
         cd = self.cleaned_data

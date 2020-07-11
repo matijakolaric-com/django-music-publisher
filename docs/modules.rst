@@ -22,6 +22,13 @@ music\_publisher.apps module
     :members:
     :show-inheritance:
 
+music\_publisher.validators module
+----------------------------------
+
+.. automodule:: music_publisher.validators
+    :members:
+    :show-inheritance:
+
 music\_publisher.base module
 ----------------------------
 
@@ -42,6 +49,28 @@ music\_publisher.admin module
 .. automodule:: music_publisher.admin
     :members:
     :show-inheritance:
+
+music\_publisher.cwr_templates module
+-------------------------------------
+
+.. automodule:: music_publisher.cwr_templates
+    :members:
+    :show-inheritance:
+
+music\_publisher.data_import module
+-----------------------------------
+
+.. automodule:: music_publisher.data_import
+    :members:
+    :show-inheritance:
+
+music\_publisher.royalty_calculation module
+-------------------------------------------
+
+.. automodule:: music_publisher.royalty_calculation
+    :members:
+    :show-inheritance:
+
 
 music\_publisher.tests module
 -----------------------------
