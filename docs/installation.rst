@@ -37,7 +37,7 @@ Guided Deployment to Heroku
 +++++++++++++++++++++++++++
 
 The author and maintainer of Django-Music-Publisher provides a
-`are-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_,
+`pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_,
 which will guide you through the deployment process.
 
 .. figure:: /images/pre_wizard.png
