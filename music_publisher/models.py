@@ -1,6 +1,6 @@
 """Concrete models.
 
-They mostly inherit classes from :mod:`.base`.
+They mostly inherit from classes in :mod:`.base`.
 
 """
 
@@ -179,8 +179,12 @@ class Release(ReleaseBase):
     def get_dict(self, with_tracks=False):
         """Get the object in an internal dictionary format
 
+        Args:
+            with_tracks (bool): add track data to the output
+
         Returns:
             dict: internal dict format
+
         """
 
         d = {
@@ -215,6 +219,14 @@ class LibraryReleaseManager(models.Manager):
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
     def get_dict(self, qs):
+        """Get the object in an internal dictionary format
+
+        Args:
+            qs (django.db.models.query.QuerySet)
+
+        Returns:
+            dict: internal dict format
+        """
         return {
             'releases': [release.get_dict(with_tracks=True) for release in qs]
         }
@@ -279,6 +291,14 @@ class CommercialReleaseManager(models.Manager):
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
     def get_dict(self, qs):
+        """Get the object in an internal dictionary format
+
+        Args:
+            qs (django.db.models.query.QuerySet)
+
+        Returns:
+            dict: internal dict format
+        """
         return {
             'releases': [release.get_dict(with_tracks=True) for release in qs]
         }
@@ -300,7 +320,9 @@ class CommercialRelease(Release):
 
 
 class OriginalPublishingAgreement(models.Model):
-    """Original Publishing Agreement for controlled writers."""
+    """Original Publishing Agreement for controlled writers.
+
+    Not used in DMP."""
 
     class Meta:
         managed = False
@@ -308,6 +330,10 @@ class OriginalPublishingAgreement(models.Model):
 
 class Writer(WriterBase):
     """Writers.
+
+    Attributes:
+        original_publishing_agreement (django.db.models.ForeignKey): \
+        Foreign key to :class:`.models.OriginalPublishingAgreement`
     """
 
     class Meta:
@@ -326,7 +352,7 @@ class Writer(WriterBase):
         return name
 
     def clean(self, *args, **kwargs):
-        """Check if writer who is controlled can no longer be."""
+        """Check if writer who is controlled still has enough data."""
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
@@ -422,7 +448,7 @@ class WorkManager(models.Manager):
         Return a dictionary with works from the queryset
 
         Args:
-            qs(django.db.models.query import QuerySet): works queryset
+            qs(django.db.models.query import QuerySet)
 
         Returns:
             dict: dictionary with works
@@ -453,6 +479,8 @@ class Work(TitleBase):
     """Concrete class, with references to foreign objects.
 
     Attributes:
+        _work_id (django.db.models.CharField): permanent work id, either \
+        imported or fixed when exports are created
         iswc (django.db.models.CharField): ISWC
         original_title (django.db.models.CharField): title of the original \
             work, implies modified work
@@ -471,7 +499,8 @@ class Work(TitleBase):
     class Meta:
         verbose_name = 'Musical Work'
         ordering = ('-id',)
-        permissions = (('can_process_royalties', 'Can perform royalty calculations'),)
+        permissions = (
+            ('can_process_royalties', 'Can perform royalty calculations'),)
 
     _work_id = models.CharField(
         'Work ID', max_length=14, blank=True, null=True, unique=True,
@@ -916,11 +945,7 @@ class WriterInWork(models.Model):
 
 
 class Recording(models.Model):
-    """Holds data on first recording.
-
-    Note that the CWR 2.x limitation of just one REC record per work has been
-    removed in the specs, but some societies still complain about it,
-    so only a single instance is allowed.
+    """Recording.
 
     Attributes:
         release_date (django.db.models.DateField): Recording Release Date
@@ -963,13 +988,15 @@ class Recording(models.Model):
 
     def clean_fields(self, *args, **kwargs):
         """
+        ISRC cleaning, just removing dots and dashes.
 
-        :param args:
-        :type args:
-        :param kwargs:
-        :type kwargs:
-        :return:
-        :rtype:
+        Args:
+            *args: may be used in upstream
+            **kwargs: may be used in upstream
+
+        Returns:
+            return from :meth:`django.db.models.Model.clean_fields`
+
         """
         if self.isrc:
             # Removing all characters added for readability
@@ -979,9 +1006,10 @@ class Recording(models.Model):
     @property
     def complete_recording_title(self):
         """
+        Return complete recording title.
 
-        :return:
-        :rtype:
+        Returns:
+            str
         """
         if self.recording_title_suffix:
             return '{} {}'.format(
@@ -991,9 +1019,10 @@ class Recording(models.Model):
     @property
     def complete_version_title(self):
         """
+        Return complete version title.
 
-        :return:
-        :rtype:
+        Returns:
+            str
         """
         if self.version_title_suffix:
             return '{} {}'.format(
@@ -1002,6 +1031,7 @@ class Recording(models.Model):
         return self.version_title
 
     def __str__(self):
+        """Return the most precise type of title"""
         return (
             self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
@@ -1021,8 +1051,13 @@ class Recording(models.Model):
     def get_dict(self, with_releases=False, with_work=True):
         """Create a data structure that can be serialized as JSON.
 
+        Args:
+            with_releases (bool): add releases data (through tracks)
+            with_work (bool): add work data
+
         Returns:
             dict: JSON-serializable data structure
+
         """
         j = {
             'id':
@@ -1055,7 +1090,7 @@ class Recording(models.Model):
                     'cut_number': track.cut_number,
                 })
         if with_work:
-            j['works'] = {'work': self.work.get_dict(with_recordings=False)}
+            j['works'] = [{'work': self.work.get_dict(with_recordings=False)}]
         return j
 
 
@@ -1078,20 +1113,28 @@ class Track(models.Model):
     def get_dict(self):
         return {
             'cut_number': self.cut_number,
-            'recording': self.recording.get_dict(with_releases=False, with_work=True)
+            'recording': self.recording.get_dict(
+                with_releases=False, with_work=True)
         }
+
 
 class CWRExport(models.Model):
     """Export in CWR format.
 
     Common Works Registration format is a standard format for registration of
-    musical works world-wide. As of November 2018, version 2.1r7 is used
-    everywhere, while some societies accept 2.2 as well, it adds no benefits
-    in this context. Version 3.0 is in draft.
+    musical works world-wide. Exports are available in CWR 2.1 revision 8 and
+    CWR 3.0 (experimental).
 
     Attributes:
-        nwr_rev (django.db.models.CharField): Choice field where user can
-            select which version and type of CWR it is.
+        nwr_rev (django.db.models.CharField): choice field where user can
+            select which version and type of CWR it is
+        cwr (django.db.models.TextField): contents of CWR file
+        year (django.db.models.CharField): 2-digit year format
+        num_in_year (django.db.models.PositiveSmallIntegerField): \
+        CWR sequential number in a year
+        works (django.db.models.ManyToManyField): included works
+        description (django.db.models.CharField): internal note
+
     """
 
     class Meta:
@@ -1116,12 +1159,18 @@ class CWRExport(models.Model):
 
     @property
     def version(self):
+        """Return CWR version."""
         if self.nwr_rev in ['WRK', 'ISR']:
             return '30'
         return '21'
 
     @property
     def filename(self):
+        """Return CWR file name.
+
+        Returns:
+            str: CWR file name
+        """
         if self.version == '30':
             return self.filename30
         return self.filename21
@@ -1173,6 +1222,7 @@ class CWRExport(models.Model):
         if self.version == '30':
             template = TEMPLATES_30.get(key)
         elif key == 'HDR' and len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9:
+            # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
             template = TEMPLATES_21.get('HDR_8')
         else:
             template = TEMPLATES_21.get(key)
@@ -1229,6 +1279,15 @@ class CWRExport(models.Model):
             self.transaction_count += 1
 
     def yield_publisher_lines(self, controlled_relative_share):
+        """Yield SPU/SPT lines.
+
+        Args:
+            controlled_relative_share (Decimal): sum of manuscript shares \
+            for controlled writers
+
+        Yields:
+              str: CWR record (row/line)
+        """
         yield self.get_transaction_record(
             'SPU', {'share': controlled_relative_share})
         if controlled_relative_share:
@@ -1237,6 +1296,12 @@ class CWRExport(models.Model):
 
     def yield_registration_lines(self, works):
         """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
+
+        Args:
+            works (list): list of work dicts
+
+        Yields:
+            str: CWR record (row/line)
         """
         for work in works:
 
@@ -1512,9 +1577,10 @@ class WorkAcknowledgement(models.Model):
 
     def get_dict(self):
         """
+        Return dictionary with external work IDs.
 
-        :return:
-        :rtype:
+        Returns:
+            dict: JSON-serializable data structure
         """
         # if not self.remote_work_id:
         #     return None
@@ -1557,7 +1623,10 @@ class ACKImport(models.Model):
 
 
 class DataImport(models.Model):
-    """Importing basic work data from a CSV file."""
+    """Importing basic work data from a CSV file.
+
+    This class just acts as log, the actual logic is in :mod:`.data_import`.
+    """
 
     class Meta:
         verbose_name = 'Data Import'

@@ -1,7 +1,7 @@
 """CWR-compatibility field-level validation.
 
 For formats that allow dashes and dots (ISWC, IPI Base), the actual format is
-from CWR 2.x specification for compatibility.
+from CWR 2.x specification: ISWC without and IPI Base with dashes.
 
 """
 
@@ -10,6 +10,7 @@ import re
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.deconstruct import deconstructible
+
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
@@ -32,6 +33,7 @@ def check_ean_digit(ean):
     Raises:
         ValidationError
     """
+
     number = ean[:-1]
     ch = str(
         (10 - sum(
@@ -125,9 +127,6 @@ class CWRFieldValidator:
         Args:
             value (): Input value
 
-        Returns:
-            None: If all is well.
-
         Raises:
             ValidationError: If the value does not pass the validation.
         """
@@ -167,7 +166,11 @@ class CWRFieldValidator:
 
 
 def validate_settings():
-    """CWR-compliance validation for settings"""
+    """CWR-compliance validation for settings.
+
+    This is used to prevent deployment with invalid settings.
+    """
+
     if settings.PUBLISHER_NAME:
         try:
             CWRFieldValidator('name')(settings.PUBLISHER_NAME)

@@ -33,6 +33,9 @@ class TitleBase(models.Model):
 class PersonBase(models.Model):
     """Base class for all classes that contain people with first and last name.
 
+    This includes writers and artists. For bands, only the last name field is
+    used.
+
     Attributes:
         first_name (django.db.models.CharField): First Name
         last_name (django.db.models.CharField): Last Name

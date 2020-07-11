@@ -1,4 +1,4 @@
-"""Django app definition for `music_publisher`."""
+"""Django app definition for :mod:`music_publisher`."""
 
 from django.apps import AppConfig
 

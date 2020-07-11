@@ -43,6 +43,13 @@ music\_publisher.models module
     :members:
     :show-inheritance:
 
+music\_publisher.cwr_templates module
+-------------------------------------
+
+.. automodule:: music_publisher.cwr_templates
+    :members:
+    :show-inheritance:
+
 music\_publisher.admin module
 -----------------------------
 
@@ -50,12 +57,6 @@ music\_publisher.admin module
     :members:
     :show-inheritance:
 
-music\_publisher.cwr_templates module
--------------------------------------
-
-.. automodule:: music_publisher.cwr_templates
-    :members:
-    :show-inheritance:
 
 music\_publisher.data_import module
 -----------------------------------

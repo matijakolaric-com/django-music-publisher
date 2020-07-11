@@ -3,22 +3,27 @@ All the code related to importing data from external files.
 """
 
 import csv
-from collections import defaultdict, OrderedDict
-from django.utils.text import slugify
-from .models import (
-    Work, Artist, ArtistInWork, Writer, WriterInWork,
-    Library, LibraryRelease, Recording)
-from .admin import WriterInWorkFormSet
 import re
-from django.conf import settings
+from collections import defaultdict, OrderedDict
 from decimal import Decimal
-from django.forms import inlineformset_factory
+
+from django.conf import settings
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import IntegrityError, transaction
+from django.forms import inlineformset_factory
+from django.utils.text import slugify
+
+from .admin import WriterInWorkFormSet
+from .models import (
+    Work, Artist, ArtistInWork, Writer, WriterInWork,
+    Library, LibraryRelease, Recording)
 
 
 class DataImporter(object):
+    """
+
+    """
     FLAT_FIELDS = [
         'work_id', 'work_title', 'iswc', 'original_title',
         'library', 'cd_identifier']
