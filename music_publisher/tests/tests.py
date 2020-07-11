@@ -70,8 +70,8 @@ class DataImportTest(TestCase):
 
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
-            data_import = data_import.DataImporter(csvfile)
-            data_import.run()
+            di = data_import.DataImporter(csvfile)
+            di.run()
 
     def test_log(self):
         """Test logging during import."""
