@@ -1,0 +1,20 @@
+Django>=3.0.6,<3.1
+# certifi
+# chardet
+# coverage
+# coveralls
+dj_database_url
+# idna
+psycopg2-binary
+# pytz
+# requests
+# requests-toolbelt
+sentry-sdk
+# Sphinx
+# sphinx_rtd_theme
+sphinxcontrib-napoleon
+# sphinxcontrib-websupport
+# tqdm
+# urllib3
+waitress
+whitenoise
