@@ -27,9 +27,9 @@ copyright = '2018-2020, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = '20 Twenty'
+version = '20.7 Endemic'
 # The full version, including alpha/beta/rc tags
-release = '20.1.3'
+release = '20.7'
 
 rst_epilog = '''
 .. |version| replace:: {}
@@ -100,7 +100,10 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_extra_path = ['googleb5723862796807b2.html']
+html_extra_path = [
+    'googleb5723862796807b2.html',
+    'work_import_template.csv'
+]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -128,7 +131,7 @@ latex_elements = {
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    # 'pointsize': '10pt',
+    'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
     #
@@ -137,6 +140,8 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     'figure_align': 'H',
+
+    'printindex': '\\footnotesize\\raggedright\\printindex',
 }
 
 

@@ -2,6 +2,7 @@
 
 Attributes:
     TEMPLATES_21 (dict): Record templates for CWR 2.1
+    TEMPLATES_30 (dict): Record templates for CWR 3.0
 """
 
 from django.template import Template
@@ -13,6 +14,7 @@ TEMPLATES_21 = {
         '{{ publisher_name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
         '               \r\n{% endautoescape %}'),
+    # CWR 2.1 revision 8 "hack" - no sender type field, 11 digit IPI name
     'HDR_8': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'HDR{{ publisher_ipi_name|rjust:11 }}'
@@ -44,7 +46,7 @@ TEMPLATES_21 = {
         ' E 000000000{{ settings.PUBLISHER_IPI_NAME|rjust:11 }}              '
         '{{ settings.PUBLISHER_SOCIETY_PR|soc }}{{ share|prp|cwrshare }}'
         '{{ settings.PUBLISHER_SOCIETY_MR|soc }}{{ share|mrp|cwrshare }}'
-        '{{ PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
+        '{{ settings.PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
         ' N {{ settings.PUBLISHER_IPI_BASE|ljust:13 }}'
         '                               '
         '\r\n{% endautoescape %}'),

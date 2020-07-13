@@ -1,27 +1,39 @@
 """
 Tests for :mod:`music_publisher`.
+
+This software has almost full test coverage. The only exceptions are
+instances of :class:`Exception` being caught during data imports.
+(User idiocy is boundless.)
+
+Most of the tests are functional end-to-end tests. While they test that
+code works, they don't always test that it works as expected.
+
+Still, it must be noted that exports are tested against provided
+templates (made in a different software, not using the same code beyond
+Python standard library).
+
+More precise tests would be better.
 """
 
 from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.auth.models import User
 from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template import Context
 from django.test import (
-    SimpleTestCase, TestCase, TransactionTestCase, override_settings,
-)
+    override_settings, SimpleTestCase, TestCase, TransactionTestCase)
 from django.urls import reverse
 
 import music_publisher.models
-from music_publisher.models import (
-    AlternateTitle, Artist, CWRExport, CommercialRelease, Label, Library,
-    LibraryRelease, Recording, Release, Work, Writer, WriterInWork,
-)
-from music_publisher import cwr_templates, validators
+from music_publisher import cwr_templates, data_import, validators
+from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
+    CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
+    Writer, WriterInWork, WorkAcknowledgement)
 
 
 def get_data_from_response(response):
@@ -54,6 +66,178 @@ def get_data_from_response(response):
     PUBLISHER_NAME='TEST PUBLISHER',
     PUBLISHER_CODE='MK',
     PUBLISHER_IPI_NAME='0000000199',
+    PUBLISHER_SOCIETY_PR='10',
+    PUBLISHER_SOCIETY_MR='34',
+    PUBLISHER_SOCIETY_SR=None,
+    REQUIRE_SAAN=False,
+    REQUIRE_PUBLISHER_FEE=False)
+class DataImportTest(TestCase):
+    """Functional test for data import from CSV files."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.superuser = User.objects.create_superuser(
+            'superuser', '', 'password')
+        cls.obj = Artist(last_name='Artist One')
+
+    def test_data_import(self):
+        with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
+            di = data_import.DataImporter(csvfile)
+            di.run()
+
+    def test_log(self):
+        """Test logging during import."""
+
+        """This does nothing, as user is unknown."""
+        di = data_import.DataImporter([], user=None)
+        di.log(data_import.ADDITION, None, 'no message')
+        self.assertEqual(LogEntry.objects.count(), 0)
+
+        """This logs."""
+        di = data_import.DataImporter([], user=self.superuser)
+        di.log(data_import.ADDITION, self.obj, 'test message')
+        self.assertEqual(LogEntry.objects.count(), 1)
+        le = LogEntry.objects.first()
+        self.assertEqual(str(le), 'Added “ARTIST ONE”.')
+        self.assertEqual(le.change_message, 'test message')
+
+    def test_unknown_key_exceptions(self):
+        """Test exceptions not tested in functional tests."""
+
+        di = data_import.DataImporter([], user=None)
+
+        # No key in dict
+        with self.assertRaises(ValueError) as ve:
+            di.get_clean_key('A', [], 'test')
+        self.assertEqual(str(ve.exception), 'Unknown value: "A" for "test".')
+
+        # Regex mismatch
+        with self.assertRaises(ValueError) as ve:
+            di.get_clean_key('-', [], 'test')
+        self.assertEqual(str(ve.exception), 'Unknown value: "-" for "test".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.process_writer_value('a', ['Writer', '1', 'b'], 'X')
+        self.assertEqual(str(ve.exception), 'Unknown column: "a".')
+
+        value, general_agreement = di.process_writer_value(
+            'a', ['writer', '1', 'controlled'], 1)
+        self.assertEqual(value, True)
+
+        value, general_agreement = di.process_writer_value(
+            'a', ['writer', '2', 'controlled'], 0)
+        self.assertEqual(value, False)
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'alt_work_title_1': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "alt_work_title_1".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "alt_title".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "artist_1".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "artist_1_name".')
+
+        with self.assertRaises(AttributeError) as ve:
+            di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
+        self.assertEqual(
+            str(ve.exception), 'Unknown column: "wtf_1".')
+
+        # mismatching general agreement numbers
+        with self.assertRaises(ValueError) as ve:
+            d = {
+                '1': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '10',
+                    'general_agreement': True,
+                    'saan': 'A',
+                },
+                '2': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '10',
+                    'general_agreement': True,
+                    'saan': 'B',
+                }
+            }
+            writers = list(di.get_writers(d))
+        self.assertEqual(
+            str(ve.exception),
+            'Two different general agreement numbers for: "X Y (*)".')
+
+        # mismatching PR societies
+        with self.assertRaises(ValueError) as ve:
+            d = {
+                '1': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '10',
+                },
+                '2': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '52',
+                }
+            }
+            writers = list(di.get_writers(d))
+        self.assertEqual(
+            str(ve.exception),
+            'Writer exists with different PRO: "X Y (*)".')
+
+        # integrity errrors
+        with self.assertRaises(ValueError) as ve:
+            d = {
+                '1': {
+                    'first': 'A',
+                    'last': 'B',
+                    'ipi': '199',
+                    'pro': '10',
+                },
+                '2': {
+                    'first': 'X',
+                    'last': 'Y',
+                    'ipi': '199',
+                    'pro': '52',
+                }
+            }
+            writers = list(di.get_writers(d))
+        self.assertEqual(
+            str(ve.exception),
+            (
+                'A writer with this IPI or general SAAN already exists in the '
+                'database, but is not exactly the same as one provided in the '
+                'importing data: A B'))
+
+        f = StringIO("Work Title,Library\nX,Y")
+        di = data_import.DataImporter(f, user=None)
+        with self.assertRaises(ValueError) as ve:
+            list(di.run())
+        self.assertEqual(
+            str(ve.exception),
+            ('Library and CD Identifier fields must both be either '
+                'present or empty.'))
+
+
+@override_settings(
+    PUBLISHER_NAME='TEST PUBLISHER',
+    PUBLISHER_CODE='MK',
+    PUBLISHER_IPI_NAME='0000000199',
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
     PUBLISHER_SOCIETY_SR='44',
@@ -63,7 +247,10 @@ def get_data_from_response(response):
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
-    """Functional tests on the interface, and several related unit tests."""
+    """Functional tests on the interface, and several related unit tests.
+
+    Note that tests build one atop another, simulating typical work flow."""
+
     fixtures = ['publishing_staff.json']
     testing_admins = [
         'artist', 'label', 'library', 'work', 'commercialrelease', 'writer',
@@ -71,8 +258,12 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_original_work(cls):
-        cls.original_work = Work.objects.create(title='The Work',
-                                                iswc='T1234567893')
+        """
+        Create original work, three writers, one controlled,
+        with recording, alternate titles, included in a commercial release."""
+        cls.original_work = Work.objects.create(
+            title='The Work', iswc='T1234567893',
+            library_release=cls.library_release)
         WriterInWork.objects.create(work=cls.original_work,
                                     writer=cls.generally_controlled_writer,
                                     capacity='C ',
@@ -91,12 +282,16 @@ class AdminTest(TestCase):
         AlternateTitle.objects.create(work=cls.original_work, suffix=True,
                                       title='Behind the Work')
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
-        Recording.objects.create(work=cls.original_work,
-                                 record_label=cls.label, artist=cls.artist,
-                                 isrc='US-S1Z-99-00001')
+        recording = Recording.objects.create(
+            work=cls.original_work, record_label=cls.label, artist=cls.artist,
+            isrc='JM-K40-14-00001')
+        Track.objects.create(
+            release=cls.commercial_release, recording=recording)
 
     @classmethod
     def create_modified_work(cls):
+        """Create modified work, original writer plus arranger,
+        with recording, alternate titles."""
         cls.modified_work = Work.objects.create(
             title='The Modified Work', original_title='The Work')
         WriterInWork.objects.create(
@@ -119,6 +314,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_copublished_work(cls):
+        """Create work, two writers, one co-published."""
         cls.copublished_work = Work.objects.create(title='Copublished')
         WriterInWork.objects.create(
             work=cls.copublished_work,
@@ -147,30 +343,36 @@ class AdminTest(TestCase):
     @classmethod
     def create_writers(cls):
         """Create four writers with different properties."""
-        cls.generally_controlled_writer = Writer(first_name='John',
-                                                 last_name='Smith',
-                                                 ipi_name='00000000297',
-                                                 pr_society='52',
-                                                 ipi_base='I-123456789-3',
-                                                 sr_society='44',
-                                                 mr_society='44',
-                                                 generally_controlled=True,
-                                                 saan='A1B2C3',
-                                                 publisher_fee=Decimal('0.25'))
+        cls.generally_controlled_writer = Writer(
+            first_name='John', last_name='Smith',
+            ipi_name='00000000297', ipi_base='I-123456789-3',
+            pr_society='52', sr_society='44', mr_society='44',
+            generally_controlled=True, saan='A1B2C3',
+            publisher_fee=Decimal('0.25'))
         cls.generally_controlled_writer.clean()
         cls.generally_controlled_writer.clean_fields()
         cls.generally_controlled_writer.save()
-        cls.other_writer = Writer(first_name='Jane', last_name='Doe',
-                                  ipi_name='395')
+
+        cls.other_writer = Writer(
+            first_name='Jane', last_name='Doe', ipi_name='395')
         cls.other_writer.clean()
         cls.other_writer.save()
 
         cls.writer_no_first_name = Writer(last_name='Jones')
         cls.writer_no_first_name.clean()
         cls.writer_no_first_name.save()
-        cls.controllable_writer = Writer(first_name='Jack', last_name='Doe',
-                                         ipi_name='493', pr_society='52',
-                                         mr_society='44', sr_society='44')
+
+        # This one is controllable, but not yet affiliated, testing
+        # "00000000000" hack
+        cls.controllable_writer = Writer(
+            first_name='Jack', last_name='Doe', ipi_name='00000000000')
+        cls.controllable_writer.clean()
+        cls.controllable_writer.save()
+        # Later, he is affiliated.
+        cls.controllable_writer.ipi_name = '493'
+        cls.controllable_writer.pr_society = '52'
+        cls.controllable_writer.mr_society = '44'
+        cls.controllable_writer.sr_society = '44'
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
 
@@ -206,6 +408,17 @@ class AdminTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Class setup.
+
+        Creating users. Creating instances of classes of less importance:
+
+        * label,
+        * library,
+        * artist,
+        * releases,
+
+        then calling the methods above.
+        """
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
             'superuser', '', 'password')
@@ -217,7 +430,6 @@ class AdminTest(TestCase):
             username='audituser', password='password', is_active=True,
             is_staff=True)
         cls.audituser.groups.add(2)
-
         cls.label = Label.objects.create(name='LABEL')
         cls.library = Library.objects.create(name='LIBRARY')
         cls.artist = Artist.objects.create(
@@ -225,6 +437,8 @@ class AdminTest(TestCase):
         cls.release = Release.objects.create(release_title='ALBUM')
         cls.library_release = Release.objects.create(
             release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
+        cls.commercial_release = Release.objects.create(
+            release_title='COMRELEASE')
 
         cls.create_writers()
         cls.create_modified_work()
@@ -234,7 +448,7 @@ class AdminTest(TestCase):
         cls.create_cwr3_export()
 
     def test_strings(self):
-        """Test ___str__ methods for created objects."""
+        """Test __str__ methods for created objects."""
         self.assertEqual(
             str(self.original_work),
             'MK000002: THE WORK (DOE / DOE / SMITH)')
@@ -271,6 +485,16 @@ class AdminTest(TestCase):
                 args=(1,))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
+            url = reverse('royalty_calculation')
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 302)
+
+    def test_super_user(self):
+        """Testing index for superuser covers all the cases."""
+        self.client.force_login(self.superuser)
+        url = reverse('admin:index')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_staff_user(self):
         """Test that a staff user can access some urls.
@@ -278,6 +502,10 @@ class AdminTest(TestCase):
         Please note that most of the work is in other tests."""
         self.client.force_login(self.staffuser)
         # General checks
+        url = reverse('admin:index')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
         for testing_admin in self.testing_admins:
             url = reverse(
                 'admin:music_publisher_{}_changelist'.format(testing_admin))
@@ -298,11 +526,16 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             data = get_data_from_response(response)
+            if testing_admin in ['cwrexport']:  # no change permission
+                continue
             if 'first_name' in data:
                 data['first_name'] += ' JR.'
             response = self.client.post(
                 url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_cwr_previews(self):
         """Test that CWR preview works."""
@@ -331,6 +564,49 @@ class AdminTest(TestCase):
             reverse('admin:music_publisher_work_changelist'),
             data={
                 'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.original_work.id
+            })
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(
+            reverse('admin:music_publisher_libraryrelease_changelist'),
+            data={
+                'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.library_release.id
+            })
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(
+            reverse('admin:music_publisher_commercialrelease_changelist'),
+            data={
+                'action': 'create_json', 'select_across': 1,
+                'index': 0, '_selected_action': self.library_release.id
+            })
+        self.assertEqual(response.status_code, 200)
+
+    def test_cwr_nwr(self):
+        """Test that CWR export works."""
+        self.client.force_login(self.staffuser)
+        response = self.client.post(
+            reverse('admin:music_publisher_cwrexport_add'),
+            data={
+                'nwr_rev': 'NWR',
+                'works': [
+                    self.original_work.id,
+                    self.modified_work.id,
+                    self.copublished_work.id,
+                ]
+            })
+        self.assertEqual(response.status_code, 302)
+        cwr = CWRExport.objects.first().cwr
+        self.assertIn('NWR0000000000000000THE MODIFIED WORK', cwr)
+        self.assertIn('THE MODIFIED WORK BEHIND THE MODIFIED WORK', cwr)
+
+    def test_csv(self):
+        """Test that CSV export works."""
+        self.client.force_login(self.staffuser)
+        response = self.client.post(
+            reverse('admin:music_publisher_work_changelist'),
+            data={
+                'action': 'create_csv', 'select_across': 1,
                 'index': 0, '_selected_action': self.original_work.id
             })
         self.assertEqual(response.status_code, 200)
@@ -447,6 +723,7 @@ class AdminTest(TestCase):
             'admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
+        data['writerinwork_set-0-capacity'] = ''
         data['writerinwork_set-0-capacity'] = ''
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
@@ -675,14 +952,15 @@ class AdminTest(TestCase):
             response.content)
 
     def test_ack_import_and_work_filters(self):
-        """Test ackknowledgement import and then filters on the change view.
+        """Test acknowledgement import and then filters on the change view,
+        as well as other related views.
 
         These tests must be together, ack import is used in filters.
         """
 
         self.client.force_login(self.staffuser)
         mock = StringIO()
-        mock.write(ACK_CONTENT)
+        mock.write(ACK_CONTENT_21)
 
         """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
@@ -707,7 +985,7 @@ class AdminTest(TestCase):
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
-        data.update({'acknowledgement_file': mockfile})
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         ackimport = music_publisher.models.ACKImport.objects.first()
@@ -727,6 +1005,51 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             music_publisher.models.ACKImport.objects.first().report, '')
+
+        """This file has also ISWC codes."""
+        mock = StringIO()
+        mock.write(ACK_CONTENT_21_EXT)
+
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        # At this point, there is a different ISWC in one of the works
+        with self.assertRaises(exceptions.ValidationError):
+            self.client.post(url, data, follow=False)
+        # Let's delete the one in the database and try again!
+        mock.seek(0)
+        self.original_work = Work.objects.get(id=self.original_work.id)
+        self.original_work.iswc = None
+        self.original_work.save()
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        self.original_work = Work.objects.get(id=self.original_work.id)
+        self.assertEqual(self.original_work.iswc, 'T9270264761')
+        url = reverse(
+            'admin:music_publisher_work_history',
+            args=(self.original_work.id,))
+        response = self.client.get(url)
+        self.assertIn('staffuser'.encode(), response.content)
+
+        """This file has bad ISWC codes."""
+        mock = StringIO()
+        mock.write(ACK_CONTENT_21_ERR)
+
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
 
         """Test with a badly formatted file."""
         mock.seek(1)
@@ -760,6 +1083,263 @@ class AdminTest(TestCase):
         url = base_url + '?in_cwr=N&ack_status=RA&has_iswc=N&has_rec=N'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+
+        """Test dummy CWR ACK 3.0"""
+        self.client.force_login(self.staffuser)
+        mock = StringIO()
+        mock.write(ACK_CONTENT_30)
+
+        """Upload the file that works."""
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNotNone(ackimport)
+
+        """Test the change view and the CWR preview."""
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+        response = self.client.get(url+'?preview=1')
+        self.assertEqual(response.status_code, 200)
+
+        """Upload the file that works."""
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        ackimport = music_publisher.models.ACKImport.objects.first()
+        self.assertIsNotNone(ackimport)
+
+        # required after acknowledgement imports because it lists
+        # ack sources
+        url = reverse('royalty_calculation')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        data = get_data_from_response(response)
+
+    @override_settings(
+        REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False,
+        PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
+    def test_data_import_and_royalty_calculations(self):
+        """Test data import, ack import and royalty calculations.
+
+        This is the normal process, work data is entered, then the registration
+        follows and then it can be processed in royalty statements.
+
+        This test also includes load testing, 200.000 rows must be imported
+        in under 10-15 seconds, performed 4 times with different algos and
+        ID types.
+        """
+        self.client.force_login(self.superuser)
+        with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'dataimport.csv',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_dataimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'data_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        data_import = music_publisher.models.DataImport.objects.first()
+        self.assertIsNotNone(data_import)
+        self.assertIsNot(data_import.report, '')
+        url = reverse('admin:music_publisher_dataimport_change',
+                      args=(data_import.id,))
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
+        self.client.force_login(self.staffuser)
+
+        mock = StringIO()
+        mock.write(ACK_CONTENT_21_EXT)
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+
+        with open(TEST_ROYALTY_PROCESSING_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'statement_file', 'statement.csv',
+            'text', 0, None)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'in_file': mockfile})
+        # Not enough data
+        response = self.client.post(url, data, follow=False)
+        self.assertFalse(hasattr(response, 'streaming_content'))
+
+        # Enough data, fee, p
+        mock.seek(0)
+        data.update({
+            'work_id_column': '1',
+            'work_id_source': '52',
+            'amount_column': '5',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, share, with rights column, ISWC
+        mock.seek(0)
+        data.update({
+            'algo': 'share',
+            'right_type_column': '3',
+            'work_id_source': 'ISWC',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, share, with rights column, ISRC
+        mock.seek(0)
+        data.update({
+            'work_id_source': 'ISRC',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, fee, sync
+        mock.seek(0)
+        data.update({
+            'right_type_column': 's',
+            'work_id_source': 'MK',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # Enough data, fee, sync
+        mock.seek(0)
+        data.update({
+            'right_type_column': 'm',
+            'work_id_source': 'MK',
+        })
+        response = self.client.post(url, data, follow=False)
+        self.assertTrue(hasattr(response, 'streaming_content'))
+
+        # lets do one more thing here, copy work IDs to foreign work IDs.
+        # to test the slowest use case, and fix work._work_id
+        for i, work in enumerate(Work.objects.all()):
+            work._work_id = work.work_id
+            work.save()
+            status = WorkAcknowledgement.TRANSACTION_STATUS_CHOICES[i % 12][0]
+            society = ['52', '52', '52', '52', '44'][i % 5]
+            WorkAcknowledgement(
+                work=work, status=status, remote_work_id=work._work_id,
+                society_code=society, date=datetime.now()).save()
+
+        # 200K rows
+        with open(TEST_ROYALTY_PROCESSING_LARGE_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mockfile = InMemoryUploadedFile(
+            mock, 'statement_file', 'statement.csv',
+            'text', 0, None)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+
+        # our ID
+        mock.seek(0)
+        data.update({
+            'in_file': mockfile,
+            'algo': 'share',
+            'work_id_column': '0',
+            'work_id_source': 'MK',
+            'right_type_column': '4',
+            'amount_column': '5',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 10)
+
+        mock.seek(0)
+        data.update({
+            'algo': 'fee',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 10)
+
+        mock.seek(0)
+        data.update({
+            'work_id_source': '52',
+            'default_fee': '10.00',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 15)
+
+        mock.seek(0)
+        data.update({
+            'algo': 'share',
+            'work_id_column': '6',
+            'work_id_source': 'ISRC',
+        })
+        time_before = datetime.now()
+        response = self.client.post(url, data, follow=False)
+        time_after = datetime.now()
+        self.assertTrue(hasattr(response, 'streaming_content'))
+        # The file must be processed in under 10 seconds
+        self.assertLess((time_after - time_before).total_seconds(), 10)
+
+    @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
+    def test_bad_data_import(self):
+        """Test bad data import."""
+
+        """Upload the completely bad file (CWR file in this case)."""
+        self.client.force_login(self.superuser)
+        with open(TEST_CWR2_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mock.seek(0)
+        mockfile = InMemoryUploadedFile(
+            mock, 'acknowledgement_file', 'dataimport.csv',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_dataimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'data_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Unknown column', response.content)
 
     def test_recording_filters(self):
         """Test Work changelist filters."""
@@ -908,7 +1488,7 @@ class ValidatorsTest(TestCase):
             validators.validate_settings()
 
     def test_title(self):
-        validator = validators.CWRFieldValidator('work_title')
+        validator = validators.CWRFieldValidator('title')
         self.assertIsNone(validator('VALID TITLE'))
         with self.assertRaises(exceptions.ValidationError):
             validator('|Invalid')
@@ -962,7 +1542,7 @@ class ValidatorsTest(TestCase):
             validator('I-123456789-4')
 
     def test_name(self):
-        validator = validators.CWRFieldValidator('last_name')
+        validator = validators.CWRFieldValidator('name')
         self.assertIsNone(validator('VALID NAME'))
         with self.assertRaises(exceptions.ValidationError):
             validator('NAME, INVALID')
@@ -1054,7 +1634,7 @@ class ModelsSimpleTest(TransactionTestCase):
             library=library, cd_identifier='ML001')
         release.save()
         self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
-        self.assertIsNone(release.get_dict())
+        self.assertIsNone(release.get_dict().get('title'))
         release.ean = '1X'
         with self.assertRaises(exceptions.ValidationError):
             release.clean()
@@ -1208,6 +1788,10 @@ class ModelsSimpleTest(TransactionTestCase):
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
             cwr.cwr.encode()[87:], TEST_CONTENT[87:])
+        # should just return when once created
+        num = cwr.num_in_year
+        cwr.create_cwr()
+        self.assertEqual(cwr.num_in_year, num)
 
         # test also CWR 3.0 ISR
         TEST_CONTENT = open(TEST_ISR_FILENAME, 'rb').read()
@@ -1229,16 +1813,82 @@ class ModelsSimpleTest(TransactionTestCase):
             writer.clean()
 
 
-ACK_CONTENT = """HDRSO000000021BMI                                          01.102018060715153220180607
+ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
-ACK0000000000000000201805160910510000100000000NWRONE                                                         MK000001            123                 20180607AS
-ACK0000000100000000201805160910510000100000001NWRTWO                                                         DMP000002                               20180607RA
-ACK0000000200000000201805160910510000100000002NWRTHREE                                                       00000000000003                          20180607RA
-ACK0000000300000000201805160910510000100000003NWRTHREE                                                       00000000000004                          20180607NP
-ACK0000000400000000201805160910510000100000004NWRX                                                           0000000000000X                          20180607NP
+ACK0000000000000000201805160910510000100000000NWRONE                                                         Z128                123                 20180607AS
+ACK0000000100000000201805160910510000100000001NWRTWO                                                         Z127                                    20180607RA
+ACK0000000200000000201805160910510000100000002NWRTHREE                                                       DMP000026                               20180607RA
+ACK0000000300000000201805160910510000100000003NWRTHREE                                                       DMP000027                               20180607NP
+ACK0000000400000000201805160910510000100000004NWRX                                                           DMP000025                               20180607NP
 GRT000010000005000000007
 TRL000010000005000000009"""
 
+
+ACK_CONTENT_21_EXT = """HDRSO000000052PRS for Music                                01.102018060715153220180607
+GRHACK0000102.100000000000
+ACK0000000000000000202006031357150000100000000REVTHE MODIFIED WORK                                           MK000001            337739ES            20200603AS
+REV0000000000000001THE MODIFIED WORK                                             MK000001      T927026487400000000            UNC000000Y      ORI                                                   N00000000000                                                   N
+SPU000000000000000201MK       TEST PUBLISHER                                E 00000000000000000004              0520500004410000   10000 N
+SPT0000000000000003MK             050001000010000I2136N001
+SWR0000000000000004W000001  TESTIC                                       TESTO                          C 0000000000000000000005205000   00000   00000 N
+SWT0000000000000005W000001  050000000000000I2136N001
+PWR0000000000000006MK       TEST PUBLISHER                                                           W000001
+ALT0000000000000007THE MODIFIED WORK 1                                         AT
+ALT0000000000000008THE MODIFIED WORK 2                                         AT
+ALT0000000000000009THE MODIFIED WORK 3                                         AT
+ALT0000000000000010THE MODIFIED WORK 4                                         AT
+REC000000000000001120200407                                                            000030                                                                                                                                                                        
+REC000000000000001220170407                                                            000010                                                                                                                                                                        
+REC000000000000001320170407                                                            000030                                                                                                                                                                        
+REC000000000000001420170407                                                            000456                                                                                                                                                                        
+ORN0000000000000015LIB                                                            MK001          0000TEST LIBRARY                                                                                                                                                                      0000
+ACK0000000100000000202006031357150000100000001REVTHE WORK                                                    MK000002            337739DU            20200603AS
+REV0000000100000001THE WORK                                                      MUM000002     T927026476100000000            UNC000000Y      ORI                                                   N00000000000                                                   N
+SPU000000010000000201MK       TEST PUBLISHER                                E 00000000000000000004              0520500004410000   10000 N
+SPT0000000100000003MK             050001000010000I2136N001
+SWR0000000100000004W000001  TESTIC                                       TESTO                          C 0000000000000000000005205000   00000   00000 N
+SWT0000000100000005W000001  050000000000000I2136N001
+PWR0000000100000006MK       TEST PUBLISHER                                                           W000001
+GRT000010000002000000025
+TRL000010000002000000027"""
+
+ACK_CONTENT_21_ERR = """HDRSO000000052PRS for Music                                01.102018060715153220180607
+GRHACK0000102.100000000000
+ACK0000000000000000202006031357150000100000000REVTHE MODIFIED WORK                                           MK000001            337739ES            20200603AS
+REV0000000000000001THE MODIFIED WORK                                             MK000001      X927026487400000000            UNC000000Y      ORI                                                   N00000000000                                                   N
+SPU000000000000000201MK       TEST PUBLISHER                                E 00000000000000000004              0520500004410000   10000 N
+SPT0000000000000003MK             050001000010000I2136N001
+SWR0000000000000004W000001  TESTIC                                       TESTO                          C 0000000000000000000005205000   00000   00000 N
+SWT0000000000000005W000001  050000000000000I2136N001
+PWR0000000000000006MK       TEST PUBLISHER                                                           W000001
+ALT0000000000000007THE MODIFIED WORK 1                                         AT
+ALT0000000000000008THE MODIFIED WORK 2                                         AT
+ALT0000000000000009THE MODIFIED WORK 3                                         AT
+ALT0000000000000010THE MODIFIED WORK 4                                         AT
+REC000000000000001120200407                                                            000030                                                                                                                                                                        
+REC000000000000001220170407                                                            000010                                                                                                                                                                        
+REC000000000000001320170407                                                            000030                                                                                                                                                                        
+REC000000000000001420170407                                                            000456                                                                                                                                                                        
+ORN0000000000000015LIB                                                            MK001          0000TEST LIBRARY                                                                                                                                                                      0000
+ACK0000000100000000202006031357150000100000001REVTHE WORK                                                    MK000002            337739DU            20200603AS
+REV0000000100000001THE WORK                                                      MUM000002     T827026476100000000            UNC000000Y      ORI                                                   N00000000000                                                   N
+SPU000000010000000201MK       TEST PUBLISHER                                E 00000000000000000004              0520500004410000   10000 N
+SPT0000000100000003MK             050001000010000I2136N001
+SWR0000000100000004W000001  TESTIC                                       TESTO                          C 0000000000000000000005205000   00000   00000 N
+SWT0000000100000005W000001  050000000000000I2136N001
+PWR0000000100000006MK       TEST PUBLISHER                                                           W000001
+GRT000010000002000000025
+TRL000010000002000000027"""
+
+ACK_CONTENT_30 = """HDRSOBMI BMI                                          2018060715153220180607               3.0000
+GRHACK0000102.100020180607
+ACK0000000000000000201805160910510000100000000WRKONE                                                         MK000001            123                                     20180607AS
+GRT000010000001000000003
+TRL000010000001000000005"""
+
+TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
+TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
+TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR'

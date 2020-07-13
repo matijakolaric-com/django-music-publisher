@@ -1,0 +1,10 @@
+Django>=3.0.6,<3.1
+dj_database_url
+psycopg2-binary
+sentry-sdk
+# Sphinx
+# sphinx_rtd_theme
+sphinxcontrib-napoleon
+# sphinxcontrib-websupport
+waitress
+whitenoise

@@ -1,0 +1,284 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script type="text/javascript" src="{% static "admin/js/papaparse.min.js" %}"></script>
+{{ form.media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}{% endblock %}
+
+{% block title %}Royalty calculations{{ block.super }}{% endblock %}
+{% block content_title %}<h1>Royalty calculations</h1>{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' 'music_publisher' %}">Music Publisher</a>
+&rsaquo; Royalty Calculations
+</div>
+{% endblock %}
+{% endif %}
+
+{% block content %}
+    <div id="content-main">
+        <form action="" method="post" id="work_form" novalidate="" enctype='multipart/form-data'>{% csrf_token %}
+            <div>
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for foo in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %} 
+                <fieldset class="module aligned">
+                    <div class="form-row">
+                        <div>
+                            {% if form.in_file.errors %}
+                                <ul class="errorlist">
+                                    {% for error in  form.in_file.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.in_file.label_tag }}
+                            {{ form.in_file }}
+                            <div class="help">{{ form.in_file.help_text|safe }}</div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="module aligned">
+                    <h2>Algorithm</h2>
+                    <div class="form-row">
+                        <div class="fieldBox">
+                            {% if form.algo.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.algo.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.algo.label_tag }}
+                            {{ form.algo }}
+                            <div class="help">{{ form.algo.help_text|safe }}</div>
+                        </div>
+                        <div class="fieldBox fee-only">
+                            {% if form.default_fee.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.default_fee.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.default_fee.label_tag }}
+                            {{ form.default_fee }}
+                            <div class="help">{{ form.default_fee.help_text|safe }}</div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="module aligned">
+                    <h2>Columns</h2>
+                    <div class="form-row">
+                        <div class="fieldBox">
+                            {% if form.work_id_column.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.work_id_column.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.work_id_column.label_tag }}
+                            {{ form.work_id_column }}
+                            <div class="help">{{ form.work_id_column.label_tag.help_text|safe }}</div>
+                        </div>
+                        <div class="fieldBox">
+                            {% if form.work_id_source.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.work_id_source.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.work_id_source.label_tag }}
+                            {{ form.work_id_source }}
+                            <div class="help">{{ form.work_id_source.label_tag.help_text|safe }}</div>
+                        </div>
+                    </div>
+                    <div class="form-row split-only">
+                        <div>
+                            {% if form.right_type_column.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.right_type_column.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.right_type_column.label_tag }}
+                            {{ form.right_type_column }}
+                            <div class="help">{{ form.right_type_column.label_tag.help_text|safe }}</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            {% if form.amount_column.errors %}
+                                <ul class="errorlist">
+                                    {% for error in form.amount_column.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ form.amount_column.label_tag }}
+                            {{ form.amount_column }}
+                            <div class="help">{{ form.amount_column.label_tag.help_text|safe }}</div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="submit-row">
+                <input type="submit" value="Process" class="default" name="_save">
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function($) {
+        if (window.FileReader) {
+
+            /* Default fee field */
+            if ($("#id_algo").val() == 'fee') {
+                $(".fee-only").show();
+                $(".split-only").hide();
+            } else {
+                $(".fee-only").hide();
+                $(".split-only").show();
+            }
+
+            /* Form manipulation setup */
+            const inFile = $("#id_in_file");
+            const workIdColumn = $("#id_work_id_column")[0];
+            const rightType = $("#id_right_type_column")[0];
+            $("#id_work_id_source")[0][0].disabled = true;
+            $("#id_work_id_source")[0][2].disabled = true;
+            $("#id_work_id_source")[0][5].disabled = true;
+            rightType[3].disabled = true;
+            rightType[3].selected = false;
+            const amountColumn = $("#id_amount_column")[0];
+            let currentHdrs = null;
+
+            /* Change form after processing CSV file */
+            function changeForm(hdrs, workIdHdrs, amountIdHdrs, rightTypeHdrs) {
+                if (JSON.stringify(hdrs) != currentHdrs) {
+                    workIdColumn.length = 0;
+                    amountColumn.length = 0;
+                    rightType.length = 4;
+                    if (hdrs.length > 1) {
+                        for (i = 0; i < hdrs.length; i++) {
+                            workIdColumn.append(new Option(hdrs[i], i));
+                            rightType.append(new Option(hdrs[i], i));
+                            amountColumn.append(new Option(hdrs[i], i));
+                        }
+                    }
+                }
+                currentHdrs = JSON.stringify(hdrs);
+                for (i = 0; i < hdrs.length; i++) {
+                    if (workIdHdrs[i]) {
+                        workIdColumn[i].disabled = false;
+                    } else {
+                        workIdColumn[i].disabled = true;
+                        workIdColumn[i].selected = false;
+                    }
+                    if (rightTypeHdrs[i]) {
+                        rightType[i + 4].disabled = false;
+                    } else {
+                        rightType[i + 4].disabled = true;
+                        rightType[i + 4].selected = false;
+                    }
+                    if (amountIdHdrs[i]) {
+                        amountColumn[i].disabled = false;
+                    } else {
+                        amountColumn[i].disabled = true;
+                        amountColumn[i].selected = false;
+                    }
+                }
+            }
+
+            /* Default fee toggling */
+            $("#id_algo").change(function() {
+                if ($("#id_algo").val() == 'fee') {
+                    $(".fee-only").show();
+                    $(".split-only").hide();
+                } else {
+                    $(".fee-only").hide();
+                    $(".split-only").show();
+                }
+            });
+
+            /* Process CSV */
+            $("#id_in_file").change(function() {
+                let file = inFile[0].files[0];
+                let hdrs = null;
+                let workIdHdrs = null;
+                let amountIdHdrs = null;
+                let rightTypeHdrs = null;
+                if (file) {
+                    Papa.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        worker: true,
+                        step: function(results, parser)
+                        {
+                            /* First time only */
+                            if (hdrs === null) {
+                                hdrs = results.meta.fields;
+                                workIdHdrs = [...hdrs];
+                                amountIdHdrs = [...hdrs];
+                                rightTypeHdrs= [...hdrs];
+                            }
+
+                            /* Disable columns for some fields */
+                            for (i in hdrs) {
+                                let value = results.data[hdrs[i]];
+
+                                /* All selected columns must not have blank values */
+                                if (value.length == 0) {
+                                    workIdHdrs[i] = false;
+                                    amountIdHdrs[i] = false;
+                                    rightTypeHdrs[i] = false;
+                                    continue;
+                                }
+
+                                /* Work ID is 14, ISWC 11-15 characters long, ISRC 12-15 */
+                                if (value.length > 15) {
+                                    workIdHdrs[i] = false
+                                }
+
+                                /* If not a number, it can not be amount */
+                                if (isNaN(value)) {
+                                    amountIdHdrs[i] = false;
+
+                                    /* Right column must start with "P", "M" or "S" */
+                                    let c = value.toLowerCase().charAt(0);
+                                    if (['p', 'm', 's'].indexOf(c) == -1) {
+                                        rightTypeHdrs[i] = false;
+                                    }
+                                } else {
+                                    rightTypeHdrs[i] = false;
+                                }
+                            }
+                        },
+                        complete: function() {
+                            if (hdrs !== null) {
+                                changeForm(hdrs, workIdHdrs, amountIdHdrs, rightTypeHdrs);
+                            }
+                        }
+                    });
+                }
+            });
+        } else {
+             alert('Please get a proper browser.');
+        }
+    })(django.jQuery);
+</script>
+{% endblock %}

@@ -93,7 +93,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 STATIC_URL = os.getenv('STATIC_URL', '/static/')
 
 STATIC_ROOT = os.getenv('STATIC_ROOT', os.path.join(BASE_DIR, 'static'))
@@ -116,7 +115,8 @@ with open(path, 'r') as f:
          for row in reader),
         key=lambda row: row[1])
 
-    
+LOGIN_URL = '/login/'
+
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
     
 # The name of the publisher. Use no comma in the name!
@@ -165,3 +165,8 @@ if SENTRY_DSN:
         send_default_pii=True
     )
     sentry_sdk.capture_message('Starting.')
+
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 0 if DEBUG else 300
+SECURE_HSTS_PRELOAD = DEBUG

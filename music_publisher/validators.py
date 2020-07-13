@@ -1,7 +1,7 @@
 """CWR-compatibility field-level validation.
 
 For formats that allow dashes and dots (ISWC, IPI Base), the actual format is
-from CWR 2.x specification for compatibility.
+from CWR 2.x specification: ISWC without and IPI Base with dashes.
 
 """
 
@@ -10,6 +10,7 @@ import re
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.deconstruct import deconstructible
+
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
@@ -32,6 +33,7 @@ def check_ean_digit(ean):
     Raises:
         ValidationError
     """
+
     number = ean[:-1]
     ch = str(
         (10 - sum(
@@ -125,15 +127,12 @@ class CWRFieldValidator:
         Args:
             value (): Input value
 
-        Returns:
-            None: If all is well.
-
         Raises:
             ValidationError: If the value does not pass the validation.
         """
 
         name = self.field
-        if 'title' in name:
+        if name == 'title':
             if not re.match(RE_TITLE, value.upper()):
                 raise ValidationError('Title contains invalid characters.')
         elif name == 'isni':
@@ -161,15 +160,17 @@ class CWRFieldValidator:
                 raise ValidationError(
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
-        elif ('name' in name or
-              'label' in name or
-              name in ['cd_identifier', 'saan', 'library']):
+        elif name == 'name':
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
 
 
 def validate_settings():
-    """CWR-compliance validation for settings"""
+    """CWR-compliance validation for settings.
+
+    This is used to prevent deployment with invalid settings.
+    """
+
     if settings.PUBLISHER_NAME:
         try:
             CWRFieldValidator('name')(settings.PUBLISHER_NAME)

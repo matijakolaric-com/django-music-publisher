@@ -16,14 +16,17 @@ def strip_zeros_from_societies(apps, schema_editor):
     """In older versions, society keys had leading zero, removed in CWR3.x."""
 
     writer_cls = apps.get_model('music_publisher', 'Writer')
+    workack_cls = apps.get_model(
+        'music_publisher', 'WorkAcknowledgement')
     for writer in writer_cls.objects.filter(pr_society__isnull=False):
         writer.pr_society = writer.pr_society.lstrip('0')
         writer.save()
+    for workack in workack_cls.objects.filter(society_code__isnull=False):
+        workack.society_code = workack.society_code.lstrip('0')
+        workack.society_code.save()
 
 
 class Migration(migrations.Migration):
-
-    replaces = [('music_publisher', '0002_auto_20191204_1255'), ('music_publisher', '0003_auto_20200103_2338'), ('music_publisher', '0004_ackimport_cwr')]
 
     dependencies = [
         ('music_publisher', '0001_initial'),

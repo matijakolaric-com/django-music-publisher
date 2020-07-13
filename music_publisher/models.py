@@ -1,6 +1,6 @@
 """Concrete models.
 
-They mostly inherit classes from :mod:`.base`.
+They mostly inherit from classes in :mod:`.base`.
 
 """
 
@@ -14,7 +14,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template import Context
 
-from .base import (IPIBase, PersonBase, TitleBase)
+from .base import (
+    ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
+    TitleBase, WriterBase,
+)
 from .cwr_templates import TEMPLATES_21, TEMPLATES_30
 from .validators import CWRFieldValidator
 
@@ -27,28 +30,9 @@ WORLD_DICT = {
 }
 
 
-class Artist(PersonBase):
-    """Performing artists.
-
-    Attributes:
-        isni (django.db.models.CharField): International Standard Name Id
+class Artist(ArtistBase):
+    """Performing artist.
     """
-
-    class Meta:
-        verbose_name = 'Performing Artist'
-        verbose_name_plural = '  Performing Artists'
-        ordering = ('last_name', 'first_name', '-id')
-
-    isni = models.CharField(
-        'ISNI',
-        max_length=16, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('isni'),))
-
-    def clean_fields(self, *args, **kwargs):
-        """ISNI cleanup"""
-        if self.isni:
-            self.isni = self.isni.rjust(16, '0').upper()
-        return models.Model.clean_fields(self, *args, **kwargs)
 
     def get_dict(self):
         """Get the object in an internal dictionary format
@@ -74,20 +58,12 @@ class Artist(PersonBase):
         return 'A{:06d}'.format(self.id)
 
 
-class Label(models.Model):
+class Label(LabelBase):
     """Music Label.
-
-    Attributes:
-        name (django.db.models.CharField): Label Name
     """
 
     class Meta:
-        verbose_name_plural = '  Music Labels'
-        ordering = ('name',)
-
-    name = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('label'),))
+        verbose_name = 'Music Label'
 
     def __str__(self):
         return self.name.upper()
@@ -114,15 +90,13 @@ class Label(models.Model):
         }
 
 
-class Library(models.Model):
+class Library(LibraryBase):
     """Music Library.
-
-    Attributes:
-        name (django.db.models.CharField): Library Name
     """
 
     class Meta:
-        verbose_name_plural = '  Music Libraries'
+        verbose_name = 'Music Library'
+        verbose_name_plural = 'Music Libraries'
         ordering = ('name',)
 
     name = models.CharField(
@@ -154,42 +128,23 @@ class Library(models.Model):
         }
 
 
-class Release(models.Model):
+class Release(ReleaseBase):
     """Music Release (album / other product)
 
     Attributes:
-        cd_identifier (django.db.models.CharField): CD Identifier, used when \
-        origin is library
-        ean (django.db.models.CharField): EAN code
         library (django.db.models.ForeignKey): Foreign key to \
         :class:`.models.Library`
-        release_date (django.db.models.DateField): Date of the release
         release_label (django.db.models.ForeignKey): Foreign key to \
         :class:`.models.Label`
-        release_title (django.db.models.CharField): Title of the release
         recordings (django.db.models.ManyToManyField): M2M to \
         :class:`.models.Recording` through :class:`.models.Track`
     """
 
     class Meta:
-        ordering = ('release_title', 'cd_identifier', '-id')
+        verbose_name = 'Release'
 
-    cd_identifier = models.CharField(
-        'CD identifier',
-        max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('cd_identifier'),))
     library = models.ForeignKey(
         Library, null=True, blank=True, on_delete=models.PROTECT)
-    release_date = models.DateField(
-        blank=True, null=True)
-    release_title = models.CharField(
-        'Release (album) title ',
-        max_length=60, blank=True, null=True,
-        validators=(CWRFieldValidator('release_title'),))
-    ean = models.CharField(
-        'Release (album) EAN',
-        max_length=13, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('ean'),))
     release_label = models.ForeignKey(
         Label, verbose_name='Release (album) label', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -221,18 +176,18 @@ class Release(models.Model):
         """
         return 'RE{:06d}'.format(self.id)
 
-    def get_dict(self):
+    def get_dict(self, with_tracks=False):
         """Get the object in an internal dictionary format
+
+        Args:
+            with_tracks (bool): add track data to the output
 
         Returns:
             dict: internal dict format
+
         """
-        if not (self.release_title or
-                self.release_label or
-                self.release_date or
-                self.ean):
-            return None
-        return {
+
+        d = {
             'id': self.id,
             'code': self.release_id,
             'title':
@@ -245,6 +200,9 @@ class Release(models.Model):
             'ean':
                 self.ean,
         }
+        if with_tracks:
+            d['tracks'] = [track.get_dict() for track in self.tracks.all()]
+        return d
 
 
 class LibraryReleaseManager(models.Manager):
@@ -260,6 +218,19 @@ class LibraryReleaseManager(models.Manager):
         """
         return super().get_queryset().filter(cd_identifier__isnull=False)
 
+    def get_dict(self, qs):
+        """Get the object in an internal dictionary format
+
+        Args:
+            qs (django.db.models.query.QuerySet)
+
+        Returns:
+            dict: internal dict format
+        """
+        return {
+            'releases': [release.get_dict(with_tracks=True) for release in qs]
+        }
+
 
 class LibraryRelease(Release):
     """Proxy class for Library Releases (AKA Library CDs)
@@ -270,7 +241,8 @@ class LibraryRelease(Release):
 
     class Meta:
         proxy = True
-        verbose_name_plural = '  Library Releases'
+        verbose_name = 'Library Release'
+        verbose_name_plural = 'Library Releases'
 
     objects = LibraryReleaseManager()
 
@@ -318,6 +290,19 @@ class CommercialReleaseManager(models.Manager):
         """
         return super().get_queryset().filter(cd_identifier__isnull=True)
 
+    def get_dict(self, qs):
+        """Get the object in an internal dictionary format
+
+        Args:
+            qs (django.db.models.query.QuerySet)
+
+        Returns:
+            dict: internal dict format
+        """
+        return {
+            'releases': [release.get_dict(with_tracks=True) for release in qs]
+        }
+
 
 class CommercialRelease(Release):
     """Proxy class for Commercial Releases
@@ -328,19 +313,38 @@ class CommercialRelease(Release):
 
     class Meta:
         proxy = True
-        verbose_name_plural = '  Commercial Releases'
+        verbose_name = 'Commercial Release'
+        verbose_name_plural = 'Commercial Releases'
 
     objects = CommercialReleaseManager()
 
 
-class Writer(PersonBase, IPIBase):
-    """Base class for writers, the second most important top-level class.
+class OriginalPublishingAgreement(models.Model):
+    """Original Publishing Agreement for controlled writers.
+
+    Not used in DMP."""
+
+    class Meta:
+        managed = False
+
+
+class Writer(WriterBase):
+    """Writers.
+
+    Attributes:
+        original_publishing_agreement (django.db.models.ForeignKey): \
+        Foreign key to :class:`.models.OriginalPublishingAgreement`
     """
 
     class Meta:
         ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name_plural = '  Writers'
+        verbose_name = 'Writer'
+        verbose_name_plural = 'Writers'
 
+    original_publishing_agreement = models.ForeignKey(
+        OriginalPublishingAgreement, verbose_name='Original Agreement',
+        null=True, blank=True, on_delete=models.PROTECT)
+    
     def __str__(self):
         name = super().__str__()
         if self.generally_controlled:
@@ -348,7 +352,7 @@ class Writer(PersonBase, IPIBase):
         return name
 
     def clean(self, *args, **kwargs):
-        """Check if writer who is controlled can no longer be."""
+        """Check if writer who is controlled still has enough data."""
         super().clean(*args, **kwargs)
         if self.pk is None or self._can_be_controlled:
             return
@@ -357,7 +361,8 @@ class Writer(PersonBase, IPIBase):
         if self.writerinwork_set.filter(controlled=True).exists():
             raise ValidationError(
                 'This writer is controlled in at least one work. ' +
-                'Required fields are: Last name, IPI name and PR society.')
+                'Required fields are: Last name, IPI name and PR society. ' +
+                'See "Writers" in the user manual.')
 
     @property
     def writer_id(self):
@@ -443,7 +448,7 @@ class WorkManager(models.Manager):
         Return a dictionary with works from the queryset
 
         Args:
-            qs(django.db.models.query import QuerySet): works queryset
+            qs(django.db.models.query import QuerySet)
 
         Returns:
             dict: dictionary with works
@@ -474,6 +479,8 @@ class Work(TitleBase):
     """Concrete class, with references to foreign objects.
 
     Attributes:
+        _work_id (django.db.models.CharField): permanent work id, either \
+        imported or fixed when exports are created
         iswc (django.db.models.CharField): ISWC
         original_title (django.db.models.CharField): title of the original \
             work, implies modified work
@@ -490,20 +497,27 @@ class Work(TitleBase):
     """
 
     class Meta:
-        verbose_name = '    Musical Work'
+        verbose_name = 'Musical Work'
         ordering = ('-id',)
+        permissions = (
+            ('can_process_royalties', 'Can perform royalty calculations'),)
 
+    _work_id = models.CharField(
+        'Work ID', max_length=14, blank=True, null=True, unique=True,
+        editable=False,
+        validators=(CWRFieldValidator('name'),))
     iswc = models.CharField(
         'ISWC', max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('iswc'),))
     original_title = models.CharField(
+        verbose_name='Title of original work',
         max_length=60, db_index=True, blank=True,
         help_text='Use only for modification of existing works.',
         validators=(CWRFieldValidator('work_title'),))
     library_release = models.ForeignKey(
         'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
         related_name='works',
-        verbose_name='Library Release')
+        verbose_name='Library release')
     last_change = models.DateTimeField(
         'Last Edited', editable=False, null=True)
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
@@ -518,9 +532,17 @@ class Work(TitleBase):
         Returns:
             str: Internal Work ID
         """
+        if self._work_id:
+            return self._work_id
         if self.id is None:
             return ''
         return '{}{:06}'.format(settings.PUBLISHER_CODE, self.id)
+
+    @work_id.setter
+    def work_id(self, value):
+        assert self._work_id is None  # this should not be called if set
+        if value:
+            self._work_id = value
 
     def is_modification(self):
         """
@@ -612,7 +634,7 @@ class Work(TitleBase):
 
         return j
 
-    def get_dict(self):
+    def get_dict(self, with_recordings=True):
         """Create a data structure that can be serialized as JSON.
 
         Normalize the structure if required.
@@ -625,6 +647,7 @@ class Work(TitleBase):
             'id': self.id,
             'code': self.work_id,
             'work_title': self.title,
+            'last_change': self.last_change,
             'version_type': {
                 'code': 'MOD',
                 'name': 'Modified Version of a musical work',
@@ -641,7 +664,6 @@ class Work(TitleBase):
                 else None),
             'writers': [],
             'performing_artists': [],
-            'recordings': [],
             'original_works': [],
             'cross_references': []
         }
@@ -660,10 +682,8 @@ class Work(TitleBase):
             d = wiw.get_dict()
             j['writers'].append(d)
 
-        # add recording data, normalize if required
-        for recording in self.recordings.all():
-            rec = recording.get_dict(with_releases=True)
-            j['recordings'].append(rec)
+        if with_recordings:
+            j['recordings'] = [recording.get_dict(with_releases=True) for recording in self.recordings.all()]
 
         # add cross references, currently only society work ids from ACKs
         for wa in self.workacknowledgement_set.all():
@@ -692,6 +712,7 @@ class AlternateTitle(TitleBase):
     class Meta:
         unique_together = (('work', 'title'),)
         ordering = ('-suffix', 'title')
+        verbose_name = 'Alternative Title'
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -766,10 +787,18 @@ class WriterInWork(models.Model):
     """
 
     class Meta:
+        verbose_name = 'Writer in Work'
         verbose_name_plural = 'Writers in Work'
         unique_together = (('work', 'writer', 'controlled'),)
         ordering = (
             '-controlled', 'writer__last_name', 'writer__first_name', '-id')
+    ROLES = (
+        ('CA', 'Composer&Lyricist'),
+        ('C ', 'Composer'),
+        ('A ', 'Lyricist'),
+        ('AR', 'Arranger'),
+        ('AD', 'Adaptor'),
+        ('TR', 'Translator'))
 
     work = models.ForeignKey(
         Work, on_delete=models.CASCADE)
@@ -781,18 +810,15 @@ class WriterInWork(models.Model):
                   'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
         validators=(CWRFieldValidator('saan'),), )
+    original_publishing_agreement = models.ForeignKey(
+        OriginalPublishingAgreement, verbose_name='Original Agreement',
+        null=True, blank=True, on_delete=models.PROTECT)
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(
         'Manuscript share', max_digits=5, decimal_places=2)
     capacity = models.CharField(
         'Role',
-        max_length=2, blank=True, choices=(
-            ('CA', 'Composer&Lyricist'),
-            ('C ', 'Composer'),
-            ('A ', 'Lyricist'),
-            ('AR', 'Arranger'),
-            ('AD', 'Adaptor'),
-            ('TR', 'Translator')))
+        max_length=2, blank=True, choices=ROLES)
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
@@ -837,7 +863,9 @@ class WriterInWork(models.Model):
                 d['writer'] = 'Must be set for a controlled writer.'
             else:
                 if not self.writer._can_be_controlled:
-                    d['writer'] = 'IPI name and PR society must be set.'
+                    d['writer'] = (
+                        'IPI name and PR society must be set. '
+                        'See "Writers" in the user manual')
                 if (settings.REQUIRE_SAAN and
                         not self.writer.generally_controlled and
                         not self.saan):
@@ -917,11 +945,7 @@ class WriterInWork(models.Model):
 
 
 class Recording(models.Model):
-    """Holds data on first recording.
-
-    Note that the CWR 2.x limitation of just one REC record per work has been
-    removed in the specs, but some societies still complain about it,
-    so only a single instance is allowed.
+    """Recording.
 
     Attributes:
         release_date (django.db.models.DateField): Recording Release Date
@@ -932,7 +956,8 @@ class Recording(models.Model):
     """
 
     class Meta:
-        verbose_name_plural = '  Recordings'
+        verbose_name = 'Recording'
+        verbose_name_plural = 'Recordings'
         ordering = ('-id',)
 
     recording_title = models.CharField(
@@ -963,13 +988,15 @@ class Recording(models.Model):
 
     def clean_fields(self, *args, **kwargs):
         """
+        ISRC cleaning, just removing dots and dashes.
 
-        :param args:
-        :type args:
-        :param kwargs:
-        :type kwargs:
-        :return:
-        :rtype:
+        Args:
+            *args: may be used in upstream
+            **kwargs: may be used in upstream
+
+        Returns:
+            return from :meth:`django.db.models.Model.clean_fields`
+
         """
         if self.isrc:
             # Removing all characters added for readability
@@ -979,9 +1006,10 @@ class Recording(models.Model):
     @property
     def complete_recording_title(self):
         """
+        Return complete recording title.
 
-        :return:
-        :rtype:
+        Returns:
+            str
         """
         if self.recording_title_suffix:
             return '{} {}'.format(
@@ -991,9 +1019,10 @@ class Recording(models.Model):
     @property
     def complete_version_title(self):
         """
+        Return complete version title.
 
-        :return:
-        :rtype:
+        Returns:
+            str
         """
         if self.version_title_suffix:
             return '{} {}'.format(
@@ -1002,6 +1031,7 @@ class Recording(models.Model):
         return self.version_title
 
     def __str__(self):
+        """Return the most precise type of title"""
         return (
             self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
@@ -1018,11 +1048,16 @@ class Recording(models.Model):
             return ''
         return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
 
-    def get_dict(self, with_releases=False):
+    def get_dict(self, with_releases=False, with_work=True):
         """Create a data structure that can be serialized as JSON.
+
+        Args:
+            with_releases (bool): add releases data (through tracks)
+            with_work (bool): add work data
 
         Returns:
             dict: JSON-serializable data structure
+
         """
         j = {
             'id':
@@ -1050,12 +1085,12 @@ class Recording(models.Model):
             j['tracks'] = []
             for track in self.tracks.all():
                 d = track.release.get_dict()
-                if not d:
-                    continue
                 j['tracks'].append({
                     'release': d,
                     'cut_number': track.cut_number,
                 })
+        if with_work:
+            j['works'] = [{'work': self.work.get_dict(with_recordings=False)}]
         return j
 
 
@@ -1063,6 +1098,7 @@ class Track(models.Model):
     """Track, a recording on a release."""
 
     class Meta:
+        verbose_name = 'Track'
         unique_together = (('recording', 'release'), ('release', 'cut_number'))
         ordering = ('release', 'cut_number',)
 
@@ -1074,23 +1110,36 @@ class Track(models.Model):
         blank=True, null=True,
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
 
+    def get_dict(self):
+        return {
+            'cut_number': self.cut_number,
+            'recording': self.recording.get_dict(
+                with_releases=False, with_work=True)
+        }
+
 
 class CWRExport(models.Model):
     """Export in CWR format.
 
     Common Works Registration format is a standard format for registration of
-    musical works world-wide. As of November 2018, version 2.1r7 is used
-    everywhere, while some societies accept 2.2 as well, it adds no benefits
-    in this context. Version 3.0 is in draft.
+    musical works world-wide. Exports are available in CWR 2.1 revision 8 and
+    CWR 3.0 (experimental).
 
     Attributes:
-        nwr_rev (django.db.models.CharField): Choice field where user can
-            select which version and type of CWR it is.
+        nwr_rev (django.db.models.CharField): choice field where user can
+            select which version and type of CWR it is
+        cwr (django.db.models.TextField): contents of CWR file
+        year (django.db.models.CharField): 2-digit year format
+        num_in_year (django.db.models.PositiveSmallIntegerField): \
+        CWR sequential number in a year
+        works (django.db.models.ManyToManyField): included works
+        description (django.db.models.CharField): internal note
+
     """
 
     class Meta:
         verbose_name = 'CWR Export'
-        verbose_name_plural = ' CWR Exports'
+        verbose_name_plural = 'CWR Exports'
         ordering = ('-id',)
 
     nwr_rev = models.CharField(
@@ -1110,12 +1159,18 @@ class CWRExport(models.Model):
 
     @property
     def version(self):
+        """Return CWR version."""
         if self.nwr_rev in ['WRK', 'ISR']:
             return '30'
         return '21'
 
     @property
     def filename(self):
+        """Return CWR file name.
+
+        Returns:
+            str: CWR file name
+        """
         if self.version == '30':
             return self.filename30
         return self.filename21
@@ -1167,6 +1222,7 @@ class CWRExport(models.Model):
         if self.version == '30':
             template = TEMPLATES_30.get(key)
         elif key == 'HDR' and len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9:
+            # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
             template = TEMPLATES_21.get('HDR_8')
         else:
             template = TEMPLATES_21.get(key)
@@ -1194,7 +1250,7 @@ class CWRExport(models.Model):
             self.record_sequence += 1
         return line
 
-    def yield_ISWC_request_lines(self, works):
+    def yield_iswc_request_lines(self, works):
         """Yield lines for an ISR (ISWC request) in CWR 3.x"""
 
         for work in works:
@@ -1222,8 +1278,30 @@ class CWRExport(models.Model):
 
             self.transaction_count += 1
 
+    def yield_publisher_lines(self, controlled_relative_share):
+        """Yield SPU/SPT lines.
+
+        Args:
+            controlled_relative_share (Decimal): sum of manuscript shares \
+            for controlled writers
+
+        Yields:
+              str: CWR record (row/line)
+        """
+        yield self.get_transaction_record(
+            'SPU', {'share': controlled_relative_share})
+        if controlled_relative_share:
+            yield self.get_transaction_record(
+                'SPT', {'share': controlled_relative_share})
+
     def yield_registration_lines(self, works):
         """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
+
+        Args:
+            works (list): list of work dicts
+
+        Yields:
+            str: CWR record (row/line)
         """
         for work in works:
 
@@ -1263,12 +1341,7 @@ class CWRExport(models.Model):
                     copublished_writer_ids.add(key)
                     other_publisher_share += share
                     controlled_shares[key] += share
-            yield self.get_transaction_record(
-                'SPU', {'share': controlled_relative_share})
-            if controlled_relative_share:
-                yield self.get_transaction_record(
-                    'SPT', {'share': controlled_relative_share})
-
+            yield from self.yield_publisher_lines(controlled_relative_share)
             # OPU, co-publishing only
             if other_publisher_share:
                 yield self.get_transaction_record(
@@ -1427,7 +1500,7 @@ class CWRExport(models.Model):
         yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
 
         if self.nwr_rev == 'ISR':
-            lines = self.yield_ISWC_request_lines(works)
+            lines = self.yield_iswc_request_lines(works)
         else:
             lines = self.yield_registration_lines(works)
 
@@ -1457,6 +1530,9 @@ class CWRExport(models.Model):
             self.num_in_year = 1
         self.cwr = ''.join(self.yield_lines())
         self.save()
+        for work in self.works.filter(_work_id__isnull=True):
+            work.work_id = work.work_id
+            work.save()
 
 
 class WorkAcknowledgement(models.Model):
@@ -1474,6 +1550,7 @@ class WorkAcknowledgement(models.Model):
     class Meta:
         verbose_name = 'Registration Acknowledgement'
         ordering = ('-date', '-id')
+        index_together = (('society_code', 'remote_work_id'),)
 
     TRANSACTION_STATUS_CHOICES = (
         ('CO', 'Conflict'),
@@ -1495,18 +1572,15 @@ class WorkAcknowledgement(models.Model):
         'Society', max_length=3, choices=settings.SOCIETIES)
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
-    remote_work_id = models.CharField(max_length=20, blank=True)
-
-    def __str__(self):
-        return '{}: {}'.format(
-            self.work_id,
-            self.get_status_display())
+    remote_work_id = models.CharField(
+        'Remote work ID', max_length=20, blank=True, db_index=True)
 
     def get_dict(self):
         """
+        Return dictionary with external work IDs.
 
-        :return:
-        :rtype:
+        Returns:
+            dict: JSON-serializable data structure
         """
         # if not self.remote_work_id:
         #     return None
@@ -1543,6 +1617,24 @@ class ACKImport(models.Model):
     date = models.DateField(editable=False)
     report = models.TextField(editable=False)
     cwr = models.TextField(blank=True, editable=False)
+
+    def __str__(self):
+        return self.filename
+
+
+class DataImport(models.Model):
+    """Importing basic work data from a CSV file.
+
+    This class just acts as log, the actual logic is in :mod:`.data_import`.
+    """
+
+    class Meta:
+        verbose_name = 'Data Import'
+        ordering = ('-date', '-id')
+
+    filename = models.CharField(max_length=60, editable=False)
+    report = models.TextField(editable=False)
+    date = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self):
         return self.filename

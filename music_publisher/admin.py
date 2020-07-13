@@ -1,7 +1,12 @@
 """
+Main interface for :mod:`music_publisher`.
+
+All views are here, except for :mod:`.royalty_calculation`.
+
 """
 import re
 import zipfile
+from csv import DictWriter
 from datetime import datetime
 from decimal import Decimal
 
@@ -10,18 +15,20 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import FileField, ModelForm
+from django.forms import FileField, ModelForm, BooleanField
 from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
+from .validators import CWRFieldValidator
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
     CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
     SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
+    DataImport,
 )
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
@@ -44,7 +51,7 @@ class ArtistInWorkInline(admin.TabularInline):
 
 class RecordingInline(admin.StackedInline):
     """Inline interface for :class:`.models.Recording`,
-        used in :class:`WorkAdmin` and :class:`ArtistAdmin`.
+        used in :class:`WorkAdmin`.
     """
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = ('complete_recording_title', 'complete_version_title')
@@ -151,6 +158,8 @@ class LabelAdmin(MusicPublisherAdmin):
         'libraryrelease_count')
     readonly_fields = (
         'recording_count', 'commercialrelease_count', 'libraryrelease_count')
+    
+    fields = ('name',)
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -225,6 +234,7 @@ class LibraryAdmin(MusicPublisherAdmin):
 
     list_display = ('name', 'libraryrelease_count', 'work_count')
     readonly_fields = ('libraryrelease_count', 'work_count')
+    fields = ('name',)
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -273,7 +283,8 @@ class LibraryAdmin(MusicPublisherAdmin):
 
 
 class TrackInline(admin.TabularInline):
-    """Inline interface for :class:`.models.Track`.
+    """Inline interface for :class:`.models.Track`, used in
+    :class:`LibraryReleaseAdmin` and :class:`CommercialReleaseAdmin`.
     """
     model = Track
     autocomplete_fields = ('release', 'recording')
@@ -326,7 +337,6 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.LibraryRelease`.
     """
 
-    actions = None
     form = LibraryReleaseForm
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
@@ -355,7 +365,6 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
     list_filter = ('release_label', 'library')
     search_fields = ('release_title', '^cd_identifier')
-    actions = None
 
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
@@ -405,13 +414,40 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
+    def create_json(self, request, qs):
+        """Batch action that downloads a JSON file containing library releases.
+
+        Returns:
+            JsonResponse: JSON file with selected works
+        """
+
+        j = LibraryRelease.objects.get_dict(qs)
+
+        response = JsonResponse(j, json_dumps_params={'indent': 4})
+        name = '{}-libraryreleases-{}'.format(
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.json"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+
+    create_json.short_description = \
+        'Export selected library releases (JSON).'
+
+    actions = ['create_json']
+
+    def get_actions(self, request):
+        """Custom action disabling the default ``delete_selected``."""
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
 
 @admin.register(CommercialRelease)
 class CommercialReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.CommercialRelease`.
     """
 
-    actions = None
     inlines = [TrackInline]
     autocomplete_fields = ('release_label',)
 
@@ -425,7 +461,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     list_filter = ('release_label',)
     search_fields = ('release_title',)
-    actions = None
 
     fieldsets = (
         (None, {
@@ -460,6 +495,34 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
+
+    def create_json(self, request, qs):
+        """Batch action that downloads a JSON file containing comercial releases.
+
+        Returns:
+            JsonResponse: JSON file with selected commercial releases
+        """
+
+        j = CommercialRelease.objects.get_dict(qs)
+
+        response = JsonResponse(j, json_dumps_params={'indent': 4})
+        name = '{}-libraryreleases-{}'.format(
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.json"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+
+    create_json.short_description = \
+        'Export selected commercial releases (JSON).'
+
+    actions = ['create_json']
+
+    def get_actions(self, request):
+        """Custom action disabling the default ``delete_selected``."""
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 
 @admin.register(Writer)
@@ -701,7 +764,7 @@ class WorkAcknowledgementInline(admin.TabularInline):
     """Inline interface for :class:`.models.WorkAcknowledgement`,
         used in :class:`WorkAdmin`.
 
-        Please note that normal users should only have a 'view' permission.
+        Note that normal users should only have a 'view' permission.
     """
 
     model = WorkAcknowledgement
@@ -866,9 +929,12 @@ class WorkAdmin(MusicPublisherAdmin):
             """Simple Yes/No filter
             """
 
-            codes = WorkAcknowledgement.objects.values_list(
+            codes = WorkAcknowledgement.objects.order_by()
+            codes = codes.values_list(
                 'society_code', flat=True).distinct()
-            return [(code, SOCIETY_DICT.get(code, code)) for code in codes]
+            return sorted(
+                [(code, SOCIETY_DICT.get(code, code)) for code in codes],
+                key=lambda code: code[1])
 
         def queryset(self, request, queryset):
             """Filter on society sending ACKs.
@@ -948,7 +1014,6 @@ class WorkAdmin(MusicPublisherAdmin):
         HasRecordingListFilter,
         ('library_release__library', admin.RelatedOnlyFieldListFilter),
         ('library_release', admin.RelatedOnlyFieldListFilter),
-        ('artists', admin.RelatedOnlyFieldListFilter),
         ('writers', admin.RelatedOnlyFieldListFilter),
         'last_change',
         InCWRListFilter,
@@ -957,7 +1022,7 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     search_fields = (
-        'title', 'alternatetitle__title', '^iswc', '^id',
+        'title', 'alternatetitle__title', '^iswc', '^id', '^_work_id',
         'recordings__recording_title', 'recordings__version_title',
         '^recordings__isrc', 'writerinwork__writer__last_name')
 
@@ -1025,7 +1090,7 @@ class WorkAdmin(MusicPublisherAdmin):
         j = Work.objects.get_dict(qs)
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
-        name = '{}{}'.format(
+        name = '{}-works-{}'.format(
             settings.PUBLISHER_CODE, datetime.now().toordinal())
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
@@ -1034,7 +1099,123 @@ class WorkAdmin(MusicPublisherAdmin):
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    actions = (create_cwr, create_json)
+    def get_labels_for_csv(self, works):
+        """Return the list of labels for the CSV file."""
+        labels = [
+            'Work ID',
+            'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
+        ]
+        alt_title_max = 1
+        writer_max = 1
+        artist_max = 1
+        for work in works:
+            alt_title_max = max(alt_title_max, len(work.get('other_titles')))
+            writer_max = max(writer_max, len(work.get('writers')))
+            artist_max = max(artist_max, len(work.get('performing_artists')))
+        for i in range(alt_title_max):
+            labels.append('Alt Title {}'.format(i))
+        for i in range(writer_max):
+            labels.append('Writer {} Last'.format(i))
+            labels.append('Writer {} First'.format(i))
+            labels.append('Writer {} IPI'.format(i))
+            labels.append('Writer {} PRO'.format(i))
+            labels.append('Writer {} Role'.format(i))
+            labels.append('Writer {} Share'.format(i))
+            labels.append('Writer {} Controlled'.format(i))
+            labels.append('Writer {} SAAN'.format(i))
+        for i in range(artist_max):
+            labels.append('Artist {} Last'.format(i))
+            labels.append('Artist {} First'.format(i))
+            labels.append('Artist {} ISNI'.format(i))
+        return labels
+
+    def get_rows_for_csv(self, works):
+        """Return rows for the CSV file, including the header."""
+
+        class EchoWriter:
+            """Class with write() method just echoing values."""
+            def write(self, value):
+                return value
+
+        pseudo_buffer = EchoWriter()
+        labels = self.get_labels_for_csv(works)
+        writer = DictWriter(pseudo_buffer, labels)
+        header = dict(zip(labels, labels))
+        yield writer.writerow(header)
+        # yield writer.writeheader()  # In Python 3.8
+        for work in works:
+            ows = work.get('original_works')
+            row = {
+                'Work ID': work['code'],
+                'Work Title': work['work_title'],
+                'ISWC': work.get('iswc', ''),
+            }
+            if ows:
+                row['Original Title'] = ows[0]['work_title']
+            origin = work.get('origin')
+            if origin:
+                row['Library'] = origin['library']['name']
+                row['CD Identifier'] = origin['cd_identifier']
+            for i, alt in enumerate(work['other_titles']):
+                row['Alt Title {}'.format(i)] = alt['title']
+            for i, wiw in enumerate(work['writers']):
+                w = wiw.get('writer') or {}
+                row['Writer {} Last'.format(i)] = w.get('last_name', '')
+                row['Writer {} First'.format(i)] = w.get('first_name', '')
+                row['Writer {} IPI'.format(i)] = w.get('ipi_name_number', '')
+                role = wiw.get('writer_role', {})
+                if role:
+                    row['Writer {} Role'.format(i)] = '{} - {}'.format(
+                        role['code'], role['name'])
+                row['Writer {} Share'.format(i)] = wiw.get('relative_share')
+                for aff in w.get('affiliations', []):
+                    if aff['affiliation_type']['code'] == 'PR':
+                        pro = aff['organization']
+                        row['Writer {} PRO'.format(i)] = '{} - {}'.format(
+                        pro['code'], pro['name'])
+                ops = wiw.get('original_publishers')
+                if ops:
+                    op = ops[0]
+                    agreement = op.get('agreement')
+                    saan = agreement.get('recipient_agreement_number', '')
+                    row['Writer {} SAAN'.format(i)] = saan
+                    agreement_type = agreement['agreement_type']['code']
+                    if agreement_type == 'OG':
+                        controlled = 'General Agreement'
+                    else:
+                        controlled = 'Yes'
+                else:
+                    controlled = 'No'
+                row['Writer {} Controlled'.format(i)] = controlled
+            for i, aiw in enumerate(work['performing_artists']):
+                artist = aiw.get('artist')
+                row['Artist {} Last'.format(i)] = artist.get('last_name', '')
+                row['Artist {} First'.format(i)] = artist.get('first_name', '')
+                row['Artist {} ISNI'.format(i)] = artist.get('isni', '')
+            yield writer.writerow(row)
+
+    def create_csv(self, request, qs):
+        """Batch action that downloads a CSV file containing selected works.
+
+        Returns:
+            JsonResponse: JSON file with selected works
+        """
+
+        j = Work.objects.get_dict(qs)
+        works = j.get('works', [])
+        response = HttpResponse(
+            self.get_rows_for_csv(works),
+            content_type="text/csv")
+        name = '{}{}'.format(
+            settings.PUBLISHER_CODE, datetime.now().toordinal())
+        cd = 'attachment; filename="{}.csv"'.format(name)
+        response['Content-Disposition'] = cd
+        return response
+
+    create_csv.short_description = \
+        'Export selected works (CSV).'
+
+    actions = (create_cwr, create_json, create_csv)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
@@ -1050,7 +1231,7 @@ class WorkAdmin(MusicPublisherAdmin):
         instances = super().get_inline_instances(request)
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
             return [i for i in instances if type(i) not in [
-                ArtistInWorkInline, RecordingInline, WorkAcknowledgementInline
+                RecordingInline, WorkAcknowledgementInline
             ]]
         return instances
 
@@ -1060,7 +1241,6 @@ class RecordingAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Recording`."""
 
     actions = None
-    inlines = [TrackInline]
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
         'label_link')
@@ -1249,8 +1429,15 @@ class CWRExportAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         """If CWR has been created, it can no longer be deleted, as it may
         have been sent. This may change once the delivery is automated."""
-
         if obj and obj.cwr:
+            return False
+        return super().has_delete_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        """If object exists, it can only be edited in changelist."""
+        if not settings.PUBLISHER_CODE:
+            return False
+        if obj:
             return False
         return super().has_delete_permission(request, obj)
 
@@ -1329,12 +1516,16 @@ class ACKImportForm(ModelForm):
 
     class Meta:
         model = ACKImport
-        fields = ('acknowledgement_file',)
+        fields = ('acknowledgement_file', 'import_iswcs')
 
     acknowledgement_file = FileField()
+    import_iswcs = BooleanField(label='Import ISWCs if present', required=False)
 
-    RE_HDR = re.compile(
+    RE_HDR_21 = re.compile(
         r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
+
+    RE_HDR_30 = re.compile(
+        r'^HDR(?:SO|AA)(.{4})(.{45})(\d{8})\d{6}(\d{8}).{15}3\.0000')
 
     def clean(self):
         """Perform usual clean, then process the file, returning the content
@@ -1347,7 +1538,9 @@ class ACKImportForm(ModelForm):
             raise ValidationError('Wrong file name format.')
         self.cleaned_data['filename'] = filename
         content = ack.file.read().decode('latin1')
-        match = re.match(self.RE_HDR, content)
+        match = re.match(self.RE_HDR_21, content)
+        if not match:
+            match = re.match(self.RE_HDR_30, content)
         if not match:
             raise ValidationError('Incorrect CWR header')
         code, name, date1, date2 = match.groups()
@@ -1358,8 +1551,16 @@ class ACKImportForm(ModelForm):
         self.cleaned_data['acknowledgement_file'] = content
 
 
+class AdminWithReport(admin.ModelAdmin):
+    """The parent class for all admin classes with a report field."""
+    def print_report(self, obj):
+        """Mark report as HTML-safe."""
+        return mark_safe(obj.report)
+    print_report.short_description = 'Report'
+
+
 @admin.register(ACKImport)
-class ACKImportAdmin(admin.ModelAdmin):
+class ACKImportAdmin(AdminWithReport):
     """Admin interface for :class:`.models.ACKImport`.
     """
 
@@ -1377,7 +1578,7 @@ class ACKImportAdmin(admin.ModelAdmin):
         'filename', 'society_code', 'society_name', 'date', 'print_report',
         'view_link')
 
-    add_fields = ('acknowledgement_file',)
+    add_fields = ('acknowledgement_file', 'import_iswcs')
 
     def get_fields(self, request, obj=None):
         """Return different fields for add vs change.
@@ -1387,16 +1588,19 @@ class ACKImportAdmin(admin.ModelAdmin):
         return self.add_fields
 
     RE_ACK_21 = re.compile(re.compile(
-        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})', re.S))
+        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M))
     RE_ACK_30 = re.compile(re.compile(
-        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})', re.S))
+        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M))
 
-    def process(self, request, society_code, file_content):
+    def process(self, request, society_code, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
 
         Big part of this code should be moved to the model, left here because
         messaging is simpler.
         """
+
+        if import_iswcs:
+            validator = CWRFieldValidator('iswc')
 
         unknown_work_ids = []
         existing_work_ids = []
@@ -1406,25 +1610,41 @@ class ACKImportAdmin(admin.ModelAdmin):
         else:
             pattern = self.RE_ACK_30
         for x in re.findall(pattern, file_content):
-            tt, work_id, remote_work_id, dat, status = x
+            tt, work_id, remote_work_id, dat, status, rest = x
+            if import_iswcs and rest:
+                header = rest.strip().split('\n')[0]
+                iswc = header[95:106].strip() or None
+                if iswc:
+                    try:
+                        validator(iswc)
+                    except ValidationError:
+                        iswc = None
             # work ID is numeric with an optional string
             work_id = work_id.strip()
-            if work_id.startswith(settings.PUBLISHER_CODE):
-                work_id = work_id[len(settings.PUBLISHER_CODE):]
-            if not work_id.isnumeric():
-                unknown_work_ids.append(work_id)
-                continue
-            work_id = int(work_id)
             remote_work_id = remote_work_id.strip()
             dat = datetime.strptime(dat, '%Y%m%d').date()
-            work = Work.objects.filter(id=work_id).first()
+            work = Work.objects.filter(_work_id=work_id).first()
             if not work:
-                messages.add_message(
-                    request, messages.ERROR,
-                    'Unknown work ID: {}'.format(work_id))
+                unknown_work_ids.append(work_id)
                 continue
+            if import_iswcs and iswc:
+                if work.iswc:
+                    if work.iswc != iswc:
+                        raise ValidationError(
+                            'A different ISWC exists for work {}: {} vs {}.'
+                            ''.format(work, work.iswc, iswc))
+                else:
+                    work.iswc = iswc
+                    work.last_change = now()
+                    from django.contrib.admin.models import CHANGE, LogEntry
+                    LogEntry.objects.log_action(
+                        request.user.id,
+                        admin.options.get_content_type_for_model(work).id,
+                        work.id, str(work), CHANGE,
+                        'ISWC imported from ACK file.')
+                    work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
-                work_id=work_id,
+                work_id=work.id,
                 remote_work_id=remote_work_id,
                 society_code=society_code,
                 date=dat,
@@ -1460,9 +1680,16 @@ class ACKImportAdmin(admin.ModelAdmin):
             obj.date = cd['date']
             # TODO move process() to model, and handle messages here
             obj.report = self.process(
-                request, obj.society_code, cd['acknowledgement_file'])
+                request, obj.society_code, cd['acknowledgement_file'],
+                cd['import_iswcs'])
             obj.cwr = cd['acknowledgement_file']
             super().save_model(request, obj, form, change)
+
+    def has_add_permission(self, request):
+        """Return false if CWR delivery code is not present."""
+        if not settings.PUBLISHER_CODE:
+            return False
+        return super().has_add_permission(request)
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
         """Deleting ACK imports is a really bad idea.
@@ -1489,10 +1716,6 @@ class ACKImportAdmin(admin.ModelAdmin):
             return mark_safe(
                 '<a href="{}" target="_blank">View CWR</a>'.format(url))
 
-    def print_report(self, obj):
-        """Mark report as HTML-safe."""
-        return mark_safe(obj.report)
-
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with a sub-view defined by GET parameters:
 
@@ -1512,7 +1735,7 @@ class ACKImportAdmin(admin.ModelAdmin):
                     'lines': cwr.split('\n'),
                     'title': obj.filename
                 })
-            except:  # Parsing user garbage, could be anything
+            except Exception:  # Parsing user garbage, could be anything
                 return render(request, 'raw_cwr.html', {
                     **self.admin_site.each_context(request),
                     'version': '',
@@ -1523,3 +1746,92 @@ class ACKImportAdmin(admin.ModelAdmin):
         return super().change_view(
             request, object_id, form_url='', extra_context=extra_context)
 
+
+class DataImportForm(ModelForm):
+    """Form used for data imports.
+
+    Attributes:
+        data_file (FileField): Field for file upload
+    """
+
+    class Meta:
+        model = ACKImport
+        fields = ('data_file',)
+
+    data_file = FileField()
+
+    def clean(self):
+        """
+        This is the actual import process, if all goes well,
+        the report is saved.
+
+        Raises:
+            ValidationError
+        """
+        super().clean()
+
+        from .data_import import DataImporter
+        from io import TextIOWrapper
+
+        cd = self.cleaned_data
+        f = cd.get('data_file')
+        report = ''
+        try:
+            importer = DataImporter(TextIOWrapper(f), self.user)
+            for work in importer.run():
+                url = reverse(
+                    'admin:music_publisher_work_change', args=(work.id,))
+                report += '<a href="{}">{}</a> {}<br/>\n'.format(
+                    url, work.work_id, work.title)
+        except Exception as e:  # user garbage, too many possibilities
+            raise ValidationError(str(e))
+        self.cleaned_data['report'] = report
+
+
+@admin.register(DataImport)
+class DataImportAdmin(AdminWithReport):
+    """Data import from CSV files.
+
+    Only the interface is here, the whole logic is in
+    :mod:`.data_import`.
+    """
+
+    form = DataImportForm
+
+    list_display = ('filename', 'date')
+    fields = readonly_fields = ('filename', 'date', 'print_report')
+
+    add_fields = ('data_file',)
+
+    def get_fields(self, request, obj=None):
+        """Return different fields for add vs change.
+        """
+        if obj:
+            return self.fields
+        return self.add_fields
+
+    def has_delete_permission(self, request, obj=None, *args, **kwargs):
+        """Deleting data imports is a really bad idea.
+        """
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        """Deleting this would make no sense, since the data is processed."""
+        return False
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.user = request.user
+        return form
+
+    def save_model(self, request, obj, form, change):
+        """Custom save_model, it ignores changes, validates the form for new
+            instances, if valid, it processes the file and, upon success,
+            calls ``super().save_model``."""
+
+        if form.is_valid():
+            cd = form.cleaned_data
+            f = cd['data_file']
+            obj.filename = f.name
+            obj.report = cd['report']
+            super().save_model(request, obj, form, change)
