@@ -25,6 +25,36 @@ from django.views.generic.edit import FormView
 from .models import SOCIETY_DICT, WorkAcknowledgement, Writer, WriterInWork
 
 
+def get_id_sources():
+    """
+    Yield choices, fixed and societies.
+    """
+    yield None, 'Publisher Work ID:'
+    yield settings.PUBLISHER_CODE, settings.PUBLISHER_NAME
+    yield None, 'International Standard Codes:'
+    yield 'ISWC', 'ISWC'
+    yield 'ISRC', 'ISRC'
+    yield None, 'Sender Work ID:'
+    codes = WorkAcknowledgement.objects.order_by(
+        'society_code').values_list('society_code', flat=True).distinct()
+    codes = [(code, SOCIETY_DICT.get(code, '')) for code in codes]
+    codes.sort(key=lambda code: code[1])
+    for code in codes:
+        yield code
+
+
+def get_right_types():
+    """
+    Yield fixed options.
+
+    They will be extended with columns in JS and prior to validation.
+    """
+    yield 'p', 'Performance for all rows'
+    yield 'm', 'Mechanical for all rows'
+    yield 's', 'Sync for all rows'
+    yield None, '-' * 40
+
+
 class RoyaltyCalculationForm(forms.Form):
     """The form for royalty calculations.
     """
@@ -33,36 +63,13 @@ class RoyaltyCalculationForm(forms.Form):
 
     class Media:
         css = {'all': ('admin/css/forms.css',)}
-        js = ('admin/js/vendor/jquery/jquery.js',
-        'admin/js/jquery.init.js')
+        js = (
+            'admin/js/vendor/jquery/jquery.js',
+            'admin/js/jquery.init.js')
 
-    def get_id_sources():
-        """
-        Yield choices, fixed and societies.
-        """
-        yield None, 'Publisher Work ID:'
-        yield settings.PUBLISHER_CODE, settings.PUBLISHER_NAME
-        yield None, 'International Standard Codes:'
-        yield 'ISWC', 'ISWC'
-        yield 'ISRC', 'ISRC'
-        yield None, 'Sender Work ID:'
-        codes = WorkAcknowledgement.objects.order_by(
-            'society_code').values_list('society_code', flat=True).distinct()
-        codes = [(code, SOCIETY_DICT.get(code, '')) for code in codes]
-        codes.sort(key=lambda code: code[1])
-        for code in codes:
-            yield code
-
-    def get_right_types():
-        """
-        Yield fixed options.
-
-        They will be extended with columns in JS and prior to validation.
-        """
-        yield 'p', 'Performance for all rows'
-        yield 'm', 'Mechanical for all rows'
-        yield 's', 'Sync for all rows'
-        yield None, '-' * 40
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.file = None
 
     ALGOS = [
         ('share', 'Split by calculated share.'),
@@ -184,10 +191,10 @@ class RoyaltyCalculation(object):
         csv_reader = csv.reader(self.file)
         work_ids = set()
         for row in csv_reader:
-            id = row[self.wc]
+            given_id = row[self.wc]
             if self.work_id_source in ['ISWC', 'ISRC']:
-                id = id.replace('.', '').replace('-', '')
-            work_ids.add(id)
+                given_id = given_id.replace('.', '').replace('-', '')
+            work_ids.add(given_id)
         return work_ids
 
     def get_work_queryset(self, work_ids):
@@ -280,12 +287,12 @@ class RoyaltyCalculation(object):
     def process_row(self, row):
         """Process one incoming row, yield multiple output rows."""
         # get the identifier and clean
-        id = row[self.wc]
+        given_id = row[self.wc]
         if self.work_id_source in ['ISWC', 'ISRC']:
-            id = id.replace('.', '').replace('-', '')
+            given_id = given_id.replace('.', '').replace('-', '')
 
         # get the work, if not found yield error
-        work = self.works.get(id)
+        work = self.works.get(given_id)
 
         amount = Decimal(row[self.ac])
         right = (self.right or row[self.rc][0]).lower()
@@ -350,7 +357,8 @@ class RoyaltyCalculation(object):
             # "Share" algorithm has one additional row with the publisher
             if self.algo == 'share':
                 out_row = row.copy()
-                out_row.append('{}, [{}]'.format(settings.PUBLISHER_NAME,
+                out_row.append('{}, [{}]'.format(
+                    settings.PUBLISHER_NAME,
                     settings.PUBLISHER_IPI_NAME))
                 out_row.append('Original Publisher')
                 out_row.append('{0:.6f}'.format(share_split * controlled))
