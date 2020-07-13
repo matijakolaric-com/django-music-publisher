@@ -1,5 +1,8 @@
 """
-Interface for :mod:`music_publisher`.
+Main interface for :mod:`music_publisher`.
+
+All views are here, except for :mod:`.royalty_calculation`.
+
 """
 import re
 import zipfile
@@ -48,7 +51,7 @@ class ArtistInWorkInline(admin.TabularInline):
 
 class RecordingInline(admin.StackedInline):
     """Inline interface for :class:`.models.Recording`,
-        used in :class:`WorkAdmin` and :class:`ArtistAdmin`.
+        used in :class:`WorkAdmin`.
     """
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = ('complete_recording_title', 'complete_version_title')
@@ -280,7 +283,8 @@ class LibraryAdmin(MusicPublisherAdmin):
 
 
 class TrackInline(admin.TabularInline):
-    """Inline interface for :class:`.models.Track`.
+    """Inline interface for :class:`.models.Track`, used in
+    :class:`LibraryReleaseAdmin` and :class:`CommercialReleaseAdmin`.
     """
     model = Track
     autocomplete_fields = ('release', 'recording')
@@ -444,7 +448,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.CommercialRelease`.
     """
 
-    actions = None
     inlines = [TrackInline]
     autocomplete_fields = ('release_label',)
 
@@ -458,7 +461,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     list_filter = ('release_label',)
     search_fields = ('release_title',)
-    actions = None
 
     fieldsets = (
         (None, {
@@ -762,7 +764,7 @@ class WorkAcknowledgementInline(admin.TabularInline):
     """Inline interface for :class:`.models.WorkAcknowledgement`,
         used in :class:`WorkAdmin`.
 
-        Please note that normal users should only have a 'view' permission.
+        Note that normal users should only have a 'view' permission.
     """
 
     model = WorkAcknowledgement
@@ -1229,7 +1231,7 @@ class WorkAdmin(MusicPublisherAdmin):
         instances = super().get_inline_instances(request)
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
             return [i for i in instances if type(i) not in [
-                ArtistInWorkInline, RecordingInline, WorkAcknowledgementInline
+                RecordingInline, WorkAcknowledgementInline
             ]]
         return instances
 
@@ -1550,6 +1552,7 @@ class ACKImportForm(ModelForm):
 
 
 class AdminWithReport(admin.ModelAdmin):
+    """The parent class for all admin classes with a report field."""
     def print_report(self, obj):
         """Mark report as HTML-safe."""
         return mark_safe(obj.report)
@@ -1629,7 +1632,7 @@ class ACKImportAdmin(AdminWithReport):
                     if work.iswc != iswc:
                         raise ValidationError(
                             'A different ISWC exists for work {}: {} vs {}.'
-                            ''.format(work, work.iswc, iswc                            ))
+                            ''.format(work, work.iswc, iswc))
                 else:
                     work.iswc = iswc
                     work.last_change = now()
@@ -1758,6 +1761,13 @@ class DataImportForm(ModelForm):
     data_file = FileField()
 
     def clean(self):
+        """
+        This is the actual import process, if all goes well,
+        the report is saved.
+
+        Raises:
+            ValidationError
+        """
         super().clean()
 
         from .data_import import DataImporter
@@ -1780,7 +1790,11 @@ class DataImportForm(ModelForm):
 
 @admin.register(DataImport)
 class DataImportAdmin(AdminWithReport):
-    """Data import from CSV files."""
+    """Data import from CSV files.
+
+    Only the interface is here, the whole logic is in
+    :mod:`.data_import`.
+    """
 
     form = DataImportForm
 

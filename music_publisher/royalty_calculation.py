@@ -1,3 +1,12 @@
+"""
+This module is about processing royalty statements.
+
+It processes files in the request-response cycle, not in background workers.
+Therefore, focus is on speed. Nothing is written to the database, and
+SELECTs are optimised and performed in one batch.
+
+"""
+
 import csv
 import os
 from collections import defaultdict
@@ -17,6 +26,8 @@ from .models import SOCIETY_DICT, WorkAcknowledgement, Writer, WriterInWork
 
 
 class RoyaltyCalculationForm(forms.Form):
+    """The form for royalty calculations.
+    """
     class Meta:
         fields = ('in_file',)
 
@@ -89,6 +100,9 @@ class RoyaltyCalculationForm(forms.Form):
     )
 
     def is_valid(self):
+        """Append additional choices to various fields, prior to the actual
+        validation.
+        """
         self.file = TextIOWrapper(self.files.get('in_file'))
         try:
             csv_reader = csv.DictReader(self.file)
@@ -100,7 +114,7 @@ class RoyaltyCalculationForm(forms.Form):
                     (str(i), field))
                 self.fields['amount_column'].choices.append((str(i), field))
             valid = super().is_valid()
-        except Exception as e:
+        except Exception:  # to match user stupidity
             return False
         return valid
 
@@ -109,6 +123,8 @@ class RoyaltyCalculation(object):
     """The process of royalty calculation."""
 
     def __init__(self, form):
+        """Initialization with data from thew form and empty attributes.
+        """
         self.file = form.file
         for key, value in form.cleaned_data.items():
             setattr(self, key, value)
@@ -157,6 +173,13 @@ class RoyaltyCalculation(object):
         return fieldnames
 
     def get_work_ids(self):
+        """
+        Find work unambiguous work identifiers.
+
+        Returns:
+            set of work identifier from the file
+        """
+
         self.file.seek(0)
         csv_reader = csv.reader(self.file)
         work_ids = set()
@@ -168,7 +191,13 @@ class RoyaltyCalculation(object):
         return work_ids
 
     def get_work_queryset(self, work_ids):
-        """Return the appropriate queryset based on work ID source and ids."""
+        """
+        Return the appropriate queryset based on work ID source and ids.
+
+        Returns:
+            queryset with :class:`.models.WriterInWork` objects. \
+            ``query_id`` has the matched field value.
+        """
         qs = WriterInWork.objects.filter(controlled=True)
         if self.work_id_source == settings.PUBLISHER_CODE:
             qs = qs.filter(work___work_id__in=work_ids)
@@ -191,7 +220,11 @@ class RoyaltyCalculation(object):
         return qs
 
     def generate_works_dict(self, qs):
-        """Generate the work dictionary."""
+        """Generate the works cache.
+
+        Returns:
+            dict (works) of lists (writerinwork) of dicts
+        """
         for wiw in qs:
             assert (wiw.work_id is not None)
             self.writer_ids.add(wiw.writer_id)
@@ -204,7 +237,10 @@ class RoyaltyCalculation(object):
             self.works[wiw.query_id].append(d)
 
     def generate_writer_dict(self):
-        """Generate the writer dictionary."""
+        """Generate the writers cache.
+        Returns:
+            dict (writer) of dicts
+        """
         qs = Writer.objects.filter(id__in=self.writer_ids)
         for writer in qs:
             if writer.first_name:
@@ -230,23 +266,26 @@ class RoyaltyCalculation(object):
         queries are required.
         """
 
+        # the first pass of processing
         work_ids = self.get_work_ids()
 
+        # the first query
         qs = self.get_work_queryset(work_ids)
 
         self.generate_works_dict(qs)
+
+        # this includes the second query
         self.generate_writer_dict()
 
     def process_row(self, row):
         """Process one incoming row, yield multiple output rows."""
+        # get the identifier and clean
         id = row[self.wc]
         if self.work_id_source in ['ISWC', 'ISRC']:
             id = id.replace('.', '').replace('-', '')
+
+        # get the work, if not found yield error
         work = self.works.get(id)
-        if not work:
-            row.append('ERROR: Work not found')
-            yield row
-            return
 
         amount = Decimal(row[self.ac])
         right = (self.right or row[self.rc][0]).lower()
@@ -258,6 +297,12 @@ class RoyaltyCalculation(object):
         # Add data to all output rows
         if self.algo == 'share':
             row.append({'p': 'Perf.', 'm': 'Mech.', 's': 'Sync'}[right])
+        if not work:
+            row.append('')
+            row.append('ERROR: Work not found')
+            yield row
+            return
+
         controlled = sum([line['relative_share'] for line in work]) / 100
         row.append('{0:.4f}'.format(controlled))
 
@@ -317,8 +362,13 @@ class RoyaltyCalculation(object):
 
     @property
     def out_file_path(self):
+        """This method creates the output file and outputs the temporary path.
+
+        Note that the process happens is several passes.
+        """
         self.get_works_and_writers()
 
+        # the second pass of processing
         self.file.seek(0)
         csv_reader = csv.reader(self.file)
 
@@ -328,22 +378,33 @@ class RoyaltyCalculation(object):
         for row in csv_reader:
             for out_row in self.process_row(row):
                 csv_writer.writerow(out_row)
+
         f.filename = self.filename
         f.close()
         return f.name
 
 
 class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
+    """The view for royalty calculations."""
+
     template_name = 'music_publisher/royalty_calculation.html'
     form_class = RoyaltyCalculationForm
     permission_required = ('music_publisher.can_process_royalties',)
 
     def render_to_response(self, context, **response_kwargs):
+        """Prepare the context, required since we use admin template."""
         context['site_header'] = settings.PUBLISHER_NAME
         context['has_permission'] = True
         return super().render_to_response(context, **response_kwargs)
 
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        """Royalty processing works only with TemporaryFileUploadHandler."""
+        request.upload_handlers = [TemporaryFileUploadHandler()]
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
+        """This is where the magic happens."""
         rc = RoyaltyCalculation(form)
         path = rc.out_file_path
         f = open(path, 'rb')
@@ -351,8 +412,3 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
             return FileResponse(f, filename=rc.filename, as_attachment=False)
         finally:
             os.remove(path)
-
-    @csrf_exempt
-    def dispatch(self, request, *args, **kwargs):
-        request.upload_handlers = [TemporaryFileUploadHandler()]
-        return super().dispatch(request, *args, **kwargs)

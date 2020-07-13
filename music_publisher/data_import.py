@@ -1,5 +1,9 @@
 """
 All the code related to importing data from external files.
+
+Currently, only works (with writers, artists, library data and ISRCs) are
+imported. (ISRCs will be used for importing recording data the in future.)
+
 """
 
 import csv
@@ -38,6 +42,7 @@ class DataImporter(object):
         self.reader = csv.DictReader(filelike)
 
     def log(self, action_flag, obj, message):
+        """Helper function for logging history."""
         if not self.user_id:
             return
         LogEntry.objects.log_action(
@@ -321,6 +326,7 @@ class DataImporter(object):
         yield work
 
     def run(self):
+        """Run the import as atomic."""
         with transaction.atomic():
             for row in self.reader:
                 yield from self.process_row(row)
