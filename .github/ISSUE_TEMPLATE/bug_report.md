@@ -1,8 +1,6 @@
----
-name: Bug report
-about: Create a report to help us improve
+Please use the following template for bug reporting. 
 
----
+*The fact that things do not work the way you would like, does not constitute a bug!*
 
 **Describe the bug**
 A clear and concise description of what the bug is.
