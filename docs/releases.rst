@@ -42,13 +42,13 @@ issues.
 ------------
 
 Index (home) page became clearer due to grouping of views. User manual was reorganised to follow
-the same structure. ``User manual`` links now lead to the relevant page.
+the same structure. ``User manual`` links now lead to the relevant page in the user manual.
 
 Basic CSV imports and exports for musical works, and JSON exports for releases were added.
 ISWCs can now be imported from CWR acknowledgements.
 
 Processing of royalty statements was added. It is the most important new feature since the 
-initial release. It can import statements in **any** CSV format. And processing is 
+initial release. It can import statements in practically **any** CSV format. Processing is
 extremely fast.  
 
 Controlled writers with no society affiliation are now fully supported.
@@ -70,7 +70,7 @@ released as open-source code, all of the following must apply:
 
 * A feature must not require complex customisations or deployments.
   Open-source solutions for end-users must be deployable by end-users.
-  E.g. registrations in GEMA and licencing of production music.
+  E.g. licencing of production music.
 
 * It must be legal. E.g. integrating DDEX into open-source code is currently not legal
   because DDEX licence is not compatible with MIT license.

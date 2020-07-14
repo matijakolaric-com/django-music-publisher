@@ -683,7 +683,9 @@ class Work(TitleBase):
             j['writers'].append(d)
 
         if with_recordings:
-            j['recordings'] = [recording.get_dict(with_releases=True) for recording in self.recordings.all()]
+            j['recordings'] = [
+                recording.get_dict(with_releases=True)
+                for recording in self.recordings.all()]
 
         # add cross references, currently only society work ids from ACKs
         for wa in self.workacknowledgement_set.all():

@@ -25,6 +25,10 @@ It can have any number of columns, in any order, as long as it has:
 
 * a column with amount to be distributed, values must be numeric
 
+.. note::
+    Matching by internal work ID only works for musical works that have been exported at least once
+    (as CSV, CWR or JSON).
+
 Values for these columns must be present in all rows.
    
 In most cases, no pre-processing is required. Most of societies and other 
@@ -36,6 +40,9 @@ Outgoing formats
 Outgoing format is a CSV file. It has all the columns of the incoming file.
 Each incoming row will be copied for every participant who shares in distribution. 
 Additional data will be provided in additional columns at the end.
+
+If no matching work is found, the original row is still copied, and an error
+is shown in ``Interested party`` column.
 
 Additional columns depend on the used algorithm.
 
@@ -52,10 +59,11 @@ In both algorithms, user has to select:
 
 Both algorithms add these columns:
 
-* Controlled by publisher (%)
-* Interested party
-* Role
-* Net amount
+* ``Controlled by publisher (%)``
+* ``Interested party``
+* ``Role``
+* ``Share in amount received (%)``
+* ``Net amount``
 
 Split by calculated share
 +++++++++++++++++++++++++++++++++++++++
@@ -78,9 +86,8 @@ Outgoing rows are generated for each controlled ``writer in work`` and the publi
 
 In addition to columns added by both algorithms, this one also adds:
 
-* Right type
-* Owned Share (%)
-* Share in amount received (%)
+* ``Right type``
+* ``Owned Share (%)``
 
 Split by manuscript share and apply fees
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -114,11 +121,10 @@ Publisher fee is taken from the first available of:
 
 In addition to columns added by both algorithms, this one also adds:
 
-* Manuscript share (%)
-* Share in amount received (%)
-* Amount before fee
-* Fee (%)
-* Fee amount
+* ``Manuscript share (%)``
+* ``Amount before fee``
+* ``Fee (%)``
+* ``Fee amount``
 
 Post-processing
 -------------------------------------------------
@@ -130,8 +136,13 @@ Outgoing royalty statements
 +++++++++++++++++++++++++++++++++++++++
 
 For creating outgoing statement, use pivot tables, filtering by 
-``Interested party`` column. You can design outgoing statemens
+``Interested party`` column. You can design outgoing statements
 however you wish.
+
+.. note::
+   If no matching work was found, there will be a row with an error message in
+   ``Interested party`` column. Use the same filter to make a statement with
+   unmatched rows.
 
 Foreign currencies
 +++++++++++++++++++++++++++++++++++++++

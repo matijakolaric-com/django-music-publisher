@@ -1,7 +1,7 @@
 Importing Data
 ==============================
 
-Simple musical works can be imported from a CSV file.
+Musical works metadata can be imported from CSV files.
 
 Caveats
 -------------------

@@ -50,7 +50,7 @@ Direct Deployment
 +++++++++++++++++
 
 First, you need to sign up with `Heroku <https://heroku.com>`_ and/or log in.
-Then press `here <https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/>`_.
+Then click `here <https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/>`_.
 This will deploy the latest code in |version| branch.
 
 .. figure:: /images/heroku.png

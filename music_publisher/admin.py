@@ -1087,6 +1087,10 @@ class WorkAdmin(MusicPublisherAdmin):
             JsonResponse: JSON file with selected works
         """
 
+        for work in qs.filter(_work_id__isnull=True):
+            work.work_id = work.work_id
+            work.save()
+
         j = Work.objects.get_dict(qs)
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
@@ -1200,6 +1204,10 @@ class WorkAdmin(MusicPublisherAdmin):
         Returns:
             JsonResponse: JSON file with selected works
         """
+
+        for work in qs.filter(_work_id__isnull=True):
+            work.work_id = work.work_id
+            work.save()
 
         j = Work.objects.get_dict(qs)
         works = j.get('works', [])

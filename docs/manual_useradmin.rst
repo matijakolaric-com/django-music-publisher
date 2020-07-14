@@ -16,7 +16,7 @@ This section is covering user administration.
 .. warning::
     Superusers should not do everyday tasks. Create staff users.
 
-You add users by pressing on ``+ add`` link for the ``users`` in
+You add users by clicking on ``+ add`` link for the ``users`` in
 the ``Authentication and Authorization``. The following view is shown:
 
 .. figure:: /images/dmp_add_user.png
@@ -24,7 +24,7 @@ the ``Authentication and Authorization``. The following view is shown:
 
    Add User view
 
-Add a username and a password twice and press on ``Save and continue
+Add a username and a password twice and click on ``Save and continue
 editing``. Then, in the next view, add additional data.
 
 .. figure:: /images/dmp_change_user.png
@@ -45,7 +45,7 @@ permission groups are set during installation:
 * ``Publishing audit`` gives read-only permissions to all data in
   Music Publisher module
 
-Select one of them and press on the icon that will move it to ``chosen groups``. Then you can press ``save``.
+Select one of them and click on the icon that will move it to ``chosen groups``. Then you can click on ``save``.
 
 .. figure:: /images/dmp_users.png
    :width: 100%
