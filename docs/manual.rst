@@ -1,9 +1,9 @@
-.. image:: images/dmp.png
-
 User Manual
 ############
 
 For version |version|.
+
+.. image:: images/dmp.png
 
 .. toctree::
    :maxdepth: 2
