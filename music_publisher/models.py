@@ -502,6 +502,12 @@ class Work(TitleBase):
         permissions = (
             ('can_process_royalties', 'Can perform royalty calculations'),)
 
+    @staticmethod
+    def persist_work_ids(qs):
+        for work in qs.filter(_work_id__isnull=True):
+            work.work_id = work.work_id
+            work.save()
+
     _work_id = models.CharField(
         'Work ID', max_length=14, blank=True, null=True, unique=True,
         editable=False,
@@ -1532,9 +1538,7 @@ class CWRExport(models.Model):
             self.num_in_year = 1
         self.cwr = ''.join(self.yield_lines())
         self.save()
-        for work in self.works.filter(_work_id__isnull=True):
-            work.work_id = work.work_id
-            work.save()
+        Work.persist_work_ids(self.works)
 
 
 class WorkAcknowledgement(models.Model):
