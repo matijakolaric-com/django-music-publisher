@@ -35,7 +35,6 @@ from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
     Writer, WriterInWork, WorkAcknowledgement)
 
-
 def get_data_from_response(response):
     """Helper for extracting data from HTTP response in a way that can be
     fed back into POST that works with Django Admin."""
@@ -63,6 +62,7 @@ def get_data_from_response(response):
 
 
 @override_settings(
+    SECURE_SSL_REDIRECT=False,
     PUBLISHER_NAME='TEST PUBLISHER',
     PUBLISHER_CODE='MK',
     PUBLISHER_IPI_NAME='0000000199',
@@ -235,6 +235,7 @@ class DataImportTest(TestCase):
 
 
 @override_settings(
+    SECURE_SSL_REDIRECT=False,
     PUBLISHER_NAME='TEST PUBLISHER',
     PUBLISHER_CODE='MK',
     PUBLISHER_IPI_NAME='0000000199',
