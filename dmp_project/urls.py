@@ -21,7 +21,8 @@ from music_publisher.royalty_calculation import RoyaltyCalculationView
 urlpatterns = [
     # admin moved to root
     path('', admin.site.urls),
-    path('royalty_calculation/', RoyaltyCalculationView.as_view(), name='royalty_calculation'),
+    path('royalty_calculation/', RoyaltyCalculationView.as_view(),
+         name='royalty_calculation'),
 ]
 
 admin.site.site_header = settings.PUBLISHER_NAME

@@ -117,7 +117,7 @@ class IPIBase(models.Model):
         if self.ipi_name:
             self.ipi_name = self.ipi_name.rjust(11, '0')
         if self.ipi_base:
-            self.ipi_base = self.ipi_base.replace('.', '')
+            self.ipi_base = self.ipi_base.replace('.', '').upper()
             self.ipi_base = re.sub(
                 r'(I).?(\d{9}).?(\d)',
                 r'\1-\2-\3',
