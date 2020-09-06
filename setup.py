@@ -24,8 +24,8 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=3.0.6,<3.1',
-        'requests>=2.23.0',
+        'Django>=3.0,<3.1',
+        'requests>=2.24.0',
     ),
     include_package_data=True,
     classifiers=[
@@ -33,6 +33,7 @@ setuptools.setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 3.0',
+        'Framework :: Django :: 3.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',

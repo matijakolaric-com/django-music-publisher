@@ -118,7 +118,7 @@ with open(path, 'r') as f:
 LOGIN_URL = '/login/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
-    
+
 # The name of the publisher. Use no comma in the name!
 PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
 
