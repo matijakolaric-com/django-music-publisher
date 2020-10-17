@@ -95,7 +95,7 @@ TEMPLATES_21 = {
     'OWR': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'OWR{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ interested_party_number|ljust:9 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}'
         '{{ writer_unknown_indicator|default:" "}}'
         '{{ writer_role|ljust:2 }}000000000{{ ipi_name|rjust:11 }}'
