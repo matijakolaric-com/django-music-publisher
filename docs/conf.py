@@ -23,13 +23,13 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = 'Django-Music-Publisher'
-copyright = '2018-2020, Matija Kolarić'
+copyright = '2018-2021, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = '20.7 Endemic'
+version = '21.1 Victor'
 # The full version, including alpha/beta/rc tags
-release = '20.7.1'
+release = '21.1'
 
 rst_epilog = '''
 .. |version| replace:: {}
