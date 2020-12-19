@@ -44,4 +44,5 @@ covering deployment, basic and advanced metadata editing, data import, registrat
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
-Total playlist duration is around 40 minutes.
+Total playlist duration is around 1 hour.
+

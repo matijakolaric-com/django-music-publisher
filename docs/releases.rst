@@ -53,6 +53,20 @@ extremely fast.
 
 Controlled writers with no society affiliation are now fully supported.
 
+20.1 Victor
+------------
+
+CWR 2.2 and 3.1 (experimental) support was added. With this addition, supported CWR 
+versions are:
+
+* 2.1 Revision 8
+* 2.2 Revision 1
+* 3.0 Revision 1 (experimental)
+* 3.1 Draft (experimental)
+
+DDEX MWN and ERN exports were added.
+
+
 Future open-source features
 ===========================
 
