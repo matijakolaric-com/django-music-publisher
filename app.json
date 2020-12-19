@@ -4,7 +4,7 @@
   "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
   "logo": "https://avatars2.githubusercontent.com/u/57564555",
   "website": "https://matijakolaric.com/",
-  "stack": "heroku-18",
+  "stack": "heroku-20",
   "addons": ["heroku-postgresql:hobby-dev"],
   "scripts": {
     "postdeploy": "python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks"
