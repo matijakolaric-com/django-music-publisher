@@ -63,12 +63,14 @@ the same structure. ``User manual`` links now lead to the relevant page in the u
 
 This version did not add any completely new features. Instead, it was focused on improving and extending existing ones.
 
-A side menu was added, making navigation faster. Support for CWR was extended to include latest revisions:
+A side menu was added, making navigation faster. 
+
+Support for CWR was extended to include latest revisions:
 
 * CWR 2.1 Revision 8
 * CWR 2.2 Revision 2
-* CWR 3.0 Revision 0
-* CWR 3.1 (draft)
+* CWR 3.0 Revision 0 (still experimental)
+
 
 
 Future open-source features
