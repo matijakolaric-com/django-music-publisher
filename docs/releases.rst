@@ -90,5 +90,3 @@ released as open-source code, all of the following must apply:
   Open-source solutions for end-users must be deployable by end-users.
   E.g. licencing of production music.
 
-* It must be legal. E.g. integrating DDEX into open-source code is currently not legal
-  because DDEX licence is not compatible with MIT license.
