@@ -34,6 +34,20 @@
             {% endif %}
           </tr>
         {% endfor %}
+          {% if group.name == 'Musical Works' %}
+            <tr>
+            {% if perms.music_publisher.can_process_royalties %}
+                <th scope="row"><a href="{% url 'royalty_calculation' %}">Royalty Calculations</a></th>
+            {% else %}
+                <th scope="row"><span title="Requires `Can process royalty statement` permission.
+                 See user manual for more information.">Royalty Calculations</span></th>
+            {% endif %}
+            {% if model.admin_url and show_changelinks %}
+                <td>&nbsp;</td>
+            {% endif %}
+            <td>&nbsp;</td>
+            </tr>
+        {% endif %}
       </table>
     </div>
             {% endfor %}

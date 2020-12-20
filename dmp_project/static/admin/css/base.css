@@ -838,7 +838,7 @@ table#change-history tbody th {
 }
 
 #content {
-    padding: 20px 40px 20px 20px;
+    padding: 20px 40px;
 }
 
 .dashboard #content {
@@ -1050,4 +1050,9 @@ table#change-history tbody th {
 
 .popup #header {
     padding: 10px 20px;
+}
+
+.toggle-nav-sidebar {
+    color: #d50000 !important;
+    flex: 0 0 20px !important;
 }
