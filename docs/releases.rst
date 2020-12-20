@@ -61,16 +61,18 @@ the same structure. ``User manual`` links now lead to the relevant page in the u
 21.1 Victor (current)
 ---------------------
 
-This version did not add any completely new features. Instead, it was focused on improving and extending existing ones.
-
-A side menu was added, making navigation faster. 
+This version was focused on improving and extending existing features.
 
 Support for CWR was extended to include latest revisions:
 
 * CWR 2.1 Revision 8
-* CWR 2.2 Revision 2
-* CWR 3.0 Revision 0 (still experimental)
+* CWR 2.2 Revision 2 (includes cross-references)
+* CWR 3.0 Revision 0 (includes cross-references, experimental)
+* CWR 3.1 DRAFT (includes cross-references, experimental)
 
+CWR Syntax highlighting was improved and now includes all fields DMP generates from data, with more detailed descriptions on mouse-over for all supported CWR versions.
+
+A side menu was added to all add/change/view pages, making navigation faster. 
 
 
 Future open-source features
