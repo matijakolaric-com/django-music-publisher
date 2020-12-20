@@ -49,7 +49,7 @@ Total playlist duration is over 1 hour.
 Open-Source for End-Users
 +++++++++++++++++++++++++++++++++++++
 
-A series of videos based on a talk for Python Croatia user group `Open-Source for End-Users <https://www.youtube.com/watch?v=yE2JffLiVBU&list=PLDIerrls8_JBPU2kLBCku_OX2S1xPoZwZ>`_
+A series of videos based on a talk for Python Croatia user group `Open-Source for End-Users <https://www.youtube.com/watch?v=yE2JffLiVBU&list=PLDIerrls8_JBPU2kLBCku_OX2S1xPoZwZ>`_.
 
 .. raw:: html
 
