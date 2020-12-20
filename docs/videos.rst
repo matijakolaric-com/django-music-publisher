@@ -55,4 +55,4 @@ A series of videos based on a talk for Python Croatia user group `Open-Source fo
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLDIerrls8_JBPU2kLBCku_OX2S1xPoZwZ" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
-Total playlist duration is atound 20 minutes.
+Total playlist duration is around 20 minutes.
