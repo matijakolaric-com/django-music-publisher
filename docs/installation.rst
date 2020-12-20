@@ -1,5 +1,5 @@
-Installation / Deployment and Configuration
-*******************************************
+Installation and Configuration
+******************************
 
 Django-Music-Publisher (DMP) can be installed/deployed as a stand-alone application, or used as a Python package.
 
