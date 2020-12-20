@@ -44,5 +44,15 @@ covering deployment, basic and advanced metadata editing, data import, registrat
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
-Total playlist duration is around 1 hour.
+Total playlist duration is over 1 hour.
 
+Open-Source for End-Users
++++++++++++++++++++++++++++++++++++++
+
+A series of videos based on a talk for Python Croatia user group `Open-Source for End-Users <https://www.youtube.com/watch?v=yE2JffLiVBU&list=PLDIerrls8_JBPU2kLBCku_OX2S1xPoZwZ>`_
+
+.. raw:: html
+
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLDIerrls8_JBPU2kLBCku_OX2S1xPoZwZ" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+
+Total playlist duration is atound 20 minutes.
