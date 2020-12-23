@@ -70,7 +70,7 @@ Support for CWR was extended to include latest revisions:
 * CWR 3.0 Revision 0 (includes cross-references, experimental)
 * CWR 3.1 DRAFT (includes cross-references, experimental)
 
-CWR Syntax highlighting was improved and now includes all fields DMP generates from data, with more detailed descriptions on mouse-over for all supported CWR versions.
+CWR Syntax highlighting was improved and now includes all fields DMP generates from data, with more detailed descriptions on mouse-over, for all supported CWR versions.
 
 A side menu was added to all add/change/view pages, making navigation faster. 
 
