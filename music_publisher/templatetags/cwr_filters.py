@@ -119,7 +119,7 @@ def perc(value):
 def soc_name(value):
     """Display society name"""
 
-    value = value.strip()
+    value = value.strip().lstrip('0')
     return models.SOCIETY_DICT.get(value, '')
 
 
@@ -150,3 +150,26 @@ def status(value):
     value = value.strip()
     obj = models.WorkAcknowledgement(status=value)
     return obj.get_status_display()
+
+
+@register.filter(name='flag')
+def flag(value):
+    """Transaction Status"""
+
+    value = value.strip()
+    return {
+        'Y': 'Yes',
+        'N': 'No',
+        'U': 'Unknown',
+    }.get(value, 'Not set')
+
+
+@register.filter(name='orimod')
+def orimod(value):
+    """Transaction Status"""
+
+    value = value.strip()
+    return {
+        'ORI': 'Original Work',
+        'MOD': 'Modification',
+    }.get(value, 'Not set')
