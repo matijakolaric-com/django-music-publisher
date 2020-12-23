@@ -319,15 +319,6 @@ class CommercialRelease(Release):
     objects = CommercialReleaseManager()
 
 
-class OriginalPublishingAgreement(models.Model):
-    """Original Publishing Agreement for controlled writers.
-
-    Not used in DMP."""
-
-    class Meta:
-        managed = False
-
-
 class Writer(WriterBase):
     """Writers.
 
@@ -341,10 +332,6 @@ class Writer(WriterBase):
         verbose_name = 'Writer'
         verbose_name_plural = 'Writers'
 
-    original_publishing_agreement = models.ForeignKey(
-        OriginalPublishingAgreement, verbose_name='Original Agreement',
-        null=True, blank=True, on_delete=models.PROTECT)
-    
     def __str__(self):
         name = super().__str__()
         if self.generally_controlled:
@@ -818,9 +805,6 @@ class WriterInWork(models.Model):
                   'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
         validators=(CWRFieldValidator('saan'),), )
-    original_publishing_agreement = models.ForeignKey(
-        OriginalPublishingAgreement, verbose_name='Original Agreement',
-        null=True, blank=True, on_delete=models.PROTECT)
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(
         'Manuscript share', max_digits=5, decimal_places=2)
