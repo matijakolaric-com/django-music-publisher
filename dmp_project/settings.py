@@ -8,6 +8,9 @@ import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
+SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
+SOFTWARE_VERSION = '20.1'
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!

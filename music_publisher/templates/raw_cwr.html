@@ -14,7 +14,8 @@
       .cwr div.WRK span.record_type,
       .cwr div.ISR span.record_type,
       .cwr div.NWR span.record_type,
-      .cwr div.REV span.record_type {color: #B00;}
+      .cwr div.REV span.record_type,
+      .cwr div.XRF span.record_type {color: #B00;}
       .cwr div.ALT span.record_type,
       .cwr div.VER span.record_type {color: #B00;}
       .cwr div.SPU span.record_type,
@@ -120,7 +121,7 @@
                 {% else %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:' }}</pre></div>
                 {% endif %}
-            {% elif version == '21' %}
+            {% elif version == '21' or version == '22' %}
                 {% if rt == 'HDR' %}
                     {% if line|slice:'3:5' == 'PB' %}
                         <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span>{{ line|slice:'3:5' }}<span class="ipnumber" title="Sender IP number">{{ line|slice:'5:14' }}</span><span class="publisher" title="Sender">{{ line|slice:'14:59' }}</span>{{ line|slice:'59:' }}</pre></div>
@@ -161,6 +162,8 @@
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="duration" title="Release date: {% if line|slice:'19:27' == '00000000' %}Unknown{% else %}{{ line|slice:'25:27' }}.{{ line|slice:'23:25' }}.{{ line|slice:'19:23' }}{% endif %}">{{ line|slice:'19:27' }}</span>{{ line|slice:'27:87' }}<span class="duration" title="Duration: {% if line|slice:'87:93' == '000000' %}Unknown{% else %}{{ line|slice:'87:89' }}h{{ line|slice:'89:91' }}m{{ line|slice:'91:93' }}s{% endif %}">{{ line|slice:'87:93' }}</span>{{ line|slice:'93:249' }}<span class="iswc" title="ISRC">{{ line|slice:'249:261' }}</span>{{ line|slice:'261:' }}</pre></div>
                 {% elif rt == 'ORN' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span title="Type: LIBRARY">{{ line|slice:'19:22' }}</span>{{ line|slice:'22:82' }}<span title="CD identifier">{{ line|slice:'82:97' }}</span>{{ line|slice:'97:101' }}<span title="Library name">{{ line|slice:'101:161' }}</span>{{ line|slice:'161:' }}</pre></div>
+                {% elif rt == 'XRF' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="prshare" title="Society: {{ line|slice:'19:22'|soc_name  }}">{{ line|slice:'19:22' }}</span><span class="iswc" title="Code">{{ line|slice:'22:36' }}</span>{{ line|slice:'36:' }}</pre></div>
                 {% else %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:' }}</pre></div>
                 {% endif %}

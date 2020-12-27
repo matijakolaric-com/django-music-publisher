@@ -18,7 +18,7 @@ from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
     TitleBase, WriterBase,
 )
-from .cwr_templates import TEMPLATES_21, TEMPLATES_30
+from .cwr_templates import TEMPLATES_21, TEMPLATES_22, TEMPLATES_30
 from .validators import CWRFieldValidator
 
 SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
@@ -1139,8 +1139,10 @@ class CWRExport(models.Model):
         choices=(
             ('NWR', 'CWR 2.1: New work registrations'),
             ('REV', 'CWR 2.1: Revisions of registered works'),
+            ('NW2', 'CWR 2.2: New work registrations'),
+            ('RE2', 'CWR 2.2: Revisions of registered works'),
             ('WRK', 'CWR 3.0: Work registration (experimental)'),
-            ('ISR', 'CWR 3.0: ISWC request (experimental)')
+            ('ISR', 'CWR 3.0: ISWC EDI request (experimental)')
         ))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
@@ -1154,6 +1156,8 @@ class CWRExport(models.Model):
         """Return CWR version."""
         if self.nwr_rev in ['WRK', 'ISR']:
             return '30'
+        elif self.nwr_rev in ['NW2', 'RE2']:
+            return '22'
         return '21'
 
     @property
@@ -1193,10 +1197,11 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        return 'CW{}{:04}{}_000.V21'.format(
+        return 'CW{}{:04}{}_000.V{}'.format(
             self.year,
             self.num_in_year,
-            settings.PUBLISHER_CODE)
+            settings.PUBLISHER_CODE,
+            self.version)
 
     def __str__(self):
         return self.filename
@@ -1213,14 +1218,21 @@ class CWRExport(models.Model):
         """
         if self.version == '30':
             template = TEMPLATES_30.get(key)
-        elif key == 'HDR' and len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9:
-            # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
-            template = TEMPLATES_21.get('HDR_8')
         else:
-            template = TEMPLATES_21.get(key)
+            if self.version == '22':
+                tdict = TEMPLATES_22
+            else:
+                tdict = TEMPLATES_21
+            if (
+                    key == 'HDR' and
+                    len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9
+            ):
+                # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
+                template = tdict.get('HDR_8')
+            else:
+                template = tdict.get(key)
         record.update({'settings': settings})
-        return template.render(
-            Context(record)).upper()
+        return template.render(Context(record)).upper()
 
     def get_transaction_record(self, key, record):
         """Create CWR transaction record (row) from the key and dict.
@@ -1299,8 +1311,18 @@ class CWRExport(models.Model):
 
             # WRK
             self.record_sequence = 0
+            if self.version == '22':
+                if self.nwr_rev == 'NW2':
+                    record_type = 'NWR'
+                elif self.nwr_rev == 'RE2':
+                    record_type = 'REV'
+                else:
+                    record_type = self.nwr_rev
+            else:
+                record_type = self.nwr_rev
+
             d = {
-                'record_type': self.nwr_rev,
+                'record_type': record_type,
                 'code': work['code'],
                 'work_title': work['work_title'],
                 'iswc': work['iswc'],
