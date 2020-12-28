@@ -1525,7 +1525,12 @@ class CWRExport(models.Model):
             'publisher_code': settings.PUBLISHER_CODE,
         })
 
-        yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
+        if self.nwr_rev == 'NW2':
+            yield self.get_record('GRH', {'transaction_type': 'NWR'})
+        elif self.nwr_rev == 'RE2':    
+            yield self.get_record('GRH', {'transaction_type': 'REV'})
+        else:
+            yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
 
         if self.nwr_rev == 'ISR':
             lines = self.yield_iswc_request_lines(works)
