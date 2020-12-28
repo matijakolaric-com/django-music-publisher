@@ -37,8 +37,15 @@ There are only three fields:
 
   * CWR 2.1: New work registrations
   * CWR 2.1: Revisions of registered works
-  * CWR 3.0: Work registration (experimental)
-  * CWR 3.0: ISWC request (experimental)
+  * CWR 2.2: New work registrations
+  * CWR 2.2: Revisions of registered works
+  * CWR 3.0: Work registration
+  * CWR 3.0: ISWC request (EDI)
+  * CWR 3.1 DRAFT: Work registration
+
+.. note::
+    Consult with the receiver which version they can process. If they can process multiple versions, choose the 
+    highest.
 
 * ``Internal note`` is a field where you can put a meaningful description of the export. 
 
