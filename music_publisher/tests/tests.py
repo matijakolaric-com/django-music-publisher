@@ -1837,6 +1837,12 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
 
+       # test CWR 3.1 WRK
+        cwr = music_publisher.models.CWRExport(nwr_rev='WR1')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
+
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607

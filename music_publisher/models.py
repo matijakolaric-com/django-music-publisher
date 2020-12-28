@@ -18,7 +18,8 @@ from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
     TitleBase, WriterBase,
 )
-from .cwr_templates import TEMPLATES_21, TEMPLATES_22, TEMPLATES_30
+from .cwr_templates import (
+    TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
 from .validators import CWRFieldValidator
 
 SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
@@ -1143,7 +1144,8 @@ class CWRExport(models.Model):
             ('NW2', 'CWR 2.2: New work registrations'),
             ('RE2', 'CWR 2.2: Revisions of registered works'),
             ('WRK', 'CWR 3.0: Work registration'),
-            ('ISR', 'CWR 3.0: ISWC request (EDI)')
+            ('ISR', 'CWR 3.0: ISWC request (EDI)'),
+            ('WR1', 'CWR 3.1 DRAFT: Work registration'),
         ))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
@@ -1157,6 +1159,8 @@ class CWRExport(models.Model):
         """Return CWR version."""
         if self.nwr_rev in ['WRK', 'ISR']:
             return '30'
+        elif self.nwr_rev == 'WR1':
+            return '31'
         elif self.nwr_rev in ['NW2', 'RE2']:
             return '22'
         return '21'
@@ -1168,32 +1172,37 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        if self.version == '30':
-            return self.filename30
-        return self.filename21
+        if self.version in ['30', '31']:
+            return self.filename3
+        return self.filename2
 
     @property
-    def filename30(self):
-        """Return proper CWR 3.0 filename.
+    def filename3(self):
+        """Return proper CWR 3.x filename.
 
         Format is: CWYYnnnnSUB_REP_VM - m - r.EXT
 
         Returns:
             str: CWR file name
         """
+        if self.version == '30':
+            minor_version = '0-0'
+        else:
+            minor_version = '1-0'
         if self.nwr_rev == 'ISR':
             ext = 'ISR'
         else:
             ext = 'SUB'
-        return 'CW{}{:04}{}_0000_V3-0-0.{}'.format(
+        return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
             self.year,
             self.num_in_year,
             settings.PUBLISHER_CODE,
+            minor_version,
             ext)
 
     @property
-    def filename21(self):
-        """Return proper CWR 2.1 filename.
+    def filename2(self):
+        """Return proper CWR 2.x filename.
 
         Returns:
             str: CWR file name
@@ -1219,6 +1228,8 @@ class CWRExport(models.Model):
         """
         if self.version == '30':
             template = TEMPLATES_30.get(key)
+        elif self.version == '31':
+            template = TEMPLATES_31.get(key)
         else:
             if self.version == '22':
                 tdict = TEMPLATES_22
@@ -1387,6 +1398,8 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('SWR', w)
                 if w['share']:
                     yield self.get_transaction_record('SWT', w)
+                if w['share']:
+                    yield self.get_transaction_record('MAN', w)
                 w['publisher_sequence'] = 1
                 yield self.get_transaction_record('PWR', w)
                 if (self.version == '30' and other_publisher_share and w and
@@ -1426,6 +1439,8 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('OWR', w)
                 if w['share']:
                     yield self.get_transaction_record('OWT', w)
+                if w['share']:
+                    yield self.get_transaction_record('MAN', w)
                 if self.version == '30' and other_publisher_share:
                     w['publisher_sequence'] = 2
                     yield self.get_transaction_record('PWR', w)

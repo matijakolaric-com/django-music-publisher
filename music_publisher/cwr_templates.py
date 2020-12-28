@@ -146,7 +146,8 @@ TEMPLATES_21 = {
         '{{ record_count|rjust:8 }}{% endautoescape %}'),
     'OPT': Template(''),
     'OWT': Template(''),
-    'XRF': Template('')
+    'XRF': Template(''),
+    'MAN': Template('')
 }
 
 TEMPLATES_22 = TEMPLATES_21.copy()
@@ -360,4 +361,26 @@ TEMPLATES_30 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'TRL00001{{ transaction_count|rjust:8 }}'
         '{{ record_count|rjust:8 }}{% endautoescape %}'),
+    'MAN': Template('')
 }
+
+TEMPLATES_31 = TEMPLATES_30.copy()
+TEMPLATES_31.update({
+    'HDR': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'HDRPB{{ publisher_code|ljust:4 }}'
+        '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
+        '{{ creation_date|date:"Ymd" }}'
+        '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
+        ' ' * 15 + '3.1000' + ' ' * 60 +
+        '{{ filename|ljust:27 }}\r\n{% endautoescape %}'),
+    'GRH': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'GRH{{ transaction_type|ljust:3 }}0000103.100000000000'
+        '\r\n{% endautoescape %}'),
+    'MAN': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'MAN{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
+        '{{ share|cwrshare }}{{ share|cwrshare }}'
+        '{{ share|cwrshare }}\r\n{% endautoescape %}')})
