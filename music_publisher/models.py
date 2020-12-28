@@ -1317,8 +1317,6 @@ class CWRExport(models.Model):
                     record_type = 'NWR'
                 elif self.nwr_rev == 'RE2':
                     record_type = 'REV'
-                else:
-                    record_type = self.nwr_rev
             else:
                 record_type = self.nwr_rev
 
