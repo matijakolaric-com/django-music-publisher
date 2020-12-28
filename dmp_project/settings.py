@@ -156,19 +156,6 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHER_AGREEMENT_PR', '1.0'))
 
-# Error reporting aggregator, see https://sentry.io
-SENTRY_DSN = os.getenv('SENTRY_DSN')
-if SENTRY_DSN:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
-        send_default_pii=True
-    )
-    sentry_sdk.capture_message('Starting.')
-
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 0 if DEBUG else 300
