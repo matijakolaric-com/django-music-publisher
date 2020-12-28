@@ -26,6 +26,7 @@
       .cwr div.SPT span.record_type,
       .cwr div.OPT span.record_type {color: #060;}
       .cwr div.SWT span.record_type,
+      .cwr div.MAN span.record_type,
       .cwr div.PWR span.record_type,
       .cwr div.OWT span.record_type {color: #00A;}
       .cwr div.PER span.record_type,
@@ -93,7 +94,7 @@
 <div class="module">
     <div class="readonly cwr">
         {% for line in lines %}{% with line|slice:'0:3' as rt %}
-            {% if version == '30'  %}
+            {% if version == '30' or version == '31' %}
                 {% if rt == 'HDR' or rt == 'TRL' or rt == 'GRH' or rt == 'GRT' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span>{{ line|slice:'3:' }}</pre></div>
                 {% elif rt == 'WRK' or rt == 'ISR' %}

@@ -376,7 +376,7 @@ TEMPLATES_31.update({
         '{{ filename|ljust:27 }}\r\n{% endautoescape %}'),
     'GRH': Template(
         '{% load cwr_filters %}{% autoescape off %}'
-        'GRH{{ transaction_type|ljust:3 }}0000103.100000000000'
+        'GRHWRK0000103.100000000000'
         '\r\n{% endautoescape %}'),
     'MAN': Template(
         '{% load cwr_filters %}{% autoescape off %}'
