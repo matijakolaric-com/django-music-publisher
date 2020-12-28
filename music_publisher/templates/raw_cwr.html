@@ -118,6 +118,8 @@
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="artist" title="Performing artist">{{ line|slice:'19:79' }}</span>{{ line|slice:'79:' }}</pre></div>
                 {% elif rt == 'REC' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:45' }}<span class="title" title="Recording title">{{ line|slice:'45:105' }}</span><span class="title" title="Version title">{{ line|slice:'105:165' }}</span><span class="artist" title="Recording artist">{{ line|slice:'165:225' }}</span>{{ line|slice:'225:' }}</pre></div>
+                {% elif rt == 'XRF' %}
+                    <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="prshare" title="Society: {{ line|slice:'19:23'|soc_name  }}">{{ line|slice:'19:23' }}</span><span class="iswc" title="Code">{{ line|slice:'23:37' }}</span>{{ line|slice:'36:' }}</pre></div>
                 {% else %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:' }}</pre></div>
                 {% endif %}

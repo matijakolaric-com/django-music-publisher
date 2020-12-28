@@ -1837,6 +1837,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
 
+
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
 ACK0000000000000000201805160910510000100000000NWRONE                                                         Z128                123                 20180607AS

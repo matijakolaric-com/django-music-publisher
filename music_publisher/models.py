@@ -1142,8 +1142,8 @@ class CWRExport(models.Model):
             ('REV', 'CWR 2.1: Revisions of registered works'),
             ('NW2', 'CWR 2.2: New work registrations'),
             ('RE2', 'CWR 2.2: Revisions of registered works'),
-            ('WRK', 'CWR 3.0: Work registration (experimental)'),
-            ('ISR', 'CWR 3.0: ISWC EDI request (experimental)')
+            ('WRK', 'CWR 3.0: Work registration'),
+            ('ISR', 'CWR 3.0: ISWC request (EDI)')
         ))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(

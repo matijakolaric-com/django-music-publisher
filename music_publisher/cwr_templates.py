@@ -185,7 +185,18 @@ TEMPLATES_22.update({
         '{{ cd_identifier|ljust:15 }}0000{{ library|ljust:60 }}' +
         ' ' * (26 + 12 + 60 + 20) + '0000' + ' ' * (18 + 26 + 42) + '\r\n'
         '{% endautoescape %}'),
-
+    'REC': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'REC{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}'
+        '{{ release_date|default:"00000000" }}' +
+        ' ' * 60 + '{{ duration|rjust:6|default:"000000" }}     ' +
+        ' ' * 151 +
+        '{{ isrc|ljust:12 }}     '
+        '{{ recording_title|ljust:60 }}{{ version_title|ljust:60 }}'
+        '{{ display_artist|ljust:60 }}{{ record_label.name|ljust:60 }}'
+        '{{ isrc_validity|ljust:20 }}{{ code|ljust:14 }}'
+        '\r\n{% endautoescape %}'),
     'XRF': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'XRF{{ transaction_sequence|rjust:8 }}'
