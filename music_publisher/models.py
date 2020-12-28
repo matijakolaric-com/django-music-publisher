@@ -164,8 +164,9 @@ class Release(ReleaseBase):
         else:
             if self.release_label:
                 return '{} ({})'.format(
-                    self.release_title.upper(), self.release_label)
-            return self.release_title.upper()
+                    (self.release_title or '<no title>').upper(),
+                    self.release_label)
+            return (self.release_title or '<no title>').upper()
 
     @property
     def release_id(self):

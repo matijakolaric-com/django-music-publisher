@@ -1411,11 +1411,23 @@ class CWRTemplatesTest(SimpleTestCase):
         'PWR', 'REC', 'SPT', 'SPU', 'SWR', 'SWT', 'TRL', 'OWK']
 
     def test_templates(self):
-        """Test CWR 2.1 and 3.0 generation with empty values."""
+        """Test CWR 2.1, 2.2 and 3.0 generation with empty values."""
         self.assertIsInstance(cwr_templates.TEMPLATES_21, dict)
         for i, key in enumerate(self.RECORD_TYPES):
             self.assertIn(key, cwr_templates.TEMPLATES_21)
             template = cwr_templates.TEMPLATES_21[key]
+            d = {
+                'transaction_sequence': i,
+                'record_sequence': None,
+                'first_name': None,
+                'pr_society': '10',
+                'share': Decimal('0.5')
+            }
+            self.assertIsInstance(template.render(Context(d)).upper(), str)
+        self.assertIsInstance(cwr_templates.TEMPLATES_22, dict)
+        for i, key in enumerate(self.RECORD_TYPES):
+            self.assertIn(key, cwr_templates.TEMPLATES_22)
+            template = cwr_templates.TEMPLATES_22[key]
             d = {
                 'transaction_sequence': i,
                 'record_sequence': None,
@@ -1813,6 +1825,11 @@ class ModelsSimpleTest(TransactionTestCase):
         with self.assertRaises(exceptions.ValidationError):
             writer.clean()
 
+       # test CWR 2.2 NWR
+        cwr = music_publisher.models.CWRExport(nwr_rev='NW2')
+        cwr.save()
+        cwr.works.add(work)
+        cwr.create_cwr()
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607

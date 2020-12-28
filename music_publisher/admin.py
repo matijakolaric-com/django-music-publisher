@@ -358,6 +358,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         'library',
         'release_title',
         'release_label',
+        'release_date',
         'work_count',
         'track_count',
     )
@@ -454,6 +455,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     list_display = (
         'release_title',
         'release_label',
+        'release_date',
         'track_count',
     )
 

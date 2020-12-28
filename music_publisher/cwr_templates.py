@@ -2,7 +2,7 @@
 
 Attributes:
     TEMPLATES_21 (dict): Record templates for CWR 2.1
-    TEMPLATES_22 (dict): Record templates for CWR 2.2
+    TEMPLATES_22 (dict): Record templates for CWR 2.2, based on 2.1
     TEMPLATES_30 (dict): Record templates for CWR 3.0
 """
 
@@ -134,8 +134,8 @@ TEMPLATES_21 = {
         'ORN{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}LIB' + ' ' * 60 +
         '{{ cd_identifier|ljust:15 }}0000{{ library|ljust:60 }}' +
-        ' ' * (26 + 12 + 60 + 20) + '0000' + ' ' * (18 + 26 + 42) + '\r\n'
-        '{% endautoescape %}'),
+        ' ' * (26 + 12 + 60 + 20) + '0000                  \r\n'
+                                    '{% endautoescape %}'),
     'GRT': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRT00001{{ transaction_count|rjust:8 }}'
@@ -178,6 +178,14 @@ TEMPLATES_22.update({
         '{{ settings.PUBLISHER_NAME|ljust:45 }}              '
         '{{ saan|ljust:14 }}'
         '{{ code|ljust:9 }}01\r\n{% endautoescape %}'),
+    'ORN': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'ORN{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}LIB' + ' ' * 60 +
+        '{{ cd_identifier|ljust:15 }}0000{{ library|ljust:60 }}' +
+        ' ' * (26 + 12 + 60 + 20) + '0000' + ' ' * (18 + 26 + 42) + '\r\n'
+        '{% endautoescape %}'),
+
     'XRF': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'XRF{{ transaction_sequence|rjust:8 }}'
