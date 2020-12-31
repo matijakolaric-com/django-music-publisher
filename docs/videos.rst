@@ -10,7 +10,7 @@ A playlist specifically about `Django-Music-Publisher <https://www.youtube.com/w
 
    <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
-Total playlist duration is over 1 hour.
+Total playlist duration is around 30 minutes.
 
 
 Music Publishing
