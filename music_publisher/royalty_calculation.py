@@ -402,7 +402,12 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
     def render_to_response(self, context, **response_kwargs):
         """Prepare the context, required since we use admin template."""
         context['site_header'] = settings.PUBLISHER_NAME
+        context['opts'] = {
+            'app_label': 'music_publisher',
+            'model_name': 'royaltycalculations',
+        }
         context['has_permission'] = True
+        context['is_nav_sidebar_enabled'] = False  # Permission issue
         return super().render_to_response(context, **response_kwargs)
 
     @csrf_exempt

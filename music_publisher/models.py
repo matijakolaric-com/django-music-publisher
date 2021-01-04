@@ -18,7 +18,8 @@ from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
     TitleBase, WriterBase,
 )
-from .cwr_templates import TEMPLATES_21, TEMPLATES_30
+from .cwr_templates import (
+    TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
 from .validators import CWRFieldValidator
 
 SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
@@ -164,8 +165,9 @@ class Release(ReleaseBase):
         else:
             if self.release_label:
                 return '{} ({})'.format(
-                    self.release_title.upper(), self.release_label)
-            return self.release_title.upper()
+                    (self.release_title or '<no title>').upper(),
+                    self.release_label)
+            return (self.release_title or '<no title>').upper()
 
     @property
     def release_id(self):
@@ -319,15 +321,6 @@ class CommercialRelease(Release):
     objects = CommercialReleaseManager()
 
 
-class OriginalPublishingAgreement(models.Model):
-    """Original Publishing Agreement for controlled writers.
-
-    Not used in DMP."""
-
-    class Meta:
-        managed = False
-
-
 class Writer(WriterBase):
     """Writers.
 
@@ -341,10 +334,6 @@ class Writer(WriterBase):
         verbose_name = 'Writer'
         verbose_name_plural = 'Writers'
 
-    original_publishing_agreement = models.ForeignKey(
-        OriginalPublishingAgreement, verbose_name='Original Agreement',
-        null=True, blank=True, on_delete=models.PROTECT)
-    
     def __str__(self):
         name = super().__str__()
         if self.generally_controlled:
@@ -818,9 +807,6 @@ class WriterInWork(models.Model):
                   'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
         validators=(CWRFieldValidator('saan'),), )
-    original_publishing_agreement = models.ForeignKey(
-        OriginalPublishingAgreement, verbose_name='Original Agreement',
-        null=True, blank=True, on_delete=models.PROTECT)
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(
         'Manuscript share', max_digits=5, decimal_places=2)
@@ -1155,8 +1141,11 @@ class CWRExport(models.Model):
         choices=(
             ('NWR', 'CWR 2.1: New work registrations'),
             ('REV', 'CWR 2.1: Revisions of registered works'),
-            ('WRK', 'CWR 3.0: Work registration (experimental)'),
-            ('ISR', 'CWR 3.0: ISWC request (experimental)')
+            ('NW2', 'CWR 2.2: New work registrations'),
+            ('RE2', 'CWR 2.2: Revisions of registered works'),
+            ('WRK', 'CWR 3.0: Work registration'),
+            ('ISR', 'CWR 3.0: ISWC request (EDI)'),
+            ('WR1', 'CWR 3.1 DRAFT: Work registration'),
         ))
     cwr = models.TextField(blank=True, editable=False)
     year = models.CharField(
@@ -1170,6 +1159,10 @@ class CWRExport(models.Model):
         """Return CWR version."""
         if self.nwr_rev in ['WRK', 'ISR']:
             return '30'
+        elif self.nwr_rev == 'WR1':
+            return '31'
+        elif self.nwr_rev in ['NW2', 'RE2']:
+            return '22'
         return '21'
 
     @property
@@ -1179,40 +1172,46 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        if self.version == '30':
-            return self.filename30
-        return self.filename21
+        if self.version in ['30', '31']:
+            return self.filename3
+        return self.filename2
 
     @property
-    def filename30(self):
-        """Return proper CWR 3.0 filename.
+    def filename3(self):
+        """Return proper CWR 3.x filename.
 
         Format is: CWYYnnnnSUB_REP_VM - m - r.EXT
 
         Returns:
             str: CWR file name
         """
+        if self.version == '30':
+            minor_version = '0-0'
+        else:
+            minor_version = '1-0'
         if self.nwr_rev == 'ISR':
             ext = 'ISR'
         else:
             ext = 'SUB'
-        return 'CW{}{:04}{}_0000_V3-0-0.{}'.format(
+        return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
             self.year,
             self.num_in_year,
             settings.PUBLISHER_CODE,
+            minor_version,
             ext)
 
     @property
-    def filename21(self):
-        """Return proper CWR 2.1 filename.
+    def filename2(self):
+        """Return proper CWR 2.x filename.
 
         Returns:
             str: CWR file name
         """
-        return 'CW{}{:04}{}_000.V21'.format(
+        return 'CW{}{:04}{}_000.V{}'.format(
             self.year,
             self.num_in_year,
-            settings.PUBLISHER_CODE)
+            settings.PUBLISHER_CODE,
+            self.version)
 
     def __str__(self):
         return self.filename
@@ -1229,14 +1228,23 @@ class CWRExport(models.Model):
         """
         if self.version == '30':
             template = TEMPLATES_30.get(key)
-        elif key == 'HDR' and len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9:
-            # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
-            template = TEMPLATES_21.get('HDR_8')
+        elif self.version == '31':
+            template = TEMPLATES_31.get(key)
         else:
-            template = TEMPLATES_21.get(key)
+            if self.version == '22':
+                tdict = TEMPLATES_22
+            else:
+                tdict = TEMPLATES_21
+            if (
+                    key == 'HDR' and
+                    len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9
+            ):
+                # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
+                template = tdict.get('HDR_8')
+            else:
+                template = tdict.get(key)
         record.update({'settings': settings})
-        return template.render(
-            Context(record)).upper()
+        return template.render(Context(record)).upper()
 
     def get_transaction_record(self, key, record):
         """Create CWR transaction record (row) from the key and dict.
@@ -1315,8 +1323,16 @@ class CWRExport(models.Model):
 
             # WRK
             self.record_sequence = 0
+            if self.version == '22':
+                if self.nwr_rev == 'NW2':
+                    record_type = 'NWR'
+                elif self.nwr_rev == 'RE2':
+                    record_type = 'REV'
+            else:
+                record_type = self.nwr_rev
+
             d = {
-                'record_type': self.nwr_rev,
+                'record_type': record_type,
                 'code': work['code'],
                 'work_title': work['work_title'],
                 'iswc': work['iswc'],
@@ -1382,6 +1398,8 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('SWR', w)
                 if w['share']:
                     yield self.get_transaction_record('SWT', w)
+                if w['share']:
+                    yield self.get_transaction_record('MAN', w)
                 w['publisher_sequence'] = 1
                 yield self.get_transaction_record('PWR', w)
                 if (self.version == '30' and other_publisher_share and w and
@@ -1421,6 +1439,8 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('OWR', w)
                 if w['share']:
                     yield self.get_transaction_record('OWT', w)
+                if w['share']:
+                    yield self.get_transaction_record('MAN', w)
                 if self.version == '30' and other_publisher_share:
                     w['publisher_sequence'] = 2
                     yield self.get_transaction_record('PWR', w)
@@ -1505,7 +1525,12 @@ class CWRExport(models.Model):
             'publisher_code': settings.PUBLISHER_CODE,
         })
 
-        yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
+        if self.nwr_rev == 'NW2':
+            yield self.get_record('GRH', {'transaction_type': 'NWR'})
+        elif self.nwr_rev == 'RE2':    
+            yield self.get_record('GRH', {'transaction_type': 'REV'})
+        else:
+            yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
 
         if self.nwr_rev == 'ISR':
             lines = self.yield_iswc_request_lines(works)

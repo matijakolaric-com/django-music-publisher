@@ -8,6 +8,9 @@ import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
+SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
+SOFTWARE_VERSION = '20.1'
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -152,19 +155,6 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
     os.getenv('PUBLISHER_AGREEMENT_PR', '1.0'))
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHER_AGREEMENT_PR', '1.0'))
-
-# Error reporting aggregator, see https://sentry.io
-SENTRY_DSN = os.getenv('SENTRY_DSN')
-if SENTRY_DSN:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
-        send_default_pii=True
-    )
-    sentry_sdk.capture_message('Starting.')
 
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG

@@ -2,6 +2,7 @@
 
 Attributes:
     TEMPLATES_21 (dict): Record templates for CWR 2.1
+    TEMPLATES_22 (dict): Record templates for CWR 2.2, based on 2.1
     TEMPLATES_30 (dict): Record templates for CWR 3.0
 """
 
@@ -145,8 +146,64 @@ TEMPLATES_21 = {
         '{{ record_count|rjust:8 }}{% endautoescape %}'),
     'OPT': Template(''),
     'OWT': Template(''),
-    'XRF': Template('')
+    'XRF': Template(''),
+    'MAN': Template('')
 }
+
+TEMPLATES_22 = TEMPLATES_21.copy()
+TEMPLATES_22.update({
+    'HDR': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'HDRPB{{ publisher_ipi_name|rjust:11|slice:"2:" }}'
+        '{{ publisher_name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
+        '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
+        '               2.2002{{ settings.SOFTWARE|ljust:30 }}'
+        '{{ settings.SOFTWARE_VERSION|ljust:30 }}\r\n{% endautoescape %}'),
+    'HDR_8': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'HDR{{ publisher_ipi_name|rjust:11 }}'
+        '{{ publisher_name|ljust:45 }}01.10{{ '
+        'creation_date|date:"Ymd" }}'
+        '{{ creation_date|date:"His" }}{{ '
+        'creation_date|date:"Ymd" }}'
+        '               2.2002DMP.MATIJAKOLARIC.COM         '
+        '{{ software_version|ljust:30 }}\r\n{% endautoescape %}'),
+    'GRH': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'GRH{{ transaction_type|ljust:3 }}0000102.20'
+        '0000000000  \r\n{% endautoescape %}'),
+    'PWR': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'PWR{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
+        '{{ settings.PUBLISHER_NAME|ljust:45 }}              '
+        '{{ saan|ljust:14 }}'
+        '{{ code|ljust:9 }}01\r\n{% endautoescape %}'),
+    'ORN': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'ORN{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}LIB' + ' ' * 60 +
+        '{{ cd_identifier|ljust:15 }}0000{{ library|ljust:60 }}' +
+        ' ' * (26 + 12 + 60 + 20) + '0000' + ' ' * (18 + 26 + 42) + '\r\n'
+        '{% endautoescape %}'),
+    'REC': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'REC{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}'
+        '{{ release_date|default:"00000000" }}' +
+        ' ' * 60 + '{{ duration|rjust:6|default:"000000" }}     ' +
+        ' ' * 151 +
+        '{{ isrc|ljust:12 }}     '
+        '{{ recording_title|ljust:60 }}{{ version_title|ljust:60 }}'
+        '{{ display_artist|ljust:60 }}{{ record_label.name|ljust:60 }}'
+        '{{ isrc_validity|ljust:20 }}{{ code|ljust:14 }}'
+        '\r\n{% endautoescape %}'),
+    'XRF': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'XRF{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ organization.code|soc }}'
+        '{{ identifier|ljust:14 }}WY\r\n{% endautoescape %}'),
+})
 
 TEMPLATES_30 = {
     'HDR': Template(
@@ -304,4 +361,26 @@ TEMPLATES_30 = {
         '{% load cwr_filters %}{% autoescape off %}'
         'TRL00001{{ transaction_count|rjust:8 }}'
         '{{ record_count|rjust:8 }}{% endautoescape %}'),
+    'MAN': Template('')
 }
+
+TEMPLATES_31 = TEMPLATES_30.copy()
+TEMPLATES_31.update({
+    'HDR': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'HDRPB{{ publisher_code|ljust:4 }}'
+        '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
+        '{{ creation_date|date:"Ymd" }}'
+        '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
+        ' ' * 15 + '3.1000' + ' ' * 60 +
+        '{{ filename|ljust:27 }}\r\n{% endautoescape %}'),
+    'GRH': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'GRHWRK0000103.100000000000'
+        '\r\n{% endautoescape %}'),
+    'MAN': Template(
+        '{% load cwr_filters %}{% autoescape off %}'
+        'MAN{{ transaction_sequence|rjust:8 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
+        '{{ share|cwrshare }}{{ share|cwrshare }}'
+        '{{ share|cwrshare }}\r\n{% endautoescape %}')})

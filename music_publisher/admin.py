@@ -302,7 +302,6 @@ class ReleaseAdmin(MusicPublisherAdmin):
     )
 
     search_fields = ('release_title', '^cd_identifier')
-    actions = None
 
     def has_module_permission(self, request):
         """Return False"""
@@ -358,6 +357,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         'library',
         'release_title',
         'release_label',
+        'release_date',
         'work_count',
         'track_count',
     )
@@ -454,6 +454,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     list_display = (
         'release_title',
         'release_label',
+        'release_date',
         'track_count',
     )
 
@@ -1480,12 +1481,14 @@ class CWRExportAdmin(admin.ModelAdmin):
             zip_file = zipfile.ZipFile(
                 response, 'w', zipfile.ZIP_DEFLATED)
             zip_file.writestr(obj.filename, obj.cwr.encode().decode('latin1'))
-            if obj.version == '30':
+            if obj.version in ['30', '31']:
                 cd = 'attachment; filename="{}.zip"'.format(
                     obj.filename.replace('.', '_'))
             else:
                 cd = 'attachment; filename="{}"'.format(
-                    obj.filename.replace('.V21', '.zip'))
+                    obj.filename.replace(
+                        '.V21', '.zip'
+                    ).replace('.V22', '.zip'))
             response['Content-Disposition'] = cd
             return response
 

@@ -572,6 +572,7 @@ input[type=button][disabled].default {
 
 .module caption,
 .inline-group h2 {
+    font-weight: 200;
     font-size: 20px;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -822,6 +823,20 @@ table#change-history tbody th {
     padding: 0;
 }
 
+#container > div {
+    flex-shrink: 0;
+}
+
+#container > .main {
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.main > .content {
+    flex:  1 0;
+    max-width: 100%;
+}
+
 #content {
     padding: 20px 40px;
 }
@@ -910,7 +925,7 @@ table#change-history tbody th {
 
 #branding h2 {
     display: inline-block;
-    padding: 0;
+    padding: 0 0 0 10px;
     font-size: 15px;
     margin: -7px 0 7px 0;
     color: white;
@@ -1035,4 +1050,9 @@ table#change-history tbody th {
 
 .popup #header {
     padding: 10px 20px;
+}
+
+.toggle-nav-sidebar {
+    color: #d50000 !important;
+    flex: 0 0 20px !important;
 }
