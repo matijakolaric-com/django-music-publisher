@@ -1,5 +1,5 @@
-Installation and Configuration
-******************************
+Installation, Configuration and Updating
+****************************************
 
 Django-Music-Publisher (DMP) can be installed/deployed as a stand-alone application, or used as a Python package.
 
@@ -60,6 +60,29 @@ You will be taken directly to the deployment form. Please note that you must fil
 Django-Music-Publisher will not be deployed. This is by design.
 
 See `Settings`_ for more information.
+
+Updating DMP on Heroku
+++++++++++++++++++++++
+
+There are three reasons for udating DMP: 
+
+* if there is a security issue with the version you installed,
+* if there is a bug that affects you, or
+* if you need some features from the newer version.
+
+While installation to Heroku is really simple, updating requires some technical knowledge. The simplest way to update is to install `Heroku CLI (command line interface) <https://devcenter.heroku.com/articles/heroku-cli>`_. It can be installed on Windows, Mac and Linux.
+
+Then you log in, clone the repository, enter the folder, add a new remote and push:
+
+.. code-block:: bash
+
+   $ heroku login
+   $ git clone https://github.com/matijakolaric-com/django-music-publisher.git
+   $ cd django-music-publisher/
+   django-music-publisher$ heroku git:remote --app yourapp 
+   django-music-publisher$ git push heroku master
+   
+If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
 
 Other options - manual deployment (developers or system engineers)
 --------------------------------------------------------------------------------
