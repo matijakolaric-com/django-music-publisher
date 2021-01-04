@@ -1920,6 +1920,6 @@ TRL000010000001000000005"""
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
 TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
-TEST_CWR2_FILENAME = 'music_publisher/tests/CW210001DMP_000.V21'
+TEST_CWR2_FILENAME = 'music_publisher/tests/CW200001DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW210002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW210003DMP_0000_V3-0-0.ISR'
