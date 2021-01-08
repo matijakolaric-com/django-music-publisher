@@ -3,7 +3,7 @@ User Manual
 
 For version |version|.
 
-.. image:: images/dmp.png
+.. image:: images/dmpw.png
 
 .. toctree::
    :maxdepth: 2
