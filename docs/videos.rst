@@ -16,11 +16,11 @@ Total playlist duration is around 30 minutes.
 Music Publishing
 ++++++++++++++++++++++++++++++++++
 
-`Music Publishing <https://www.youtube.com/watch?list=PLQ3e-DuNTFt-HjNC2jTRdmN1DZW1URvJ0&v=1IQyUM-5aAM>`_ videos are good, technically oriented introduction into music publishing with practical software examples. DMP is used in videos 2-8.
+`Music Publishing <https://www.youtube.com/watch?v=yFyIje5w5Y8&list=PLQ3e-DuNTFt-HjNC2jTRdmN1DZW1URvJ0>`_ videos are good, technically oriented introduction into music publishing with practical software examples. DMP is used in videos 2-8.
 
 .. raw:: html
 
-   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/1IQyUM-5aAM/?list=PLQ3e-DuNTFt-HjNC2jTRdmN1DZW1URvJ0" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
+   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed/?list=PLQ3e-DuNTFt-HjNC2jTRdmN1DZW1URvJ0" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
 
 Total playlist duration is around 1 hour.
 
