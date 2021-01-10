@@ -212,7 +212,8 @@ TEMPLATES_30 = {
         '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
         '{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
-        ' ' * 15 + '3.0000' + ' ' * 60 +
+        ' ' * 15 + '3.0000{{ settings.SOFTWARE|ljust:30 }}'
+        '{{ settings.SOFTWARE_VERSION|ljust:30 }}'
         '{{ filename|ljust:27 }}\r\n{% endautoescape %}'),
     'GRH': Template(
         '{% load cwr_filters %}{% autoescape off %}'
@@ -372,7 +373,8 @@ TEMPLATES_31.update({
         '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
         '{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
-        ' ' * 15 + '3.1000' + ' ' * 60 +
+        ' ' * 15 + '3.1000{{ settings.SOFTWARE|ljust:30 }}'
+        '{{ settings.SOFTWARE_VERSION|ljust:30 }}'
         '{{ filename|ljust:27 }}\r\n{% endautoescape %}'),
     'GRH': Template(
         '{% load cwr_filters %}{% autoescape off %}'
