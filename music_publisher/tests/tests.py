@@ -1800,7 +1800,7 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
-            cwr.cwr.encode()[87:], TEST_CONTENT[87:])
+            cwr.cwr.encode()[167:], TEST_CONTENT[167:])
         # should just return when once created
         num = cwr.num_in_year
         cwr.create_cwr()
@@ -1815,7 +1815,7 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
-            cwr.cwr.encode()[87:], TEST_CONTENT[87:])
+            cwr.cwr.encode()[167:], TEST_CONTENT[167:])
 
         # raises error because this writer is controlled in a work
         writer.pr_society = None
