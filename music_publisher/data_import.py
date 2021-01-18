@@ -56,11 +56,12 @@ class DataImporter(object):
         key_match = re.match(r'^([0-9]+|[A-Z]+)', value)
         if not key_match:
             raise ValueError(
-                'Unknown value: "{}" for "{}".'.format(value, name))
+                'Bad value: "{}" for "{}".'.format(value, name))
         key = key_match.group(0)
-        if key.upper() in [t[0] for t in tup]:
+        if key.upper() in [t[0].strip() for t in tup]:
             return key
         else:
+            print(key, [t[0] for t in tup])
             raise ValueError(
                 'Unknown value: "{}" for "{}".'.format(value, name))
 
@@ -76,7 +77,8 @@ class DataImporter(object):
             raise AttributeError('Unknown column: "{}".'.format(key))
         if key_elements[2] == 'role':
             value = self.get_clean_key(
-                value, WriterInWork.ROLES, 'writer role')
+                value.ljust(2), WriterInWork.ROLES, 'writer role')
+            value = value.ljust(2)
         elif key_elements[2] == 'pro':
             value = self.get_clean_key(value, settings.SOCIETIES, 'society')
         elif key_elements[2] == 'share':

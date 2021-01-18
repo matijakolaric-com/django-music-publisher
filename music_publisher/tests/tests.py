@@ -115,7 +115,7 @@ class DataImportTest(TestCase):
         # Regex mismatch
         with self.assertRaises(ValueError) as ve:
             di.get_clean_key('-', [], 'test')
-        self.assertEqual(str(ve.exception), 'Unknown value: "-" for "test".')
+        self.assertEqual(str(ve.exception), 'Bad value: "-" for "test".')
 
         with self.assertRaises(AttributeError) as ve:
             di.process_writer_value('a', ['Writer', '1', 'b'], 'X')
