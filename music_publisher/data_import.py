@@ -61,7 +61,6 @@ class DataImporter(object):
         if key.upper() in [t[0].strip() for t in tup]:
             return key
         else:
-            print(key, [t[0] for t in tup])
             raise ValueError(
                 'Unknown value: "{}" for "{}".'.format(value, name))
 

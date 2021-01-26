@@ -364,12 +364,12 @@ class AdminTest(TestCase):
         cls.writer_no_first_name.save()
 
         # This one is controllable, but not yet affiliated, testing
-        # "00000000000" hack
+        # "00000000000" hack and '99 Filioque' hack
         cls.controllable_writer = Writer(
-            first_name='Jack', last_name='Doe', ipi_name='00000000000')
+            first_name='Jack', last_name='Doe', ipi_name='00000000000',
+            pr_society='99')
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
-        # Later, he is affiliated.
         cls.controllable_writer.ipi_name = '493'
         cls.controllable_writer.pr_society = '52'
         cls.controllable_writer.mr_society = '44'
