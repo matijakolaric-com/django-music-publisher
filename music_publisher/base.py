@@ -107,7 +107,8 @@ class IPIBase(models.Model):
         'IPI base #', max_length=15, blank=True, null=True,
         validators=(CWRFieldValidator('ipi_base'),))
 
-    _can_be_controlled = models.BooleanField(editable=False, default=False)
+    _can_be_controlled = models.BooleanField(
+        verbose_name='Can be controlled', editable=False, default=False)
 
     def clean_fields(self, *args, **kwargs):
         """

@@ -406,6 +406,7 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
             'app_label': 'music_publisher',
             'model_name': 'royaltycalculations',
         }
+        context['title'] = 'Royalty Calculations'
         context['has_permission'] = True
         context['is_nav_sidebar_enabled'] = False  # Permission issue
         return super().render_to_response(context, **response_kwargs)
