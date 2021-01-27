@@ -60,13 +60,21 @@ For writers who are controlled (whose works are published by you), more data is 
 than for those who are not. This column shows if data is sufficient for the writer to be
 marked as controlled.
 
-Controlled writers without affiliation
-------------------------------------------
+Controlled writers without affiliation and/or IPI name number
+-------------------------------------------------------------
 
-If a writer chooses not to become an affiliate of any society,
-you can enter ``00000000000`` in the ``IPI name#`` field. This has to be
-re-entered on *every* save.
+In very rare cases, writers choose not to affiliate with any society
+and even get an IPI name number. And consequently not getting paid.
 
+If you control such a writer, you can still enter them. If they don't
+have an IPI name number, you can enter ``00000000000``. If they are not
+affiliated with any performance rights society, there is a ``NO SOCIETY``
+option at the bottom of the list.
+
+This has to be manually re-entered on *every* save of the writer form.
+It is a feature, not a bug. In almost all cases, both IPI name number
+and PR affiliations should be entered for controlled writers. Entering
+edge case exceptions should not be simple.
 
 Other writers
 ------------------------------------------

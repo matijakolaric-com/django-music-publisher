@@ -75,7 +75,7 @@ class SocietyAffiliationBase(models.Model):
     pr_society = models.CharField(
         'Performance rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
-        choices=settings.SOCIETIES)
+        choices=settings.SOCIETIES + [('99', 'NO SOCIETY')])
     mr_society = models.CharField(
         'Mechanical rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
@@ -107,7 +107,8 @@ class IPIBase(models.Model):
         'IPI base #', max_length=15, blank=True, null=True,
         validators=(CWRFieldValidator('ipi_base'),))
 
-    _can_be_controlled = models.BooleanField(editable=False, default=False)
+    _can_be_controlled = models.BooleanField(
+        verbose_name='Can be controlled', editable=False, default=False)
 
     def clean_fields(self, *args, **kwargs):
         """
@@ -162,13 +163,13 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
     def clean(self):
         """Clean the data and validate."""
 
+        self._can_be_controlled = (
+                bool(self.ipi_name) & bool(self.pr_society))
         if self.ipi_name == '00000000000':
-            self._can_be_controlled = True
             self.ipi_name = None
-        else:
-            self._can_be_controlled = (
-                    bool(self.ipi_name) &
-                    bool(self.pr_society))
+        if self.pr_society == '99':
+            self.pr_society = None
+
         d = {}
         if not self.generally_controlled:
             if self.saan:

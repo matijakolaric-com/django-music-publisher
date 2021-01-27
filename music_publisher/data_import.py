@@ -34,7 +34,8 @@ class DataImporter(object):
     ARTIST_FIELDS = [
         'last', 'first', 'isni']
     WRITER_FIELDS = [
-        'last', 'first', 'ipi', 'pro', 'role', 'share', 'controlled', 'saan']
+        'last', 'first', 'ipi', 'pro', 'role', 'share', 'manuscript_share',
+        'pr_share', 'mr_share', 'sr_share', 'controlled', 'saan']
 
     def __init__(self, filelike, user=None):
         self.user = user
@@ -61,7 +62,6 @@ class DataImporter(object):
         if key.upper() in [t[0].strip() for t in tup]:
             return key
         else:
-            print(key, [t[0] for t in tup])
             raise ValueError(
                 'Unknown value: "{}" for "{}".'.format(value, name))
 
@@ -81,7 +81,7 @@ class DataImporter(object):
             value = value.ljust(2)
         elif key_elements[2] == 'pro':
             value = self.get_clean_key(value, settings.SOCIETIES, 'society')
-        elif key_elements[2] == 'share':
+        elif key_elements[2] in ['share', 'manuscript_share']:
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])
             else:
@@ -297,7 +297,8 @@ class DataImporter(object):
                 saan = None
             wiw = WriterInWork(
                 writer=writer, work=work,
-                relative_share=w_dict.get('share'),
+                relative_share=(
+                    w_dict.get('manuscript_share') or w_dict.get('share')),
                 capacity=w_dict.get('role'),
                 controlled=w_dict.get('controlled'),
                 saan=saan)

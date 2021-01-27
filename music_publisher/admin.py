@@ -1121,8 +1121,17 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} First'.format(i))
             labels.append('Writer {} IPI'.format(i))
             labels.append('Writer {} PRO'.format(i))
+            if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
+                labels.append('Writer {} MRO'.format(i))
+            if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
+                labels.append('Writer {} SRO'.format(i))
             labels.append('Writer {} Role'.format(i))
-            labels.append('Writer {} Share'.format(i))
+            labels.append('Writer {} Manuscript Share'.format(i))
+            labels.append('Writer {} PR Share'.format(i))
+            if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
+                labels.append('Writer {} MR Share'.format(i))
+            if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
+                labels.append('Writer {} SR Share'.format(i))
             labels.append('Writer {} Controlled'.format(i))
             labels.append('Writer {} SAAN'.format(i))
         for i in range(artist_max):
@@ -1169,7 +1178,12 @@ class WorkAdmin(MusicPublisherAdmin):
                 if role:
                     row['Writer {} Role'.format(i)] = '{} - {}'.format(
                         role['code'], role['name'])
-                row['Writer {} Share'.format(i)] = wiw.get('relative_share')
+                row['Writer {} Manuscript Share'.format(i)] = wiw.get('relative_share')
+                row['Writer {} PR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_PR)
+                if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
+                    row['Writer {} MR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_MR)
+                if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
+                    row['Writer {} SR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
                 for aff in w.get('affiliations', []):
                     if aff['affiliation_type']['code'] == 'PR':
                         pro = aff['organization']

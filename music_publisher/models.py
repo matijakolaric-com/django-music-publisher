@@ -1343,43 +1343,96 @@ class CWRExport(models.Model):
                     'ORI         ')
             }
             yield self.get_transaction_record('WRK', d)
+            yield from self.get_party_lines(work)
+            yield from self.get_other_lines(work)
+            self.transaction_count += 1
 
-            # SPU, SPT
-            controlled_relative_share = Decimal(0)  # total pub share
-            other_publisher_share = Decimal(0)  # used for co-publishing
-            controlled_writer_ids = set()  # used for co-publishing
-            copublished_writer_ids = set()  # used for co-publishing
-            controlled_shares = defaultdict(Decimal)
-            for wiw in work['writers']:
-                if wiw['controlled']:
-                    controlled_writer_ids.add(wiw['writer']['code'])
-            for wiw in work['writers']:
-                writer = wiw['writer']
-                share = Decimal(wiw['relative_share'])
-                if wiw['controlled']:
-                    key = writer['code']
-                    controlled_relative_share += share
-                    controlled_shares[key] += share
-                elif (writer and writer['code'] in controlled_writer_ids):
-                    key = writer['code']
-                    copublished_writer_ids.add(key)
-                    other_publisher_share += share
-                    controlled_shares[key] += share
-            yield from self.yield_publisher_lines(controlled_relative_share)
-            # OPU, co-publishing only
-            if other_publisher_share:
-                yield self.get_transaction_record(
-                    'OPU', {'sequence': 2, 'share': other_publisher_share})
-                yield self.get_transaction_record(
-                    'OPT', {'share': other_publisher_share})
+    def get_party_lines(self, work):
+        """Yield SPU, SPT, OPU, SWR, SWT, OPT and PWR lines
 
-            # SWR, SWT, PWR
-            for wiw in work['writers']:
-                if not wiw['controlled']:
-                    continue  # goes to OWR
+        Args:
+            work: musical work
+
+        Yields:
+            str: CWR record (row/line)
+        """
+
+        # SPU, SPT
+        controlled_relative_share = Decimal(0)  # total pub share
+        other_publisher_share = Decimal(0)  # used for co-publishing
+        controlled_writer_ids = set()  # used for co-publishing
+        copublished_writer_ids = set()  # used for co-publishing
+        controlled_shares = defaultdict(Decimal)
+        for wiw in work['writers']:
+            if wiw['controlled']:
+                controlled_writer_ids.add(wiw['writer']['code'])
+        for wiw in work['writers']:
+            writer = wiw['writer']
+            share = Decimal(wiw['relative_share'])
+            if wiw['controlled']:
+                key = writer['code']
+                controlled_relative_share += share
+                controlled_shares[key] += share
+            elif (writer and writer['code'] in controlled_writer_ids):
+                key = writer['code']
+                copublished_writer_ids.add(key)
+                other_publisher_share += share
+                controlled_shares[key] += share
+        yield from self.yield_publisher_lines(controlled_relative_share)
+        # OPU, co-publishing only
+        if other_publisher_share:
+            yield self.get_transaction_record(
+                'OPU', {'sequence': 2, 'share': other_publisher_share})
+            yield self.get_transaction_record(
+                'OPT', {'share': other_publisher_share})
+
+        # SWR, SWT, PWR
+        for wiw in work['writers']:
+            if not wiw['controlled']:
+                continue  # goes to OWR
+            w = wiw['writer']
+            agr = wiw['original_publishers'][0]['agreement']
+            saan = agr['recipient_agreement_number'] if agr else None
+            affiliations = w.get('affiliations', [])
+            for aff in affiliations:
+                if aff['affiliation_type']['code'] == 'PR':
+                    w['pr_society'] = aff['organization']['code']
+                elif aff['affiliation_type']['code'] == 'MR':
+                    w['mr_society'] = aff['organization']['code']
+                elif aff['affiliation_type']['code'] == 'SR':
+                    w['sr_society'] = aff['organization']['code']
+
+            w.update({
+                'writer_role': wiw['writer_role']['code'],
+                'share': controlled_shares[w['code']],
+                'saan': saan,
+                'original_publishers': wiw['original_publishers']
+            })
+            yield self.get_transaction_record('SWR', w)
+            if w['share']:
+                yield self.get_transaction_record('SWT', w)
+            if w['share']:
+                yield self.get_transaction_record('MAN', w)
+            w['publisher_sequence'] = 1
+            yield self.get_transaction_record('PWR', w)
+            if (self.version == '30' and other_publisher_share and w and
+                    w['code'] in copublished_writer_ids):
+                w['publisher_sequence'] = 2
+                yield self.get_transaction_record(
+                    'PWR', {
+                        'code': w['code'],
+                        'publisher_sequence': 2
+                    })
+
+        # OWR
+        for wiw in work['writers']:
+            if wiw['controlled']:
+                continue  # done in SWR
+            writer = wiw['writer']
+            if writer and writer['code'] in controlled_writer_ids:
+                continue  # co-publishing, already solved
+            if writer:
                 w = wiw['writer']
-                agr = wiw['original_publishers'][0]['agreement']
-                saan = agr['recipient_agreement_number'] if agr else None
                 affiliations = w.get('affiliations', [])
                 for aff in affiliations:
                     if aff['affiliation_type']['code'] == 'PR':
@@ -1388,120 +1441,89 @@ class CWRExport(models.Model):
                         w['mr_society'] = aff['organization']['code']
                     elif aff['affiliation_type']['code'] == 'SR':
                         w['sr_society'] = aff['organization']['code']
-
-                w.update({
-                    'writer_role': wiw['writer_role']['code'],
-                    'share': controlled_shares[w['code']],
-                    'saan': saan,
-                    'original_publishers': wiw['original_publishers']
-                })
-                yield self.get_transaction_record('SWR', w)
-                if w['share']:
-                    yield self.get_transaction_record('SWT', w)
-                if w['share']:
-                    yield self.get_transaction_record('MAN', w)
-                w['publisher_sequence'] = 1
+            else:
+                w = {'writer_unknown_indicator': 'Y'}
+            w.update({
+                'writer_role': wiw['writer_role']['code'] if wiw[
+                    'writer_role']
+                else None,
+                'share': Decimal(wiw['relative_share'])
+            })
+            yield self.get_transaction_record('OWR', w)
+            if w['share']:
+                yield self.get_transaction_record('OWT', w)
+            if w['share']:
+                yield self.get_transaction_record('MAN', w)
+            if self.version == '30' and other_publisher_share:
+                w['publisher_sequence'] = 2
                 yield self.get_transaction_record('PWR', w)
-                if (self.version == '30' and other_publisher_share and w and
-                        w['code'] in copublished_writer_ids):
-                    w['publisher_sequence'] = 2
-                    yield self.get_transaction_record(
-                        'PWR', {
-                            'code': w['code'],
-                            'publisher_sequence': 2
-                        })
 
-            # OWR
-            for wiw in work['writers']:
-                if wiw['controlled']:
-                    continue  # done in SWR
-                writer = wiw['writer']
-                if writer and writer['code'] in controlled_writer_ids:
-                    continue  # co-publishing, already solved
-                if writer:
-                    w = wiw['writer']
-                    affiliations = w.get('affiliations', [])
-                    for aff in affiliations:
-                        if aff['affiliation_type']['code'] == 'PR':
-                            w['pr_society'] = aff['organization']['code']
-                        elif aff['affiliation_type']['code'] == 'MR':
-                            w['mr_society'] = aff['organization']['code']
-                        elif aff['affiliation_type']['code'] == 'SR':
-                            w['sr_society'] = aff['organization']['code']
-                else:
-                    w = {'writer_unknown_indicator': 'Y'}
-                w.update({
-                    'writer_role': wiw['writer_role']['code'] if wiw[
-                        'writer_role']
-                    else None,
-                    'share': Decimal(wiw['relative_share'])
-                })
-                yield self.get_transaction_record('OWR', w)
-                if w['share']:
-                    yield self.get_transaction_record('OWT', w)
-                if w['share']:
-                    yield self.get_transaction_record('MAN', w)
-                if self.version == '30' and other_publisher_share:
-                    w['publisher_sequence'] = 2
-                    yield self.get_transaction_record('PWR', w)
+    def get_other_lines(self, work):
+        """Yield ALT and subsequent lines
 
-            # ALT
-            alt_titles = set()
-            for at in work['other_titles']:
-                alt_titles.add(at['title'])
-            for rec in work['recordings']:
-                if rec['recording_title']:
-                    alt_titles.add(rec['recording_title'])
-                if rec['version_title']:
-                    alt_titles.add(rec['version_title'])
-            for alt_title in sorted(alt_titles):
-                if alt_title == work['work_title']:
-                    continue
-                yield self.get_transaction_record('ALT', {
-                    'alternate_title': alt_title
-                })
+        Args:
+            work: musical work
 
-            # VER
-            if work['version_type']['code'] == 'MOD':
-                yield self.get_transaction_record('OWK',
-                                                  work['original_works'][0])
+        Yields:
+            str: CWR record (row/line)
+        """
 
-            # PER
-            # artists can be recording and/or live, so let's see
-            artists = {}
-            for aiw in work['performing_artists']:
-                artists.update({aiw['artist']['code']: aiw['artist']})
-            for rec in work['recordings']:
-                if not rec['recording_artist']:
-                    continue
-                artists.update({
-                    rec['recording_artist']['code']: rec['recording_artist']
-                })
-            for artist in artists.values():
-                yield self.get_transaction_record('PER', artist)
+        # ALT
+        alt_titles = set()
+        for at in work['other_titles']:
+            alt_titles.add(at['title'])
+        for rec in work['recordings']:
+            if rec['recording_title']:
+                alt_titles.add(rec['recording_title'])
+            if rec['version_title']:
+                alt_titles.add(rec['version_title'])
+        for alt_title in sorted(alt_titles):
+            if alt_title == work['work_title']:
+                continue
+            yield self.get_transaction_record('ALT', {
+                'alternate_title': alt_title
+            })
 
-            # REC
-            for rec in work['recordings']:
-                if rec['recording_artist']:
-                    rec['display_artist'] = '{} {}'.format(
-                        rec['recording_artist']['first_name'] or '',
-                        rec['recording_artist']['last_name'],
-                    ).strip()[:60]
-                if rec['isrc']:
-                    rec['isrc_validity'] = 'Y'
-                yield self.get_transaction_record('REC', rec)
+        # VER
+        if work['version_type']['code'] == 'MOD':
+            yield self.get_transaction_record('OWK',
+                                              work['original_works'][0])
 
-            # ORN
-            if work['origin']:
-                yield self.get_transaction_record('ORN', {
-                    'library': work['origin']['library']['name'],
-                    'cd_identifier': work['origin']['cd_identifier'],
-                })
+        # PER
+        # artists can be recording and/or live, so let's see
+        artists = {}
+        for aiw in work['performing_artists']:
+            artists.update({aiw['artist']['code']: aiw['artist']})
+        for rec in work['recordings']:
+            if not rec['recording_artist']:
+                continue
+            artists.update({
+                rec['recording_artist']['code']: rec['recording_artist']
+            })
+        for artist in artists.values():
+            yield self.get_transaction_record('PER', artist)
 
-            # XRF
-            for xrf in work['cross_references']:
-                yield self.get_transaction_record('XRF', xrf)
-            self.transaction_count += 1
+        # REC
+        for rec in work['recordings']:
+            if rec['recording_artist']:
+                rec['display_artist'] = '{} {}'.format(
+                    rec['recording_artist']['first_name'] or '',
+                    rec['recording_artist']['last_name'],
+                ).strip()[:60]
+            if rec['isrc']:
+                rec['isrc_validity'] = 'Y'
+            yield self.get_transaction_record('REC', rec)
+
+        # ORN
+        if work['origin']:
+            yield self.get_transaction_record('ORN', {
+                'library': work['origin']['library']['name'],
+                'cd_identifier': work['origin']['cd_identifier'],
+            })
+
+        # XRF
+        for xrf in work['cross_references']:
+            yield self.get_transaction_record('XRF', xrf)
 
     def yield_lines(self):
         """Yield CWR transaction records (rows/lines) for works
