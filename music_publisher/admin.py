@@ -1418,7 +1418,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     list_editable = ('description',)
 
     list_filter = ('nwr_rev', 'year')
-    search_fields = ('works__title',)
+    search_fields = ('description', 'works__title', 'num_in_year')
 
     def get_readonly_fields(self, request, obj=None):
         """Read-only fields differ if CWR has been completed."""
