@@ -11,6 +11,19 @@ from django.db import models
 from .validators import CWRFieldValidator
 
 
+class NotesBase(models.Model):
+    """Abstract class for all classes that have notes.
+
+    Attributes:
+        notes (django.db.models.Textfield): Notes, no use
+    """
+
+    class Meta:
+        abstract = True
+
+    notes = models.TextField(blank=True)
+
+
 class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
 
@@ -144,10 +157,9 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         abstract = True
 
     saan = models.CharField(
-        'Society-assigned general agreement number',
-        help_text='Use this field for general agreements only.\n'
-                  'For specific agreements use the field in the Work form,\n'
-                  'in Writers In Work section.',
+        'SAAN',
+        help_text='Use this field for a general original publishing '
+            'agreement.',
         validators=(CWRFieldValidator('saan'),),
         max_length=14, blank=True, null=True, unique=True)
 
@@ -155,10 +167,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         'General agreement', default=False)
     publisher_fee = models.DecimalField(
         max_digits=5, decimal_places=2, blank=True, null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text=
-        'Percentage of royalties kept by the publisher,\n'
-        'in a general agreement.')
+        validators=[MinValueValidator(0), MaxValueValidator(100)])
 
     def clean(self):
         """Clean the data and validate."""
@@ -198,7 +207,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         super().clean_fields(*args, **kwargs)
 
 
-class ArtistBase(PersonBase):
+class ArtistBase(PersonBase, NotesBase):
     """Performing artist base class.
 
     Attributes:
@@ -223,7 +232,7 @@ class ArtistBase(PersonBase):
         return models.Model.clean_fields(self, *args, **kwargs)
 
 
-class WriterBase(PersonBase, IPIWithGeneralAgreementBase):
+class WriterBase(PersonBase, IPIWithGeneralAgreementBase, NotesBase):
     """Base class for writers.
     """
 
@@ -233,7 +242,7 @@ class WriterBase(PersonBase, IPIWithGeneralAgreementBase):
         abstract = True
 
 
-class LabelBase(models.Model):
+class LabelBase(NotesBase):
     """Music Label base class.
 
     Attributes:
