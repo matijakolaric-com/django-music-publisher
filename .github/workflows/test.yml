@@ -1,6 +1,13 @@
 name: Django Music Publisher test
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+    - 'docs/**'
+    - 'static/**'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -18,17 +25,37 @@ jobs:
         python: [3.7, 3.8, 3.9]
     
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout
+      uses: actions/checkout@v1
+
     - name: Setup Python
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python }}
+
+    - name: Setup cache for pip
+      uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt coverage coveralls
+      if: steps.cache.outputs.cache-hit != 'true'
+  test:
     - name: Test
+      needs: build
       env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
         coverage run manage.py test 
+  finish:        
+    - name: Coveralls
+      needs: test
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
