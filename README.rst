@@ -10,13 +10,13 @@ Django Music Publisher
 .. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/master?logo=coveralls&branch=master
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
     :alt: Coverage Status
-.. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg
+.. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg?logo=github
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
     :alt: License
-.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg
+.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg?logo=pypi
     :target: https://pypi.org/project/django-music-publisher/
     :alt: PYPI
-.. image:: https://img.shields.io/github/issues/matijakolaric-com/django-music-publisher
+.. image:: https://img.shields.io/github/issues/matijakolaric-com/django-music-publisher?logo=github
     :target: https://github.com/matijakolaric-com/django-music-publisher/issues
     :alt: GitHub issues
 
