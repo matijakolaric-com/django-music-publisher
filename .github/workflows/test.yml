@@ -1,9 +1,7 @@
 name: Django Music Publisher test
 
 on:
-- push
-- pull_request:
-    branches: [ master ]
+  [push]
 
 steps:
 - uses: actions/checkout@v1
