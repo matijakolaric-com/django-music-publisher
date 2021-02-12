@@ -1,5 +1,4 @@
-name: Django Music Publisher test
-
+name: Build
 on:
   push:
     paths-ignore:
