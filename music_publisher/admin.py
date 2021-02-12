@@ -1207,10 +1207,10 @@ class WorkAdmin(MusicPublisherAdmin):
                 if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
                     row['Writer {} SR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
                 for aff in w.get('affiliations', []):
-                    if aff['affiliation_type']['code'] == 'PR':
-                        pro = aff['organization']
-                        row['Writer {} PRO'.format(i)] = '{} - {}'.format(
-                        pro['code'], pro['name'])
+                    code = aff['affiliation_type']['code']
+                    cmo = aff['organization']
+                    row['Writer {} {}O'.format(i, code)] = '{} - {}'.format(
+                        cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
                 if ops:
                     op = ops[0]
