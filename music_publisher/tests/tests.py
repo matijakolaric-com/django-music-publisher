@@ -1283,7 +1283,7 @@ class AdminTest(TestCase):
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
         # The file must be processed in under 10 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 10)
+        self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
         data.update({
@@ -1294,7 +1294,7 @@ class AdminTest(TestCase):
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
         # The file must be processed in under 10 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 10)
+        self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
         data.update({
@@ -1319,7 +1319,7 @@ class AdminTest(TestCase):
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
         # The file must be processed in under 10 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 10)
+        self.assertLess((time_after - time_before).total_seconds(), 15)
 
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
