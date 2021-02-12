@@ -46,16 +46,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt coverage coveralls
       if: steps.cache.outputs.cache-hit != 'true'
-  test:
+
     - name: Test
-      needs: build
       env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
         coverage run manage.py test 
-  finish:        
+
     - name: Coveralls
-      needs: test
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
