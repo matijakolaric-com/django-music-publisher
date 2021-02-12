@@ -4,7 +4,7 @@ Django Music Publisher
 .. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master
     :target: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/
     :alt: Build Status
-.. image:: https://img.shields.io/readthedocs/django-music-publisher/latest?logo=read-the-docs   
+.. image:: https://img.shields.io/readthedocs/django-music-publisher?logo=read-the-docs   
     :target: https://django-music-publisher.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/master?logo=coveralls&branch=master
