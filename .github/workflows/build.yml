@@ -50,7 +50,7 @@ jobs:
       env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
-        coverage run manage.py test 
+        coverage run  --omit=manage.py manage.py test 
 
     - name: Coveralls
       env:
