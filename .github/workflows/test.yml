@@ -14,7 +14,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: Python
+    - name: Setup Python
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python }}
@@ -23,5 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt coverage coveralls
     - name: Test
+      env:
+          DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
         coverage run manage.py test 
