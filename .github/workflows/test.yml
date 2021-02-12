@@ -1,7 +1,6 @@
 name: Django Music Publisher test
 
 on: [push]
-defaults:
 
 jobs:
   build:
