@@ -147,7 +147,7 @@ class ArtistAdmin(MusicPublisherAdmin):
         count = obj.recording__count
 
         url = reverse('admin:music_publisher_recording_changelist')
-        url += '?recording_artist__id__exact={}'.format(obj.id)
+        url += '?artist__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     recording_count.short_description = 'Recordings'
