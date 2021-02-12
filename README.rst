@@ -1,7 +1,7 @@
 Django Music Publisher
 ++++++++++++++++++++++
 
-.. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/Django%20Music%20Publisher%20test/badge.svg?branch=master
+.. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master
     :target: https://github.com/matijakolaric-com/django-music-publisher/workflows/Django%20Music%20Publisher%20test/
     :alt: Build Status
 .. image:: https://readthedocs.org/projects/django-music-publisher/badge/?version=latest
