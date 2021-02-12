@@ -53,6 +53,6 @@ jobs:
         coverage run manage.py test 
 
     - name: Coveralls
-      uses: coverallsapp/github-action@master
+      uses: AndreMiras/coveralls-python-action@v20201129
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
