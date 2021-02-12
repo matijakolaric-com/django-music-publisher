@@ -1,0 +1,21 @@
+name: Django Music Publisher test
+
+on:
+- push
+- pull_request:
+    branches: [ master ]
+
+steps:
+- uses: actions/checkout@v1
+- name: Python
+  uses: actions/setup-python@v1
+  with:
+    python-version: 3.8
+- name: Install dependencies
+  run: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+- name: Tes
+  run: |
+    coverage manage.py test 
+    
