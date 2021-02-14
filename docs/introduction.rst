@@ -120,8 +120,8 @@ While new features will be added, the described limitations are permanent.
 Beyond Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Some publishers require more features than DMP offers and/or technical and user support. In that case, there are several options.
+Some publishers require more features than DMP offers and/or technical and user support. In that case, there are two options.
 
-One is to use commercial software. `LATONA.app <https://latona.app>`_ is DMP's commercial large sibling. Migrating from DMP to LATONA is fully supported. There are other solutions, of course.
+One is to use commercial software. `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as affordable Software-as-a-Service, is a built on top of Django-Music-Publisher. There are other solutions, of course.
 
-The other option is to hire a software developer, or a developement agency, to create a custom solution. DMP might be used as a starting point. Note that developing a custom solution is a continuous process, not one-off project.
+The other option is to hire a software developer, or a developement agency, to create a custom solution to exactly match your needs. Django-Music-Publisher may be used as a starting point.
