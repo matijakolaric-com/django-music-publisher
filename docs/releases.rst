@@ -83,14 +83,16 @@ released as open-source code, all of the following must apply:
 
 * Code must be global, or near-global. Features that apply to one or couple of 
   countries will not be included.
-  E.g. US publishers with multiple affiliations and BUMA/STEMRA
-  share split rules are not covered.
+  E.g. there are several PROs in the US, and they have rules about publishers being affiliated 
+  with the same PRO as writers. The consequence is that US publishers usualy have several
+  entities, one for each of the PROs. Support for US publishers with multiple entities will not
+  be included in open-source code.
 
 * Code must be applicable to small publishers (and soon labels). The goal is to help them
   grow. If a feature is required only by established companies, it will not be included. 
-  E.g. administrators and sub-publishers.
+  E.g. features for administrators and sub-publishers will not be included in open-source code.
 
 * A feature must not require complex customisations or deployments.
   Open-source solutions for end-users must be deployable by end-users.
-  E.g. licencing of production music.
+  E.g. licencing of production music or password reset.
 
