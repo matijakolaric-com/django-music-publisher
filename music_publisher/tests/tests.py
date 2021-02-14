@@ -246,9 +246,9 @@ class DataImportTest(TestCase):
     REQUIRE_PUBLISHER_FEE=True,
     ENABLE_NOTES=False)
 class AdminTestNoNotes(TestCase):
-    
+
     fixtures = ['publishing_staff.json']
-    
+
     @classmethod
     def setUpClass(cls):
         """Class setup.
@@ -256,13 +256,11 @@ class AdminTestNoNotes(TestCase):
         Creating staff user.
         """
         super().setUpClass()
-        cls.staffuser = User.objects.create(
-            username='staffuser', password='password', is_active=True,
-            is_staff=True)
-        cls.staffuser.groups.add(1)
+        cls.superuser = User.objects.create_superuser(
+            'superuser', '', 'password')
 
     def test_no_notes(self):
-        self.client.force_login(self.staffuser)
+        self.client.force_login(self.superuser)
         url = reverse(
             'admin:music_publisher_writer_add')
         response = self.client.get(url, follow=False)
