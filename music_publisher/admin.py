@@ -87,10 +87,17 @@ class ArtistAdmin(MusicPublisherAdmin):
     list_display = (
         'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
     search_fields = ('last_name', 'isni',)
-    fieldsets = (
-        ('Name', {'fields': (('first_name', 'last_name'),)}),
-        ('ISNI', {'fields': ('isni',), }),
-    )
+    if settings.ENABLE_NOTES:
+        fieldsets = (
+            ('Name', {'fields': (('first_name', 'last_name'),)}),
+            ('ISNI', {'fields': ('isni',), }),
+            ('Notes', {'fields': ('notes',), }),
+        )
+    else:
+        fieldsets = (
+            ('Name', {'fields': (('first_name', 'last_name'),)}),
+            ('ISNI', {'fields': ('isni',), }),
+        )
 
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
@@ -140,7 +147,7 @@ class ArtistAdmin(MusicPublisherAdmin):
         count = obj.recording__count
 
         url = reverse('admin:music_publisher_recording_changelist')
-        url += '?recording_artist__id__exact={}'.format(obj.id)
+        url += '?artist__id__exact={}'.format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     recording_count.short_description = 'Recordings'
@@ -158,8 +165,16 @@ class LabelAdmin(MusicPublisherAdmin):
         'libraryrelease_count')
     readonly_fields = (
         'recording_count', 'commercialrelease_count', 'libraryrelease_count')
-    
-    fields = ('name',)
+
+    if settings.ENABLE_NOTES:
+        fieldsets = (
+            ('Name', {'fields': ('name',)}),
+            ('Notes', {'fields': ('notes',), }),
+        )
+    else:
+        fieldsets = (
+            ('Name', {'fields': ('name',)}),
+        )
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -544,7 +559,7 @@ class WriterAdmin(MusicPublisherAdmin):
 
         Depending on settings, MR and PR affiliations may not be needed.
         See :meth:`WriterAdmin.get_society_list`"""
-        return (
+        fieldsets = [
             ('Name', {
                 'fields': (
                     ('first_name', 'last_name'),)
@@ -563,7 +578,14 @@ class WriterAdmin(MusicPublisherAdmin):
                      ('saan', 'publisher_fee'))
                 ),
             }),
-        )
+        ]
+        if settings.ENABLE_NOTES:
+            fieldsets.append(
+                ('Notes', {
+                    'fields': ('notes',),
+                }),
+            )
+        return fieldsets
 
     actions = None
 
@@ -1185,10 +1207,10 @@ class WorkAdmin(MusicPublisherAdmin):
                 if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
                     row['Writer {} SR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
                 for aff in w.get('affiliations', []):
-                    if aff['affiliation_type']['code'] == 'PR':
-                        pro = aff['organization']
-                        row['Writer {} PRO'.format(i)] = '{} - {}'.format(
-                        pro['code'], pro['name'])
+                    code = aff['affiliation_type']['code']
+                    cmo = aff['organization']
+                    row['Writer {} {}O'.format(i, code)] = '{} - {}'.format(
+                        cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
                 if ops:
                     op = ops[0]

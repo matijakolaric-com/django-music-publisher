@@ -803,7 +803,7 @@ class WriterInWork(models.Model):
         Writer, on_delete=models.PROTECT, blank=True, null=True)
     saan = models.CharField(
         'Society-assigned specific agreement number',
-        help_text='Use this field for specific agreements only.\n'
+        help_text='Use this field for specific agreements only.'
                   'For general agreements use the field in the Writer form.',
         max_length=14, blank=True, null=True,
         validators=(CWRFieldValidator('saan'),), )

@@ -244,9 +244,49 @@ class DataImportTest(TestCase):
     PUBLISHER_SOCIETY_SR='44',
     REQUIRE_SAAN=True,
     REQUIRE_PUBLISHER_FEE=True,
+    ENABLE_NOTES=False)
+class AdminTestNoNotes(TestCase):
+    
+    fixtures = ['publishing_staff.json']
+    
+    @classmethod
+    def setUpClass(cls):
+        """Class setup.
+
+        Creating staff user.
+        """
+        super().setUpClass()
+        cls.staffuser = User.objects.create(
+            username='staffuser', password='password', is_active=True,
+            is_staff=True)
+        cls.staffuser.groups.add(1)
+
+    def test_no_notes(self):
+        self.client.force_login(self.staffuser)
+        url = reverse(
+            'admin:music_publisher_writer_add')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = reverse(
+            'admin:music_publisher_artist_add')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+
+
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    PUBLISHER_NAME='TEST PUBLISHER',
+    PUBLISHER_CODE='MK',
+    PUBLISHER_IPI_NAME='0000000199',
+    PUBLISHER_SOCIETY_PR='52',
+    PUBLISHER_SOCIETY_MR='44',
+    PUBLISHER_SOCIETY_SR='44',
+    REQUIRE_SAAN=True,
+    REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
+    ENABLE_NOTES=True)
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests.
 
