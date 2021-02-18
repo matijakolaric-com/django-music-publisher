@@ -125,10 +125,6 @@ Publisher-related settings
 * ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, without it CWR generation will not work.
 * ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
 * ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
-
-Affiliation settings
------------------------------------
-
 * ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO) numeric code, required
 * ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO) numeric code
 * ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society numeric code, rarely used
@@ -144,3 +140,7 @@ Agreement-related settings
 * ``PUBLISHING_AGREEMENT_PUBLISHER_SR`` - Synchronization share transferred to the publisher, default is '1.0' (100%)
 * ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
 * ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
+
+Other settings
+------------------------------------
+* ``ENABLE_NOTES`` - Enables notes (text field) for writers, labels and artists
