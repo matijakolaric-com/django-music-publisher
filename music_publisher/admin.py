@@ -8,7 +8,7 @@ import re
 import zipfile
 from csv import DictWriter
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django import forms
 from django.conf import settings
@@ -1433,9 +1433,20 @@ class CWRExportAdmin(admin.ModelAdmin):
         qs = qs.annotate(models.Count('works'))
         return qs
 
+    def date(self, obj):
+        if obj and obj.cwr:
+            if obj.version in ['21', '22']:
+                s = obj.cwr[64:78]
+            else:
+                s = obj.cwr[65:79]
+            try:
+                return datetime.strptime(s, '%Y%m%d%H%M%S').date()
+            except ValueError:
+                pass
+
     autocomplete_fields = ('works',)
     list_display = (
-        'filename', 'nwr_rev', 'work_count', 'view_link',
+        'filename', 'nwr_rev', 'date', 'work_count', 'view_link',
         'download_link', 'description')
     list_editable = ('description',)
 
