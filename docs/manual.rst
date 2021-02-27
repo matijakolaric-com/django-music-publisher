@@ -1,8 +1,8 @@
 User Manual
 ############
 
-Django-Music-Publisher |version|
-======================================================================
+.. note::
+   This user manual applies to version |version|.
 
 .. toctree::
    :maxdepth: 2
