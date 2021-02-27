@@ -100,6 +100,7 @@ html_logo = 'images/dmp.png'
 html_theme_options = {
     'style_nav_header_background': '#fcfcfc',
     'logo_only': True,
+    'display_version': True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
