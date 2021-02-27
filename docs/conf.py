@@ -95,11 +95,12 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_logo = 'images/logo.png'
-if os.environ.get('READTHEDOCS_VERSION') == 'latest':
-    html_theme_options = {
-        'style_nav_header_background': '#D50000',
-    }
+html_logo = 'images/dmp.png'
+
+html_theme_options = {
+    'style_nav_header_background': '#fcfcfc',
+    'logo_only': True,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
