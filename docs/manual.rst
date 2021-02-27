@@ -1,9 +1,8 @@
 User Manual
 ############
 
-For version |version|.
-
-.. image:: images/dmpw.png
+Django-Music-Publisher |version|
+############################################
 
 .. toctree::
    :maxdepth: 2
