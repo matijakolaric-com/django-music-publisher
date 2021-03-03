@@ -166,8 +166,8 @@ TEMPLATES_22.update({
         'creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ '
         'creation_date|date:"Ymd" }}'
-        '               2.2002DMP.MATIJAKOLARIC.COM         '
-        '{{ software_version|ljust:30 }}\r\n{% endautoescape %}'),
+        '               2.2002{{ settings.SOFTWARE|ljust:30 }}'
+        '{{ settings.SOFTWARE_VERSION|ljust:30 }}\r\n{% endautoescape %}'),
     'GRH': Template(
         '{% load cwr_filters %}{% autoescape off %}'
         'GRH{{ transaction_type|ljust:3 }}0000102.20'
