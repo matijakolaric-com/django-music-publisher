@@ -17,8 +17,6 @@ ALT0000000000000013MUSIC PUB CARTOONS SUFFIX CO-SUFFIX                         A
 ALT0000000000000014WORK RECORDING                                              AT  
 ALT0000000000000015WORK RECORDING FEAT. TESTING                                AT  
 VER0000000000000016MUSIC PUB CARTOONS                                                                                                                                                                                                                                                                                                                                       
-REC000000000000001700000000                                                            000000                                                                                                                                                                             
-REC000000000000001800000000                                                            000000                                                                                                                                                                             
-ORN0000000000000019LIB                                                            ML001          0000MUSIC LIBRARY                                                                                                                                                                     0000                  
-GRT000010000000100000022   0000000000
-TRL000010000000100000024
+ORN0000000000000017LIB                                                            ML001          0000MUSIC LIBRARY                                                                                                                                                                     0000                  
+GRT000010000000100000020   0000000000
+TRL000010000000100000022

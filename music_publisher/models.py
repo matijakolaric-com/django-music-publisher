@@ -1415,8 +1415,8 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('MAN', w)
             w['publisher_sequence'] = 1
             yield self.get_transaction_record('PWR', w)
-            if (self.version == '30' and other_publisher_share and w and
-                    w['code'] in copublished_writer_ids):
+            if (self.version in ['30', '31'] and other_publisher_share and
+                    w and w['code'] in copublished_writer_ids):
                 w['publisher_sequence'] = 2
                 yield self.get_transaction_record(
                     'PWR', {
@@ -1454,7 +1454,7 @@ class CWRExport(models.Model):
                 yield self.get_transaction_record('OWT', w)
             if w['share']:
                 yield self.get_transaction_record('MAN', w)
-            if self.version == '30' and other_publisher_share:
+            if self.version in ['30', '31'] and other_publisher_share:
                 w['publisher_sequence'] = 2
                 yield self.get_transaction_record('PWR', w)
 
@@ -1512,6 +1512,12 @@ class CWRExport(models.Model):
                 ).strip()[:60]
             if rec['isrc']:
                 rec['isrc_validity'] = 'Y'
+            if self.version in ['21', '22'] and not any([
+                rec['release_date'],
+                rec['duration'],
+                rec['isrc'],
+            ]):
+                continue
             yield self.get_transaction_record('REC', rec)
 
         # ORN
