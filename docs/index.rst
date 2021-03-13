@@ -2,7 +2,7 @@
 
    <br>
 
-Django-Music-Publisher |br| Free music publishing software 
+Django-Music-Publisher |br| Free Music Publishing Software 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. figure:: /images/work.png

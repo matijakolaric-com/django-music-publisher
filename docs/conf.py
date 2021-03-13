@@ -22,7 +22,7 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = 'Django-Music-Publisher'
+project = 'Django-Music-Publisher - Free Music Publishing Software -'
 copyright = '2018-2021, Matija Kolarić'
 author = 'Matija Kolarić'
 
