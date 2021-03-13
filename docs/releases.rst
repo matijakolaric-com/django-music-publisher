@@ -77,13 +77,15 @@ A side menu was added to all add/change/view pages, making navigation faster.
 21.7 (upcoming)
 -------------------------------------------
 
-The upcoming major version will contain following improvements, already present in the 
-current minor version:
+The upcoming major version will primarily focus on improving data exchange with
+other solutions.
+
+It will contain following improvements, already present in the current minor version:
 
 * More data in CSV export: separate performance, mechanical and sync shares for writers
 * Support for writers with IPI numbers, but without affiliation
 
-Features planned for the upcoming version:
+Features planned for the upcoming major version:
 
 * Even more data in CSV exports:
 
