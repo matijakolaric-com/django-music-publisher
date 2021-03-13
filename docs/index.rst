@@ -12,7 +12,8 @@ Django-Music-Publisher (DMP) is free, open source software for **managing music 
 musical works** and **royalty processing**.
 
 This is the official documentation, including the user manual. 
-Home page of this project, including the installation wizard, and comparison with commercial options, is at https://dmp.matijakolaric.com.
+`Home page <https://dmp.matijakolaric.com>`_ of this project includes an installation wizard and comparison 
+with commercial options.
 
 
 .. toctree::

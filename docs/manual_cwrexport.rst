@@ -1,5 +1,5 @@
-CWR Exports
-===================
+Common Works Registration Exports
+=======================================
 
 Common Works Registration (CWR) is a protocol and file format for batch registrations of musical works with collecting societies worldwide. Publishers send registrations and societies reply with acknowledgement files. Registrations in this formats are usually called CWRs and acknowledgement ACKs.
 

@@ -22,7 +22,7 @@ workhorse in this software.
 
    manual_work
    manual_writer
-   manual_cwrexport
+   CWR Exports <manual_cwrexport>
    manual_ackimport
    manual_dataimport
    manual_royaltycalculations
