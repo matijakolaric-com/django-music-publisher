@@ -1297,10 +1297,10 @@ class AdminTest(TestCase):
             work.save()
             status = WorkAcknowledgement.TRANSACTION_STATUS_CHOICES[i % 12][0]
             society = ['52', '52', '52', '52', '44'][i % 5]
+            # And we do it twice. the first one should be ignored
             WorkAcknowledgement(
                 work=work, status=status, remote_work_id=work._work_id,
                 society_code=society, date=datetime.now()).save()
-
         # 200K rows
         with open(TEST_ROYALTY_PROCESSING_LARGE_FILENAME) as csvfile:
             mock = StringIO()
@@ -1796,6 +1796,14 @@ class ModelsSimpleTest(TransactionTestCase):
             society_code='10',
             date=datetime.now(),
             status='RA'
+        )
+
+        music_publisher.models.WorkAcknowledgement.objects.create(
+            work=work,
+            society_code='51',
+            remote_work_id='REMOTE2',
+            date=datetime.now(),
+            status='AS'
         )
 
         music_publisher.models.WorkAcknowledgement.objects.create(

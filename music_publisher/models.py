@@ -683,9 +683,13 @@ class Work(TitleBase):
                 for recording in self.recordings.all()]
 
         # add cross references, currently only society work ids from ACKs
+        used_society_codes = []
         for wa in self.workacknowledgement_set.all():
             if not wa.remote_work_id:
                 continue
+            if wa.society_code in used_society_codes:
+                continue
+            used_society_codes.append(wa.society_code)
             d = wa.get_dict()
             j['cross_references'].append(d)
 
