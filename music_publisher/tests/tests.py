@@ -28,6 +28,7 @@ from django.template import Context
 from django.test import (
     override_settings, SimpleTestCase, TestCase, TransactionTestCase)
 from django.urls import reverse
+from django.contrib.messages import get_messages
 
 import music_publisher.models
 from music_publisher import cwr_templates, data_import, validators
@@ -1058,8 +1059,13 @@ class AdminTest(TestCase):
         data = get_data_from_response(response)
         data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
         # At this point, there is a different ISWC in one of the works
-        with self.assertRaises(exceptions.ValidationError):
-            self.client.post(url, data, follow=False)
+        response = self.client.post(url, data, follow=False)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 2)
+        self.assertIn(
+            'Conflicting ISWCs found for work',
+            str(messages[0]),
+        )
         # Let's delete the one in the database and try again!
         mock.seek(0)
         self.original_work = Work.objects.get(id=self.original_work.id)
