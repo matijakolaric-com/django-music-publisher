@@ -74,6 +74,41 @@ CWR Syntax highlighting was improved and now includes all fields DMP generates f
 
 A side menu was added to all add/change/view pages, making navigation faster. 
 
+21.7 (upcoming)
+-------------------------------------------
+
+The upcoming major version will primarily focus on improving data exchange with
+other solutions.
+
+It will contain following improvements, already present in the current minor version:
+
+* More data in CSV export: separate performance, mechanical and sync shares for writers
+* Support for writers with IPI numbers, but without affiliation
+
+Features planned for the upcoming major version:
+
+* Even more data in CSV exports:
+
+  * recordings, all fields, including recording ID
+  * publishers (for controlled writer, name, IPI name #, shares)
+  * society work IDs
+
+* More data in CSV imports:
+
+  * recordings, all fields, including recording ID
+  * society work IDs
+
+These improvements will ensure bidirectional data exchange between Django-Music-Publisher
+and `That Green Thing <https://matijakolaric.com/thatgreenthing>`_.
+
+We are considering following improvements:
+
+* *Go Dutch* mode, where the sum of shares for writers adds up to something else than 100%
+  (66.66% for BUMA/STEMRA affiliates)
+
+* Data imports from various 3rd-party formats
+
+* Data exports to various 3rd-party formats
 
 Future open-source features
 ===========================

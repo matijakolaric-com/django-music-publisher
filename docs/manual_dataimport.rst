@@ -62,7 +62,8 @@ For another writer column set, add all of:
 ``Writer 5 Last``, ``Writer 5 First``, ``Writer 5 IPI``, ``Writer 5 PRO``, ``Writer 5 Role``,
 ``Writer 5 Share``, ``Writer 5 Controlled``, ``Writer 5 SAAN``. 
 
-You can add as many writer, artist and alternative title sets as you require.
+You can add as many writer-, artist- and alternative-title-sets as you require. Just keep incrementing
+the counter.
 
 Note that this file has the same form as CSV exports, described in :ref:`exporting_csv`.
 
