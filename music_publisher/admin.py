@@ -1640,10 +1640,13 @@ class ACKImportAdmin(AdminWithReport):
             return self.fields
         return self.add_fields
 
-    RE_ACK_21 = re.compile(re.compile(
-        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M))
-    RE_ACK_30 = re.compile(re.compile(
-        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M))
+    RE_ACK_21 = re.compile(
+        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M)
+    RE_ACK_30 = re.compile(
+        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M)
+
+    RE_ISW_21 = re.compile(
+        r'(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)', re.S | re.M)
 
     def process(self, request, society_code, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
@@ -1651,6 +1654,8 @@ class ACKImportAdmin(AdminWithReport):
         Big part of this code should be moved to the model, left here because
         messaging is simpler.
         """
+
+        from django.contrib.admin.models import CHANGE, LogEntry
 
         if import_iswcs:
             validator = CWRFieldValidator('iswc')
@@ -1689,7 +1694,6 @@ class ACKImportAdmin(AdminWithReport):
                 else:
                     work.iswc = iswc
                     work.last_change = now()
-                    from django.contrib.admin.models import CHANGE, LogEntry
                     LogEntry.objects.log_action(
                         request.user.id,
                         admin.options.get_content_type_for_model(work).id,
@@ -1709,6 +1713,28 @@ class ACKImportAdmin(AdminWithReport):
                 'admin:music_publisher_work_change', args=(work.id,))
             report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
                 url, work.work_id, work.title, wa.get_status_display())
+        if file_content[59:64] == '01.10':
+            for work_id, iswc in re.findall(self.RE_ISW_21, file_content):
+                work_id = work_id.strip()
+                work = Work.objects.filter(_work_id=work_id).first()
+                if not work:
+                    unknown_work_ids.append(work_id)
+                    continue
+                if import_iswcs and iswc:
+                    if work.iswc:
+                        if work.iswc != iswc:
+                            raise ValidationError(
+                                'A different ISWC exists for work {}: {} vs {}.'
+                                ''.format(work, work.iswc, iswc))
+                    else:
+                        work.iswc = iswc
+                        work.last_change = now()
+                        LogEntry.objects.log_action(
+                            request.user.id,
+                            admin.options.get_content_type_for_model(work).id,
+                            work.id, str(work), CHANGE,
+                            'ISWC imported from ACK file.')
+                        work.save()
         if unknown_work_ids:
             messages.add_message(
                 request, messages.ERROR,

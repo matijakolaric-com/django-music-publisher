@@ -13,6 +13,8 @@
       .cwr div.ACK span.record_type,
       .cwr div.WRK span.record_type,
       .cwr div.ISR span.record_type,
+      .cwr div.ISA span.record_type,
+      .cwr div.ISW span.record_type,
       .cwr div.NWR span.record_type,
       .cwr div.REV span.record_type,
       .cwr div.XRF span.record_type {color: #B00;}
@@ -68,6 +70,8 @@
       .cwr div span.capacity {color: #B00;}
       .cwr div.ACK,
       .cwr div.ISR,
+      .cwr div.ISA,
+      .cwr div.ISW,
       .cwr div.WRK,
       .cwr div.NWR,
       .cwr div.REV,
@@ -148,7 +152,7 @@
                     {% endwith %}
                 {% elif rt == 'MSG' %}
                     <div class="{{ rt }} {{ status_code }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:35' }}<span class="message" title="Message Text">{{ line|slice:'35:' }}</span></pre></div>
-                {% elif rt == 'NWR' or rt == 'REV' %}
+                {% elif rt == 'NWR' or rt == 'REV' or rt == 'ISW' %}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="title" title="Work title">{{ line|slice:'19:79' }}</span><span class="workid" title="Work ID">{{ line|slice:'79:93' }}</span>{{ line|slice:'93:95' }}<span class="iswc" title="ISWC">{{ line|slice:'95:106' }}</span>{{ line|slice:'106:129' }}<span class="duration" title="Duration: {% if line|slice:'129:135' == '000000' %}Unknown{% else %}{{ line|slice:'129:131' }}h{{ line|slice:'131:133' }}m{{ line|slice:'133:135' }}s{% endif %}">{{ line|slice:'129:135' }}</span><span class="flag" title="Recorded indicator: {{ line|slice:'135:136'|flag }}">{{ line|slice:'135:136' }}</span>{{ line|slice:'136:142' }}<span class="flag" title="Version type: {{ line|slice:'142:145'|orimod }}">{{ line|slice:'142:145' }}</span>{{ line|slice:'145:' }}</pre></div>
                 {% elif rt == 'SPU'%}
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span><span class="chain" title="Publisher chain sequence">{{ line|slice:'19:21' }}</span><span class="ipnumber" title="Publisher IP number">{{ line|slice:'21:30' }}</span><span class="publisher" title="Publisher">{{ line|slice:'30:75' }}</span>{{ line|slice:'75:76' }}<span class="flag" title="Role: ORIGINAL PUBLISHER">{{ line|slice:'76:78' }}</span>{{ line|slice:'78:87' }}<span class="publisher" title="IPI Name #">{{ line|slice:'87:98' }}</span>{{ line|slice:'98:112' }}<span class="prshare" title="Perf. affiliation: {{ line|slice:'112:115'|soc_name  }}">{{ line|slice:'112:115' }}</span>{{ line|slice:'115:120' }}<span class="mrshare" title="Mech. affiliation: {{ line|slice:'120:123'|soc_name  }}">{{ line|slice:'120:123' }}</span>{{ line|slice:'123:128' }}<span class="srshare" title="Sync. affiliation: {{ line|slice:'128:131'|soc_name  }}">{{ line|slice:'128:131' }}</span>{{ line|slice:'131:139' }}<span class="publisher" title="IPI Base #">{{ line|slice:'139:152' }}</span>{{ line|slice:'152:' }}</pre></div>
