@@ -1572,7 +1572,8 @@ class ACKImportForm(ModelForm):
         fields = ('acknowledgement_file', 'import_iswcs')
 
     acknowledgement_file = FileField()
-    import_iswcs = BooleanField(label='Import ISWCs if present', required=False)
+    import_iswcs = BooleanField(
+        label='Import ISWCs if present', required=False, initial=True)
 
     RE_HDR_21 = re.compile(
         r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
@@ -1688,9 +1689,17 @@ class ACKImportAdmin(AdminWithReport):
             if import_iswcs and iswc:
                 if work.iswc:
                     if work.iswc != iswc:
-                        raise ValidationError(
-                            'A different ISWC exists for work {}: {} vs {}.'
-                            ''.format(work, work.iswc, iswc))
+                        report +=(
+                            'A different ISWC exists for work' +
+                            '{}: {} (old) vs {} (new).<br/>\n'.format(
+                                work, work.iswc, iswc) +
+                            'Old ISWC kept, please investigate.<br/>\n')
+                        self.message_user(
+                            request,
+                            'Conflicting ISWCs found for work {}!'.format(
+                                work),
+                            level=messages.ERROR
+                        )
                 else:
                     work.iswc = iswc
                     work.last_change = now()
