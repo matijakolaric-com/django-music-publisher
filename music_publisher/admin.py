@@ -1645,7 +1645,6 @@ class ACKImportAdmin(AdminWithReport):
         r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M)
     RE_ACK_30 = re.compile(
         r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M)
-
     RE_ISW_21 = re.compile(
         r'(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)', re.S | re.M)
 

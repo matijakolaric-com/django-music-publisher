@@ -270,6 +270,10 @@ class AdminTestNoNotes(TestCase):
             'admin:music_publisher_artist_add')
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+        url = reverse(
+            'admin:music_publisher_label_add')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
 
 @override_settings(
@@ -305,6 +309,10 @@ class AdminTestWithNotes(TestCase):
         self.assertEqual(response.status_code, 200)
         url = reverse(
             'admin:music_publisher_artist_add')
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = reverse(
+            'admin:music_publisher_label_add')
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -1066,6 +1074,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         ackimport = music_publisher.models.ACKImport.objects.first()
+        print(ackimport.report)
         self.assertIsNotNone(ackimport)
 
         """And repeat the previous step, as duplicates are processed 
@@ -1941,7 +1950,12 @@ ACK0000000200000000201805160910510000100000002NWRTHREE                          
 ACK0000000300000000201805160910510000100000003NWRTHREE                                                       DMP000027                               20180607NP
 ACK0000000400000000201805160910510000100000004NWRX                                                           DMP000025                               20180607NP
 GRT000010000005000000007
-TRL000010000005000000009"""
+GRHISW0000202.100020180607
+ISW0000000000000000MUSIC PUB CARTOONS                                            DMP000001                00000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000100000000MUSIC PUB CARTOONS                                            DMP000001     T123456789500000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000200000000MUSIC PUB CARTOONS                                            DMP000001     T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+GRT000020000003000000003
+TRL000010000008000000014"""
 
 
 ACK_CONTENT_21_EXT = """HDRSO000000052PRS for Music                                01.102018060715153220180607
