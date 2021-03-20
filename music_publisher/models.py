@@ -1708,8 +1708,8 @@ class DataImport(models.Model):
 
 FORCE_CASE_CHOICES = {
     'upper': str.upper,
-    'lower': str.lower,
     'title': str.title,
+    'capitalize': str.capitalize,
 }
 
 
