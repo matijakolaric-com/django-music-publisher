@@ -64,7 +64,7 @@ See `Settings`_ for more information.
 Updating DMP on Heroku
 ++++++++++++++++++++++
 
-There are three reasons for udating DMP: 
+There are three reasons for updating DMP:
 
 * if there is a security issue with the version you installed,
 * if there is a bug that affects you, or
