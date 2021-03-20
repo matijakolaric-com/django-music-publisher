@@ -433,7 +433,7 @@ class AdminTest(TestCase):
     def create_writers(cls):
         """Create four writers with different properties."""
         cls.generally_controlled_writer = Writer(
-            first_name='John', last_name='Smith',
+            first_name='JOHN', last_name='SMITH',
             ipi_name='00000000297', ipi_base='I-123456789-3',
             pr_society='52', sr_society='44', mr_society='44',
             generally_controlled=True, saan='A1B2C3',
@@ -556,6 +556,7 @@ class AdminTest(TestCase):
         self.assertEqual(
             str(self.modified_work.artistinwork_set.first()),
             'JOHN DOE')
+        self.assertEqual(self.generally_controlled_writer.last_name, 'SMITH')
 
     def test_unknown_user(self):
         """Several fast test to make sure that an unregistered user is blind.
@@ -1665,7 +1666,8 @@ class ValidatorsTest(TestCase):
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75')
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
+    FORCE_CASE='smart'
 )
 class ModelsSimpleTest(TransactionTestCase):
     """These tests are modifying objects directly."""
@@ -1677,9 +1679,10 @@ class ModelsSimpleTest(TransactionTestCase):
         with self.assertRaises(exceptions.ValidationError):
             artist.clean_fields()
         artist = music_publisher.models.Artist(
-            last_name='The Band', isni='1X')
+            last_name='THE BAND', isni='1X')
         self.assertIsNone(artist.clean_fields())
         artist.save()
+        self.assertEqual(artist.last_name, 'The Band')
         self.assertEqual(str(artist), 'THE BAND')
 
     def test_commercial_release(self):

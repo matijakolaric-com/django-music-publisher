@@ -1706,9 +1706,16 @@ class DataImport(models.Model):
         return self.filename
 
 
+def smart_str_conversion(value):
+    if value.isupper():
+        return value.title()
+    return value
+
+
 FORCE_CASE_CHOICES = {
     'upper': str.upper,
     'title': str.title,
+    'smart': smart_str_conversion,
 }
 
 
@@ -1725,6 +1732,7 @@ def change_case(sender, instance, **kwargs):
             if (isinstance(value, str) and
                     field.editable and
                     field.choices is None and
-                    'description' not in field.name):
+                    'description' not in field.name and
+                    '_id' not in field.name):
                 value = force_case(value)
                 setattr(instance, field.name, value)
