@@ -166,4 +166,4 @@ REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
 REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 
 ENABLE_NOTES = os.getenv('ENABLE_NOTES', False)
-FORCE_CASE = os.getenv('UPPERCASE_ONLY')
+FORCE_CASE = os.getenv('FORCE_CASE')

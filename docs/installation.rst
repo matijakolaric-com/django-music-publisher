@@ -138,9 +138,11 @@ Agreement-related settings
 * ``PUBLISHING_AGREEMENT_PUBLISHER_PR`` - Performance share transferred to the publisher, default is '0.5' (50%)
 * ``PUBLISHING_AGREEMENT_PUBLISHER_MR`` - Mechanical share transferred to the publisher, default is '1.0' (100%)
 * ``PUBLISHING_AGREEMENT_PUBLISHER_SR`` - Synchronization share transferred to the publisher, default is '1.0' (100%)
-* ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
-* ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
 
 Other settings
 ------------------------------------
+* ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
+* ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
 * ``ENABLE_NOTES`` - Enables notes (text field) for writers, labels and artists
+* ``FORCE_CASE`` - available options are ``upper`` and ``title``, converting nearly all strings to UPPER CASE or Title Case,
+  respectively.

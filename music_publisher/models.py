@@ -1709,12 +1709,11 @@ class DataImport(models.Model):
 FORCE_CASE_CHOICES = {
     'upper': str.upper,
     'title': str.title,
-    'capitalize': str.capitalize,
 }
 
 
 @receiver(pre_save)
-def uppercase(sender, instance, **kwargs):
+def change_case(sender, instance, **kwargs):
     force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
     if not force_case:
         return
@@ -1725,6 +1724,7 @@ def uppercase(sender, instance, **kwargs):
             value = getattr(instance, field.name)
             if (isinstance(value, str) and
                     field.editable and
-                    field.choices is None):
+                    field.choices is None and
+                    'description' not in field.name):
                 value = force_case(value)
                 setattr(instance, field.name, value)
