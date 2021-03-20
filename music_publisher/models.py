@@ -12,6 +12,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.template import Context
 
 from .base import (
@@ -21,6 +23,7 @@ from .base import (
 from .cwr_templates import (
     TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
 from .validators import CWRFieldValidator
+
 
 SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
 
@@ -1701,3 +1704,27 @@ class DataImport(models.Model):
 
     def __str__(self):
         return self.filename
+
+
+FORCE_CASE_CHOICES = {
+    'upper': str.upper,
+    'lower': str.lower,
+    'title': str.title,
+}
+
+
+@receiver(pre_save)
+def uppercase(sender, instance, **kwargs):
+    force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
+    if not force_case:
+        return
+    if sender._meta.app_label != 'music_publisher':
+        return
+    for field in instance._meta.get_fields():
+        if isinstance(field, models.CharField):
+            value = getattr(instance, field.name)
+            if (isinstance(value, str) and
+                    field.editable and
+                    field.choices is None):
+                value = force_case(value)
+                setattr(instance, field.name, value)

@@ -170,8 +170,8 @@ class DataImporter(object):
             lookup_writer.clean_fields()
             lookup_writer.clean()
             writer = Writer.objects.filter(
-                last_name=lookup_writer.last_name,
-                first_name=lookup_writer.first_name,
+                last_name__iexact=lookup_writer.last_name,
+                first_name__iexact=lookup_writer.first_name,
                 ipi_name=lookup_writer.ipi_name).first()
             if writer:
                 # No existing general agreement for this writer
@@ -220,8 +220,8 @@ class DataImporter(object):
             lookup_artist.clean_fields()
             lookup_artist.clean()
             artist = Artist.objects.filter(
-                last_name=lookup_artist.last_name,
-                first_name=lookup_artist.first_name,
+                last_name__iexact=lookup_artist.last_name,
+                first_name__iexact=lookup_artist.first_name,
                 isni=lookup_artist.isni
             ).first()
             if not artist:
@@ -234,7 +234,8 @@ class DataImporter(object):
     def get_library_release(self, library_name, cd_identifier):
         lookup_library = Library(name=library_name)
         lookup_library.clean_fields()
-        library = Library.objects.filter(name=lookup_library.name).first()
+        library = Library.objects.filter(
+            name__iexact=lookup_library.name).first()
         if not library:
             library = lookup_library
             library.save()
@@ -245,7 +246,7 @@ class DataImporter(object):
             cd_identifier=cd_identifier)
         library_release = LibraryRelease.objects.filter(
             library_id=lookup_library_release.library_id,
-            cd_identifier=lookup_library_release.cd_identifier
+            cd_identifier__iexact=lookup_library_release.cd_identifier
         ).first()
         if not library_release:
             library_release = lookup_library_release

@@ -71,7 +71,8 @@ def get_data_from_response(response):
     PUBLISHER_SOCIETY_MR='34',
     PUBLISHER_SOCIETY_SR=None,
     REQUIRE_SAAN=False,
-    REQUIRE_PUBLISHER_FEE=False)
+    REQUIRE_PUBLISHER_FEE=False,
+    FORCE_CASE='upper')
 class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
@@ -80,7 +81,10 @@ class DataImportTest(TestCase):
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
             'superuser', '', 'password')
-        cls.obj = Artist(last_name='Artist One')
+        cls.obj = Artist.objects.create(last_name='Artist One')
+
+    def test_case_change(self):
+        self.assertEqual(self.obj.last_name, 'ARTIST ONE')
 
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
@@ -1074,7 +1078,6 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         ackimport = music_publisher.models.ACKImport.objects.first()
-        print(ackimport.report)
         self.assertIsNotNone(ackimport)
 
         """And repeat the previous step, as duplicates are processed 

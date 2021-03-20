@@ -122,6 +122,13 @@ LOGIN_URL = '/login/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 0 if DEBUG else 300
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = not DEBUG
+
 # The name of the publisher. Use no comma in the name!
 PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
 
@@ -141,13 +148,6 @@ PUBLISHER_SOCIETY_PR = os.getenv('PUBLISHER_SOCIETY_PR', None)
 PUBLISHER_SOCIETY_MR = os.getenv('PUBLISHER_SOCIETY_MR', None)
 PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
 
-# Set to True for societies that require society-assigned agreement numbers
-# PRS/MCPS, BUMA/STEMRA, Scandinavian societies.
-REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
-
-# Set to True if you have a standard publishing agreement with writers
-REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
-
 # Shares transferred to the original publisher, default to 50%/100%/100%
 PUBLISHING_AGREEMENT_PUBLISHER_PR = Decimal(
     os.getenv(
@@ -158,11 +158,12 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_SR', '1.0'))
 
-ENABLE_NOTES = os.getenv('ENABLE_NOTES', False)
+# Set to True for societies that require society-assigned agreement numbers
+# PRS/MCPS, BUMA/STEMRA, Scandinavian societies.
+REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
 
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-SECURE_HSTS_SECONDS = 0 if DEBUG else 300
-SECURE_HSTS_PRELOAD = not DEBUG
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = not DEBUG
+# Set to True if you have a standard publishing agreement with writers
+REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
+
+ENABLE_NOTES = os.getenv('ENABLE_NOTES', False)
+FORCE_CASE = os.getenv('UPPERCASE_ONLY')

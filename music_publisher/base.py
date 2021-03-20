@@ -129,7 +129,7 @@ class IPIBase(models.Model):
         consistently formatted data.
         """
         if self.ipi_name:
-            self.ipi_name = self.ipi_name.rjust(11, '0')
+            self.ipi_name = self.ipi_name.zfill(11)
         if self.ipi_base:
             self.ipi_base = self.ipi_base.replace('.', '').upper()
             self.ipi_base = re.sub(
