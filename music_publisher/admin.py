@@ -513,7 +513,8 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     track_count.admin_order_field = 'tracks__count'
 
     def create_json(self, request, qs):
-        """Batch action that downloads a JSON file containing comercial releases.
+        """Batch action that downloads a JSON file containing commercial
+        releases.
 
         Returns:
             JsonResponse: JSON file with selected commercial releases
@@ -1111,8 +1112,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         Work.persist_work_ids(qs)
-        j = Work.objects.get_dict(qs)
 
+        j = Work.objects.get_dict(qs)
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}-works-{}'.format(
             settings.PUBLISHER_CODE, datetime.now().toordinal())
@@ -1313,11 +1314,13 @@ class RecordingAdmin(MusicPublisherAdmin):
         'work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
+        'recording_id',
         'complete_recording_title', 'complete_version_title', 'title',
         'work_link', 'artist_link', 'label_link')
     fieldsets = (
         (None, {
             'fields': (
+                'recording_id',
                 'work',
                 (
                     'recording_title', 'recording_title_suffix',
@@ -1343,10 +1346,17 @@ class RecordingAdmin(MusicPublisherAdmin):
         qs = qs.prefetch_related('record_label')
         return qs
 
+    def recording_id(self, obj):
+        """Return :attr:`.models.Recording.recording_id`, make it sortable."""
+        return obj.recording_id
+
+    recording_id.short_description = 'Recording ID'
+    recording_id.admin_order_field = 'id'
+
     def title(self, obj):
         """Return the recording title, which is not the necessarily the
         title field."""
-        return str(obj)
+        return obj.title
 
     def work_link(self, obj):
         """Link to the work the recording is based on."""

@@ -8,7 +8,7 @@ Django-Music-Publisher |br| Free music publishing software
 YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
 
 .. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=21.7
-    :target: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/
+    :target: https://github.com/matijakolaric-com/django-music-publisher/actions/workflows/build.yml
     :alt: Build Status
 .. image:: https://img.shields.io/readthedocs/django-music-publisher?logo=read-the-docs   
     :target: https://django-music-publisher.readthedocs.io/en/21.7/

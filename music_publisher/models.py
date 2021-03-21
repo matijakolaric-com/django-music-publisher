@@ -496,9 +496,13 @@ class Work(TitleBase):
 
     @staticmethod
     def persist_work_ids(qs):
+        qs = qs.prefetch_related('recordings')
         for work in qs.filter(_work_id__isnull=True):
             work.work_id = work.work_id
             work.save()
+            for rec in work.recordings.all():
+                if rec._recording_id is None:
+                    rec.recording_id = rec.recording_id
 
     _work_id = models.CharField(
         'Work ID', max_length=14, blank=True, null=True, unique=True,
@@ -961,6 +965,10 @@ class Recording(models.Model):
         verbose_name_plural = 'Recordings'
         ordering = ('-id',)
 
+    _recording_id = models.CharField(
+        'Recording ID', max_length=14, blank=True, null=True, unique=True,
+        editable=False,
+        validators=(CWRFieldValidator('name'),))
     recording_title = models.CharField(
         blank=True, max_length=60,
         validators=(CWRFieldValidator('work_title'),))
@@ -1031,10 +1039,9 @@ class Recording(models.Model):
                 self.version_title).strip()
         return self.version_title
 
-    def __str__(self):
-        """Return the most precise type of title"""
-        return (
-            self.complete_version_title if self.version_title else
+    @property
+    def title(self):
+        return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
             self.work.title)
 
@@ -1045,9 +1052,26 @@ class Recording(models.Model):
         Returns:
             str: Internal Recording ID
         """
+        if self._recording_id:
+            return self._recording_id
         if self.id is None:
             return ''
         return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
+
+    @recording_id.setter
+    def recording_id(self, value):
+        assert self._recording_id is None  # this should not be called if set
+        if value:
+            self._recording_id = value
+
+    def __str__(self):
+        """Return the most precise type of title"""
+        if self.artist:
+            return '{}: {} ({})'.format(
+                self.recording_id, self.title, self.artist)
+        else:
+            return '{}: {}'.format(
+                self.recording_id, self.title)
 
     def get_dict(self, with_releases=False, with_work=True):
         """Create a data structure that can be serialized as JSON.
