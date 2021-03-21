@@ -10,7 +10,7 @@ setuptools.setup(
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
     description=(
-        'Software for managing music metadata, registration/licencing '''
+        'Software for managing music metadata, registration/licencing '
         'of musical works and royalty processing.'),
     long_description=long_description,
     long_description_content_type='text/x-rst',
