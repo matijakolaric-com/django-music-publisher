@@ -10,21 +10,22 @@ setuptools.setup(
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
     description=(
-        'Software for managing music metadata, registration/licencing '
+        'Software for managing music metadata, batch registration '
         'of musical works and royalty processing.'),
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://dmp.matijakolaric.com',
     project_urls={
         'Created by': 'https://matijakolaric.com',
-        'Video Tutorials': 'https://www.youtube.com/watch?v=duqgzK3JitU&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP',
+        'Video Tutorials': 'https://www.youtube.com/watch?v=duqgzK3JitU'
+            '&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP',
         'Documentation': 'https://django-music-publisher.readthedocs.io/',
         'Code Repository': 'https://github.com/matijakolaric-com/django'
-                           '-music-publisher/',
+            '-music-publisher/',
     },
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=3.1.5,<3.2',
+        'Django>=3.2,<3.3',
         'requests>=2.24.0',
     ),
     include_package_data=True,
@@ -32,7 +33,7 @@ setuptools.setup(
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
         'Intended Audience :: Developers',
         'Intended Audience :: Other Audience',
         'License :: OSI Approved :: MIT License',
