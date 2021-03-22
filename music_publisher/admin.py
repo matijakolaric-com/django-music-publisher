@@ -1133,34 +1133,47 @@ class WorkAdmin(MusicPublisherAdmin):
         alt_title_max = 1
         writer_max = 1
         artist_max = 1
+        xrf_max = 1
+        recordings_max = 1
         for work in works:
             alt_title_max = max(alt_title_max, len(work.get('other_titles')))
             writer_max = max(writer_max, len(work.get('writers')))
+            recording_max = max(writer_max, len(work.get('recordings')))
             artist_max = max(artist_max, len(work.get('performing_artists')))
+            xrf_max = max(artist_max, len(work.get('cross_references')))
         for i in range(alt_title_max):
-            labels.append('Alt Title {}'.format(i))
+            labels.append('Alt Title {}'.format(i + 1))
         for i in range(writer_max):
-            labels.append('Writer {} Last'.format(i))
-            labels.append('Writer {} First'.format(i))
-            labels.append('Writer {} IPI'.format(i))
-            labels.append('Writer {} PRO'.format(i))
+            labels.append('Writer {} Last'.format(i + 1))
+            labels.append('Writer {} First'.format(i + 1))
+            labels.append('Writer {} IPI'.format(i + 1))
+            labels.append('Writer {} PRO'.format(i + 1))
             if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                labels.append('Writer {} MRO'.format(i))
+                labels.append('Writer {} MRO'.format(i + 1))
             if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                labels.append('Writer {} SRO'.format(i))
-            labels.append('Writer {} Role'.format(i))
-            labels.append('Writer {} Manuscript Share'.format(i))
-            labels.append('Writer {} PR Share'.format(i))
+                labels.append('Writer {} SRO'.format(i + 1))
+            labels.append('Writer {} Role'.format(i + 1))
+            labels.append('Writer {} Manuscript Share'.format(i + 1))
+            labels.append('Writer {} PR Share'.format(i + 1))
             if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                labels.append('Writer {} MR Share'.format(i))
+                labels.append('Writer {} MR Share'.format(i + 1))
             if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                labels.append('Writer {} SR Share'.format(i))
-            labels.append('Writer {} Controlled'.format(i))
-            labels.append('Writer {} SAAN'.format(i))
+                labels.append('Writer {} SR Share'.format(i + 1))
+            labels.append('Writer {} Controlled'.format(i + 1))
+            labels.append('Writer {} SAAN'.format(i + 1))
+            labels.append('Writer {} Publisher Name'.format(i + 1))
+            labels.append('Writer {} Publisher IPI'.format(i + 1))
         for i in range(artist_max):
-            labels.append('Artist {} Last'.format(i))
-            labels.append('Artist {} First'.format(i))
-            labels.append('Artist {} ISNI'.format(i))
+            labels.append('Artist {} Last'.format(i + 1))
+            labels.append('Artist {} First'.format(i + 1))
+            labels.append('Artist {} ISNI'.format(i + 1))
+        # for i in range(recording_max):
+        #     labels.append('Recording {} Artist Last'.format(i + 1))
+        #     labels.append('Recording {} Artist First'.format(i + 1))
+        #     labels.append('Recording {} Artist ISNI'.format(i + 1))
+        for i in range(xrf_max):
+            labels.append('Reference {} CMO'.format(i + 1))
+            labels.append('Reference {} ID'.format(i + 1))
         return labels
 
     def get_rows_for_csv(self, works):
@@ -1191,46 +1204,57 @@ class WorkAdmin(MusicPublisherAdmin):
                 row['Library'] = origin['library']['name']
                 row['CD Identifier'] = origin['cd_identifier']
             for i, alt in enumerate(work['other_titles']):
-                row['Alt Title {}'.format(i)] = alt['title']
+                row['Alt Title {}'.format(i + 1)] = alt['title']
             for i, wiw in enumerate(work['writers']):
                 w = wiw.get('writer') or {}
-                row['Writer {} Last'.format(i)] = w.get('last_name', '')
-                row['Writer {} First'.format(i)] = w.get('first_name', '')
-                row['Writer {} IPI'.format(i)] = w.get('ipi_name_number', '')
+                row['Writer {} Last'.format(i + 1)] = w.get('last_name', '')
+                row['Writer {} First'.format(i + 1)] = w.get('first_name', '')
+                row['Writer {} IPI'.format(i + 1)] = w.get('ipi_name_number', '')
                 role = wiw.get('writer_role', {})
                 if role:
-                    row['Writer {} Role'.format(i)] = '{} - {}'.format(
+                    row['Writer {} Role'.format(i + 1)] = '{} - {}'.format(
                         role['code'], role['name'])
-                row['Writer {} Manuscript Share'.format(i)] = wiw.get('relative_share')
-                row['Writer {} PR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_PR)
+                row['Writer {} Manuscript Share'.format(i + 1)] = wiw.get('relative_share')
+                row['Writer {} PR Share'.format(i + 1)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_PR)
                 if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                    row['Writer {} MR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_MR)
+                    row['Writer {} MR Share'.format(i + 1)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_MR)
                 if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                    row['Writer {} SR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
+                    row['Writer {} SR Share'.format(i + 1)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
                 for aff in w.get('affiliations', []):
                     code = aff['affiliation_type']['code']
                     cmo = aff['organization']
-                    row['Writer {} {}O'.format(i, code)] = '{} - {}'.format(
+                    row['Writer {} {}O'.format(i + 1, code)] = '{} - {}'.format(
                         cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
                 if ops:
                     op = ops[0]
                     agreement = op.get('agreement')
                     saan = agreement.get('recipient_agreement_number', '')
-                    row['Writer {} SAAN'.format(i)] = saan
+                    row['Writer {} SAAN'.format(i + 1)] = saan
                     agreement_type = agreement['agreement_type']['code']
                     if agreement_type == 'OG':
                         controlled = 'General Agreement'
                     else:
                         controlled = 'Yes'
+                    row['Writer {} Publisher Name'.format(
+                        i + 1)] = op['publisher']['name']
+                    row['Writer {} Publisher IPI'.format(
+                        i + 1)] = op['publisher']['ipi_name_number']
                 else:
                     controlled = 'No'
-                row['Writer {} Controlled'.format(i)] = controlled
+                row['Writer {} Controlled'.format(i + 1)] = controlled
             for i, aiw in enumerate(work['performing_artists']):
                 artist = aiw.get('artist')
-                row['Artist {} Last'.format(i)] = artist.get('last_name', '')
-                row['Artist {} First'.format(i)] = artist.get('first_name', '')
-                row['Artist {} ISNI'.format(i)] = artist.get('isni', '')
+                row['Artist {} Last'.format(i + 1)] = artist.get('last_name', '')
+                row['Artist {} First'.format(i + 1)] = artist.get('first_name', '')
+                row['Artist {} ISNI'.format(i + 1)] = artist.get('isni', '')
+            for i, xrf in enumerate(work['cross_references']):
+                print(xrf)
+                code = xrf['organization']['code']
+                name = xrf['organization']['name']
+                row['Reference {} CMO'.format(i + 1)] = '{} - {}'.format(
+                    code, name)
+                row['Reference {} ID'.format(i + 1)] = xrf['identifier']
             yield writer.writerow(row)
 
     def create_csv(self, request, qs):
