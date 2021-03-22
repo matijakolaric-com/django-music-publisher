@@ -1134,13 +1134,13 @@ class WorkAdmin(MusicPublisherAdmin):
         writer_max = 1
         artist_max = 1
         xrf_max = 1
-        recordings_max = 1
+        recording_max = 1
         for work in works:
             alt_title_max = max(alt_title_max, len(work.get('other_titles')))
             writer_max = max(writer_max, len(work.get('writers')))
-            recording_max = max(writer_max, len(work.get('recordings')))
+            recording_max = max(recording_max, len(work.get('recordings')))
             artist_max = max(artist_max, len(work.get('performing_artists')))
-            xrf_max = max(artist_max, len(work.get('cross_references')))
+            xrf_max = max(xrf_max, len(work.get('cross_references')))
         for i in range(alt_title_max):
             labels.append('Alt Title {}'.format(i + 1))
         for i in range(writer_max):
@@ -1163,14 +1163,21 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} SAAN'.format(i + 1))
             labels.append('Writer {} Publisher Name'.format(i + 1))
             labels.append('Writer {} Publisher IPI'.format(i + 1))
+        for i in range(recording_max):
+            labels.append('Recording {} ID'.format(i + 1))
+            labels.append('Recording {} Recording Title'.format(i + 1))
+            labels.append('Recording {} Version Title'.format(i + 1))
+            labels.append('Recording {} Release Date'.format(i + 1))
+            labels.append('Recording {} Duration'.format(i + 1))
+            labels.append('Recording {} ISRC'.format(i + 1))
+            labels.append('Recording {} Artist Last'.format(i + 1))
+            labels.append('Recording {} Artist First'.format(i + 1))
+            labels.append('Recording {} Artist ISNI'.format(i + 1))
+            labels.append('Recording {} Record Label'.format(i + 1))
         for i in range(artist_max):
             labels.append('Artist {} Last'.format(i + 1))
             labels.append('Artist {} First'.format(i + 1))
             labels.append('Artist {} ISNI'.format(i + 1))
-        # for i in range(recording_max):
-        #     labels.append('Recording {} Artist Last'.format(i + 1))
-        #     labels.append('Recording {} Artist First'.format(i + 1))
-        #     labels.append('Recording {} Artist ISNI'.format(i + 1))
         for i in range(xrf_max):
             labels.append('Reference {} CMO'.format(i + 1))
             labels.append('Reference {} ID'.format(i + 1))
@@ -1243,13 +1250,25 @@ class WorkAdmin(MusicPublisherAdmin):
                 else:
                     controlled = 'No'
                 row['Writer {} Controlled'.format(i + 1)] = controlled
+            for i, rec in enumerate(work['recordings']):
+                row['Recording {} ID'.format(i + 1)] = rec['code']
+                row['Recording {} Recording Title'.format(i + 1)] = rec['recording_title']
+                row['Recording {} Version Title'.format(i + 1)] = rec['version_title']
+                row['Recording {} Release Date'.format(i + 1)] = rec['release_date']
+                row['Recording {} Duration'.format(i + 1)] = rec['duration']
+                row['Recording {} ISRC'.format(i + 1)] = rec['isrc']
+                row['Recording {} Record Label'.format(i + 1)] = (rec['record_label'] or {}).get('name')
+                artist = rec.get('recording_artist') or {}
+                row['Recording {} Artist Last'.format(i + 1)] = artist.get('last_name', '')
+                row['Recording {} Artist Last'.format(i + 1)] = artist.get('last_name', '')
+                row['Recording {} Artist First'.format(i + 1)] = artist.get('first_name', '')
+                row['Recording {} Artist ISNI'.format(i + 1)] = artist.get('isni', '')
             for i, aiw in enumerate(work['performing_artists']):
                 artist = aiw.get('artist')
                 row['Artist {} Last'.format(i + 1)] = artist.get('last_name', '')
                 row['Artist {} First'.format(i + 1)] = artist.get('first_name', '')
                 row['Artist {} ISNI'.format(i + 1)] = artist.get('isni', '')
             for i, xrf in enumerate(work['cross_references']):
-                print(xrf)
                 code = xrf['organization']['code']
                 name = xrf['organization']['name']
                 row['Reference {} CMO'.format(i + 1)] = '{} - {}'.format(
