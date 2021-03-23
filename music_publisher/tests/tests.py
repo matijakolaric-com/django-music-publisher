@@ -238,89 +238,6 @@ class DataImportTest(TestCase):
             ('Library and CD Identifier fields must both be either '
                 'present or empty.'))
 
-
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    PUBLISHER_NAME='TEST PUBLISHER',
-    PUBLISHER_CODE='MK',
-    PUBLISHER_IPI_NAME='0000000199',
-    PUBLISHER_SOCIETY_PR='52',
-    PUBLISHER_SOCIETY_MR='44',
-    PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
-    ENABLE_NOTES=False)
-class AdminTestNoNotes(TestCase):
-
-    fixtures = ['publishing_staff.json']
-
-    @classmethod
-    def setUpClass(cls):
-        """Class setup.
-
-        Creating staff user.
-        """
-        super().setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            'superuser', '', 'password')
-
-    def test_no_notes(self):
-        self.client.force_login(self.superuser)
-        url = reverse(
-            'admin:music_publisher_writer_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_artist_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_label_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-
-
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    PUBLISHER_NAME='TEST PUBLISHER',
-    PUBLISHER_CODE='MK',
-    PUBLISHER_IPI_NAME='0000000199',
-    PUBLISHER_SOCIETY_PR='52',
-    PUBLISHER_SOCIETY_MR='44',
-    PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
-    ENABLE_NOTES=True)
-class AdminTestWithNotes(TestCase):
-
-    fixtures = ['publishing_staff.json']
-
-    @classmethod
-    def setUpClass(cls):
-        """Class setup.
-
-        Creating staff user.
-        """
-        super().setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            'superuser', '', 'password')
-
-    def test_with_notes(self):
-        self.client.force_login(self.superuser)
-        url = reverse(
-            'admin:music_publisher_writer_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_artist_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_label_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-
-
 @override_settings(
     SECURE_SSL_REDIRECT=False,
     PUBLISHER_NAME='TEST PUBLISHER',
@@ -333,8 +250,7 @@ class AdminTestWithNotes(TestCase):
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
-    ENABLE_NOTES=True)
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests.
 
@@ -496,6 +412,17 @@ class AdminTest(TestCase):
         isr.create_cwr()
 
     @classmethod
+    def create_work_acknowledgements(cls):
+        """Create work acknowledgements. """
+        WorkAcknowledgement(
+            work_id=cls.original_work.id,
+            society_code='319',
+            date=datetime.now(),
+            remote_work_id='123456',
+            status='AC'
+        ).save()
+
+    @classmethod
     def setUpClass(cls):
         """Class setup.
 
@@ -535,6 +462,7 @@ class AdminTest(TestCase):
         cls.create_copublished_work()
         cls.create_cwr2_export()
         cls.create_cwr3_export()
+        cls.create_work_acknowledgements()
 
     def test_strings(self):
         """Test __str__ methods for created objects."""

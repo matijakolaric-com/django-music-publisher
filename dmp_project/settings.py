@@ -167,5 +167,4 @@ REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
 # Set to True if you have a standard publishing agreement with writers
 REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 
-ENABLE_NOTES = os.getenv('ENABLE_NOTES', False)
 FORCE_CASE = os.getenv('FORCE_CASE')

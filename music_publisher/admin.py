@@ -87,17 +87,11 @@ class ArtistAdmin(MusicPublisherAdmin):
     list_display = (
         'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
     search_fields = ('last_name', 'isni',)
-    if settings.ENABLE_NOTES:
-        fieldsets = (
-            ('Name', {'fields': (('first_name', 'last_name'),)}),
-            ('ISNI', {'fields': ('isni',), }),
-            ('Notes', {'fields': ('notes',), }),
-        )
-    else:
-        fieldsets = (
-            ('Name', {'fields': (('first_name', 'last_name'),)}),
-            ('ISNI', {'fields': ('isni',), }),
-        )
+    fieldsets = (
+        ('Name', {'fields': (('first_name', 'last_name'),)}),
+        ('ISNI', {'fields': ('isni',), }),
+        ('Notes', {'fields': ('notes',), }),
+    )
 
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
@@ -166,15 +160,10 @@ class LabelAdmin(MusicPublisherAdmin):
     readonly_fields = (
         'recording_count', 'commercialrelease_count', 'libraryrelease_count')
 
-    if settings.ENABLE_NOTES:
-        fieldsets = (
-            ('Name', {'fields': ('name',)}),
-            ('Notes', {'fields': ('notes',), }),
-        )
-    else:
-        fieldsets = (
-            ('Name', {'fields': ('name',)}),
-        )
+    fieldsets = (
+        ('Name', {'fields': ('name',)}),
+        ('Notes', {'fields': ('notes',), }),
+    )
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -560,7 +549,7 @@ class WriterAdmin(MusicPublisherAdmin):
 
         Depending on settings, MR and PR affiliations may not be needed.
         See :meth:`WriterAdmin.get_society_list`"""
-        fieldsets = [
+        return [
             ('Name', {
                 'fields': (
                     ('first_name', 'last_name'),)
@@ -579,14 +568,10 @@ class WriterAdmin(MusicPublisherAdmin):
                      ('saan', 'publisher_fee'))
                 ),
             }),
+            ('Notes', {
+                'fields': ('notes',),
+            }),
         ]
-        if settings.ENABLE_NOTES:
-            fieldsets.append(
-                ('Notes', {
-                    'fields': ('notes',),
-                }),
-            )
-        return fieldsets
 
     actions = None
 

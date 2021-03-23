@@ -74,41 +74,32 @@ CWR Syntax highlighting was improved and now includes all fields DMP generates f
 
 A side menu was added to all add/change/view pages, making navigation faster. 
 
-21.7 (upcoming)
+21.7 Madeleine
 -------------------------------------------
 
-The upcoming major version will primarily focus on improving data exchange with
-other solutions.
+The version focuses on improving data exchange with other solutions, most notably
+`That Green Thing <https://matijakolaric.com/thatgreenthing>`_.
 
-It will contain following improvements, already present in the current minor version:
-
-* More data in CSV export: separate performance, mechanical and sync shares for writers
 * Support for writers with IPI numbers, but without affiliation
+* Internal notes for writers, artists and labels
 
-Features planned for the upcoming major version:
+* More data in CSV export: 
 
-* Even more data in CSV exports:
-
-  * recordings, all fields, including recording ID
-  * publishers (for controlled writer, name, IPI name #, shares)
-  * society work IDs
+    * separate manuscript, performance, mechanical and sync shares for writers
+    * data about an original publisher, with performance, mechanical and sync shares
+    * data about recordings, including recording ID, record labels and recording artists
+    * society Work IDs
 
 * More data in CSV imports:
 
-  * recordings, all fields, including recording ID
-  * society work IDs
-
-These improvements will ensure bidirectional data exchange between Django-Music-Publisher
-and `That Green Thing <https://matijakolaric.com/thatgreenthing>`_.
-
-We are considering following improvements:
+    * option to use publisher information or ``controlled`` column for imports
+    * data about recordings, including recording ID, record labels and recording artists
+    * society work IDs
 
 * *Go Dutch* mode, where the sum of shares for writers adds up to something else than 100%
   (66.66% for BUMA/STEMRA affiliates)
 
-* Data imports from various 3rd-party formats
-
-* Data exports to various 3rd-party formats
+* Interface now available in *dark* mode
 
 Future open-source features
 ===========================

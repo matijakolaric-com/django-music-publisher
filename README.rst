@@ -13,7 +13,7 @@ YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
 .. image:: https://img.shields.io/readthedocs/django-music-publisher?logo=read-the-docs   
     :target: https://django-music-publisher.readthedocs.io/en/21.7/
     :alt: Documentation Status
-.. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/master?logo=coveralls&branch=21.7
+.. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/21.7?logo=coveralls&branch=21.7
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=21.7
     :alt: Coverage Status
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg?logo=github
