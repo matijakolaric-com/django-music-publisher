@@ -22,7 +22,7 @@ YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg?logo=pypi
     :target: https://pypi.org/project/django-music-publisher/
     :alt: PYPI
-.. image:: https://img.shields.io/github/issues/matijakolaric-com/django-music-publisher?logo=github
+.. image:: https://img.shields.io/github/issues/matijakolaric-com/django-music-publisher/bug?logo=github
     :target: https://github.com/matijakolaric-com/django-music-publisher/issues
     :alt: GitHub issues
 

@@ -97,7 +97,7 @@ The version focuses on improving data exchange with other solutions, most notabl
     * society work IDs
 
 * *Go Dutch* mode, where the sum of shares for writers adds up to something else than 100%
-  (66.66% for BUMA/STEMRA affiliates)
+  (e.g. 66.66% for BUMA/STEMRA affiliates)
 
 * Interface now available in *dark* mode
 
