@@ -1275,12 +1275,15 @@ class WorkAdmin(MusicPublisherAdmin):
                     ).quantize(Decimal('0.0001'))
                 else:
                     controlled = 'No'
-                    row['Writer {} PR Share'.format(i + 1)] = wiw.get(
-                        'relative_share')
-                    row['Writer {} MR Share'.format(i + 1)] = wiw.get(
-                        'relative_share')
-                    row['Writer {} SR Share'.format(i + 1)] = wiw.get(
-                        'relative_share')
+                    row['Writer {} PR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share', '0')
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} MR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share', '0')
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} SR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share', '0')
+                    ).quantize(Decimal('0.0001'))
                 row['Writer {} Controlled'.format(i + 1)] = controlled
             for i, rec in enumerate(work['recordings']):
                 row['Recording {} ID'.format(i + 1)] = rec['code']
