@@ -26,6 +26,10 @@ YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
     :target: https://github.com/matijakolaric-com/django-music-publisher/issues
     :alt: GitHub issues
 
+.. figure:: docs/images/work.png
+  
+   Editing of musical works in Django-Music-Publisher
+
 Django-Music-Publisher (DMP) is open source software for **managing music metadata**, **registration/licencing of musical works** and **royalty processing**.
 
 * Home: https://dmp.matijakolaric.com/
@@ -33,4 +37,3 @@ Django-Music-Publisher (DMP) is open source software for **managing music metada
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
-.. image:: docs/images/work.png
