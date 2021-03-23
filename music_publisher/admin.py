@@ -1154,17 +1154,13 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} First'.format(i + 1))
             labels.append('Writer {} IPI'.format(i + 1))
             labels.append('Writer {} PRO'.format(i + 1))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                labels.append('Writer {} MRO'.format(i + 1))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                labels.append('Writer {} SRO'.format(i + 1))
+            labels.append('Writer {} MRO'.format(i + 1))
+            labels.append('Writer {} SRO'.format(i + 1))
             labels.append('Writer {} Role'.format(i + 1))
             labels.append('Writer {} Manuscript Share'.format(i + 1))
             labels.append('Writer {} PR Share'.format(i + 1))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                labels.append('Writer {} MR Share'.format(i + 1))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                labels.append('Writer {} SR Share'.format(i + 1))
+            labels.append('Writer {} MR Share'.format(i + 1))
+            labels.append('Writer {} SR Share'.format(i + 1))
             labels.append('Writer {} Controlled'.format(i + 1))
             labels.append('Writer {} SAAN'.format(i + 1))
             labels.append('Writer {} Publisher Name'.format(i + 1))
@@ -1262,14 +1258,12 @@ class WorkAdmin(MusicPublisherAdmin):
                         wiw.get('relative_share')) * (1 - PR)
                     row['Writer {} Publisher PR Share'.format(i + 1)] = \
                         Decimal(wiw.get('relative_share')) * PR
-                    if MR != Decimal(1):
-                        row['Writer {} MR Share'.format(i + 1)] = Decimal(
-                            wiw.get('relative_share')) * (1 - MR)
+                    row['Writer {} MR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share')) * (1 - MR)
                     row['Writer {} Publisher MR Share'.format(i + 1)] = \
                         Decimal(wiw.get('relative_share')) * MR
-                    if SR != Decimal(1):
-                        row['Writer {} SR Share'.format(i + 1)] = Decimal(
-                            wiw.get('relative_share')) * (1 - SR)
+                    row['Writer {} SR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share')) * (1 - SR)
                     row['Writer {} Publisher SR Share'.format(i + 1)] = \
                         Decimal(wiw.get('relative_share')) * SR
                 else:
