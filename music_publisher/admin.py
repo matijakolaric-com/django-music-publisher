@@ -1130,14 +1130,20 @@ class WorkAdmin(MusicPublisherAdmin):
             'Work ID',
             'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
         ]
-        alt_title_max = 1
-        writer_max = 1
-        artist_max = 1
-        xrf_max = 1
-        recording_max = 1
+        alt_title_max = 0
+        writer_max = 0
+        writer_with_publisher_max = 0
+        artist_max = 0
+        xrf_max = 0
+        recording_max = 0
         for work in works:
             alt_title_max = max(alt_title_max, len(work.get('other_titles')))
             writer_max = max(writer_max, len(work.get('writers')))
+            ops = 0
+            for w in work.get('writers'):
+                if w.get('original_publishers'):
+                    ops += 1
+            writer_with_publisher_max = max(writer_with_publisher_max, ops)
             recording_max = max(recording_max, len(work.get('recordings')))
             artist_max = max(artist_max, len(work.get('performing_artists')))
             xrf_max = max(xrf_max, len(work.get('cross_references')))
@@ -1163,6 +1169,10 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} SAAN'.format(i + 1))
             labels.append('Writer {} Publisher Name'.format(i + 1))
             labels.append('Writer {} Publisher IPI'.format(i + 1))
+            if i < writer_with_publisher_max:
+                labels.append('Writer {} Publisher PR Share'.format(i + 1))
+                labels.append('Writer {} Publisher MR Share'.format(i + 1))
+                labels.append('Writer {} Publisher SR Share'.format(i + 1))
         for i in range(recording_max):
             labels.append('Recording {} ID'.format(i + 1))
             labels.append('Recording {} Recording Title'.format(i + 1))
@@ -1190,6 +1200,10 @@ class WorkAdmin(MusicPublisherAdmin):
             """Class with write() method just echoing values."""
             def write(self, value):
                 return value
+
+        PR = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+        MR = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+        SR = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
         pseudo_buffer = EchoWriter()
         labels = self.get_labels_for_csv(works)
@@ -1221,18 +1235,15 @@ class WorkAdmin(MusicPublisherAdmin):
                 if role:
                     row['Writer {} Role'.format(i + 1)] = '{} - {}'.format(
                         role['code'], role['name'])
-                row['Writer {} Manuscript Share'.format(i + 1)] = wiw.get('relative_share')
-                row['Writer {} PR Share'.format(i + 1)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_PR)
-                if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                    row['Writer {} MR Share'.format(i + 1)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_MR)
-                if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                    row['Writer {} SR Share'.format(i + 1)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
                 for aff in w.get('affiliations', []):
                     code = aff['affiliation_type']['code']
                     cmo = aff['organization']
                     row['Writer {} {}O'.format(i + 1, code)] = '{} - {}'.format(
                         cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
+
+                row['Writer {} Manuscript Share'.format(i + 1)] = wiw.get(
+                    'relative_share')
                 if ops:
                     op = ops[0]
                     agreement = op.get('agreement')
@@ -1247,8 +1258,28 @@ class WorkAdmin(MusicPublisherAdmin):
                         i + 1)] = op['publisher']['name']
                     row['Writer {} Publisher IPI'.format(
                         i + 1)] = op['publisher']['ipi_name_number']
+                    row['Writer {} PR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share')) * (1 - PR)
+                    row['Writer {} Publisher PR Share'.format(i + 1)] = \
+                        Decimal(wiw.get('relative_share')) * PR
+                    if MR != Decimal(1):
+                        row['Writer {} MR Share'.format(i + 1)] = Decimal(
+                            wiw.get('relative_share')) * (1 - MR)
+                    row['Writer {} Publisher MR Share'.format(i + 1)] = \
+                        Decimal(wiw.get('relative_share')) * MR
+                    if SR != Decimal(1):
+                        row['Writer {} SR Share'.format(i + 1)] = Decimal(
+                            wiw.get('relative_share')) * (1 - SR)
+                    row['Writer {} Publisher SR Share'.format(i + 1)] = \
+                        Decimal(wiw.get('relative_share')) * SR
                 else:
                     controlled = 'No'
+                    row['Writer {} PR Share'.format(i + 1)] = wiw.get(
+                        'relative_share')
+                    row['Writer {} MR Share'.format(i + 1)] = wiw.get(
+                        'relative_share')
+                    row['Writer {} SR Share'.format(i + 1)] = wiw.get(
+                        'relative_share')
                 row['Writer {} Controlled'.format(i + 1)] = controlled
             for i, rec in enumerate(work['recordings']):
                 row['Recording {} ID'.format(i + 1)] = rec['code']
