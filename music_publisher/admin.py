@@ -1162,8 +1162,8 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} MR Share'.format(i + 1))
             labels.append('Writer {} SR Share'.format(i + 1))
             labels.append('Writer {} Controlled'.format(i + 1))
-            labels.append('Writer {} SAAN'.format(i + 1))
             if i < writer_with_publisher_max:
+                labels.append('Writer {} SAAN'.format(i + 1))
                 labels.append('Writer {} Publisher Name'.format(i + 1))
                 labels.append('Writer {} Publisher IPI'.format(i + 1))
                 labels.append('Writer {} Publisher PR Share'.format(i + 1))
@@ -1238,8 +1238,9 @@ class WorkAdmin(MusicPublisherAdmin):
                         cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
 
-                row['Writer {} Manuscript Share'.format(i + 1)] = wiw.get(
-                    'relative_share')
+                row['Writer {} Manuscript Share'.format(i + 1)] = Decimal(
+                    wiw.get('relative_share', '0')
+                ).quantize(Decimal('0.0001'))
                 if ops:
                     op = ops[0]
                     agreement = op.get('agreement')
