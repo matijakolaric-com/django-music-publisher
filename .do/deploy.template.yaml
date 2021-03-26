@@ -6,6 +6,11 @@ spec:
       branch: "21.7"
       repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
     envs:
+    - key: DJANGO_SUPERUSER_USERNAME
+      scope: RUN_TIME
+      value: administrator
+    - key: DJANGO_SUPERUSER_USERNAME
+      scope: RUN_TIME
     - key: DATABASE_URL
       scope: RUN_TIME
       value: ${example-db.DATABASE_URL}
