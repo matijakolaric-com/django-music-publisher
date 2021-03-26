@@ -1,5 +1,5 @@
 spec:
-  name: "Django-Music-Publisher - Music Catalogue Software"
+  name: "Django Music Publisher"
   services:
   - name: web
     git:
