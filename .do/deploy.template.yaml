@@ -1,8 +1,9 @@
 spec:
+  name: "Django-Music-Publisher - Music Catalogue Software"
   services:
-  - name: "Django-Music-Publisher - Music Catalogue Software"
+  - name: web
     git:
-      branch: 21.7
+      branch: "21.7"
       repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
     envs:
     - key: DATABASE_URL
