@@ -1,6 +1,7 @@
 spec:
+  name: django-music-publisher
   services:
-  - name: django-music-publisher
+  - name: app
     git:
       branch: "21.7"
       repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
