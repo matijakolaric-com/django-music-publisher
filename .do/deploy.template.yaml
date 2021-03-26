@@ -9,7 +9,11 @@ spec:
     - key: DJANGO_SUPERUSER_USERNAME
       scope: RUN_TIME
       value: administrator
-    - key: DJANGO_SUPERUSER_USERNAME
+    - key: DJANGO_SUPERUSER_PASSWORD
+      scope: RUN_TIME
+      value: ""
+      type: SECRET
+    - key: PUBLISHER
       scope: RUN_TIME
     - key: DATABASE_URL
       scope: RUN_TIME
