@@ -1755,8 +1755,8 @@ def change_case(sender, instance, **kwargs):
             value = getattr(instance, field.name)
             if (isinstance(value, str) and
                     field.editable and
-                    field.choices is None and
-                    'description' not in field.name and
-                    '_id' not in field.name):
+                    field.choices is None and (
+                        'name' in field.name or
+                        'title' in field.name)):
                 value = force_case(value)
                 setattr(instance, field.name, value)

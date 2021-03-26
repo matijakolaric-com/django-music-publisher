@@ -1,8 +1,4 @@
-.. |br| raw:: html
-
-   <br>
-
-Django-Music-Publisher |br| Free music publishing software 
+Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
