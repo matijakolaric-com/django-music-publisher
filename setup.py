@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='21.7.dev1',
+    version='21.7.dev2',
     author='Matija Kolarić',
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
