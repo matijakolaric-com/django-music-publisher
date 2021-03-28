@@ -705,6 +705,14 @@ class AdminTest(TestCase):
         with self.assertRaises(CommercialRelease.DoesNotExist):
             CommercialRelease.objects.get(pk=2)
 
+    def test_template_download(self):
+        self.client.force_login(self.audituser)
+        url = reverse('admin:music_publisher_dataimport_add')
+        url += '?download_template=1'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Recording 2 ISRC', response.content)
+
     def test_audit_user(self):
         """Test that audit user can see, but not change things."""
         self.client.force_login(self.audituser)

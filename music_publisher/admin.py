@@ -6,7 +6,7 @@ All views are here, except for :mod:`.royalty_calculation`.
 """
 import re
 import zipfile
-from csv import DictWriter
+from csv import DictWriter, writer
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -1109,18 +1109,18 @@ class WorkAdmin(MusicPublisherAdmin):
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    def get_labels_for_csv(self, works):
+    def get_labels_for_csv(self, works, repeating_column_nr=0):
         """Return the list of labels for the CSV file."""
         labels = [
             'Work ID',
             'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
         ]
-        alt_title_max = 0
-        writer_max = 0
-        writer_with_publisher_max = 0
-        artist_max = 0
-        xrf_max = 0
-        recording_max = 0
+        alt_title_max = repeating_column_nr
+        writer_max = repeating_column_nr
+        writer_with_publisher_max = repeating_column_nr
+        artist_max = repeating_column_nr
+        xrf_max = repeating_column_nr
+        recording_max = repeating_column_nr
         for work in works:
             alt_title_max = max(alt_title_max, len(work.get('other_titles')))
             writer_max = max(writer_max, len(work.get('writers')))
@@ -1956,10 +1956,23 @@ class DataImportAdmin(AdminWithReport):
     :mod:`.data_import`.
     """
 
+    add_form_template = 'admin/add_data_import.html'
     form = DataImportForm
 
     list_display = ('filename', 'date')
     fields = readonly_fields = ('filename', 'date', 'print_report')
+
+    def add_view(self, request, form_url='', extra_context=None):
+        if 'download_template' in request.GET:
+            fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6)
+            response = HttpResponse(
+                ','.join(fieldnames),
+                content_type="text/csv")
+            cd = 'attachment; filename="{}.csv"'.format(
+                'DMP_data_exchange_template.csv')
+            response['Content-Disposition'] = cd
+            return response
+        return super().add_view(request, form_url, extra_context)
 
     add_fields = ('data_file',)
 
