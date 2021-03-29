@@ -10,7 +10,97 @@
 {% endif %}
 {% block extrastyle %}{% endblock %}
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
-{% block extrahead %}{% endblock %}
+{% block extrahead %}
+<style>
+    * {font-weight: 300 !important;}
+    #branding * {font-weight: 200 !important;}
+    #changelist-filter select {
+        width: 100%;
+    }
+    h1, h2, h3, h4, h5, caption {
+        font-weight: 200 !important;
+        text-transform: uppercase;
+    }
+    td, th, li, dt, dd, input, .form-row, textarea, select {
+        font-size: 14px;
+        line-height: 16px;
+    }
+    select:disabled {
+        background-color: var(--darkened-bg);
+    }
+    .object-tools a:link, .object-tools a:visited {
+        display: block;
+        background: var(--delete-button-bg);
+        border-radius: 4px;
+        padding: 10px 15px;
+        height: 15px;
+        line-height: 15px;
+        color: var(--button-fg);
+        font-size: 14px;
+    }
+    .required label, label.required {
+        color: var(--body-loud-color);
+    }
+    div.breadcrumbs {
+        font-size: 14px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+    div.breadcrumbs * {
+        font-weight: 200 !important;
+    }
+    #branding h1 {
+        display: inline-block;
+        padding: 0;
+        margin: 0 20px 0 0;
+        font-size: 28px;
+    }
+    #branding h2 {
+        display: inline-block;
+        padding: 0 0 0 10px;
+        font-size: 15px;
+        margin: -7px 0 7px 0;
+    }
+    #branding h2 a {
+        font-size: 18px;
+    }
+    .inline-group .tabular tr.has_original td {
+        padding: 8px !important;
+    }
+    .module caption, .inline-group h2, .module h2 {
+        font-size: 18px;
+    }
+    :root {
+        --primary: #d50000;
+        --secondary: #d50000;
+        --link-fg: #d50000;
+        --header-color: var(--header-branding-color);
+        --accent: var(--primary-fg);
+        --link-selected-fg: var(--link-fg);
+        --link-hover-color: var(--body-fg);
+        --object-tools-bg: var(--primary);
+        --object-tools-hover-bg: var(--body-fg);
+        --breadcrumbs-fg: var(--body-fg);
+        --breadcrumbs-link-fg: var(--link-fg);
+        --breadcrumbs-link-selected-fg: var(--link-selected-fg);
+        --breadcrumbs-bg: var(--primary-bg);
+        --button-bg: var(--primary);
+        --button-hover-bg: var(--body-fg);
+        --delete-button-bg: var(--button-bg);
+        --delete-button-hover-bg: var(--button-hover-bg);
+    }
+    @media (prefers-color-scheme: dark) {
+        * {font-weight: 400 !important;}
+        :root {
+            --primary: #5f0000;
+            --primary-fg: #e5e5e5;
+            --secondary: #5f0000;
+            --link-fg: #f5c595;
+            --body-fg: #ccc;
+        }
+    }
+</style>
+{% endblock %}
 {% block responsive %}
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive.css" %}">
