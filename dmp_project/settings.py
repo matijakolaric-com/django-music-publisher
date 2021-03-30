@@ -111,15 +111,6 @@ TIME_INPUT_FORMATS = [
     '%M:%S',        # '14:30'
 ]
 
-path = os.path.join(BASE_DIR, 'music_publisher', 'societies.csv')
-
-with open(path, 'r') as f:
-    reader = csv.reader(f)
-    SOCIETIES = sorted(
-        ((str(row[0]), '{} ({})'.format(row[1], row[2]))
-         for row in reader),
-        key=lambda row: row[1])
-
 LOGIN_URL = '/login/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None

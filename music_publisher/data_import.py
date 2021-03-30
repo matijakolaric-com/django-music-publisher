@@ -19,6 +19,7 @@ from django.db import IntegrityError, transaction
 from django.forms import inlineformset_factory
 from django.utils.text import slugify
 
+from .societies import SOCIETIES
 from .admin import WriterInWorkFormSet
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
@@ -91,7 +92,7 @@ class DataImporter(object):
                 value.ljust(2), WriterInWork.ROLES, 'writer role')
             value = value.ljust(2)
         elif key_elements[2] == 'pro':
-            value = self.get_clean_key(value, settings.SOCIETIES, 'society')
+            value = self.get_clean_key(value, SOCIETIES, 'society')
         elif key_elements[2] in ['share', 'manuscript_share']:
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])

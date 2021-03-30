@@ -23,15 +23,14 @@ from .base import (
 from .cwr_templates import (
     TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
 from .validators import CWRFieldValidator
-
-
-SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
+from .societies import SOCIETIES, SOCIETY_DICT
 
 WORLD_DICT = {
     'tis-a': '2WL',
     'tis-n': '2136',
     'name': 'World'
 }
+
 
 
 class Artist(ArtistBase):
@@ -1659,7 +1658,7 @@ class WorkAcknowledgement(models.Model):
 
     work = models.ForeignKey(Work, on_delete=models.PROTECT)
     society_code = models.CharField(
-        'Society', max_length=3, choices=settings.SOCIETIES)
+        'Society', max_length=3, choices=SOCIETIES)
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(

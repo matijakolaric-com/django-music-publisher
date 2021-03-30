@@ -9,7 +9,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import CWRFieldValidator
-
+from .societies import SOCIETIES
 
 class NotesBase(models.Model):
     """Abstract class for all classes that have notes.
@@ -88,15 +88,15 @@ class SocietyAffiliationBase(models.Model):
     pr_society = models.CharField(
         'Performance rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
-        choices=settings.SOCIETIES + [('99', 'NO SOCIETY')])
+        choices=SOCIETIES + [('99', 'NO SOCIETY')])
     mr_society = models.CharField(
         'Mechanical rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
-        choices=settings.SOCIETIES)
+        choices=SOCIETIES)
     sr_society = models.CharField(
         'Synchronization rights society', max_length=3, blank=True, null=True,
         validators=(CWRFieldValidator('pr_society'),),
-        choices=settings.SOCIETIES)
+        choices=SOCIETIES)
 
 
 class IPIBase(models.Model):

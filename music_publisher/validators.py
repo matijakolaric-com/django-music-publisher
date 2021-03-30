@@ -10,7 +10,7 @@ import re
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.deconstruct import deconstructible
-
+from .societies import SOCIETIES
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
@@ -195,7 +195,7 @@ def validate_settings():
         except ValidationError as e:
             raise ImproperlyConfigured('PUBLISHER_IPI_NAME: ' + str(e))
 
-    keys = [s[0] for s in settings.SOCIETIES]
+    keys = [s[0] for s in SOCIETIES]
     for t in ['PR', 'MR', 'SR']:
         attr = getattr(settings, 'PUBLISHER_SOCIETY_' + t)
         if attr and attr not in keys:
