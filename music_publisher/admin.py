@@ -1151,6 +1151,9 @@ class WorkAdmin(MusicPublisherAdmin):
                 labels.append('Writer {} SAAN'.format(i + 1))
                 labels.append('Writer {} Publisher Name'.format(i + 1))
                 labels.append('Writer {} Publisher IPI'.format(i + 1))
+                labels.append('Writer {} Publisher PRO'.format(i + 1))
+                labels.append('Writer {} Publisher MRO'.format(i + 1))
+                labels.append('Writer {} Publisher SRO'.format(i + 1))
                 labels.append('Writer {} Publisher PR Share'.format(i + 1))
                 labels.append('Writer {} Publisher MR Share'.format(i + 1))
                 labels.append('Writer {} Publisher SR Share'.format(i + 1))
@@ -1240,6 +1243,13 @@ class WorkAdmin(MusicPublisherAdmin):
                         i + 1)] = op['publisher']['name']
                     row['Writer {} Publisher IPI'.format(
                         i + 1)] = op['publisher']['ipi_name_number']
+                    for aff in op['publisher'].get('affiliations', []):
+                        row['Writer {} Publisher {}O'.format(
+                            i + 1,
+                            aff['affiliation_type']['code']
+                        )] = '{} - {}'.format(
+                            aff['organization']['code'],
+                            aff['organization']['name'])
                     row['Writer {} PR Share'.format(i + 1)] = (
                         Decimal( wiw.get('relative_share')) * (1 - PR)
                     ).quantize(Decimal('0.0001'))
