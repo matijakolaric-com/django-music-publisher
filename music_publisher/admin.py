@@ -1929,6 +1929,7 @@ class DataImportForm(ModelForm):
         fields = ('data_file',)
 
     data_file = FileField()
+    ignore_unknown_columns = BooleanField(required=False, initial=False)
 
     def clean(self):
         """
@@ -1942,19 +1943,35 @@ class DataImportForm(ModelForm):
 
         from .data_import import DataImporter
         from io import TextIOWrapper
+        from django.db import transaction
 
         cd = self.cleaned_data
         f = cd.get('data_file')
         report = ''
-        try:
-            importer = DataImporter(TextIOWrapper(f), self.user)
-            for work in importer.run():
-                url = reverse(
-                    'admin:music_publisher_work_change', args=(work.id,))
-                report += '<a href="{}">{}</a> {}<br/>\n'.format(
-                    url, work.work_id, work.title)
-        except Exception as e:  # user garbage, too many possibilities
-            raise ValidationError(str(e))
+        with transaction.atomic():
+            try:
+                importer = DataImporter(TextIOWrapper(f), self.user)
+                for work in importer.run():
+                    url = reverse(
+                        'admin:music_publisher_work_change', args=(work.id,))
+                    report += '<a href="{}">{}</a> {}<br/>\n'.format(
+                        url, work.work_id, work.title)
+                if importer.unkown_keys:
+                    if cd.get('ignore_unknown_columns'):
+                        report += '<br>\nUNKNOWN COLUMN NAMES:<br>\n'
+                        report += '<br>\n'.join(
+                            [f'- {key}' for key in sorted(
+                                importer.unkown_keys)]
+                        )
+                    else:
+                        raise ValidationError(
+                            'Unknown columns: ' +
+                            ', '.join(importer.unkown_keys))
+                report += importer.report
+            except ValidationError:
+                raise
+            except Exception as e:  # user garbage, too many possibilities
+                raise ValidationError(str(e))
         self.cleaned_data['report'] = report
 
 
@@ -1984,7 +2001,7 @@ class DataImportAdmin(AdminWithReport):
             return response
         return super().add_view(request, form_url, extra_context)
 
-    add_fields = ('data_file',)
+    add_fields = ('data_file', 'ignore_unknown_columns')
 
     def get_fields(self, request, obj=None):
         """Return different fields for add vs change.

@@ -14,6 +14,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms import inlineformset_factory
 from django.utils.text import slugify
@@ -21,7 +22,7 @@ from django.utils.text import slugify
 from .admin import WriterInWorkFormSet
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
-    Library, LibraryRelease, Recording)
+    Library, LibraryRelease, Recording, WorkAcknowledgement)
 
 
 class DataImporter(object):
@@ -34,13 +35,23 @@ class DataImporter(object):
     ARTIST_FIELDS = [
         'last', 'first', 'isni']
     WRITER_FIELDS = [
-        'last', 'first', 'ipi', 'pro', 'role', 'share', 'manuscript_share',
-        'pr_share', 'mr_share', 'sr_share', 'controlled', 'saan']
+        'last', 'first', 'ipi', 'pro', 'mro', 'sro', 'role',
+        'share', 'manuscript_share', 'pr_share', 'mr_share', 'sr_share',
+        'controlled', 'saan',
+        'publisher_name', 'publisher_ipi', 'publisher_pro', 'publisher_mro',
+        'publisher_sro', 'publisher_pr_share', 'publisher_mr_share',
+        'publisher_sr_share']
+    RECORDING_FIELDS = [
+        # 'id', 'recording_title', 'version_title', 'release_date', 'duration',
+        'isrc', 'artist_last', 'artist_first', 'artist_isni', 'record_label']
+    REFERENCE_FIELDS = ['id', 'cmo']
 
     def __init__(self, filelike, user=None):
         self.user = user
         self.user_id = self.user.id if self.user else None
         self.reader = csv.DictReader(filelike)
+        self.report = ''
+        self.unkown_keys = set()
 
     def log(self, action_flag, obj, message):
         """Helper function for logging history."""
@@ -120,10 +131,13 @@ class DataImporter(object):
             elif prefix == 'alt':
                 key_elements = clean_key.rsplit('_', 1)
                 if len(key_elements) < 2 or key_elements[0] != 'alt_title':
-                    raise AttributeError('Unknown column: "{}".'.format(key))
+                    self.unkown_keys.add(key)
                 out_dict['alt_titles'].append(value)
             elif prefix == 'writer':
                 key_elements = clean_key.split('_', 2)
+                if (len(key_elements) < 3 or
+                        key_elements[2] not in self.WRITER_FIELDS):
+                    self.unkown_keys.add(key)
                 value, general_agreement = self.process_writer_value(
                     key, key_elements, value)
                 if general_agreement:
@@ -134,14 +148,24 @@ class DataImporter(object):
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.ARTIST_FIELDS):
-                    raise AttributeError('Unknown column: "{}".'.format(key))
+                    self.unkown_keys.add(key)
                 out_dict['artists'][key_elements[1]][key_elements[2]] = value
             elif prefix == 'recording':
                 key_elements = clean_key.split('_', 2)
-                if (len(key_elements) == 3 and key_elements[2] == 'isrc'):
-                    out_dict['recordings'][key_elements[1]] = value
+                if (len(key_elements) < 3 or
+                        key_elements[2] not in self.RECORDING_FIELDS):
+                    self.unkown_keys.add(key)
+                out_dict['recordings'][key_elements[1]][key_elements[2]] = \
+                    value
+            elif prefix == 'reference':
+                key_elements = clean_key.split('_', 2)
+                if (len(key_elements) < 3 or
+                        key_elements[2] not in self.REFERENCE_FIELDS):
+                    self.unkown_keys.add(key)
+                out_dict['recordings'][key_elements[1]][key_elements[2]] = \
+                    value
             else:
-                raise AttributeError('Unknown column: "{}".'.format(key))
+                self.unkown_keys.add(key)
         return out_dict
 
     def get_writers(self, writer_dict):
@@ -278,18 +302,25 @@ class DataImporter(object):
             library_release=library_release)
         work.clean_fields()
         work.clean()
-        work.save()
-        self.log(
-            ADDITION, work, 'Added during import.')
+        try:
+            work.save()
+        except IntegrityError:
+            raise ValidationError(
+                f'Work "{ work.title }", ' +
+                (f'ID "{ work.work_id }", ' if work.work_id else '') +
+                (f'ISWC "{ work.iswc }", ' if work.iswc else '') +
+                'clashes with an existing work. '
+                'Data imports can only be used for adding new works.')
+        self.log(ADDITION, work, 'Added during import.')
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
-        for isrc in row_dict['recordings'].values():
-            recording = Recording(work=work, isrc=isrc)
-            recording.clean_fields()
-            recording.clean()
-            recording.save()
-            self.log(
-                ADDITION, recording, 'Added during import.')
+        # for isrc in row_dict['recordings'].values():
+        #     recording = Recording(work=work, isrc=isrc)
+        #     recording.clean_fields()
+        #     recording.clean()
+        #     recording.save()
+        #     self.log(
+        #         ADDITION, recording, 'Added during import.')
         wiws = []
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
