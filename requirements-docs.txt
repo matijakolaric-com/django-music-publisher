@@ -4,3 +4,4 @@ psycopg2-binary==2.8.6
 waitress==2.0.0
 whitenoise==5.2.0
 sphinxcontrib-napoleon
+music-metadata-territories==21.2
