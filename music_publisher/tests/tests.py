@@ -134,30 +134,21 @@ class DataImportTest(TestCase):
             'a', ['writer', '2', 'controlled'], 0)
         self.assertEqual(value, False)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'alt_work_title_1': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "alt_work_title_1".')
+        self.assertNotIn('Alt Work Title 1', di.unkown_keys)
+        di.unflatten({'Work Title': 'X', 'Alt Work Title 1': 'Y'})
+        self.assertIn('Alt Work Title 1', di.unkown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "alt_title".')
+        di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
+        self.assertIn('alt_title', di.unkown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "artist_1".')
+        di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
+        self.assertIn('artist_1', di.unkown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "artist_1_name".')
+        di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
+        self.assertIn('artist_1_name', di.unkown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "wtf_1".')
+        di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
+        self.assertIn('wtf_1', di.unkown_keys)
 
         # mismatching general agreement numbers
         with self.assertRaises(ValueError) as ve:
@@ -1362,7 +1353,7 @@ class AdminTest(TestCase):
             mock.write(csvfile.read())
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'dataimport.csv',
+            mock, 'dataimport_file', 'dataimport.csv',
             'text', 0, None)
         url = reverse('admin:music_publisher_dataimport_add')
         response = self.client.get(url)
@@ -1370,7 +1361,7 @@ class AdminTest(TestCase):
         data.update({'data_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Unknown column', response.content)
+        self.assertIn(b'errornote', response.content)
 
     def test_recording_filters(self):
         """Test Work changelist filters."""

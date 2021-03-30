@@ -1968,8 +1968,6 @@ class DataImportForm(ModelForm):
                             'Unknown columns: ' +
                             ', '.join(importer.unkown_keys))
                 report += importer.report
-            except ValidationError:
-                raise
             except Exception as e:  # user garbage, too many possibilities
                 raise ValidationError(str(e))
         self.cleaned_data['report'] = report

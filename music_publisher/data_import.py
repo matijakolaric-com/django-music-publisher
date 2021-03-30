@@ -118,6 +118,7 @@ class DataImporter(object):
             'writers': defaultdict(OrderedDict),
             'artists': defaultdict(OrderedDict),
             'recordings': defaultdict(OrderedDict),
+            'references': defaultdict(OrderedDict),
         }
         for key, value in in_dict.items():
             if isinstance(value, str):
@@ -132,12 +133,14 @@ class DataImporter(object):
                 key_elements = clean_key.rsplit('_', 1)
                 if len(key_elements) < 2 or key_elements[0] != 'alt_title':
                     self.unkown_keys.add(key)
+                    continue
                 out_dict['alt_titles'].append(value)
             elif prefix == 'writer':
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.WRITER_FIELDS):
                     self.unkown_keys.add(key)
+                    continue
                 value, general_agreement = self.process_writer_value(
                     key, key_elements, value)
                 if general_agreement:
@@ -149,12 +152,14 @@ class DataImporter(object):
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.ARTIST_FIELDS):
                     self.unkown_keys.add(key)
+                    continue
                 out_dict['artists'][key_elements[1]][key_elements[2]] = value
             elif prefix == 'recording':
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.RECORDING_FIELDS):
                     self.unkown_keys.add(key)
+                    continue
                 out_dict['recordings'][key_elements[1]][key_elements[2]] = \
                     value
             elif prefix == 'reference':
@@ -162,7 +167,8 @@ class DataImporter(object):
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.REFERENCE_FIELDS):
                     self.unkown_keys.add(key)
-                out_dict['recordings'][key_elements[1]][key_elements[2]] = \
+                    continue
+                out_dict['references'][key_elements[1]][key_elements[2]] = \
                     value
             else:
                 self.unkown_keys.add(key)
@@ -280,6 +286,8 @@ class DataImporter(object):
         return library_release
 
     def process_row(self, row):
+        if not any(row.values()):
+            return
         row_dict = self.unflatten(row)
         writers = self.get_writers(row_dict['writers'])
         artists = self.get_artists(row_dict['artists'])
@@ -362,6 +370,5 @@ class DataImporter(object):
 
     def run(self):
         """Run the import as atomic."""
-        with transaction.atomic():
-            for row in self.reader:
-                yield from self.process_row(row)
+        for row in self.reader:
+            yield from self.process_row(row)
