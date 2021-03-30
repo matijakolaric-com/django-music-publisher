@@ -256,9 +256,17 @@ class DataImporter(object):
             ).first()
             if not artist:
                 artist = lookup_artist
-                artist.save()
-                self.log(
-                    ADDITION, artist, 'Added during import.')
+                try:
+                    artist.save()
+                    self.log(
+                        ADDITION, artist, 'Added during import.')
+                except IntegrityError:
+                    raise ValueError(
+                        'An artist with this ISNI already '
+                        'exists in the database, but is not exactly the same '
+                        'as one provided in the importing data: {}'.format(
+                            artist
+                        ))
             yield artist
 
     def get_library_release(self, library_name, cd_identifier):
@@ -335,10 +343,13 @@ class DataImporter(object):
             saan = w_dict.get('saan')
             if writer and saan == writer.saan:
                 saan = None
+            share = w_dict.get('manuscript_share') or w_dict.get('share')
+            if not share:
+                share = (w_dict.get('pr_share', 0) +
+                    w_dict.get('publisher_pr_share', 0))
             wiw = WriterInWork(
                 writer=writer, work=work,
-                relative_share=(
-                    w_dict.get('manuscript_share') or w_dict.get('share')),
+                relative_share=share,
                 capacity=w_dict.get('role'),
                 controlled=w_dict.get('controlled'),
                 saan=saan)

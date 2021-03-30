@@ -10,6 +10,7 @@ from django import template
 from django.conf import settings
 
 from music_publisher import models
+from music_metadata.territories.territory import Territory
 
 register = template.Library()
 
@@ -173,3 +174,33 @@ def orimod(value):
         'ORI': 'Original Work',
         'MOD': 'Modification',
     }.get(value, 'Not set')
+
+
+@register.filter(name='terr')
+def terr(value):
+    """Territory name"""
+
+    value = value.strip()
+    territory = Territory.get(value)
+    return str(territory)
+
+
+@register.filter(name='ie')
+def ie(value):
+    """Included / Excluded"""
+
+    value = value.strip()
+    if value == 'E':
+        return 'excluding '
+    return ''
+
+
+@register.filter(name='role')
+def role(value):
+    """Publisher role"""
+
+    return {
+        'E ': 'Original Publisher',
+        'AM': 'Administrator',
+        'SE': 'Sub-publisher'
+    }.get(value, 'Unknown publisher role')
