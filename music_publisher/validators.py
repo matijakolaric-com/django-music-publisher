@@ -11,6 +11,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.deconstruct import deconstructible
 from .societies import SOCIETIES
+from decimal import Decimal
+
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
@@ -204,14 +206,20 @@ def validate_settings():
                     t, attr
                 ))
 
-    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
-        raise ImproperlyConfigured(
-            'PUBLISHING_AGREEMENT_PUBLISHER_PR: Must be between 0.0 and 0.5')
+    if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
+        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
+            raise ImproperlyConfigured(
+                'PUBLISHING_AGREEMENT_PUBLISHER_PR: '
+                'Must be between 0.0 and 0.5')
 
-    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
-        raise ImproperlyConfigured(
-            'PUBLISHING_AGREEMENT_PUBLISHER_MR: Must be between 0.0 and 1.0')
+    if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR'):
+        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
+            raise ImproperlyConfigured(
+                'PUBLISHING_AGREEMENT_PUBLISHER_MR: '
+                'Must be between 0.0 and 1.0')
 
-    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
-        raise ImproperlyConfigured(
-            'PUBLISHING_AGREEMENT_PUBLISHER_SR: Must be between 0.0 and 1.0')
+    if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
+        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
+            raise ImproperlyConfigured(
+                'PUBLISHING_AGREEMENT_PUBLISHER_SR: '
+                'Must be between 0.0 and 1.0')

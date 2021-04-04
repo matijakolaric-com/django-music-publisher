@@ -14,9 +14,18 @@ from music_metadata.territories.territory import Territory
 
 register = template.Library()
 
-PRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
-MRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
-SRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
+if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
+    PRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+else:
+    PRP_SHARE = Decimal('0.5')
+if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR'):
+    MRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+else:
+    MRP_SHARE = Decimal(1)
+if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_SR'):
+    SRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
+else:
+    SRP_SHARE = Decimal(1)
 PRW_SHARE = Decimal('1') - PRP_SHARE
 MRW_SHARE = Decimal('1') - MRP_SHARE
 SRW_SHARE = Decimal('1') - SRP_SHARE

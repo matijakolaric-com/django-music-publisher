@@ -35,6 +35,8 @@ from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
     Writer, WriterInWork, WorkAcknowledgement)
+from django.conf import settings
+
 
 def get_data_from_response(response):
     """Helper for extracting data from HTTP response in a way that can be
@@ -77,11 +79,15 @@ class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
     @classmethod
+    @override_settings()
     def setUpClass(cls):
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
             'superuser', '', 'password')
         cls.obj = Artist.objects.create(last_name='Artist One')
+        del settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+        del settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+        del settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
     def test_case_change(self):
         self.assertEqual(self.obj.last_name, 'ARTIST ONE')

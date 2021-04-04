@@ -143,9 +143,7 @@ PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
 
 # Shares transferred to the original publisher, default to 50%/100%/100%
 PUBLISHING_AGREEMENT_PUBLISHER_PR = Decimal(
-    os.getenv(
-        'PUBLISHING_AGREEMENT_PUBLISHER_PR',
-        os.getenv('PUBLISHER_AGREEMENT_PR', '0.5')))
+    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_PR', '0.5'))
 PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
     os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_MR', '1.0'))
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
