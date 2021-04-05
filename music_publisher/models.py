@@ -1561,6 +1561,15 @@ class CWRExport(models.Model):
         for xrf in work['cross_references']:
             yield self.get_transaction_record('XRF', xrf)
 
+    def get_header(self):
+        return self.get_record('HDR', {
+            'creation_date': datetime.now(),
+            'filename': self.filename,
+            'publisher_ipi_name': settings.PUBLISHER_IPI_NAME,
+            'publisher_name': settings.PUBLISHER_NAME,
+            'publisher_code': settings.PUBLISHER_CODE,
+        })
+
     def yield_lines(self):
         """Yield CWR transaction records (rows/lines) for works
 
@@ -1575,13 +1584,7 @@ class CWRExport(models.Model):
 
         self.record_count = self.record_sequence = self.transaction_count = 0
 
-        yield self.get_record('HDR', {
-            'creation_date': datetime.now(),
-            'filename': self.filename,
-            'publisher_ipi_name': settings.PUBLISHER_IPI_NAME,
-            'publisher_name': settings.PUBLISHER_NAME,
-            'publisher_code': settings.PUBLISHER_CODE,
-        })
+        yield self.get_header()
 
         if self.nwr_rev == 'NW2':
             yield self.get_record('GRH', {'transaction_type': 'NWR'})
