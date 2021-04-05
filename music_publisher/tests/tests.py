@@ -140,21 +140,21 @@ class DataImportTest(TestCase):
             'a', ['writer', '2', 'controlled'], 0)
         self.assertEqual(value, False)
 
-        self.assertNotIn('Alt Work Title 1', di.unkown_keys)
+        self.assertNotIn('Alt Work Title 1', di.unknown_keys)
         di.unflatten({'Work Title': 'X', 'Alt Work Title 1': 'Y'})
-        self.assertIn('Alt Work Title 1', di.unkown_keys)
+        self.assertIn('Alt Work Title 1', di.unknown_keys)
 
         di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
-        self.assertIn('alt_title', di.unkown_keys)
+        self.assertIn('alt_title', di.unknown_keys)
 
         di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
-        self.assertIn('artist_1', di.unkown_keys)
+        self.assertIn('artist_1', di.unknown_keys)
 
         di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
-        self.assertIn('artist_1_name', di.unkown_keys)
+        self.assertIn('artist_1_name', di.unknown_keys)
 
         di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
-        self.assertIn('wtf_1', di.unkown_keys)
+        self.assertIn('wtf_1', di.unknown_keys)
 
         # mismatching general agreement numbers
         with self.assertRaises(ValueError) as ve:

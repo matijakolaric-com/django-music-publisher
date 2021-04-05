@@ -43,7 +43,7 @@ class DataImporter(object):
         'publisher_sro', 'publisher_pr_share', 'publisher_mr_share',
         'publisher_sr_share']
     RECORDING_FIELDS = [
-        # 'id', 'recording_title', 'version_title', 'release_date', 'duration',
+        'id', 'recording_title', 'version_title', 'release_date', 'duration',
         'isrc', 'artist_last', 'artist_first', 'artist_isni', 'record_label']
     REFERENCE_FIELDS = ['id', 'cmo']
 
@@ -52,7 +52,7 @@ class DataImporter(object):
         self.user_id = self.user.id if self.user else None
         self.reader = csv.DictReader(filelike)
         self.report = ''
-        self.unkown_keys = set()
+        self.unknown_keys = set()
 
     def log(self, action_flag, obj, message):
         """Helper function for logging history."""
@@ -133,14 +133,14 @@ class DataImporter(object):
             elif prefix == 'alt':
                 key_elements = clean_key.rsplit('_', 1)
                 if len(key_elements) < 2 or key_elements[0] != 'alt_title':
-                    self.unkown_keys.add(key)
+                    self.unknown_keys.add(key)
                     continue
                 out_dict['alt_titles'].append(value)
             elif prefix == 'writer':
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.WRITER_FIELDS):
-                    self.unkown_keys.add(key)
+                    self.unknown_keys.add(key)
                     continue
                 value, general_agreement = self.process_writer_value(
                     key, key_elements, value)
@@ -152,14 +152,14 @@ class DataImporter(object):
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.ARTIST_FIELDS):
-                    self.unkown_keys.add(key)
+                    self.unknown_keys.add(key)
                     continue
                 out_dict['artists'][key_elements[1]][key_elements[2]] = value
             elif prefix == 'recording':
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.RECORDING_FIELDS):
-                    self.unkown_keys.add(key)
+                    self.unknown_keys.add(key)
                     continue
                 out_dict['recordings'][key_elements[1]][key_elements[2]] = \
                     value
@@ -167,12 +167,12 @@ class DataImporter(object):
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.REFERENCE_FIELDS):
-                    self.unkown_keys.add(key)
+                    self.unknown_keys.add(key)
                     continue
                 out_dict['references'][key_elements[1]][key_elements[2]] = \
                     value
             else:
-                self.unkown_keys.add(key)
+                self.unknown_keys.add(key)
         return out_dict
 
     def get_writers(self, writer_dict):
