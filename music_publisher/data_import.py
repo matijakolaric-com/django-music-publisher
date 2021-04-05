@@ -11,7 +11,6 @@ import re
 from collections import defaultdict, OrderedDict
 from decimal import Decimal
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms import inlineformset_factory
@@ -21,6 +20,7 @@ from .societies import SOCIETIES
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
     Library, LibraryRelease, Recording, WorkAcknowledgement)
+from .forms import WriterInWorkFormSet
 
 
 class DataImporter(object):
@@ -294,7 +294,7 @@ class DataImporter(object):
             self.log(library_release, 'Added during import.')
         return library_release
 
-    def process_row(self, row, validate=True):
+    def process_row(self, row):
         if not any(row.values()):
             return
         row_dict = self.unflatten(row)
@@ -360,25 +360,23 @@ class DataImporter(object):
         factory_fields = [
             'work', 'writer', 'capacity', 'relative_share', 'controlled',
             'saan']
-        if validate:
-            from .admin import WriterInWorkFormSet
-            factory = inlineformset_factory(
-                Work, WriterInWork, formset=WriterInWorkFormSet,
-                fields=factory_fields, extra=len(wiws))
-            formset = factory()
-            for i, form in enumerate(formset.forms):
-                wiw = wiws[i]
-                data = {}
-                data['writer'] = wiw.writer_id
-                data['work'] = wiw.work_id
-                data['capacity'] = wiw.capacity
-                data['relative_share'] = wiw.relative_share
-                data['controlled'] = wiw.controlled
-                data['saan'] = wiw.saan
-                form.initial = form.cleaned_data = data
-                form.full_clean()
-                form.is_bound = True
-            formset.clean()
+        factory = inlineformset_factory(
+            Work, WriterInWork, formset=WriterInWorkFormSet,
+            fields=factory_fields, extra=len(wiws))
+        formset = factory()
+        for i, form in enumerate(formset.forms):
+            wiw = wiws[i]
+            data = {}
+            data['writer'] = wiw.writer_id
+            data['work'] = wiw.work_id
+            data['capacity'] = wiw.capacity
+            data['relative_share'] = wiw.relative_share
+            data['controlled'] = wiw.controlled
+            data['saan'] = wiw.saan
+            form.initial = form.cleaned_data = data
+            form.full_clean()
+            form.is_bound = True
+        formset.clean()
         yield work
 
     def run(self):
