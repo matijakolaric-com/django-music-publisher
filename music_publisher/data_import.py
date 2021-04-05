@@ -12,15 +12,12 @@ from collections import defaultdict, OrderedDict
 from decimal import Decimal
 
 from django.conf import settings
-from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
-from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms import inlineformset_factory
 from django.utils.text import slugify
 
 from .societies import SOCIETIES
-from .admin import WriterInWorkFormSet
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
     Library, LibraryRelease, Recording, WorkAcknowledgement)
@@ -54,10 +51,16 @@ class DataImporter(object):
         self.report = ''
         self.unknown_keys = set()
 
-    def log(self, action_flag, obj, message):
+    def log(self, obj, message, change=False):
         """Helper function for logging history."""
         if not self.user_id:
             return
+        from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
+        from django.contrib.admin.options import get_content_type_for_model
+        if change:
+            action_flag = CHANGE
+        else:
+            action_flag = ADDITION
         LogEntry.objects.log_action(
             self.user_id, get_content_type_for_model(obj).id, obj.id, str(obj),
             action_flag, message)
@@ -212,7 +215,8 @@ class DataImporter(object):
                     writer.generally_controlled = True
                     writer.save()
                     self.log(
-                        CHANGE, writer, 'General agreement set during import.')
+                        writer, 'General agreement set during import.',
+                        change=True)
 
                 # Writer must be exactly same, except if marked "generally
                 # controlled" in the database, and not in the file
@@ -231,8 +235,7 @@ class DataImporter(object):
                 writer = lookup_writer
                 try:
                     writer.save()
-                    self.log(
-                        ADDITION, writer, 'Added during import.')
+                    self.log(writer, 'Added during import.')
                 except IntegrityError:
                     raise ValueError(
                         'A writer with this IPI or general SAAN already '
@@ -259,8 +262,7 @@ class DataImporter(object):
                 artist = lookup_artist
                 try:
                     artist.save()
-                    self.log(
-                        ADDITION, artist, 'Added during import.')
+                    self.log(artist, 'Added during import.')
                 except IntegrityError:
                     raise ValueError(
                         'An artist with this ISNI already '
@@ -278,8 +280,7 @@ class DataImporter(object):
         if not library:
             library = lookup_library
             library.save()
-            self.log(
-                ADDITION, library, 'Added during import.')
+            self.log(library, 'Added during import.')
         lookup_library_release = LibraryRelease(
             library_id=library.id,
             cd_identifier=cd_identifier)
@@ -290,11 +291,10 @@ class DataImporter(object):
         if not library_release:
             library_release = lookup_library_release
             library_release.save()
-            self.log(
-                ADDITION, library_release, 'Added during import.')
+            self.log(library_release, 'Added during import.')
         return library_release
 
-    def process_row(self, row):
+    def process_row(self, row, validate=True):
         if not any(row.values()):
             return
         row_dict = self.unflatten(row)
@@ -328,7 +328,7 @@ class DataImporter(object):
                 (f'ISWC "{ work.iswc }", ' if work.iswc else '') +
                 'clashes with an existing work. '
                 'Data imports can only be used for adding new works.')
-        self.log(ADDITION, work, 'Added during import.')
+        self.log(work, 'Added during import.')
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
         # for isrc in row_dict['recordings'].values():
@@ -336,8 +336,7 @@ class DataImporter(object):
         #     recording.clean_fields()
         #     recording.clean()
         #     recording.save()
-        #     self.log(
-        #         ADDITION, recording, 'Added during import.')
+        #     self.log(recording, 'Added during import.')
         wiws = []
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
@@ -361,23 +360,25 @@ class DataImporter(object):
         factory_fields = [
             'work', 'writer', 'capacity', 'relative_share', 'controlled',
             'saan']
-        factory = inlineformset_factory(
-            Work, WriterInWork, formset=WriterInWorkFormSet,
-            fields=factory_fields, extra=len(wiws))
-        formset = factory()
-        for i, form in enumerate(formset.forms):
-            wiw = wiws[i]
-            data = {}
-            data['writer'] = wiw.writer_id
-            data['work'] = wiw.work_id
-            data['capacity'] = wiw.capacity
-            data['relative_share'] = wiw.relative_share
-            data['controlled'] = wiw.controlled
-            data['saan'] = wiw.saan
-            form.initial = form.cleaned_data = data
-            form.full_clean()
-            form.is_bound = True
-        formset.clean()
+        if validate:
+            from .admin import WriterInWorkFormSet
+            factory = inlineformset_factory(
+                Work, WriterInWork, formset=WriterInWorkFormSet,
+                fields=factory_fields, extra=len(wiws))
+            formset = factory()
+            for i, form in enumerate(formset.forms):
+                wiw = wiws[i]
+                data = {}
+                data['writer'] = wiw.writer_id
+                data['work'] = wiw.work_id
+                data['capacity'] = wiw.capacity
+                data['relative_share'] = wiw.relative_share
+                data['controlled'] = wiw.controlled
+                data['saan'] = wiw.saan
+                form.initial = form.cleaned_data = data
+                form.full_clean()
+                form.is_bound = True
+            formset.clean()
         yield work
 
     def run(self):

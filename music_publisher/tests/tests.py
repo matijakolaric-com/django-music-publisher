@@ -102,12 +102,12 @@ class DataImportTest(TestCase):
 
         """This does nothing, as user is unknown."""
         di = data_import.DataImporter([], user=None)
-        di.log(data_import.ADDITION, None, 'no message')
+        di.log(None, 'no message')
         self.assertEqual(LogEntry.objects.count(), 0)
 
         """This logs."""
         di = data_import.DataImporter([], user=self.superuser)
-        di.log(data_import.ADDITION, self.obj, 'test message')
+        di.log(self.obj, 'test message')
         self.assertEqual(LogEntry.objects.count(), 1)
         le = LogEntry.objects.first()
         self.assertEqual(str(le), 'Added “ARTIST ONE”.')
