@@ -1324,7 +1324,7 @@ class CWRExport(models.Model):
 
             self.transaction_count += 1
 
-    def yield_publisher_lines(self, work, controlled_relative_share):
+    def yield_publisher_lines(self, publisher, controlled_relative_share):
         """Yield SPU/SPT lines.
 
         Args:
@@ -1334,7 +1334,6 @@ class CWRExport(models.Model):
         Yields:
               str: CWR record (row/line)
         """
-        publisher = work['writers'][0]['original_publishers'][0]['publisher']
         affiliations = publisher.get('affiliations', [])
         for aff in affiliations:
             if aff['affiliation_type']['code'] == 'PR':
@@ -1427,7 +1426,9 @@ class CWRExport(models.Model):
                 copublished_writer_ids.add(key)
                 other_publisher_share += share
                 controlled_shares[key] += share
-        yield from self.yield_publisher_lines(work, controlled_relative_share)
+        publisher = work['writers'][0]['original_publishers'][0]['publisher']
+        yield from self.yield_publisher_lines(
+            publisher, controlled_relative_share)
         # OPU, co-publishing only
         if other_publisher_share:
             yield self.get_transaction_record(
