@@ -1630,14 +1630,12 @@ class CWRExport(models.Model):
             'record_count': self.record_count + 4
         })
 
-    def create_cwr(self, publisher_code=None):
+    def create_cwr(self):
         """Create CWR and save.
         """
-        if publisher_code is None:
-            publisher_code = settings.PUBLISHER_CODE
-        self.publisher_code = publisher_code
         if self.cwr:
             return
+        self.publisher_code = settings.PUBLISHER_CODE
         self.year = datetime.now().strftime('%y')
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
