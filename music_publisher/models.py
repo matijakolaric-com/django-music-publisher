@@ -1267,7 +1267,7 @@ class CWRExport(models.Model):
                 tdict = TEMPLATES_21
             if (
                     key == 'HDR' and
-                    len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9
+                    len(record['publisher_ipi_name'].lstrip('0')) > 9
             ):
                 # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
                 template = tdict.get('HDR_8')
@@ -1324,7 +1324,7 @@ class CWRExport(models.Model):
 
             self.transaction_count += 1
 
-    def yield_publisher_lines(self, controlled_relative_share):
+    def yield_publisher_lines(self, work, controlled_relative_share):
         """Yield SPU/SPT lines.
 
         Args:
@@ -1334,8 +1334,27 @@ class CWRExport(models.Model):
         Yields:
               str: CWR record (row/line)
         """
+        publisher = work['writers'][0]['original_publishers'][0]['publisher']
+        affiliations = publisher.get('affiliations', [])
+        for aff in affiliations:
+            if aff['affiliation_type']['code'] == 'PR':
+                publisher['pr_society'] = aff['organization']['code']
+            elif aff['affiliation_type']['code'] == 'MR':
+                publisher['mr_society'] = aff['organization']['code']
+            elif aff['affiliation_type']['code'] == 'SR':
+                publisher['sr_society'] = aff['organization']['code']
         yield self.get_transaction_record(
-            'SPU', {'share': controlled_relative_share})
+            'SPU', {
+                'chain_sequence': 1,
+                'name': publisher.get('name'),
+                'code': publisher.get('code'),
+                'ipi_name_number': publisher.get('ipi_name_number'),
+                'ipi_base_number': publisher.get('ipi_base_number'),
+                'pr_society': publisher.get('pr_society'),
+                'mr_society': publisher.get('mr_society'),
+                'sr_society': publisher.get('sr_society'),
+                'share': controlled_relative_share
+            })
         if controlled_relative_share:
             yield self.get_transaction_record(
                 'SPT', {'share': controlled_relative_share})
@@ -1408,7 +1427,7 @@ class CWRExport(models.Model):
                 copublished_writer_ids.add(key)
                 other_publisher_share += share
                 controlled_shares[key] += share
-        yield from self.yield_publisher_lines(controlled_relative_share)
+        yield from self.yield_publisher_lines(work, controlled_relative_share)
         # OPU, co-publishing only
         if other_publisher_share:
             yield self.get_transaction_record(

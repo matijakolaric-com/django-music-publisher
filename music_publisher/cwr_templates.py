@@ -38,18 +38,21 @@ TEMPLATES_21 = {
         '      {{ version_type }}  ' + ' ' * 40 + 'N00000000000' +
         ' ' * 51 + 'N'
                    '\r\n{% endautoescape %}'),
+
     'SPU': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'SPU{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}01'
-        '{{ settings.PUBLISHER_CODE|ljust:9 }}'
-        '{{ settings.PUBLISHER_NAME|ljust:45 }}'
-        ' E 000000000{{ settings.PUBLISHER_IPI_NAME|rjust:11 }}              '
-        '{{ settings.PUBLISHER_SOCIETY_PR|soc }}{{ share|prp|cwrshare }}'
-        '{{ settings.PUBLISHER_SOCIETY_MR|soc }}{{ share|mrp|cwrshare }}'
-        '{{ settings.PUBLISHER_SOCIETY_SR|soc }}{{ share|srp|cwrshare }}'
-        ' N {{ settings.PUBLISHER_IPI_BASE|ljust:13 }}'
-        '                               '
+        '{{ record_sequence|rjust:8 }}{{ chain_sequence|rjust:2 }}'
+        '{{ code|ljust:9 }}'
+        '{{ name|ljust:45 }}'
+        ' {{ role|default:"E "|ljust:2}}'
+        '000000000{{ ipi_name_number|rjust:11 }}              '
+        '{{ pr_society|soc }}{{ share|prp|cwrshare }}'
+        '{{ mr_society|soc }}{{ share|mrp|cwrshare }}'
+        '{{ sr_society|soc }}{{ share|srp|cwrshare }}'
+        ' N {{ ipi_base_number|ljust:13 }}'
+        '              {{ saan|ljust:14 }}  '
+        '{{usa_license|ljust:1}}'
         '\r\n{% endautoescape %}'),
     'SPT': Template(
         '{% load cwr_generators %}{% autoescape off %}'
