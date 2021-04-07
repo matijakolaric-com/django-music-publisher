@@ -1592,7 +1592,7 @@ class CWRExport(models.Model):
             'publisher_code': settings.PUBLISHER_CODE,
         })
 
-    def yield_lines(self):
+    def yield_lines(self, works):
         """Yield CWR transaction records (rows/lines) for works
 
         Args:
@@ -1601,8 +1601,6 @@ class CWRExport(models.Model):
         Yields:
             str: CWR record (row/line)
         """
-        qs = self.works.order_by('id', )
-        works = Work.objects.get_dict(qs)['works']
 
         self.record_count = self.record_sequence = self.transaction_count = 0
 
@@ -1610,7 +1608,7 @@ class CWRExport(models.Model):
 
         if self.nwr_rev == 'NW2':
             yield self.get_record('GRH', {'transaction_type': 'NWR'})
-        elif self.nwr_rev == 'RE2':    
+        elif self.nwr_rev == 'RE2':
             yield self.get_record('GRH', {'transaction_type': 'REV'})
         else:
             yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
@@ -1647,7 +1645,9 @@ class CWRExport(models.Model):
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
-        self.cwr = ''.join(self.yield_lines())
+        qs = self.works.order_by('id', )
+        works = Work.objects.get_dict(qs)['works']
+        self.cwr = ''.join(self.yield_lines(works))
         self.save()
         Work.persist_work_ids(self.works)
 
