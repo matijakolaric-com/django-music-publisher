@@ -11,15 +11,15 @@ from django.template import Template
 TEMPLATES_21 = {
     'HDR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
-        'HDRPB{{ publisher_ipi_name|rjust:11|slice:"2:" }}'
-        '{{ publisher_name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
+        'HDRPB{{ ipi_name_number|rjust:11|slice:"2:" }}'
+        '{{ name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
         '               \r\n{% endautoescape %}'),
     # CWR 2.1 revision 8 "hack" - no sender type field, 11 digit IPI name
     'HDR_8': Template(
         '{% load cwr_generators %}{% autoescape off %}'
-        'HDR{{ publisher_ipi_name|rjust:11 }}'
-        '{{ publisher_name|ljust:45 }}01.10{{ '
+        'HDR{{ ipi_name_number|rjust:11 }}'
+        '{{ name|ljust:45 }}01.10{{ '
         'creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ '
         'creation_date|date:"Ymd" }}'
@@ -157,15 +157,15 @@ TEMPLATES_22 = TEMPLATES_21.copy()
 TEMPLATES_22.update({
     'HDR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
-        'HDRPB{{ publisher_ipi_name|rjust:11|slice:"2:" }}'
-        '{{ publisher_name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
+        'HDRPB{{ ipi_name_number|rjust:11|slice:"2:" }}'
+        '{{ name|ljust:45 }}01.10{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
         '               2.2002{{ settings.SOFTWARE|ljust:30 }}'
         '{{ settings.SOFTWARE_VERSION|ljust:30 }}\r\n{% endautoescape %}'),
     'HDR_8': Template(
         '{% load cwr_generators %}{% autoescape off %}'
-        'HDR{{ publisher_ipi_name|rjust:11 }}'
-        '{{ publisher_name|ljust:45 }}01.10{{ '
+        'HDR{{ ipi_name_number|rjust:11 }}'
+        '{{ name|ljust:45 }}01.10{{ '
         'creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ '
         'creation_date|date:"Ymd" }}'
@@ -211,8 +211,8 @@ TEMPLATES_22.update({
 TEMPLATES_30 = {
     'HDR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
-        'HDRPB{{ publisher_code|ljust:4 }}'
-        '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
+        'HDRPB{{ code|ljust:4 }}'
+        '{{ name|ljust:45 }}' + ' ' * 11 +
         '{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
         ' ' * 15 + '3.0000{{ settings.SOFTWARE|ljust:30 }}'

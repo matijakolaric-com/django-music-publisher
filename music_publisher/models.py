@@ -1269,7 +1269,7 @@ class CWRExport(models.Model):
                 tdict = TEMPLATES_21
             if (
                     key == 'HDR' and
-                    len(record['publisher_ipi_name'].lstrip('0')) > 9
+                    len(record['ipi_name_number'].lstrip('0')) > 9
             ):
                 # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
                 template = tdict.get('HDR_8')
@@ -1587,9 +1587,9 @@ class CWRExport(models.Model):
         return self.get_record('HDR', {
             'creation_date': datetime.now(),
             'filename': self.filename,
-            'publisher_ipi_name': settings.PUBLISHER_IPI_NAME,
-            'publisher_name': settings.PUBLISHER_NAME,
-            'publisher_code': settings.PUBLISHER_CODE,
+            'ipi_name_number': settings.PUBLISHER_IPI_NAME,
+            'name': settings.PUBLISHER_NAME,
+            'code': settings.PUBLISHER_CODE,
         })
 
     def yield_lines(self, works):
@@ -1630,12 +1630,14 @@ class CWRExport(models.Model):
             'record_count': self.record_count + 4
         })
 
-    def create_cwr(self):
+    def create_cwr(self, publisher_code=None):
         """Create CWR and save.
         """
+        if publisher_code is None:
+            publisher_code = settings.PUBLISHER_CODE
+        self.publisher_code = publisher_code
         if self.cwr:
             return
-        self.publisher_code = settings.PUBLISHER_CODE
         self.year = datetime.now().strftime('%y')
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
