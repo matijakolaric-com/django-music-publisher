@@ -1184,6 +1184,8 @@ class CWRExport(models.Model):
     works = models.ManyToManyField(Work, related_name='cwr_exports')
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
+    publisher_code = None
+
     @property
     def version(self):
         """Return CWR version."""
@@ -1226,7 +1228,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
             self.year,
             self.num_in_year,
-            settings.PUBLISHER_CODE,
+            self.publisher_code,
             minor_version,
             ext)
 
@@ -1240,7 +1242,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_000.V{}'.format(
             self.year,
             self.num_in_year,
-            settings.PUBLISHER_CODE,
+            self.publisher_code,
             self.version)
 
     def __str__(self):
@@ -1630,9 +1632,12 @@ class CWRExport(models.Model):
             'record_count': self.record_count + 4
         })
 
-    def create_cwr(self):
+    def create_cwr(self, publisher_code=None):
         """Create CWR and save.
         """
+        if publisher_code is None:
+            publisher_code = settings.PUBLISHER_CODE
+        self.publisher_code = publisher_code
         if self.cwr:
             return
         self.year = datetime.now().strftime('%y')
