@@ -149,7 +149,7 @@
                     <div class="{{ rt }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:' }}</span></pre></div>
                 {% elif rt == 'ACK' %}
                     {% with line|slice:'157:159' as status_code %}
-                        <div class="{{ rt }} {{ status_code }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:46' }}<span class="type" title="Original transaction type">{{ line|slice:'46:49' }}</span><span class="title" title="Work title">{{ line|slice:'49:109' }}</span>{{ line|slice:'109:157' }}<span class="status" title="Transaction Status: {{ status_code|status }}">{{ line|slice:'157:159' }}</span>{{ line|slice:'159:' }}</pre></div>
+                        <div class="{{ rt }} {{ status_code }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:46' }}<span class="type" title="Original transaction type">{{ line|slice:'46:49' }}</span><span class="title" title="Work title">{{ line|slice:'49:109' }}</span><span class="workid" title="Work ID">{{ line|slice:'109:123' }}</span>{{ line|slice:'123:157' }}<span class="status" title="Transaction Status: {{ status_code|status }}">{{ line|slice:'157:159' }}</span>{{ line|slice:'159:' }}</pre></div>
                     {% endwith %}
                 {% elif rt == 'MSG' %}
                     <div class="{{ rt }} {{ status_code }}"><pre><span class="record_type">{{ rt }}</span><span class="counters">{{ line|slice:'3:19' }}</span>{{ line|slice:'19:35' }}<span class="message" title="Message Text">{{ line|slice:'35:' }}</span></pre></div>

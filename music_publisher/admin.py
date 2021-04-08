@@ -1584,7 +1584,8 @@ class ACKImportForm(ModelForm):
         cd = self.cleaned_data
         ack = cd.get('acknowledgement_file')
         filename = ack.name
-        if not (len(filename) in [18, 19] and filename[-4:].upper() == '.V21'):
+        if not (len(filename) in [18, 19] and
+                filename[-4:].upper() in ['.V21', '.V22']):
             raise ValidationError('Wrong file name format.')
         self.cleaned_data['filename'] = filename
         content = ack.file.read().decode('latin1')

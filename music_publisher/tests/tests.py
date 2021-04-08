@@ -988,7 +988,7 @@ class AdminTest(TestCase):
         """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CX180001000_FOO.V22',
+            mock, 'acknowledgement_file', 'CX180001000_FOO.V23',
             'text', 0, None)
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)

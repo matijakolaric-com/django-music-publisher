@@ -15,6 +15,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.template import Context
+from django.utils.duration import duration_string
 
 from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
@@ -1096,8 +1097,7 @@ class Recording(models.Model):
                 self.release_date.strftime('%Y%m%d') if self.release_date
                 else None,
             'duration':
-                str(self.duration).replace(':', '') if self.duration
-                else None,
+                duration_string(self.duration) if self.duration else None,
             'isrc':
                 self.isrc,
             'recording_artist':
@@ -1564,6 +1564,8 @@ class CWRExport(models.Model):
                 ).strip()[:60]
             if rec['isrc']:
                 rec['isrc_validity'] = 'Y'
+            if rec['duration']:
+                rec['duration'] = rec['duration'].replace(':', '')[0:6]
             if self.version in ['21', '22'] and not any([
                 rec['release_date'],
                 rec['duration'],
