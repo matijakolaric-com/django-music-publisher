@@ -39,7 +39,7 @@ def rjust(value, length):
         value = '0'
     else:
         value = str(value)
-    value = value.rjust(length, '0')
+    value = value.rjust(length, '0')[0:length]
     return value
 
 
@@ -51,7 +51,7 @@ def ljust(value, length):
         value = ''
     else:
         value = str(value)
-    value = value.ljust(length, ' ')
+    value = value.ljust(length, ' ')[0:length]
     return value
 
 
