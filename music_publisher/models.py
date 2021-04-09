@@ -1228,7 +1228,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
             self.year,
             self.num_in_year,
-            self.publisher_code,
+            self.publisher_code or settings.PUBLISHER_CODE,
             minor_version,
             ext)
 
@@ -1242,7 +1242,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_000.V{}'.format(
             self.year,
             self.num_in_year,
-            self.publisher_code,
+            self.publisher_code or settings.PUBLISHER_CODE,
             self.version)
 
     def __str__(self):
