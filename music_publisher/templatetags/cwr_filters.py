@@ -14,13 +14,6 @@ from music_metadata.territories.territory import Territory
 register = template.Library()
 
 
-def calculate_value(value, share):
-    """Convert string to a decimal and multiply with share."""
-    value = Decimal(value or 0)
-    value *= share
-    return value
-
-
 @register.filter(name='perc')
 def perc(value):
     """Display shares as human-readable string."""
