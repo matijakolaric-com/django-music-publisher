@@ -1030,7 +1030,7 @@ class WorkAdmin(MusicPublisherAdmin):
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    def get_labels_for_csv(self, works, repeating_column_nr=0):
+    def get_labels_for_csv(self, works, repeating_column_nr=0, simple=False):
         """Return the list of labels for the CSV file."""
         labels = [
             'Work ID',
@@ -1060,15 +1060,17 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} First'.format(i + 1))
             labels.append('Writer {} IPI'.format(i + 1))
             labels.append('Writer {} PRO'.format(i + 1))
-            labels.append('Writer {} MRO'.format(i + 1))
-            labels.append('Writer {} SRO'.format(i + 1))
+            if not simple:
+                labels.append('Writer {} MRO'.format(i + 1))
+                labels.append('Writer {} SRO'.format(i + 1))
             labels.append('Writer {} Role'.format(i + 1))
             labels.append('Writer {} Manuscript Share'.format(i + 1))
-            labels.append('Writer {} PR Share'.format(i + 1))
-            labels.append('Writer {} MR Share'.format(i + 1))
-            labels.append('Writer {} SR Share'.format(i + 1))
+            if not simple:
+                labels.append('Writer {} PR Share'.format(i + 1))
+                labels.append('Writer {} MR Share'.format(i + 1))
+                labels.append('Writer {} SR Share'.format(i + 1))
             labels.append('Writer {} Controlled'.format(i + 1))
-            if i < writer_with_publisher_max:
+            if not simple and i < writer_with_publisher_max:
                 labels.append('Writer {} SAAN'.format(i + 1))
                 labels.append('Writer {} Publisher Name'.format(i + 1))
                 labels.append('Writer {} Publisher IPI'.format(i + 1))
@@ -1079,23 +1081,26 @@ class WorkAdmin(MusicPublisherAdmin):
                 labels.append('Writer {} Publisher MR Share'.format(i + 1))
                 labels.append('Writer {} Publisher SR Share'.format(i + 1))
         for i in range(recording_max):
-            labels.append('Recording {} ID'.format(i + 1))
-            labels.append('Recording {} Recording Title'.format(i + 1))
-            labels.append('Recording {} Version Title'.format(i + 1))
+            if not simple:
+                labels.append('Recording {} ID'.format(i + 1))
+                labels.append('Recording {} Recording Title'.format(i + 1))
+                labels.append('Recording {} Version Title'.format(i + 1))
             labels.append('Recording {} Release Date'.format(i + 1))
             labels.append('Recording {} Duration'.format(i + 1))
             labels.append('Recording {} ISRC'.format(i + 1))
-            labels.append('Recording {} Artist Last'.format(i + 1))
-            labels.append('Recording {} Artist First'.format(i + 1))
-            labels.append('Recording {} Artist ISNI'.format(i + 1))
-            labels.append('Recording {} Record Label'.format(i + 1))
+            if not simple:
+                labels.append('Recording {} Artist Last'.format(i + 1))
+                labels.append('Recording {} Artist First'.format(i + 1))
+                labels.append('Recording {} Artist ISNI'.format(i + 1))
+                labels.append('Recording {} Record Label'.format(i + 1))
         for i in range(artist_max):
             labels.append('Artist {} Last'.format(i + 1))
             labels.append('Artist {} First'.format(i + 1))
             labels.append('Artist {} ISNI'.format(i + 1))
-        for i in range(xrf_max):
-            labels.append('Reference {} CMO'.format(i + 1))
-            labels.append('Reference {} ID'.format(i + 1))
+        if not simple:
+            for i in range(xrf_max):
+                labels.append('Reference {} CMO'.format(i + 1))
+                labels.append('Reference {} ID'.format(i + 1))
         return labels
 
     def get_rows_for_csv(self, works):
@@ -1813,7 +1818,11 @@ class ACKImportAdmin(AdminWithReport):
 
         Parameters:
             preview: that returns the preview of CWR file."""
-        obj = get_object_or_404(ACKImport, pk=object_id)
+        try:
+            obj = get_object_or_404(ACKImport, pk=int(object_id))
+        except ValueError:
+            return super().change_view(
+                request, object_id, form_url='', extra_context=extra_context)
         if 'preview' in request.GET:
             cwr = self.get_preview(obj)
             if (cwr[59:64] == '01.10'):
