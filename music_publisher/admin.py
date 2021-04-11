@@ -636,6 +636,7 @@ class AlternateTitleFormSet(BaseInlineFormSet):
         Raises:
             ValidationError
         """
+        super().clean()
         work_title_len = len(self.instance.title)
         for form in self.forms:
             if not form.is_valid():
@@ -862,6 +863,7 @@ class WorkAdmin(MusicPublisherAdmin):
             """Filter on society sending ACKs.
             """
             if self.value():
+                queryset.society_code = self.value()
                 return queryset.filter(
                     workacknowledgement__society_code=self.value()).distinct()
             return queryset
@@ -882,8 +884,13 @@ class WorkAdmin(MusicPublisherAdmin):
             """Filter on ACK status.
             """
             if self.value():
-                return queryset.filter(
-                    workacknowledgement__status=self.value()).distinct()
+                if hasattr(queryset, 'society_code')
+                    return queryset.filter(
+                        workacknowledgement__status=self.value()
+                    ).distinct()
+                else:
+                    return queryset.filter(
+                        workacknowledgement__status=self.value()).distinct()
             return queryset
 
     class HasISWCListFilter(admin.SimpleListFilter):
@@ -1426,7 +1433,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Optimized query with count of works in the export.
         """
         qs = super().get_queryset(request)
-        qs = qs.annotate(models.Count('works'))
+        qs = qs.annotate(models.Count('works', distinct=True))
         return qs
 
     def date(self, obj):
