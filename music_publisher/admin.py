@@ -863,7 +863,7 @@ class WorkAdmin(MusicPublisherAdmin):
             """Filter on society sending ACKs.
             """
             if self.value():
-                queryset =  queryset.filter(
+                queryset = queryset.filter(
                     workacknowledgement__society_code=self.value()).distinct()
                 queryset.society_code = self.value()
             return queryset
@@ -889,11 +889,9 @@ class WorkAdmin(MusicPublisherAdmin):
                         workacknowledgement__status=self.value(),
                         workacknowledgement__society_code=queryset.society_code
                     ).distinct()
-                    print("HERE")
                 else:
                     queryset = queryset.filter(
                         workacknowledgement__status=self.value()).distinct()
-            print(queryset.query)
             return queryset
 
     class HasISWCListFilter(admin.SimpleListFilter):
