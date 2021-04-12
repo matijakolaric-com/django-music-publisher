@@ -47,6 +47,7 @@ class ArtistInWorkInline(admin.TabularInline):
     autocomplete_fields = ('artist', 'work')
     model = ArtistInWork
     extra = 0
+    ordering = ('artist__last_name', 'artist__first_name')
     verbose_name_plural = \
         'Artists performing Works (not mentioned in "recordings" section)'
 
@@ -77,7 +78,7 @@ class RecordingInline(admin.StackedInline):
     verbose_name_plural = \
         'Recordings (with recording artists and record labels)'
     model = Recording
-    ordering = ('recording_title', 'version_title')
+    ordering = ('recording_title', 'version_title', 'id')
     extra = 0
 
 
@@ -85,6 +86,8 @@ class RecordingInline(admin.StackedInline):
 class ArtistAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Artist`.
     """
+
+    ordering = ('last_name', 'first_name', 'isni', '-id')
 
     list_display = (
         'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
@@ -167,6 +170,8 @@ class LabelAdmin(MusicPublisherAdmin):
         ('Notes', {'fields': ('notes',), }),
     )
 
+    ordering = ('name', '-id')
+
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
         """
@@ -237,6 +242,7 @@ class LibraryAdmin(MusicPublisherAdmin):
     """
     actions = None
     search_fields = ('name',)
+    ordering = ('name', '-id')
 
     list_display = ('name', 'libraryrelease_count', 'work_count')
     readonly_fields = ('libraryrelease_count', 'work_count')
@@ -293,6 +299,7 @@ class TrackInline(admin.TabularInline):
     :class:`LibraryReleaseAdmin` and :class:`CommercialReleaseAdmin`.
     """
     model = Track
+    ordering = ('release', 'cut_number',)
     autocomplete_fields = ('release', 'recording')
     extra = 0
 
@@ -302,6 +309,7 @@ class ReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Release`.
     """
 
+    ordering = ('release_title', 'cd_identifier', '-id')
     actions = None
     list_display = (
         '__str__',
@@ -342,6 +350,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.LibraryRelease`.
     """
 
+    ordering = ('release_title', 'cd_identifier', '-id')
     form = LibraryReleaseForm
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
@@ -454,6 +463,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.CommercialRelease`.
     """
 
+    ordering = ('release_title', 'cd_identifier', '-id')
     inlines = [TrackInline]
     autocomplete_fields = ('release_label',)
 
@@ -538,6 +548,7 @@ class WriterAdmin(MusicPublisherAdmin):
     """Interface for :class:`.models.Writer`.
     """
 
+    ordering = ('last_name', 'first_name', 'ipi_name', '-id')
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
                     '_can_be_controlled', 'generally_controlled',
                     'work_count')
@@ -662,6 +673,7 @@ class AlternateTitleInline(admin.TabularInline):
     verbose_name_plural = \
         'Alternative titles (not mentioned in "recordings" section)'
     fields = ('title', 'suffix', 'complete_alt_title')
+    ordering = ('suffix', 'title',)
 
     def complete_alt_title(self, obj):
         """Return the complete title, see
@@ -681,6 +693,8 @@ class WriterInWorkInline(admin.TabularInline):
     fields = (
         'writer', 'capacity', 'relative_share', 'controlled', 'saan',
         'publisher_fee')
+    ordering = (
+            '-controlled', 'writer__last_name', 'writer__first_name', '-id')
 
 
 class WorkAcknowledgementInline(admin.TabularInline):
@@ -693,6 +707,7 @@ class WorkAcknowledgementInline(admin.TabularInline):
     model = WorkAcknowledgement
     extra = 0
     fields = ('date', 'society_code', 'remote_work_id', 'status')
+    ordering = ('-date', '-id')
 
 
 class WorkForm(forms.ModelForm):
@@ -737,6 +752,7 @@ class WorkAdmin(MusicPublisherAdmin):
             :class:`WorkAcknowledgementInline`,
     """
 
+    ordering = ('-id',)
     form = WorkForm
 
     inlines = (
@@ -1140,7 +1156,8 @@ class WorkAdmin(MusicPublisherAdmin):
                 w = wiw.get('writer') or {}
                 row['Writer {} Last'.format(i + 1)] = w.get('last_name', '')
                 row['Writer {} First'.format(i + 1)] = w.get('first_name', '')
-                row['Writer {} IPI'.format(i + 1)] = w.get('ipi_name_number', '')
+                row['Writer {} IPI'.format(i + 1)] = w.get(
+                    'ipi_name_number', '')
                 role = wiw.get('writer_role', {})
                 if role:
                     row['Writer {} Role'.format(i + 1)] = '{} - {}'.format(
@@ -1148,8 +1165,8 @@ class WorkAdmin(MusicPublisherAdmin):
                 for aff in w.get('affiliations', []):
                     code = aff['affiliation_type']['code']
                     cmo = aff['organization']
-                    row['Writer {} {}O'.format(i + 1, code)] = '{} - {}'.format(
-                        cmo['code'], cmo['name'])
+                    row['Writer {} {}O'.format(i + 1, code)] = \
+                        '{} - {}'.format(cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
 
                 row['Writer {} Manuscript Share'.format(i + 1)] = Decimal(
@@ -1208,22 +1225,33 @@ class WorkAdmin(MusicPublisherAdmin):
                 row['Writer {} Controlled'.format(i + 1)] = controlled
             for i, rec in enumerate(work['recordings']):
                 row['Recording {} ID'.format(i + 1)] = rec['code']
-                row['Recording {} Recording Title'.format(i + 1)] = rec['recording_title']
-                row['Recording {} Version Title'.format(i + 1)] = rec['version_title']
-                row['Recording {} Release Date'.format(i + 1)] = rec['release_date']
+                row['Recording {} Recording Title'.format(i + 1)] = \
+                    rec['recording_title']
+                row['Recording {} Version Title'.format(i + 1)] = \
+                    rec['version_title']
+                row['Recording {} Release Date'.format(i + 1)] = \
+                    rec['release_date']
                 row['Recording {} Duration'.format(i + 1)] = rec['duration']
                 row['Recording {} ISRC'.format(i + 1)] = rec['isrc']
-                row['Recording {} Record Label'.format(i + 1)] = (rec['record_label'] or {}).get('name')
+                row['Recording {} Record Label'.format(i + 1)] = \
+                    (rec['record_label'] or {}).get('name')
                 artist = rec.get('recording_artist') or {}
-                row['Recording {} Artist Last'.format(i + 1)] = artist.get('last_name', '')
-                row['Recording {} Artist Last'.format(i + 1)] = artist.get('last_name', '')
-                row['Recording {} Artist First'.format(i + 1)] = artist.get('first_name', '')
-                row['Recording {} Artist ISNI'.format(i + 1)] = artist.get('isni', '')
+                row['Recording {} Artist Last'.format(i + 1)] = \
+                    artist.get('last_name', '')
+                row['Recording {} Artist Last'.format(i + 1)] = \
+                    artist.get('last_name', '')
+                row['Recording {} Artist First'.format(i + 1)] = \
+                    artist.get('first_name', '')
+                row['Recording {} Artist ISNI'.format(i + 1)] = \
+                    artist.get('isni', '')
             for i, aiw in enumerate(work['performing_artists']):
                 artist = aiw.get('artist')
-                row['Artist {} Last'.format(i + 1)] = artist.get('last_name', '')
-                row['Artist {} First'.format(i + 1)] = artist.get('first_name', '')
-                row['Artist {} ISNI'.format(i + 1)] = artist.get('isni', '')
+                row['Artist {} Last'.format(i + 1)] = \
+                    artist.get('last_name', '')
+                row['Artist {} First'.format(i + 1)] = \
+                    artist.get('first_name', '')
+                row['Artist {} ISNI'.format(i + 1)] = \
+                    artist.get('isni', '')
             for i, xrf in enumerate(work['cross_references']):
                 code = xrf['organization']['code']
                 name = xrf['organization']['name']
@@ -1284,6 +1312,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
         'label_link')
+    ordering = ('-id',)
 
     class HasISRCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISRC.
@@ -1397,6 +1426,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     """
 
     actions = None
+    ordering = ('-id',)
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
@@ -1621,6 +1651,7 @@ class AdminWithReport(admin.ModelAdmin):
         """Mark report as HTML-safe."""
         return mark_safe(obj.report)
     print_report.short_description = 'Report'
+    ordering = ('-id',)
 
 
 @admin.register(ACKImport)
@@ -1861,6 +1892,7 @@ class DataImportAdmin(AdminWithReport):
 
     list_display = ('filename', 'date')
     fields = readonly_fields = ('filename', 'date', 'print_report')
+    ordering = ('-id',)
 
     def add_view(self, request, form_url='', extra_context=None):
         if 'download_template' in request.GET:

@@ -27,8 +27,23 @@
         text-transform: uppercase;
     }
     td, th, li, dt, dd, input, .form-row, textarea, select {
-        font-size: 14px;
-        line-height: 16px;
+        font-size: 15px;
+        line-height: 18px;
+    }
+    .form-row, .module.aligned input:not([type=checkbox]):not([type=submit]), textarea, select {
+        min-width: 20em;
+        box-sizing: border-box;
+    }
+    .fieldBox {
+        min-width: 20em;
+        box-sizing: border-box;
+        padding: 3px 0;
+    }
+    .related-widget-wrapper {
+        width: 20em;
+    }
+    .inline-group .aligned label {
+        width: 10em !important;
     }
     select:disabled {
         background-color: var(--darkened-bg);
@@ -69,11 +84,37 @@
     #branding h2 a {
         font-size: 18px;
     }
-    .inline-group .tabular tr.has_original td {
+
+    div.inline-group .tabular tr.has_original td {
         padding: 8px !important;
     }
+    div.inline-group .module.aligned h2 {
+        padding: 8px 0 0 8px;
+        background-color: var(--breadcrumbs-bg);
+        color: var(--breadcrumbs-fg);
+        font-size: 13px;
+    }
+
+    .field-original_publisher_pr_share input[type=number],
+    .field-writer_pr_share input[type=number] {
+        border: 1px solid var(--link-fg);
+    }
+
+    .field-original_publisher_pr_share label,
+    .field-writer_pr_share label {
+        color: var(--link-fg);
+    }
+
     .module caption, .inline-group h2, .module h2 {
         font-size: 18px;
+    }
+
+    .select2-selection__clear {
+        font-size: 20px;
+        color: var(--primary);
+    }
+    .form-row {
+        font-size: 15px !important;
     }
     #user-tools {
         font-size: 15px;

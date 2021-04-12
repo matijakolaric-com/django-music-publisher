@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='21.7.dev4',
+    version='21.7.dev5',
     author='Matija Kolarić',
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
@@ -25,7 +25,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=3.2rc1,<3.3',
+        'Django>=3.2,<3.3',
         'requests>=2.24.0',
     ),
     include_package_data=True,
