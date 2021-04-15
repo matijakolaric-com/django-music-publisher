@@ -1730,7 +1730,7 @@ class ACKImportAdmin(AdminWithReport):
                 if work.iswc:
                     if work.iswc != iswc:
                         report +=(
-                            'A different ISWC exists for work' +
+                            'A different ISWC exists for work ' +
                             '{}: {} (old) vs {} (new).<br/>\n'.format(
                                 work, work.iswc, iswc) +
                             'Old ISWC kept, please investigate.<br/>\n')
@@ -1772,9 +1772,18 @@ class ACKImportAdmin(AdminWithReport):
                 if import_iswcs and iswc:
                     if work.iswc:
                         if work.iswc != iswc:
-                            raise ValidationError(
-                                'A different ISWC exists for work {}: {} vs {}.'
-                                ''.format(work, work.iswc, iswc))
+                            report += (
+                                    'A different ISWC exists for work ' +
+                                    '{}: {} (old) vs {} (new).<br/>\n'.format(
+                                        work, work.iswc, iswc) +
+                                    'Old ISWC kept, please '
+                                    'investigate.<br/>\n')
+                            self.message_user(
+                                request,
+                                'Conflicting ISWCs found for work {}!'.format(
+                                    work),
+                                level=messages.ERROR
+                            )
                     else:
                         work.iswc = iswc
                         work.last_change = now()
