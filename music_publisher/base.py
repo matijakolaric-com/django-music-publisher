@@ -11,6 +11,14 @@ from django.db import models
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES
 
+
+class NotesManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.defer('notes')
+        return qs
+
+
 class NotesBase(models.Model):
     """Abstract class for all classes that have notes.
 
@@ -20,6 +28,8 @@ class NotesBase(models.Model):
 
     class Meta:
         abstract = True
+
+    objects = NotesManager()
 
     notes = models.TextField(blank=True)
 

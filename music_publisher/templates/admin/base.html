@@ -29,8 +29,12 @@
         font-size: 15px;
         line-height: 18px;
     }
-    .form-row, .module.aligned input:not([type=checkbox]):not([type=submit]), textarea, select {
+    .form-row {
         min-width: 20em;
+        box-sizing: border-box;
+    }
+    .module.aligned input:not([type=checkbox]):not([type=submit]), textarea, select {
+        width: 20em;
         box-sizing: border-box;
     }
     .fieldBox {
@@ -38,7 +42,7 @@
         box-sizing: border-box;
         padding: 3px 0;
     }
-    .related-widget-wrapper {
+    .fieldBox .related-widget-wrapper {
         width: 20em;
     }
     .tabular input[type=number] {

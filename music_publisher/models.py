@@ -1142,6 +1142,13 @@ class Track(models.Model):
         }
 
 
+class DeferCwrManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.defer('cwr')
+        return qs
+
+
 class CWRExport(models.Model):
     """Export in CWR format.
 
@@ -1165,6 +1172,8 @@ class CWRExport(models.Model):
         verbose_name = 'CWR Export'
         verbose_name_plural = 'CWR Exports'
         ordering = ('-id',)
+
+    objects = DeferCwrManager()
 
     nwr_rev = models.CharField(
         'CWR version/type', max_length=3, db_index=True, default='NWR',
@@ -1729,6 +1738,8 @@ class ACKImport(models.Model):
     class Meta:
         verbose_name = 'CWR ACK Import'
         ordering = ('-date', '-id')
+
+    objects = DeferCwrManager()
 
     filename = models.CharField(max_length=60, editable=False)
     society_code = models.CharField(max_length=3, editable=False)
