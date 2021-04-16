@@ -162,7 +162,7 @@ class CWRFieldValidator:
                 raise ValidationError(
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
-        elif name == 'name':
+        else:
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
 

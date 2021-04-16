@@ -515,7 +515,7 @@ class Work(TitleBase):
         verbose_name='Title of original work',
         max_length=60, db_index=True, blank=True,
         help_text='Use only for modification of existing works.',
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
     library_release = models.ForeignKey(
         'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
         related_name='works',
@@ -971,12 +971,12 @@ class Recording(models.Model):
         validators=(CWRFieldValidator('name'),))
     recording_title = models.CharField(
         blank=True, max_length=60,
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
     recording_title_suffix = models.BooleanField(
         default=False, help_text='A suffix to the WORK title.')
     version_title = models.CharField(
         blank=True, max_length=60,
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
     version_title_suffix = models.BooleanField(
         default=False, help_text='A suffix to the RECORDING title.')
     release_date = models.DateField(blank=True, null=True)
