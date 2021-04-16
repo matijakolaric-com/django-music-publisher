@@ -1791,7 +1791,7 @@ class ACKImportAdmin(AdminWithReport):
                             request.user.id,
                             admin.options.get_content_type_for_model(work).id,
                             work.id, str(work), CHANGE,
-                            'ISWC imported from ACK file.')
+                            'ISWC imported from ISW file.')
                         work.save()
         if unknown_work_ids:
             messages.add_message(
