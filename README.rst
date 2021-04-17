@@ -1,8 +1,6 @@
 Django-Music-Publisher
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
-
 .. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master
     :target: https://github.com/matijakolaric-com/django-music-publisher/actions/workflows/build.yml
     :alt: Build Status
