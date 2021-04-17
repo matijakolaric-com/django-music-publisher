@@ -26,12 +26,12 @@ from .cwr_templates import (
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
 
+
 WORLD_DICT = {
     'tis-a': '2WL',
     'tis-n': '2136',
     'name': 'World'
 }
-
 
 
 class Artist(ArtistBase):
@@ -103,9 +103,9 @@ class Library(LibraryBase):
         verbose_name_plural = 'Music Libraries'
         ordering = ('name',)
 
-    name = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('library'),))
+    # name = models.CharField(
+    #     max_length=60, unique=True,
+    #     validators=(CWRFieldValidator('library'),))
 
     def __str__(self):
         return self.name.upper()
@@ -1041,6 +1041,7 @@ class Recording(models.Model):
 
     @property
     def title(self):
+        """Generate title from various fields."""
         return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
             self.work.title)
@@ -1119,7 +1120,14 @@ class Recording(models.Model):
 
 
 class Track(models.Model):
-    """Track, a recording on a release."""
+    """Track, a recording on a release.
+
+    Attributes:
+        recording (django.db.models.ForeignKey): Recording
+        release (django.db.models.ForeignKey): Release
+        cut_number (django.db.models.PositiveSmallIntegerField): Cut Number
+
+    """
 
     class Meta:
         verbose_name = 'Track'
@@ -1135,6 +1143,12 @@ class Track(models.Model):
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
 
     def get_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+
+        """
         return {
             'cut_number': self.cut_number,
             'recording': self.recording.get_dict(
@@ -1143,6 +1157,11 @@ class Track(models.Model):
 
 
 class DeferCwrManager(models.Manager):
+    """Manager for CWR Exports and ACK Imports.
+
+    Defers :attr:`CWRExport.cwr` and :attr:`AckImport.cwr` fields.
+
+    """
     def get_queryset(self):
         qs = super().get_queryset()
         qs = qs.defer('cwr')
@@ -1595,6 +1614,7 @@ class CWRExport(models.Model):
             yield self.get_transaction_record('XRF', xrf)
 
     def get_header(self):
+        """Construct CWR HDR record."""
         return self.get_record('HDR', {
             'creation_date': datetime.now(),
             'filename': self.filename,
@@ -1726,13 +1746,14 @@ class ACKImport(models.Model):
     """CWR acknowledgement file import.
 
     Attributes:
-        date (django.db.models.DateField): Acknowledgement date
         filename (django.db.models.CharField): Description
-        report (django.db.models.CharField): Basically a log
         society_code (models.CharField): 3-digit society code,
             please note that ``choices`` is not set.
         society_name (models.CharField): Society name,
             used if society code is missing.
+        date (django.db.models.DateField): Acknowledgement date
+        report (django.db.models.CharField): Basically a log
+        cwr (django.db.models.TextField): contents of CWR file
     """
 
     class Meta:
@@ -1771,6 +1792,7 @@ class DataImport(models.Model):
 
 
 def smart_str_conversion(value):
+    """Convert to Title Case only if UPPER CASE."""
     if value.isupper():
         return value.title()
     return value
@@ -1785,6 +1807,7 @@ FORCE_CASE_CHOICES = {
 
 @receiver(pre_save)
 def change_case(sender, instance, **kwargs):
+    """Change case of CharFields from :mod:`music_publisher`."""
     force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
     if not force_case:
         return
