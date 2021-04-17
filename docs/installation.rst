@@ -143,6 +143,5 @@ Other settings
 ------------------------------------
 * ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
 * ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
-* ``ENABLE_NOTES`` - Enables notes (text field) for writers, labels and artists
 * ``FORCE_CASE`` - available options are ``upper`` and ``title`` and ``smart``, converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields to Title Case,
   respectively.

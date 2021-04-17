@@ -28,7 +28,7 @@ Project Scope
 DMP can be used out-of-the-box by most small original publishers, both for commercial (general) and
 production (library) music.
 
-Each DMP installation supports a **single original publisher**. It is not intended to be used by
+Each DMP installation supports a **single publisher**. It is not intended to be used by
 administrators or sub-publishers, nor by publishing companies with multiple entities (including
 US publishers affiliated with multiple PROs).
 
