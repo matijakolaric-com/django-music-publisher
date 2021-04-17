@@ -1,11 +1,15 @@
-Django-Music-Publisher
+.. |br| raw:: html
+
+   <br>
+
+Django-Music-Publisher |br| Free music publishing software 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master
-    :target: https://github.com/matijakolaric-com/django-music-publisher/actions/workflows/build.yml
+    :target: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/
     :alt: Build Status
 .. image:: https://img.shields.io/readthedocs/django-music-publisher?logo=read-the-docs   
-    :target: https://django-music-publisher.readthedocs.io/
+    :target: https://django-music-publisher.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/master?logo=coveralls&branch=master
     :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
@@ -29,3 +33,4 @@ Django-Music-Publisher (DMP) is open source software for **managing music metada
 * Code: https://github.com/matijakolaric-com/django-music-publisher/
 * PYPI: https://pypi.org/project/django-music-publisher/
 
+.. image:: docs/images/work.png

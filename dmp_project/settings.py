@@ -9,7 +9,7 @@ from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
-SOFTWARE_VERSION = '21.7 MADELEINE (OPEN SOURCE)'
+SOFTWARE_VERSION = '21.5 MAYDAY (OPEN SOURCE)'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -66,8 +66,6 @@ WSGI_APPLICATION = 'dmp_project.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3')))}
-
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
