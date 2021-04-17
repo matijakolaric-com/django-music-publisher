@@ -1,7 +1,5 @@
-"""Filters used in generation of CWR files.
+"""Filters used in parsing of CWR files.
 
-Their goal is to format the incoming data to the right fixed-length
-format, as well as do some basic validation.
 """
 
 from decimal import Decimal
@@ -32,7 +30,7 @@ def soc_name(value):
 
 @register.filter(name='capacity')
 def capacity(value):
-    """Display capacity"""
+    """Display writer capacity/role"""
 
     value = value.strip()
     obj = models.WriterInWork(capacity=value)
@@ -41,7 +39,7 @@ def capacity(value):
 
 @register.filter(name='agreement_type')
 def agreement_type(value):
-    """Display agreement_type"""
+    """Display publishing agreement type"""
 
     value = value.strip()
     return {
@@ -52,7 +50,7 @@ def agreement_type(value):
 
 @register.filter(name='status')
 def status(value):
-    """Transaction Status"""
+    """Display acknowledgement status"""
 
     value = value.strip()
     obj = models.WorkAcknowledgement(status=value)
@@ -61,7 +59,7 @@ def status(value):
 
 @register.filter(name='flag')
 def flag(value):
-    """Transaction Status"""
+    """Display flag value"""
 
     value = value.strip()
     return {
@@ -73,7 +71,7 @@ def flag(value):
 
 @register.filter(name='orimod')
 def orimod(value):
-    """Transaction Status"""
+    """Display original or modification"""
 
     value = value.strip()
     return {
@@ -84,7 +82,7 @@ def orimod(value):
 
 @register.filter(name='terr')
 def terr(value):
-    """Territory name"""
+    """Display territory"""
 
     value = value.strip()
     territory = Territory.get(value)
@@ -93,7 +91,7 @@ def terr(value):
 
 @register.filter(name='ie')
 def ie(value):
-    """Included / Excluded"""
+    """Display Included / Excluded"""
 
     value = value.strip()
     if value == 'E':
@@ -103,7 +101,7 @@ def ie(value):
 
 @register.filter(name='role')
 def role(value):
-    """Publisher role"""
+    """Display publisher role/capacity"""
 
     return {
         'E ': 'Original Publisher',
