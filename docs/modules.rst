@@ -62,6 +62,13 @@ music\_publisher.cwr_templates
     :members:
     :show-inheritance:
 
+music\_publisher.templatetags
+-------------------------------------
+
+.. automodule:: music_publisher.templatetags
+    :members:
+    :show-inheritance:
+
 music\_publisher.admin
 -----------------------------
 
