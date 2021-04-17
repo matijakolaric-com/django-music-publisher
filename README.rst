@@ -3,14 +3,14 @@ Django-Music-Publisher
 
 YOU ARE ON DEVELOPMENT BRANCH FOR 21.7
 
-.. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=21.7
+.. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master
     :target: https://github.com/matijakolaric-com/django-music-publisher/actions/workflows/build.yml
     :alt: Build Status
-.. image:: https://img.shields.io/readthedocs/django-music-publisher/21.7?logo=read-the-docs   
-    :target: https://django-music-publisher.readthedocs.io/en/21.7/
+.. image:: https://img.shields.io/readthedocs/django-music-publisher?logo=read-the-docs   
+    :target: https://django-music-publisher.readthedocs.io/
     :alt: Documentation Status
-.. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/21.7?logo=coveralls&branch=21.7
-    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=21.7
+.. image:: https://img.shields.io/coveralls/github/matijakolaric-com/django-music-publisher/master?logo=coveralls&branch=master
+    :target: https://coveralls.io/github/matijakolaric-com/django-music-publisher?branch=master
     :alt: Coverage Status
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg?logo=github
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
