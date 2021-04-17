@@ -28,7 +28,7 @@ class NotesBase(models.Model):
     """Abstract class for all classes that have notes.
 
     Attributes:
-        notes (django.db.models.Textfield): Notes, no use
+        notes (django.db.models.Textfield): Notes, free internal text field
     """
 
     class Meta:
@@ -295,8 +295,8 @@ class ReleaseBase(models.Model):
         cd_identifier (django.db.models.CharField): CD Identifier, used when \
         origin is library
         library (django.db.models.CharField): Library Name
-        ean (django.db.models.CharField): EAN code
         release_date (django.db.models.DateField): Date of the release
+        ean (django.db.models.CharField): EAN code
         release_label (django.db.models.CharField): Label Name
         release_title (django.db.models.CharField): Title of the release
     """
