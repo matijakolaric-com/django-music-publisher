@@ -1,7 +1,5 @@
 """Filters used in generation of CWR files.
 
-Their goal is to format the incoming data to the right fixed-length
-format, as well as do some basic validation.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
@@ -74,43 +72,43 @@ def calculate_value(value, share):
 
 @register.filter(name='prw')
 def prw(value):
-    """Writer share, PR"""
+    """Calculate writer share, performance"""
     return calculate_value(value, PRW_SHARE)
 
 
 @register.filter(name='prp')
 def prp(value):
-    """Publisher share, PR"""
+    """Calculate publisher share, performance"""
     return calculate_value(value, PRP_SHARE)
 
 
 @register.filter(name='mrw')
 def mrw(value):
-    """Writer share, MR"""
+    """Calculate writer share, mechanical"""
     return calculate_value(value, MRW_SHARE)
 
 
 @register.filter(name='mrp')
 def mrp(value):
-    """Publisher share, MR"""
+    """Calculate publisher share, mechanical"""
     return calculate_value(value, MRP_SHARE)
 
 
 @register.filter(name='srw')
 def srw(value):
-    """Writer share, SR"""
+    """Calculate writer share, sync"""
     return calculate_value(value, SRW_SHARE)
 
 
 @register.filter(name='srp')
 def srp(value):
-    """Publisher share, SR"""
+    """Calculate publisher share, sync"""
     return calculate_value(value, SRP_SHARE)
 
 
 @register.filter(name='cwrshare')
 def cwrshare(value):
-    """Get CWR-compatible output for the Share field."""
+    """Get CWR-compatible output for share fields"""
     value = (value * Decimal('10000')).quantize(
         Decimal('1.'), rounding=ROUND_HALF_UP)
     value = int(value)
