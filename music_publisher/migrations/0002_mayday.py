@@ -4,6 +4,17 @@ import django.core.validators
 from django.db import migrations, models
 import django.db.migrations.operations.special
 import music_publisher.validators
+from django.conf import settings
+
+
+def persist_recording_ids(apps, schema_editor):
+    Work = apps.get_model('music_publisher', 'Work')
+    qs = Work.objects.filter(_work_id__isnull=True)
+    qs = qs.prefetch_related('recordings')
+    for work in qs:
+        for rec in work.recordings.all():
+            rec._recording_id = '{}{:06}R'.format(
+                settings.PUBLISHER_CODE, rec.id)
 
 
 # Functions from the following migrations need manual copying.
@@ -91,7 +102,7 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, editable=False, max_length=14, null=True, unique=True, validators=[music_publisher.validators.CWRFieldValidator('name')], verbose_name='Recording ID'),
         ),
         migrations.RunPython(
-            code=music_publisher.migrations.0006_recording__recording_id.persist_recording_ids,
+            code=persist_recording_ids,
             reverse_code=django.db.migrations.operations.special.RunPython.noop,
         ),
         migrations.AlterField(
