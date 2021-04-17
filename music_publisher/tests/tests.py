@@ -1026,8 +1026,11 @@ class AdminTest(TestCase):
         data.update({'acknowledgement_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            music_publisher.models.ACKImport.objects.first().report, '')
+        self.assertIn(
+            'A different ISWC exists for work MK000001: THE MODIFIED WORK '
+            '(SMITH): T3221234234 (old) vs T1234567893 (new).',
+            music_publisher.models.ACKImport.objects.first().report
+        )
 
         """This file has also ISWC codes."""
         mock = StringIO()
@@ -1044,7 +1047,7 @@ class AdminTest(TestCase):
         # At this point, there is a different ISWC in one of the works
         response = self.client.post(url, data, follow=False)
         messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages), 2)
+        self.assertEqual(len(messages), 3)
         self.assertIn(
             'Conflicting ISWCs found for work',
             str(messages[0]),
@@ -1112,7 +1115,10 @@ class AdminTest(TestCase):
         url = base_url + '?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
-        url = base_url + '?in_cwr=N&ack_status=RA&has_iswc=N&has_rec=N'
+        url = base_url + '?in_cwr=N&ack_society=21&ack_status=RA&has_iswc=N&has_rec=N'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = base_url + '?ack_status=RA&has_iswc=N&has_rec=N'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -1363,6 +1369,20 @@ class AdminTest(TestCase):
         self.assertTrue(hasattr(response, 'streaming_content'))
         # The file must be processed in under 10 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
+
+        # TEST BAD
+        with open(TEST_CWR2_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mockfile = InMemoryUploadedFile(
+            mock, 'statement_file', 'statement.csv',
+            'text', 0, None)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'in_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+
 
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
@@ -1912,9 +1932,9 @@ ACK0000000300000000201805160910510000100000003NWRTHREE                          
 ACK0000000400000000201805160910510000100000004NWRX                                                           DMP000025                               20180607NP
 GRT000010000005000000007
 GRHISW0000202.100020180607
-ISW0000000000000000MUSIC PUB CARTOONS                                            DMP000001                00000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-ISW0000000100000000MUSIC PUB CARTOONS                                            DMP000001     T123456789500000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-ISW0000000200000000MUSIC PUB CARTOONS                                            DMP000001     T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000000000000MUSIC PUB CARTOONS                                            MK000001      T322123423400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000100000000MUSIC PUB CARTOONS                                            MK000001      T123456789300000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000200000000MUSIC PUB CARTOONS                                            XX000001      T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
 GRT000020000003000000003
 TRL000010000008000000014"""
 
