@@ -35,6 +35,8 @@ from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
     Writer, WriterInWork, WorkAcknowledgement)
+from django.conf import settings
+
 
 def get_data_from_response(response):
     """Helper for extracting data from HTTP response in a way that can be
@@ -77,11 +79,15 @@ class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
     @classmethod
+    @override_settings()
     def setUpClass(cls):
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
             'superuser', '', 'password')
         cls.obj = Artist.objects.create(last_name='Artist One')
+        del settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+        del settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+        del settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
     def test_case_change(self):
         self.assertEqual(self.obj.last_name, 'ARTIST ONE')
@@ -96,12 +102,12 @@ class DataImportTest(TestCase):
 
         """This does nothing, as user is unknown."""
         di = data_import.DataImporter([], user=None)
-        di.log(data_import.ADDITION, None, 'no message')
+        di.log(None, 'no message')
         self.assertEqual(LogEntry.objects.count(), 0)
 
         """This logs."""
         di = data_import.DataImporter([], user=self.superuser)
-        di.log(data_import.ADDITION, self.obj, 'test message')
+        di.log(self.obj, 'test message')
         self.assertEqual(LogEntry.objects.count(), 1)
         le = LogEntry.objects.first()
         self.assertEqual(str(le), 'Added “ARTIST ONE”.')
@@ -134,30 +140,21 @@ class DataImportTest(TestCase):
             'a', ['writer', '2', 'controlled'], 0)
         self.assertEqual(value, False)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'alt_work_title_1': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "alt_work_title_1".')
+        self.assertNotIn('Alt Work Title 1', di.unknown_keys)
+        di.unflatten({'Work Title': 'X', 'Alt Work Title 1': 'Y'})
+        self.assertIn('Alt Work Title 1', di.unknown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "alt_title".')
+        di.unflatten({'work_title': 'X', 'alt_title': 'Y'})
+        self.assertIn('alt_title', di.unknown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "artist_1".')
+        di.unflatten({'work_title': 'X', 'artist_1': 'Y'})
+        self.assertIn('artist_1', di.unknown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "artist_1_name".')
+        di.unflatten({'work_title': 'X', 'artist_1_name': 'Y'})
+        self.assertIn('artist_1_name', di.unknown_keys)
 
-        with self.assertRaises(AttributeError) as ve:
-            di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
-        self.assertEqual(
-            str(ve.exception), 'Unknown column: "wtf_1".')
+        di.unflatten({'work_title': 'X', 'wtf_1': 'Y'})
+        self.assertIn('wtf_1', di.unknown_keys)
 
         # mismatching general agreement numbers
         with self.assertRaises(ValueError) as ve:
@@ -238,89 +235,6 @@ class DataImportTest(TestCase):
             ('Library and CD Identifier fields must both be either '
                 'present or empty.'))
 
-
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    PUBLISHER_NAME='TEST PUBLISHER',
-    PUBLISHER_CODE='MK',
-    PUBLISHER_IPI_NAME='0000000199',
-    PUBLISHER_SOCIETY_PR='52',
-    PUBLISHER_SOCIETY_MR='44',
-    PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
-    ENABLE_NOTES=False)
-class AdminTestNoNotes(TestCase):
-
-    fixtures = ['publishing_staff.json']
-
-    @classmethod
-    def setUpClass(cls):
-        """Class setup.
-
-        Creating staff user.
-        """
-        super().setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            'superuser', '', 'password')
-
-    def test_no_notes(self):
-        self.client.force_login(self.superuser)
-        url = reverse(
-            'admin:music_publisher_writer_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_artist_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_label_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-
-
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    PUBLISHER_NAME='TEST PUBLISHER',
-    PUBLISHER_CODE='MK',
-    PUBLISHER_IPI_NAME='0000000199',
-    PUBLISHER_SOCIETY_PR='52',
-    PUBLISHER_SOCIETY_MR='44',
-    PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
-    ENABLE_NOTES=True)
-class AdminTestWithNotes(TestCase):
-
-    fixtures = ['publishing_staff.json']
-
-    @classmethod
-    def setUpClass(cls):
-        """Class setup.
-
-        Creating staff user.
-        """
-        super().setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            'superuser', '', 'password')
-
-    def test_with_notes(self):
-        self.client.force_login(self.superuser)
-        url = reverse(
-            'admin:music_publisher_writer_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_artist_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            'admin:music_publisher_label_add')
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-
-
 @override_settings(
     SECURE_SSL_REDIRECT=False,
     PUBLISHER_NAME='TEST PUBLISHER',
@@ -333,8 +247,7 @@ class AdminTestWithNotes(TestCase):
     REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
-    ENABLE_NOTES=True)
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests.
 
@@ -496,6 +409,17 @@ class AdminTest(TestCase):
         isr.create_cwr()
 
     @classmethod
+    def create_work_acknowledgements(cls):
+        """Create work acknowledgements. """
+        WorkAcknowledgement(
+            work_id=cls.original_work.id,
+            society_code='319',
+            date=datetime.now(),
+            remote_work_id='123456',
+            status='AC'
+        ).save()
+
+    @classmethod
     def setUpClass(cls):
         """Class setup.
 
@@ -535,6 +459,7 @@ class AdminTest(TestCase):
         cls.create_copublished_work()
         cls.create_cwr2_export()
         cls.create_cwr3_export()
+        cls.create_work_acknowledgements()
 
     def test_strings(self):
         """Test __str__ methods for created objects."""
@@ -776,6 +701,14 @@ class AdminTest(TestCase):
             'LIBRARY RELEASE')
         with self.assertRaises(CommercialRelease.DoesNotExist):
             CommercialRelease.objects.get(pk=2)
+
+    def test_template_download(self):
+        self.client.force_login(self.audituser)
+        url = reverse('admin:music_publisher_dataimport_add')
+        url += '?download_template=1'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Recording 2 ISRC', response.content)
 
     def test_audit_user(self):
         """Test that audit user can see, but not change things."""
@@ -1055,7 +988,7 @@ class AdminTest(TestCase):
         """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CX180001000_FOO.V22',
+            mock, 'acknowledgement_file', 'CX180001000_FOO.V23',
             'text', 0, None)
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
@@ -1426,7 +1359,7 @@ class AdminTest(TestCase):
             mock.write(csvfile.read())
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'dataimport.csv',
+            mock, 'dataimport_file', 'dataimport.csv',
             'text', 0, None)
         url = reverse('admin:music_publisher_dataimport_add')
         response = self.client.get(url)
@@ -1434,7 +1367,7 @@ class AdminTest(TestCase):
         data.update({'data_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Unknown column', response.content)
+        self.assertIn(b'errornote', response.content)
 
     def test_recording_filters(self):
         """Test Work changelist filters."""
@@ -1890,6 +1823,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.filename, 'CW210001DMP_000.V21')
         self.assertEqual(
             cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
         self.assertEqual(
@@ -1901,6 +1835,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.filename, 'CW210002DMP_0000_V3-0-0.SUB')
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
@@ -1916,6 +1851,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.filename, 'CW210003DMP_0000_V3-0-0.ISR')
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
@@ -1934,18 +1870,21 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.filename, 'CW210004DMP_000.V22')
 
        # test CWR 2.2 REV
         cwr = music_publisher.models.CWRExport(nwr_rev='RE2')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.filename, 'CW210005DMP_000.V22')
 
        # test CWR 3.1 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev='WR1')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
+        self.assertEqual(cwr.filename, 'CW210006DMP_0000_V3-1-0.SUB')
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607

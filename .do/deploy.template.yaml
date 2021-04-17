@@ -1,0 +1,22 @@
+spec:
+  name: django-music-publisher
+  services:
+  - name: app
+    instance_size_slug: basic-xxs
+    git:
+      branch: "21.7"
+      repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
+    envs:
+    - key: DJANGO_SUPERUSER_USERNAME
+      scope: RUN_TIME
+      value: administrator
+    - key: DJANGO_SUPERUSER_PASSWORD
+      scope: RUN_TIME
+      value: ""
+      type: SECRET
+    - key: DATABASE_URL
+      scope: RUN_TIME
+      value: ${example-db.DATABASE_URL}
+  databases:
+  - name: example-db
+    engine: PG

@@ -15,6 +15,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.template import Context
+from django.utils.duration import duration_string
 
 from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
@@ -23,15 +24,14 @@ from .base import (
 from .cwr_templates import (
     TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
 from .validators import CWRFieldValidator
-
-
-SOCIETY_DICT = OrderedDict(settings.SOCIETIES)
+from .societies import SOCIETIES, SOCIETY_DICT
 
 WORLD_DICT = {
     'tis-a': '2WL',
     'tis-n': '2136',
     'name': 'World'
 }
+
 
 
 class Artist(ArtistBase):
@@ -496,9 +496,13 @@ class Work(TitleBase):
 
     @staticmethod
     def persist_work_ids(qs):
+        qs = qs.prefetch_related('recordings')
         for work in qs.filter(_work_id__isnull=True):
             work.work_id = work.work_id
             work.save()
+            for rec in work.recordings.all():
+                if rec._recording_id is None:
+                    rec.recording_id = rec.recording_id
 
     _work_id = models.CharField(
         'Work ID', max_length=14, blank=True, null=True, unique=True,
@@ -511,7 +515,7 @@ class Work(TitleBase):
         verbose_name='Title of original work',
         max_length=60, db_index=True, blank=True,
         help_text='Use only for modification of existing works.',
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
     library_release = models.ForeignKey(
         'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
         related_name='works',
@@ -961,14 +965,18 @@ class Recording(models.Model):
         verbose_name_plural = 'Recordings'
         ordering = ('-id',)
 
+    _recording_id = models.CharField(
+        'Recording ID', max_length=14, blank=True, null=True, unique=True,
+        editable=False,
+        validators=(CWRFieldValidator('name'),))
     recording_title = models.CharField(
         blank=True, max_length=60,
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
     recording_title_suffix = models.BooleanField(
         default=False, help_text='A suffix to the WORK title.')
     version_title = models.CharField(
         blank=True, max_length=60,
-        validators=(CWRFieldValidator('work_title'),))
+        validators=(CWRFieldValidator('title'),))
     version_title_suffix = models.BooleanField(
         default=False, help_text='A suffix to the RECORDING title.')
     release_date = models.DateField(blank=True, null=True)
@@ -1031,10 +1039,9 @@ class Recording(models.Model):
                 self.version_title).strip()
         return self.version_title
 
-    def __str__(self):
-        """Return the most precise type of title"""
-        return (
-            self.complete_version_title if self.version_title else
+    @property
+    def title(self):
+        return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
             self.work.title)
 
@@ -1045,9 +1052,26 @@ class Recording(models.Model):
         Returns:
             str: Internal Recording ID
         """
+        if self._recording_id:
+            return self._recording_id
         if self.id is None:
             return ''
         return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
+
+    @recording_id.setter
+    def recording_id(self, value):
+        assert self._recording_id is None  # this should not be called if set
+        if value:
+            self._recording_id = value
+
+    def __str__(self):
+        """Return the most precise type of title"""
+        if self.artist:
+            return '{}: {} ({})'.format(
+                self.recording_id, self.title, self.artist)
+        else:
+            return '{}: {}'.format(
+                self.recording_id, self.title)
 
     def get_dict(self, with_releases=False, with_work=True):
         """Create a data structure that can be serialized as JSON.
@@ -1073,8 +1097,7 @@ class Recording(models.Model):
                 self.release_date.strftime('%Y%m%d') if self.release_date
                 else None,
             'duration':
-                str(self.duration).replace(':', '') if self.duration
-                else None,
+                duration_string(self.duration) if self.duration else None,
             'isrc':
                 self.isrc,
             'recording_artist':
@@ -1119,6 +1142,13 @@ class Track(models.Model):
         }
 
 
+class DeferCwrManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.defer('cwr')
+        return qs
+
+
 class CWRExport(models.Model):
     """Export in CWR format.
 
@@ -1143,6 +1173,8 @@ class CWRExport(models.Model):
         verbose_name_plural = 'CWR Exports'
         ordering = ('-id',)
 
+    objects = DeferCwrManager()
+
     nwr_rev = models.CharField(
         'CWR version/type', max_length=3, db_index=True, default='NWR',
         choices=(
@@ -1160,6 +1192,8 @@ class CWRExport(models.Model):
     num_in_year = models.PositiveSmallIntegerField(default=0)
     works = models.ManyToManyField(Work, related_name='cwr_exports')
     description = models.CharField('Internal Note', blank=True, max_length=60)
+
+    publisher_code = None
 
     @property
     def version(self):
@@ -1203,7 +1237,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
             self.year,
             self.num_in_year,
-            settings.PUBLISHER_CODE,
+            self.publisher_code or settings.PUBLISHER_CODE,
             minor_version,
             ext)
 
@@ -1217,7 +1251,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_000.V{}'.format(
             self.year,
             self.num_in_year,
-            settings.PUBLISHER_CODE,
+            self.publisher_code or settings.PUBLISHER_CODE,
             self.version)
 
     def __str__(self):
@@ -1244,7 +1278,7 @@ class CWRExport(models.Model):
                 tdict = TEMPLATES_21
             if (
                     key == 'HDR' and
-                    len(settings.PUBLISHER_IPI_NAME.lstrip('0')) > 9
+                    len(record['ipi_name_number'].lstrip('0')) > 9
             ):
                 # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
                 template = tdict.get('HDR_8')
@@ -1301,7 +1335,7 @@ class CWRExport(models.Model):
 
             self.transaction_count += 1
 
-    def yield_publisher_lines(self, controlled_relative_share):
+    def yield_publisher_lines(self, publisher, controlled_relative_share):
         """Yield SPU/SPT lines.
 
         Args:
@@ -1311,8 +1345,26 @@ class CWRExport(models.Model):
         Yields:
               str: CWR record (row/line)
         """
+        affiliations = publisher.get('affiliations', [])
+        for aff in affiliations:
+            if aff['affiliation_type']['code'] == 'PR':
+                publisher['pr_society'] = aff['organization']['code']
+            elif aff['affiliation_type']['code'] == 'MR':
+                publisher['mr_society'] = aff['organization']['code']
+            elif aff['affiliation_type']['code'] == 'SR':
+                publisher['sr_society'] = aff['organization']['code']
         yield self.get_transaction_record(
-            'SPU', {'share': controlled_relative_share})
+            'SPU', {
+                'chain_sequence': 1,
+                'name': publisher.get('name'),
+                'code': publisher.get('code'),
+                'ipi_name_number': publisher.get('ipi_name_number'),
+                'ipi_base_number': publisher.get('ipi_base_number'),
+                'pr_society': publisher.get('pr_society'),
+                'mr_society': publisher.get('mr_society'),
+                'sr_society': publisher.get('sr_society'),
+                'share': controlled_relative_share
+            })
         if controlled_relative_share:
             yield self.get_transaction_record(
                 'SPT', {'share': controlled_relative_share})
@@ -1385,7 +1437,9 @@ class CWRExport(models.Model):
                 copublished_writer_ids.add(key)
                 other_publisher_share += share
                 controlled_shares[key] += share
-        yield from self.yield_publisher_lines(controlled_relative_share)
+        publisher = work['writers'][0]['original_publishers'][0]['publisher']
+        yield from self.yield_publisher_lines(
+            publisher, controlled_relative_share)
         # OPU, co-publishing only
         if other_publisher_share:
             yield self.get_transaction_record(
@@ -1519,6 +1573,8 @@ class CWRExport(models.Model):
                 ).strip()[:60]
             if rec['isrc']:
                 rec['isrc_validity'] = 'Y'
+            if rec['duration']:
+                rec['duration'] = rec['duration'].replace(':', '')[0:6]
             if self.version in ['21', '22'] and not any([
                 rec['release_date'],
                 rec['duration'],
@@ -1538,7 +1594,16 @@ class CWRExport(models.Model):
         for xrf in work['cross_references']:
             yield self.get_transaction_record('XRF', xrf)
 
-    def yield_lines(self):
+    def get_header(self):
+        return self.get_record('HDR', {
+            'creation_date': datetime.now(),
+            'filename': self.filename,
+            'ipi_name_number': settings.PUBLISHER_IPI_NAME,
+            'name': settings.PUBLISHER_NAME,
+            'code': settings.PUBLISHER_CODE,
+        })
+
+    def yield_lines(self, works):
         """Yield CWR transaction records (rows/lines) for works
 
         Args:
@@ -1547,22 +1612,14 @@ class CWRExport(models.Model):
         Yields:
             str: CWR record (row/line)
         """
-        qs = self.works.order_by('id', )
-        works = Work.objects.get_dict(qs)['works']
 
         self.record_count = self.record_sequence = self.transaction_count = 0
 
-        yield self.get_record('HDR', {
-            'creation_date': datetime.now(),
-            'filename': self.filename,
-            'publisher_ipi_name': settings.PUBLISHER_IPI_NAME,
-            'publisher_name': settings.PUBLISHER_NAME,
-            'publisher_code': settings.PUBLISHER_CODE,
-        })
+        yield self.get_header()
 
         if self.nwr_rev == 'NW2':
             yield self.get_record('GRH', {'transaction_type': 'NWR'})
-        elif self.nwr_rev == 'RE2':    
+        elif self.nwr_rev == 'RE2':
             yield self.get_record('GRH', {'transaction_type': 'REV'})
         else:
             yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
@@ -1584,9 +1641,12 @@ class CWRExport(models.Model):
             'record_count': self.record_count + 4
         })
 
-    def create_cwr(self):
+    def create_cwr(self, publisher_code=None):
         """Create CWR and save.
         """
+        if publisher_code is None:
+            publisher_code = settings.PUBLISHER_CODE
+        self.publisher_code = publisher_code
         if self.cwr:
             return
         self.year = datetime.now().strftime('%y')
@@ -1596,7 +1656,9 @@ class CWRExport(models.Model):
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
-        self.cwr = ''.join(self.yield_lines())
+        qs = self.works.order_by('id', )
+        works = Work.objects.get_dict(qs)['works']
+        self.cwr = ''.join(self.yield_lines(works))
         self.save()
         Work.persist_work_ids(self.works)
 
@@ -1635,7 +1697,7 @@ class WorkAcknowledgement(models.Model):
 
     work = models.ForeignKey(Work, on_delete=models.PROTECT)
     society_code = models.CharField(
-        'Society', max_length=3, choices=settings.SOCIETIES)
+        'Society', max_length=3, choices=SOCIETIES)
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(
@@ -1676,6 +1738,8 @@ class ACKImport(models.Model):
     class Meta:
         verbose_name = 'CWR ACK Import'
         ordering = ('-date', '-id')
+
+    objects = DeferCwrManager()
 
     filename = models.CharField(max_length=60, editable=False)
     society_code = models.CharField(max_length=3, editable=False)
@@ -1731,8 +1795,8 @@ def change_case(sender, instance, **kwargs):
             value = getattr(instance, field.name)
             if (isinstance(value, str) and
                     field.editable and
-                    field.choices is None and
-                    'description' not in field.name and
-                    '_id' not in field.name):
+                    field.choices is None and (
+                        'name' in field.name or
+                        'title' in field.name)):
                 value = force_case(value)
                 setattr(instance, field.name, value)

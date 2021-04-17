@@ -11,17 +11,16 @@ import re
 from collections import defaultdict, OrderedDict
 from decimal import Decimal
 
-from django.conf import settings
-from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
-from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms import inlineformset_factory
 from django.utils.text import slugify
 
-from .admin import WriterInWorkFormSet
+from .societies import SOCIETIES
 from .models import (
     Work, Artist, ArtistInWork, Writer, WriterInWork,
-    Library, LibraryRelease, Recording)
+    Library, LibraryRelease, Recording, WorkAcknowledgement)
+from .forms import WriterInWorkFormSet
 
 
 class DataImporter(object):
@@ -34,18 +33,34 @@ class DataImporter(object):
     ARTIST_FIELDS = [
         'last', 'first', 'isni']
     WRITER_FIELDS = [
-        'last', 'first', 'ipi', 'pro', 'role', 'share', 'manuscript_share',
-        'pr_share', 'mr_share', 'sr_share', 'controlled', 'saan']
+        'last', 'first', 'ipi', 'pro', 'mro', 'sro', 'role',
+        'share', 'manuscript_share', 'pr_share', 'mr_share', 'sr_share',
+        'controlled', 'saan',
+        'publisher_name', 'publisher_ipi', 'publisher_pro', 'publisher_mro',
+        'publisher_sro', 'publisher_pr_share', 'publisher_mr_share',
+        'publisher_sr_share']
+    RECORDING_FIELDS = [
+        'id', 'recording_title', 'version_title', 'release_date', 'duration',
+        'isrc', 'artist_last', 'artist_first', 'artist_isni', 'record_label']
+    REFERENCE_FIELDS = ['id', 'cmo']
 
     def __init__(self, filelike, user=None):
         self.user = user
         self.user_id = self.user.id if self.user else None
         self.reader = csv.DictReader(filelike)
+        self.report = ''
+        self.unknown_keys = set()
 
-    def log(self, action_flag, obj, message):
+    def log(self, obj, message, change=False):
         """Helper function for logging history."""
         if not self.user_id:
             return
+        from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
+        from django.contrib.admin.options import get_content_type_for_model
+        if change:
+            action_flag = CHANGE
+        else:
+            action_flag = ADDITION
         LogEntry.objects.log_action(
             self.user_id, get_content_type_for_model(obj).id, obj.id, str(obj),
             action_flag, message)
@@ -80,7 +95,7 @@ class DataImporter(object):
                 value.ljust(2), WriterInWork.ROLES, 'writer role')
             value = value.ljust(2)
         elif key_elements[2] == 'pro':
-            value = self.get_clean_key(value, settings.SOCIETIES, 'society')
+            value = self.get_clean_key(value, SOCIETIES, 'society')
         elif key_elements[2] in ['share', 'manuscript_share']:
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])
@@ -107,6 +122,7 @@ class DataImporter(object):
             'writers': defaultdict(OrderedDict),
             'artists': defaultdict(OrderedDict),
             'recordings': defaultdict(OrderedDict),
+            'references': defaultdict(OrderedDict),
         }
         for key, value in in_dict.items():
             if isinstance(value, str):
@@ -120,10 +136,15 @@ class DataImporter(object):
             elif prefix == 'alt':
                 key_elements = clean_key.rsplit('_', 1)
                 if len(key_elements) < 2 or key_elements[0] != 'alt_title':
-                    raise AttributeError('Unknown column: "{}".'.format(key))
+                    self.unknown_keys.add(key)
+                    continue
                 out_dict['alt_titles'].append(value)
             elif prefix == 'writer':
                 key_elements = clean_key.split('_', 2)
+                if (len(key_elements) < 3 or
+                        key_elements[2] not in self.WRITER_FIELDS):
+                    self.unknown_keys.add(key)
+                    continue
                 value, general_agreement = self.process_writer_value(
                     key, key_elements, value)
                 if general_agreement:
@@ -134,14 +155,27 @@ class DataImporter(object):
                 key_elements = clean_key.split('_', 2)
                 if (len(key_elements) < 3 or
                         key_elements[2] not in self.ARTIST_FIELDS):
-                    raise AttributeError('Unknown column: "{}".'.format(key))
+                    self.unknown_keys.add(key)
+                    continue
                 out_dict['artists'][key_elements[1]][key_elements[2]] = value
             elif prefix == 'recording':
                 key_elements = clean_key.split('_', 2)
-                if (len(key_elements) == 3 and key_elements[2] == 'isrc'):
-                    out_dict['recordings'][key_elements[1]] = value
+                if (len(key_elements) < 3 or
+                        key_elements[2] not in self.RECORDING_FIELDS):
+                    self.unknown_keys.add(key)
+                    continue
+                out_dict['recordings'][key_elements[1]][key_elements[2]] = \
+                    value
+            elif prefix == 'reference':
+                key_elements = clean_key.split('_', 2)
+                if (len(key_elements) < 3 or
+                        key_elements[2] not in self.REFERENCE_FIELDS):
+                    self.unknown_keys.add(key)
+                    continue
+                out_dict['references'][key_elements[1]][key_elements[2]] = \
+                    value
             else:
-                raise AttributeError('Unknown column: "{}".'.format(key))
+                self.unknown_keys.add(key)
         return out_dict
 
     def get_writers(self, writer_dict):
@@ -181,7 +215,8 @@ class DataImporter(object):
                     writer.generally_controlled = True
                     writer.save()
                     self.log(
-                        CHANGE, writer, 'General agreement set during import.')
+                        writer, 'General agreement set during import.',
+                        change=True)
 
                 # Writer must be exactly same, except if marked "generally
                 # controlled" in the database, and not in the file
@@ -200,8 +235,7 @@ class DataImporter(object):
                 writer = lookup_writer
                 try:
                     writer.save()
-                    self.log(
-                        ADDITION, writer, 'Added during import.')
+                    self.log(writer, 'Added during import.')
                 except IntegrityError:
                     raise ValueError(
                         'A writer with this IPI or general SAAN already '
@@ -226,9 +260,16 @@ class DataImporter(object):
             ).first()
             if not artist:
                 artist = lookup_artist
-                artist.save()
-                self.log(
-                    ADDITION, artist, 'Added during import.')
+                try:
+                    artist.save()
+                    self.log(artist, 'Added during import.')
+                except IntegrityError:
+                    raise ValueError(
+                        'An artist with this ISNI already '
+                        'exists in the database, but is not exactly the same '
+                        'as one provided in the importing data: {}'.format(
+                            artist
+                        ))
             yield artist
 
     def get_library_release(self, library_name, cd_identifier):
@@ -239,8 +280,7 @@ class DataImporter(object):
         if not library:
             library = lookup_library
             library.save()
-            self.log(
-                ADDITION, library, 'Added during import.')
+            self.log(library, 'Added during import.')
         lookup_library_release = LibraryRelease(
             library_id=library.id,
             cd_identifier=cd_identifier)
@@ -251,11 +291,12 @@ class DataImporter(object):
         if not library_release:
             library_release = lookup_library_release
             library_release.save()
-            self.log(
-                ADDITION, library_release, 'Added during import.')
+            self.log(library_release, 'Added during import.')
         return library_release
 
     def process_row(self, row):
+        if not any(row.values()):
+            return
         row_dict = self.unflatten(row)
         writers = self.get_writers(row_dict['writers'])
         artists = self.get_artists(row_dict['artists'])
@@ -278,28 +319,37 @@ class DataImporter(object):
             library_release=library_release)
         work.clean_fields()
         work.clean()
-        work.save()
-        self.log(
-            ADDITION, work, 'Added during import.')
+        try:
+            work.save()
+        except IntegrityError:
+            raise ValidationError(
+                f'Work "{ work.title }", ' +
+                (f'ID "{ work.work_id }", ' if work.work_id else '') +
+                (f'ISWC "{ work.iswc }", ' if work.iswc else '') +
+                'clashes with an existing work. '
+                'Data imports can only be used for adding new works.')
+        self.log(work, 'Added during import.')
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
-        for isrc in row_dict['recordings'].values():
-            recording = Recording(work=work, isrc=isrc)
-            recording.clean_fields()
-            recording.clean()
-            recording.save()
-            self.log(
-                ADDITION, recording, 'Added during import.')
+        # for isrc in row_dict['recordings'].values():
+        #     recording = Recording(work=work, isrc=isrc)
+        #     recording.clean_fields()
+        #     recording.clean()
+        #     recording.save()
+        #     self.log(recording, 'Added during import.')
         wiws = []
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
             saan = w_dict.get('saan')
             if writer and saan == writer.saan:
                 saan = None
+            share = w_dict.get('manuscript_share') or w_dict.get('share')
+            if not share:
+                share = (w_dict.get('pr_share', 0) +
+                    w_dict.get('publisher_pr_share', 0))
             wiw = WriterInWork(
                 writer=writer, work=work,
-                relative_share=(
-                    w_dict.get('manuscript_share') or w_dict.get('share')),
+                relative_share=share,
                 capacity=w_dict.get('role'),
                 controlled=w_dict.get('controlled'),
                 saan=saan)
@@ -331,6 +381,5 @@ class DataImporter(object):
 
     def run(self):
         """Run the import as atomic."""
-        with transaction.atomic():
-            for row in self.reader:
-                yield from self.process_row(row)
+        for row in self.reader:
+            yield from self.process_row(row)

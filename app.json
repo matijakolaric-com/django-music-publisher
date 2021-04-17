@@ -1,5 +1,5 @@
 {
-  "name": "DMP - Metadata management for original music publishers",
+  "name": "Django-Music-Publisher - Music Catalogue Software",
   "description": "When you fill out the following form and submit, the software will be installed and deployed from the repository. By doing so, you accept the license from: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE",
   "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
   "logo": "https://avatars2.githubusercontent.com/u/57564555",
@@ -52,10 +52,6 @@
     },
     "REQUIRE_SAAN": {
       "description": "Enter '1' to make Society-Assigned Agreement Number a required field.\nRequired in some societies, e.g. PRS/MCPS, BUMA/STEMRA, GEMA.",
-      "required": false
-    },
-    "REQUIRE_PUBLISHER_FEE": {
-      "description": "Enter '1' to make Publisher Fee a required field. If unsure, leave it empty.",
       "required": false
     },
     "PUBLISHING_AGREEMENT_PUBLISHER_PR": {
