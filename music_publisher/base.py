@@ -15,10 +15,10 @@ from .societies import SOCIETIES
 class NotesManager(models.Manager):
     """Manager for objects inheriting from :class:`NotesBase`.
 
-    Defers :attr:`.models.NotesBase.notes` field.
+    Defers :attr:`NotesBase.notes` field.
     """
     def get_queryset(self):
-        """Defer :attr:`.models.NotesBase.notes` field."""
+        """Defer :attr:`NotesBase.notes` field."""
         qs = super().get_queryset()
         qs = qs.defer('notes')
         return qs
@@ -28,7 +28,7 @@ class NotesBase(models.Model):
     """Abstract class for all classes that have notes.
 
     Attributes:
-        notes (django.db.models.Textfield): Notes, free internal text field
+        notes (django.db.models.TextField): Notes, free internal text field
     """
 
     class Meta:
