@@ -7,8 +7,8 @@ ACK0000000300000000201805160910510000100000003NWRTHREE                          
 ACK0000000400000000201805160910510000100000004NWRX                                                           DMP000025                               20180607NP
 GRT000010000005000000007
 GRHISW0000202.100020180607
-ISW0000000000000000MUSIC PUB CARTOONS                                            DMP000001                00000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-ISW0000000100000000MUSIC PUB CARTOONS                                            DMP000001     T123456789500000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-ISW0000000200000000MUSIC PUB CARTOONS                                            DMP000001     T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000000000000MUSIC PUB CARTOONS                                            MK000001      T322123423400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000100000000MUSIC PUB CARTOONS                                            MK000001      T123456789300000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000200000000MUSIC PUB CARTOONS                                            MK000001      T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
 GRT000020000003000000003
 TRL000010000008000000014

@@ -9,7 +9,7 @@ from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
-SOFTWARE_VERSION = '21.1 VICTOR (OPEN SOURCE)'
+SOFTWARE_VERSION = '21.7 MADELEINE (OPEN SOURCE)'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -67,6 +67,8 @@ DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3')))}
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.'
@@ -109,15 +111,6 @@ TIME_INPUT_FORMATS = [
     '%M:%S',        # '14:30'
 ]
 
-path = os.path.join(BASE_DIR, 'music_publisher', 'societies.csv')
-
-with open(path, 'r') as f:
-    reader = csv.reader(f)
-    SOCIETIES = sorted(
-        ((str(row[0]), '{} ({})'.format(row[1], row[2]))
-         for row in reader),
-        key=lambda row: row[1])
-
 LOGIN_URL = '/login/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
@@ -150,9 +143,7 @@ PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
 
 # Shares transferred to the original publisher, default to 50%/100%/100%
 PUBLISHING_AGREEMENT_PUBLISHER_PR = Decimal(
-    os.getenv(
-        'PUBLISHING_AGREEMENT_PUBLISHER_PR',
-        os.getenv('PUBLISHER_AGREEMENT_PR', '0.5')))
+    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_PR', '0.5'))
 PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
     os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_MR', '1.0'))
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
@@ -165,5 +156,9 @@ REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
 # Set to True if you have a standard publishing agreement with writers
 REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 
-ENABLE_NOTES = os.getenv('ENABLE_NOTES', False)
+# Set to one of the following options to change names and titles
+# * 'upper' - changes all names and titles to UPPER CASE
+# * 'title' - Changes all names to Title Case
+# * 'smart' - Changes all UPPER CASE names and titles to Title Case
+# Anything else makes no changes to names and titles
 FORCE_CASE = os.getenv('FORCE_CASE')

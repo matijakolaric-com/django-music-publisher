@@ -1,6 +1,7 @@
 include README.rst
 include LICENSE
 include music_publisher/templates/raw_cwr.html
+include music_publisher/templates/admin/add_data_import.html
 include music_publisher/templates/music_publisher/royalty_calculation.html
 include music_publisher/societies.csv
 include music_publisher/tests/CW200001DMP_000.V21

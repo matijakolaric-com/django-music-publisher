@@ -10,6 +10,8 @@ import re
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.deconstruct import deconstructible
+from .societies import SOCIETIES
+from decimal import Decimal
 
 
 TITLES_CHARS = re.escape(
@@ -160,7 +162,7 @@ class CWRFieldValidator:
                 raise ValidationError(
                     'Value does not match I-NNNNNNNNN-C format.')
             check_iswc_digit(value, weight=2)
-        elif name == 'name':
+        else:
             if not re.match(RE_NAME, value.upper()):
                 raise ValidationError('Name contains invalid characters.')
 
@@ -195,7 +197,7 @@ def validate_settings():
         except ValidationError as e:
             raise ImproperlyConfigured('PUBLISHER_IPI_NAME: ' + str(e))
 
-    keys = [s[0] for s in settings.SOCIETIES]
+    keys = [s[0] for s in SOCIETIES]
     for t in ['PR', 'MR', 'SR']:
         attr = getattr(settings, 'PUBLISHER_SOCIETY_' + t)
         if attr and attr not in keys:
@@ -204,14 +206,20 @@ def validate_settings():
                     t, attr
                 ))
 
-    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
-        raise ImproperlyConfigured(
-            'PUBLISHING_AGREEMENT_PUBLISHER_PR: Must be between 0.0 and 0.5')
+    if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
+        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
+            raise ImproperlyConfigured(
+                'PUBLISHING_AGREEMENT_PUBLISHER_PR: '
+                'Must be between 0.0 and 0.5')
 
-    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
-        raise ImproperlyConfigured(
-            'PUBLISHING_AGREEMENT_PUBLISHER_MR: Must be between 0.0 and 1.0')
+    if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR'):
+        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
+            raise ImproperlyConfigured(
+                'PUBLISHING_AGREEMENT_PUBLISHER_MR: '
+                'Must be between 0.0 and 1.0')
 
-    if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
-        raise ImproperlyConfigured(
-            'PUBLISHING_AGREEMENT_PUBLISHER_SR: Must be between 0.0 and 1.0')
+    if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
+        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
+            raise ImproperlyConfigured(
+                'PUBLISHING_AGREEMENT_PUBLISHER_SR: '
+                'Must be between 0.0 and 1.0')

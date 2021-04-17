@@ -6,7 +6,7 @@ All views are here, except for :mod:`.royalty_calculation`.
 """
 import re
 import zipfile
-from csv import DictWriter
+from csv import DictWriter, writer
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -30,6 +30,8 @@ from .models import (
     SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
     DataImport,
 )
+from .forms import DataImportForm, WriterInWorkFormSet
+
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
@@ -45,6 +47,7 @@ class ArtistInWorkInline(admin.TabularInline):
     autocomplete_fields = ('artist', 'work')
     model = ArtistInWork
     extra = 0
+    ordering = ('artist__last_name', 'artist__first_name')
     verbose_name_plural = \
         'Artists performing Works (not mentioned in "recordings" section)'
 
@@ -75,7 +78,7 @@ class RecordingInline(admin.StackedInline):
     verbose_name_plural = \
         'Recordings (with recording artists and record labels)'
     model = Recording
-    ordering = ('recording_title', 'version_title')
+    ordering = ('recording_title', 'version_title', 'id')
     extra = 0
 
 
@@ -84,20 +87,16 @@ class ArtistAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Artist`.
     """
 
+    ordering = ('last_name', 'first_name', 'isni', '-id')
+
     list_display = (
         'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
     search_fields = ('last_name', 'isni',)
-    if settings.ENABLE_NOTES:
-        fieldsets = (
-            ('Name', {'fields': (('first_name', 'last_name'),)}),
-            ('ISNI', {'fields': ('isni',), }),
-            ('Notes', {'fields': ('notes',), }),
-        )
-    else:
-        fieldsets = (
-            ('Name', {'fields': (('first_name', 'last_name'),)}),
-            ('ISNI', {'fields': ('isni',), }),
-        )
+    fieldsets = (
+        ('Name', {'fields': (('first_name', 'last_name'),)}),
+        ('ISNI', {'fields': ('isni',), }),
+        ('Notes', {'fields': ('notes',), }),
+    )
 
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
@@ -166,15 +165,12 @@ class LabelAdmin(MusicPublisherAdmin):
     readonly_fields = (
         'recording_count', 'commercialrelease_count', 'libraryrelease_count')
 
-    if settings.ENABLE_NOTES:
-        fieldsets = (
-            ('Name', {'fields': ('name',)}),
-            ('Notes', {'fields': ('notes',), }),
-        )
-    else:
-        fieldsets = (
-            ('Name', {'fields': ('name',)}),
-        )
+    fieldsets = (
+        ('Name', {'fields': ('name',)}),
+        ('Notes', {'fields': ('notes',), }),
+    )
+
+    ordering = ('name', '-id')
 
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
@@ -246,6 +242,7 @@ class LibraryAdmin(MusicPublisherAdmin):
     """
     actions = None
     search_fields = ('name',)
+    ordering = ('name', '-id')
 
     list_display = ('name', 'libraryrelease_count', 'work_count')
     readonly_fields = ('libraryrelease_count', 'work_count')
@@ -302,6 +299,7 @@ class TrackInline(admin.TabularInline):
     :class:`LibraryReleaseAdmin` and :class:`CommercialReleaseAdmin`.
     """
     model = Track
+    ordering = ('release', 'cut_number',)
     autocomplete_fields = ('release', 'recording')
     extra = 0
 
@@ -311,6 +309,7 @@ class ReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Release`.
     """
 
+    ordering = ('release_title', 'cd_identifier', '-id')
     actions = None
     list_display = (
         '__str__',
@@ -351,6 +350,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.LibraryRelease`.
     """
 
+    ordering = ('release_title', 'cd_identifier', '-id')
     form = LibraryReleaseForm
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
@@ -463,6 +463,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.CommercialRelease`.
     """
 
+    ordering = ('release_title', 'cd_identifier', '-id')
     inlines = [TrackInline]
     autocomplete_fields = ('release_label',)
 
@@ -513,7 +514,8 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     track_count.admin_order_field = 'tracks__count'
 
     def create_json(self, request, qs):
-        """Batch action that downloads a JSON file containing comercial releases.
+        """Batch action that downloads a JSON file containing commercial
+        releases.
 
         Returns:
             JsonResponse: JSON file with selected commercial releases
@@ -546,6 +548,7 @@ class WriterAdmin(MusicPublisherAdmin):
     """Interface for :class:`.models.Writer`.
     """
 
+    ordering = ('last_name', 'first_name', 'ipi_name', '-id')
     list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
                     '_can_be_controlled', 'generally_controlled',
                     'work_count')
@@ -559,7 +562,7 @@ class WriterAdmin(MusicPublisherAdmin):
 
         Depending on settings, MR and PR affiliations may not be needed.
         See :meth:`WriterAdmin.get_society_list`"""
-        fieldsets = [
+        return [
             ('Name', {
                 'fields': (
                     ('first_name', 'last_name'),)
@@ -578,14 +581,10 @@ class WriterAdmin(MusicPublisherAdmin):
                      ('saan', 'publisher_fee'))
                 ),
             }),
+            ('Notes', {
+                'fields': ('notes',),
+            }),
         ]
-        if settings.ENABLE_NOTES:
-            fieldsets.append(
-                ('Notes', {
-                    'fields': ('notes',),
-                }),
-            )
-        return fieldsets
 
     actions = None
 
@@ -648,6 +647,7 @@ class AlternateTitleFormSet(BaseInlineFormSet):
         Raises:
             ValidationError
         """
+        super().clean()
         work_title_len = len(self.instance.title)
         for form in self.forms:
             if not form.is_valid():
@@ -673,100 +673,12 @@ class AlternateTitleInline(admin.TabularInline):
     verbose_name_plural = \
         'Alternative titles (not mentioned in "recordings" section)'
     fields = ('title', 'suffix', 'complete_alt_title')
+    ordering = ('suffix', 'title',)
 
     def complete_alt_title(self, obj):
         """Return the complete title, see
         :meth:`.models.AlternateTitle.__str__`"""
         return str(obj)
-
-
-class WriterInWorkFormSet(BaseInlineFormSet):
-    """Formset for :class:`WriterInWorkInline`.
-    """
-
-    orig_cap = ['C ', 'A ', 'CA']
-
-    def clean(self):
-        """Performs these checks:
-            at least one writer must be controlled,
-            at least one writer music be Composer or Composer&Lyricist
-            sum of relative shares must be ~100%
-
-        Returns:
-            None
-
-        Raises:
-            ValidationError
-        """
-        is_modification = self.instance.is_modification()
-        super().clean()
-        total = 0
-        controlled = False
-        has_composer = False
-        writers = []
-        needs_extended_capacity = is_modification
-        for form in self.forms:
-            if not form.is_valid():
-                return
-            if form.cleaned_data and not form.cleaned_data.get('DELETE'):
-                writer = form.cleaned_data['writer']
-                writers.append(writer)
-                total += form.cleaned_data['relative_share']
-                if form.cleaned_data['controlled']:
-                    controlled = True
-                if form.cleaned_data['capacity'] in ['C ', 'CA']:
-                    has_composer = True
-                if (not is_modification and form.cleaned_data['capacity'] and
-                        form.cleaned_data['capacity'] not in self.orig_cap):
-                    form.add_error(
-                        'capacity',
-                        'Not allowed in original works.')
-                if (is_modification and form.cleaned_data['capacity'] and
-                        form.cleaned_data['capacity'] not in self.orig_cap):
-                    needs_extended_capacity = False
-        if needs_extended_capacity:
-            for form in self.forms:
-                form.add_error(
-                    'capacity',
-                    'At least one must be Arranger, Adaptor or Translator.')
-            raise ValidationError(
-                'In a modified work, '
-                'at least one writer must be Arranger, Adaptor or Translator.')
-        if not controlled:
-            for form in self.forms:
-                form.add_error(
-                    'controlled', 'At least one writer must be controlled.')
-            raise ValidationError('At least one writer must be controlled.')
-        if not has_composer:
-            for form in self.forms:
-                form.add_error(
-                    'capacity',
-                    'At least one writer must be Composer or '
-                    'Composer&Lyricist.')
-            raise ValidationError(
-                'At least one writer must be Composer or Composer&Lyricist.')
-        if not (Decimal(99.98) <= total <= Decimal(100.02)):
-            for form in self.forms:
-                form.add_error(
-                    'relative_share', 'Sum of manuscript shares must be 100%.')
-            raise ValidationError('Sum of manuscript shares must be 100%.')
-        if is_modification:
-            writer_capacities = {}
-            for form in self.forms:
-                cd = form.cleaned_data
-                if cd['controlled']:
-                    writer_capacities[cd['writer'].id] = cd['capacity']
-            for form in self.forms:
-                cd = form.cleaned_data
-                if cd['writer'] and not cd['controlled']:
-                    controlled_capacity = writer_capacities.get(
-                        cd['writer'].id)
-                    if (controlled_capacity and
-                            cd['capacity'] != controlled_capacity):
-                        form.add_error(
-                            'capacity',
-                            'Must be same as in controlled line for this '
-                            'writer.')
 
 
 class WriterInWorkInline(admin.TabularInline):
@@ -781,6 +693,8 @@ class WriterInWorkInline(admin.TabularInline):
     fields = (
         'writer', 'capacity', 'relative_share', 'controlled', 'saan',
         'publisher_fee')
+    ordering = (
+            '-controlled', 'writer__last_name', 'writer__first_name', '-id')
 
 
 class WorkAcknowledgementInline(admin.TabularInline):
@@ -793,6 +707,7 @@ class WorkAcknowledgementInline(admin.TabularInline):
     model = WorkAcknowledgement
     extra = 0
     fields = ('date', 'society_code', 'remote_work_id', 'status')
+    ordering = ('-date', '-id')
 
 
 class WorkForm(forms.ModelForm):
@@ -837,6 +752,7 @@ class WorkAdmin(MusicPublisherAdmin):
             :class:`WorkAcknowledgementInline`,
     """
 
+    ordering = ('-id',)
     form = WorkForm
 
     inlines = (
@@ -963,8 +879,9 @@ class WorkAdmin(MusicPublisherAdmin):
             """Filter on society sending ACKs.
             """
             if self.value():
-                return queryset.filter(
+                queryset = queryset.filter(
                     workacknowledgement__society_code=self.value()).distinct()
+                queryset.society_code = self.value()
             return queryset
 
     class ACKStatusListFilter(admin.SimpleListFilter):
@@ -983,8 +900,14 @@ class WorkAdmin(MusicPublisherAdmin):
             """Filter on ACK status.
             """
             if self.value():
-                return queryset.filter(
-                    workacknowledgement__status=self.value()).distinct()
+                if hasattr(queryset, 'society_code'):
+                    queryset = queryset.filter(
+                        workacknowledgement__status=self.value(),
+                        workacknowledgement__society_code=queryset.society_code
+                    ).distinct()
+                else:
+                    queryset = queryset.filter(
+                        workacknowledgement__status=self.value()).distinct()
             return queryset
 
     class HasISWCListFilter(admin.SimpleListFilter):
@@ -1111,8 +1034,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """
 
         Work.persist_work_ids(qs)
-        j = Work.objects.get_dict(qs)
 
+        j = Work.objects.get_dict(qs)
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}-works-{}'.format(
             settings.PUBLISHER_CODE, datetime.now().toordinal())
@@ -1123,43 +1046,77 @@ class WorkAdmin(MusicPublisherAdmin):
     create_json.short_description = \
         'Export selected works (JSON).'
 
-    def get_labels_for_csv(self, works):
+    def get_labels_for_csv(self, works, repeating_column_nr=0, simple=False):
         """Return the list of labels for the CSV file."""
         labels = [
             'Work ID',
             'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
         ]
-        alt_title_max = 1
-        writer_max = 1
-        artist_max = 1
+        alt_title_max = repeating_column_nr
+        writer_max = repeating_column_nr
+        writer_with_publisher_max = repeating_column_nr
+        artist_max = repeating_column_nr
+        xrf_max = repeating_column_nr
+        recording_max = repeating_column_nr
         for work in works:
             alt_title_max = max(alt_title_max, len(work.get('other_titles')))
             writer_max = max(writer_max, len(work.get('writers')))
+            ops = 0
+            for w in work.get('writers'):
+                if w.get('original_publishers'):
+                    ops += 1
+            writer_with_publisher_max = max(writer_with_publisher_max, ops)
+            recording_max = max(recording_max, len(work.get('recordings')))
             artist_max = max(artist_max, len(work.get('performing_artists')))
+            xrf_max = max(xrf_max, len(work.get('cross_references')))
         for i in range(alt_title_max):
-            labels.append('Alt Title {}'.format(i))
+            labels.append('Alt Title {}'.format(i + 1))
         for i in range(writer_max):
-            labels.append('Writer {} Last'.format(i))
-            labels.append('Writer {} First'.format(i))
-            labels.append('Writer {} IPI'.format(i))
-            labels.append('Writer {} PRO'.format(i))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                labels.append('Writer {} MRO'.format(i))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                labels.append('Writer {} SRO'.format(i))
-            labels.append('Writer {} Role'.format(i))
-            labels.append('Writer {} Manuscript Share'.format(i))
-            labels.append('Writer {} PR Share'.format(i))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                labels.append('Writer {} MR Share'.format(i))
-            if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                labels.append('Writer {} SR Share'.format(i))
-            labels.append('Writer {} Controlled'.format(i))
-            labels.append('Writer {} SAAN'.format(i))
+            labels.append('Writer {} Last'.format(i + 1))
+            labels.append('Writer {} First'.format(i + 1))
+            labels.append('Writer {} IPI'.format(i + 1))
+            labels.append('Writer {} PRO'.format(i + 1))
+            if not simple:
+                labels.append('Writer {} MRO'.format(i + 1))
+                labels.append('Writer {} SRO'.format(i + 1))
+            labels.append('Writer {} Role'.format(i + 1))
+            labels.append('Writer {} Manuscript Share'.format(i + 1))
+            if not simple:
+                labels.append('Writer {} PR Share'.format(i + 1))
+                labels.append('Writer {} MR Share'.format(i + 1))
+                labels.append('Writer {} SR Share'.format(i + 1))
+            labels.append('Writer {} Controlled'.format(i + 1))
+            if not simple and i < writer_with_publisher_max:
+                labels.append('Writer {} SAAN'.format(i + 1))
+                labels.append('Writer {} Publisher Name'.format(i + 1))
+                labels.append('Writer {} Publisher IPI'.format(i + 1))
+                labels.append('Writer {} Publisher PRO'.format(i + 1))
+                labels.append('Writer {} Publisher MRO'.format(i + 1))
+                labels.append('Writer {} Publisher SRO'.format(i + 1))
+                labels.append('Writer {} Publisher PR Share'.format(i + 1))
+                labels.append('Writer {} Publisher MR Share'.format(i + 1))
+                labels.append('Writer {} Publisher SR Share'.format(i + 1))
+        for i in range(recording_max):
+            if not simple:
+                labels.append('Recording {} ID'.format(i + 1))
+                labels.append('Recording {} Recording Title'.format(i + 1))
+                labels.append('Recording {} Version Title'.format(i + 1))
+            labels.append('Recording {} Release Date'.format(i + 1))
+            labels.append('Recording {} Duration'.format(i + 1))
+            labels.append('Recording {} ISRC'.format(i + 1))
+            if not simple:
+                labels.append('Recording {} Artist Last'.format(i + 1))
+                labels.append('Recording {} Artist First'.format(i + 1))
+                labels.append('Recording {} Artist ISNI'.format(i + 1))
+                labels.append('Recording {} Record Label'.format(i + 1))
         for i in range(artist_max):
-            labels.append('Artist {} Last'.format(i))
-            labels.append('Artist {} First'.format(i))
-            labels.append('Artist {} ISNI'.format(i))
+            labels.append('Artist {} Last'.format(i + 1))
+            labels.append('Artist {} First'.format(i + 1))
+            labels.append('Artist {} ISNI'.format(i + 1))
+        if not simple:
+            for i in range(xrf_max):
+                labels.append('Reference {} CMO'.format(i + 1))
+                labels.append('Reference {} ID'.format(i + 1))
         return labels
 
     def get_rows_for_csv(self, works):
@@ -1169,6 +1126,10 @@ class WorkAdmin(MusicPublisherAdmin):
             """Class with write() method just echoing values."""
             def write(self, value):
                 return value
+
+        PR = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+        MR = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+        SR = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
         pseudo_buffer = EchoWriter()
         labels = self.get_labels_for_csv(works)
@@ -1190,46 +1151,113 @@ class WorkAdmin(MusicPublisherAdmin):
                 row['Library'] = origin['library']['name']
                 row['CD Identifier'] = origin['cd_identifier']
             for i, alt in enumerate(work['other_titles']):
-                row['Alt Title {}'.format(i)] = alt['title']
+                row['Alt Title {}'.format(i + 1)] = alt['title']
             for i, wiw in enumerate(work['writers']):
                 w = wiw.get('writer') or {}
-                row['Writer {} Last'.format(i)] = w.get('last_name', '')
-                row['Writer {} First'.format(i)] = w.get('first_name', '')
-                row['Writer {} IPI'.format(i)] = w.get('ipi_name_number', '')
+                row['Writer {} Last'.format(i + 1)] = w.get('last_name', '')
+                row['Writer {} First'.format(i + 1)] = w.get('first_name', '')
+                row['Writer {} IPI'.format(i + 1)] = w.get(
+                    'ipi_name_number', '')
                 role = wiw.get('writer_role', {})
                 if role:
-                    row['Writer {} Role'.format(i)] = '{} - {}'.format(
+                    row['Writer {} Role'.format(i + 1)] = '{} - {}'.format(
                         role['code'], role['name'])
-                row['Writer {} Manuscript Share'.format(i)] = wiw.get('relative_share')
-                row['Writer {} PR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_PR)
-                if settings.PUBLISHING_AGREEMENT_PUBLISHER_MR != Decimal(1):
-                    row['Writer {} MR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_MR)
-                if settings.PUBLISHING_AGREEMENT_PUBLISHER_SR != Decimal(1):
-                    row['Writer {} SR Share'.format(i)] = Decimal(wiw.get('relative_share')) * (1 - settings.PUBLISHING_AGREEMENT_PUBLISHER_SR)
                 for aff in w.get('affiliations', []):
                     code = aff['affiliation_type']['code']
                     cmo = aff['organization']
-                    row['Writer {} {}O'.format(i, code)] = '{} - {}'.format(
-                        cmo['code'], cmo['name'])
+                    row['Writer {} {}O'.format(i + 1, code)] = \
+                        '{} - {}'.format(cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
+
+                row['Writer {} Manuscript Share'.format(i + 1)] = Decimal(
+                    wiw.get('relative_share', '0')
+                ).quantize(Decimal('0.0001'))
                 if ops:
                     op = ops[0]
                     agreement = op.get('agreement')
                     saan = agreement.get('recipient_agreement_number', '')
-                    row['Writer {} SAAN'.format(i)] = saan
+                    row['Writer {} SAAN'.format(i + 1)] = saan
                     agreement_type = agreement['agreement_type']['code']
                     if agreement_type == 'OG':
                         controlled = 'General Agreement'
                     else:
                         controlled = 'Yes'
+                    row['Writer {} Publisher Name'.format(
+                        i + 1)] = op['publisher']['name']
+                    row['Writer {} Publisher IPI'.format(
+                        i + 1)] = op['publisher']['ipi_name_number']
+                    for aff in op['publisher'].get('affiliations', []):
+                        row['Writer {} Publisher {}O'.format(
+                            i + 1,
+                            aff['affiliation_type']['code']
+                        )] = '{} - {}'.format(
+                            aff['organization']['code'],
+                            aff['organization']['name'])
+                    row['Writer {} PR Share'.format(i + 1)] = (
+                        Decimal( wiw.get('relative_share')) * (1 - PR)
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} Publisher PR Share'.format(i + 1)] = (
+                        Decimal(wiw.get('relative_share')) * PR
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} MR Share'.format(i + 1)] = (
+                        Decimal(wiw.get('relative_share')) * (1 - MR)
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} Publisher MR Share'.format(i + 1)] = (
+                            Decimal(wiw.get('relative_share')) * MR
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} SR Share'.format(i + 1)] = (
+                        Decimal(wiw.get('relative_share')) * (1 - SR)
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} Publisher SR Share'.format(i + 1)] = (
+                        Decimal(wiw.get('relative_share')) * SR
+                    ).quantize(Decimal('0.0001'))
                 else:
                     controlled = 'No'
-                row['Writer {} Controlled'.format(i)] = controlled
+                    row['Writer {} PR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share', '0')
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} MR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share', '0')
+                    ).quantize(Decimal('0.0001'))
+                    row['Writer {} SR Share'.format(i + 1)] = Decimal(
+                        wiw.get('relative_share', '0')
+                    ).quantize(Decimal('0.0001'))
+                row['Writer {} Controlled'.format(i + 1)] = controlled
+            for i, rec in enumerate(work['recordings']):
+                row['Recording {} ID'.format(i + 1)] = rec['code']
+                row['Recording {} Recording Title'.format(i + 1)] = \
+                    rec['recording_title']
+                row['Recording {} Version Title'.format(i + 1)] = \
+                    rec['version_title']
+                row['Recording {} Release Date'.format(i + 1)] = \
+                    rec['release_date']
+                row['Recording {} Duration'.format(i + 1)] = rec['duration']
+                row['Recording {} ISRC'.format(i + 1)] = rec['isrc']
+                row['Recording {} Record Label'.format(i + 1)] = \
+                    (rec['record_label'] or {}).get('name')
+                artist = rec.get('recording_artist') or {}
+                row['Recording {} Artist Last'.format(i + 1)] = \
+                    artist.get('last_name', '')
+                row['Recording {} Artist Last'.format(i + 1)] = \
+                    artist.get('last_name', '')
+                row['Recording {} Artist First'.format(i + 1)] = \
+                    artist.get('first_name', '')
+                row['Recording {} Artist ISNI'.format(i + 1)] = \
+                    artist.get('isni', '')
             for i, aiw in enumerate(work['performing_artists']):
                 artist = aiw.get('artist')
-                row['Artist {} Last'.format(i)] = artist.get('last_name', '')
-                row['Artist {} First'.format(i)] = artist.get('first_name', '')
-                row['Artist {} ISNI'.format(i)] = artist.get('isni', '')
+                row['Artist {} Last'.format(i + 1)] = \
+                    artist.get('last_name', '')
+                row['Artist {} First'.format(i + 1)] = \
+                    artist.get('first_name', '')
+                row['Artist {} ISNI'.format(i + 1)] = \
+                    artist.get('isni', '')
+            for i, xrf in enumerate(work['cross_references']):
+                code = xrf['organization']['code']
+                name = xrf['organization']['name']
+                row['Reference {} CMO'.format(i + 1)] = '{} - {}'.format(
+                    code, name)
+                row['Reference {} ID'.format(i + 1)] = xrf['identifier']
             yield writer.writerow(row)
 
     def create_csv(self, request, qs):
@@ -1284,6 +1312,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     list_display = (
         'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
         'label_link')
+    ordering = ('-id',)
 
     class HasISRCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISRC.
@@ -1313,11 +1342,13 @@ class RecordingAdmin(MusicPublisherAdmin):
         'work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
+        'recording_id',
         'complete_recording_title', 'complete_version_title', 'title',
         'work_link', 'artist_link', 'label_link')
     fieldsets = (
         (None, {
             'fields': (
+                'recording_id',
                 'work',
                 (
                     'recording_title', 'recording_title_suffix',
@@ -1343,10 +1374,17 @@ class RecordingAdmin(MusicPublisherAdmin):
         qs = qs.prefetch_related('record_label')
         return qs
 
+    def recording_id(self, obj):
+        """Return :attr:`.models.Recording.recording_id`, make it sortable."""
+        return obj.recording_id
+
+    recording_id.short_description = 'Recording ID'
+    recording_id.admin_order_field = 'id'
+
     def title(self, obj):
         """Return the recording title, which is not the necessarily the
         title field."""
-        return str(obj)
+        return obj.title
 
     def work_link(self, obj):
         """Link to the work the recording is based on."""
@@ -1388,6 +1426,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     """
 
     actions = None
+    ordering = ('-id',)
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
@@ -1430,7 +1469,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Optimized query with count of works in the export.
         """
         qs = super().get_queryset(request)
-        qs = qs.annotate(models.Count('works'))
+        qs = qs.annotate(models.Count('works', distinct=True))
         return qs
 
     def date(self, obj):
@@ -1588,7 +1627,8 @@ class ACKImportForm(ModelForm):
         cd = self.cleaned_data
         ack = cd.get('acknowledgement_file')
         filename = ack.name
-        if not (len(filename) in [18, 19] and filename[-4:].upper() == '.V21'):
+        if not (len(filename) in [18, 19] and
+                filename[-4:].upper() in ['.V21', '.V22']):
             raise ValidationError('Wrong file name format.')
         self.cleaned_data['filename'] = filename
         content = ack.file.read().decode('latin1')
@@ -1611,6 +1651,7 @@ class AdminWithReport(admin.ModelAdmin):
         """Mark report as HTML-safe."""
         return mark_safe(obj.report)
     print_report.short_description = 'Report'
+    ordering = ('-id',)
 
 
 @admin.register(ACKImport)
@@ -1689,7 +1730,7 @@ class ACKImportAdmin(AdminWithReport):
                 if work.iswc:
                     if work.iswc != iswc:
                         report +=(
-                            'A different ISWC exists for work' +
+                            'A different ISWC exists for work ' +
                             '{}: {} (old) vs {} (new).<br/>\n'.format(
                                 work, work.iswc, iswc) +
                             'Old ISWC kept, please investigate.<br/>\n')
@@ -1731,9 +1772,18 @@ class ACKImportAdmin(AdminWithReport):
                 if import_iswcs and iswc:
                     if work.iswc:
                         if work.iswc != iswc:
-                            raise ValidationError(
-                                'A different ISWC exists for work {}: {} vs {}.'
-                                ''.format(work, work.iswc, iswc))
+                            report += (
+                                    'A different ISWC exists for work ' +
+                                    '{}: {} (old) vs {} (new).<br/>\n'.format(
+                                        work, work.iswc, iswc) +
+                                    'Old ISWC kept, please '
+                                    'investigate.<br/>\n')
+                            self.message_user(
+                                request,
+                                'Conflicting ISWCs found for work {}!'.format(
+                                    work),
+                                level=messages.ERROR
+                            )
                     else:
                         work.iswc = iswc
                         work.last_change = now()
@@ -1741,7 +1791,7 @@ class ACKImportAdmin(AdminWithReport):
                             request.user.id,
                             admin.options.get_content_type_for_model(work).id,
                             work.id, str(work), CHANGE,
-                            'ISWC imported from ACK file.')
+                            'ISWC imported from ISW file.')
                         work.save()
         if unknown_work_ids:
             messages.add_message(
@@ -1808,7 +1858,11 @@ class ACKImportAdmin(AdminWithReport):
 
         Parameters:
             preview: that returns the preview of CWR file."""
-        obj = get_object_or_404(ACKImport, pk=object_id)
+        try:
+            obj = get_object_or_404(ACKImport, pk=int(object_id))
+        except ValueError:
+            return super().change_view(
+                request, object_id, form_url='', extra_context=extra_context)
         if 'preview' in request.GET:
             cwr = self.get_preview(obj)
             if (cwr[59:64] == '01.10'):
@@ -1834,47 +1888,6 @@ class ACKImportAdmin(AdminWithReport):
             request, object_id, form_url='', extra_context=extra_context)
 
 
-class DataImportForm(ModelForm):
-    """Form used for data imports.
-
-    Attributes:
-        data_file (FileField): Field for file upload
-    """
-
-    class Meta:
-        model = ACKImport
-        fields = ('data_file',)
-
-    data_file = FileField()
-
-    def clean(self):
-        """
-        This is the actual import process, if all goes well,
-        the report is saved.
-
-        Raises:
-            ValidationError
-        """
-        super().clean()
-
-        from .data_import import DataImporter
-        from io import TextIOWrapper
-
-        cd = self.cleaned_data
-        f = cd.get('data_file')
-        report = ''
-        try:
-            importer = DataImporter(TextIOWrapper(f), self.user)
-            for work in importer.run():
-                url = reverse(
-                    'admin:music_publisher_work_change', args=(work.id,))
-                report += '<a href="{}">{}</a> {}<br/>\n'.format(
-                    url, work.work_id, work.title)
-        except Exception as e:  # user garbage, too many possibilities
-            raise ValidationError(str(e))
-        self.cleaned_data['report'] = report
-
-
 @admin.register(DataImport)
 class DataImportAdmin(AdminWithReport):
     """Data import from CSV files.
@@ -1883,12 +1896,26 @@ class DataImportAdmin(AdminWithReport):
     :mod:`.data_import`.
     """
 
+    add_form_template = 'admin/add_data_import.html'
     form = DataImportForm
 
     list_display = ('filename', 'date')
     fields = readonly_fields = ('filename', 'date', 'print_report')
+    ordering = ('-id',)
 
-    add_fields = ('data_file',)
+    def add_view(self, request, form_url='', extra_context=None):
+        if 'download_template' in request.GET:
+            fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6)
+            response = HttpResponse(
+                ','.join(fieldnames),
+                content_type="text/csv")
+            cd = 'attachment; filename="{}.csv"'.format(
+                'DMP_data_exchange_template.csv')
+            response['Content-Disposition'] = cd
+            return response
+        return super().add_view(request, form_url, extra_context)
+
+    add_fields = ('data_file', 'ignore_unknown_columns')
 
     def get_fields(self, request, obj=None):
         """Return different fields for add vs change.
