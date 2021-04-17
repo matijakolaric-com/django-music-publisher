@@ -1186,7 +1186,10 @@ class AdminTest(TestCase):
         url = reverse('admin:music_publisher_dataimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
-        data.update({'data_file': mockfile})
+        data.update({
+            'data_file': mockfile,
+            'ignore_unknown_columns': True
+        })
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         data_import = music_publisher.models.DataImport.objects.first()
