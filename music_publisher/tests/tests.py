@@ -1094,6 +1094,10 @@ class AdminTest(TestCase):
 
         """Test the change view and the CWR preview."""
         url = reverse(
+            'admin:music_publisher_ackimport_change', args=('GARBAGE',))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        url = reverse(
             'admin:music_publisher_ackimport_change', args=(ackimport.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -1188,6 +1192,14 @@ class AdminTest(TestCase):
         data = get_data_from_response(response)
         data.update({
             'data_file': mockfile,
+        })
+        response = self.client.post(url, data, follow=False)
+
+        mock.seek(0)
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({
+            'data_file': mockfile,
             'ignore_unknown_columns': True
         })
         response = self.client.post(url, data, follow=False)
@@ -1195,6 +1207,7 @@ class AdminTest(TestCase):
         data_import = music_publisher.models.DataImport.objects.first()
         self.assertIsNotNone(data_import)
         self.assertIsNot(data_import.report, '')
+
         url = reverse('admin:music_publisher_dataimport_change',
                       args=(data_import.id,))
         response = self.client.get(url, follow=False)

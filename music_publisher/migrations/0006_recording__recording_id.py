@@ -13,6 +13,7 @@ def persist_recording_ids(apps, schema_editor):
         for rec in work.recordings.all():
             rec._recording_id = '{}{:06}R'.format(
                 settings.PUBLISHER_CODE, rec.id)
+            rec.save()
 
 
 class Migration(migrations.Migration):
