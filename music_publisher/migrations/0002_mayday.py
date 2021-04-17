@@ -25,8 +25,6 @@ def persist_recording_ids(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('music_publisher', '0002_auto_20210104_1155'), ('music_publisher', '0003_auto_20210127_1231'), ('music_publisher', '0004_auto_20210209_1517'), ('music_publisher', '0005_auto_20210301_2222'), ('music_publisher', '0006_recording__recording_id'), ('music_publisher', '0007_auto_20210416_1158')]
-
     dependencies = [
         ('music_publisher', '0001_initial'),
     ]
