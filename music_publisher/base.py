@@ -18,7 +18,7 @@ class NotesManager(models.Manager):
     Defers :attr:`.models.NotesBase.notes` field.
     """
     def get_queryset(self):
-        """Defer `:attr:`.models.NotesBase.notes` field."""
+        """Defer :attr:`.models.NotesBase.notes` field."""
         qs = super().get_queryset()
         qs = qs.defer('notes')
         return qs
