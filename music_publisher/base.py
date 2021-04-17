@@ -13,11 +13,12 @@ from .societies import SOCIETIES
 
 
 class NotesManager(models.Manager):
-    """Manager for objects inheriting from :class:NotesBase.
+    """Manager for objects inheriting from :class:`NotesBase`.
 
-    Defers ``notes`` field.
+    Defers :attr:`.models.NotesBase.notes` field.
     """
     def get_queryset(self):
+        """Defer `:attr:`.models.NotesBase.notes` field."""
         qs = super().get_queryset()
         qs = qs.defer('notes')
         return qs
