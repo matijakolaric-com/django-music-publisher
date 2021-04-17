@@ -4,7 +4,7 @@ Attributes:
     TEMPLATES_21 (dict): Record templates for CWR 2.1
     TEMPLATES_22 (dict): Record templates for CWR 2.2, based on 2.1
     TEMPLATES_30 (dict): Record templates for CWR 3.0
-    TEMPLATES_30 (dict): Record templates for CWR 3.1, based on 3.0
+    TEMPLATES_31 (dict): Record templates for CWR 3.1, based on 3.0
 """
 
 from django.template import Template
