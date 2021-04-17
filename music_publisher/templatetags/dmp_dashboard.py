@@ -1,6 +1,4 @@
-"""Filters used in DMP dashboard.
-
-"""
+"""Filters used in DMP dashboard."""
 
 from django import template
 from collections import OrderedDict

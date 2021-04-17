@@ -69,6 +69,27 @@ music\_publisher.templatetags
     :members:
     :show-inheritance:
 
+music\_publisher.templatetags.cwr_filters
+-------------------------------------
+
+.. automodule:: music_publisher.templatetags.cwr_filters
+    :members:
+    :show-inheritance:
+
+music\_publisher.templatetags.cwr_generators
+-------------------------------------
+
+.. automodule:: music_publisher.templatetags.cwr_generators
+    :members:
+    :show-inheritance:
+
+music\_publisher.templatetags.dmp_dashboard
+-------------------------------------
+
+.. automodule:: music_publisher.templatetags.dmp_dashboard
+    :members:
+    :show-inheritance:
+
 music\_publisher.admin
 -----------------------------
 
