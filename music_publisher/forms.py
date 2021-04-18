@@ -216,7 +216,6 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                             'writer.')
 
 
-
 class DataImportForm(ModelForm):
     """Form used for data imports.
 

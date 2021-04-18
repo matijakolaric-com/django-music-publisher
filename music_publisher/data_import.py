@@ -18,9 +18,10 @@ from django.utils.text import slugify
 
 from .societies import SOCIETIES
 from .models import (
-    Work, Artist, ArtistInWork, Writer, WriterInWork,
+    Work, Artist, ArtistInWork, Writer, WriterInWork, AlternateTitle,
     Library, LibraryRelease, Recording, WorkAcknowledgement)
 from .forms import WriterInWorkFormSet
+from django.utils.timezone import now
 
 
 class DataImporter(object):
@@ -32,13 +33,14 @@ class DataImporter(object):
         'library', 'cd_identifier']
     ARTIST_FIELDS = [
         'last', 'first', 'isni']
+    SHARE_FIELDS = [
+        'share', 'manuscript_share', 'pr_share', 'mr_share', 'sr_share',
+        'publisher_pr_share', 'publisher_mr_share', 'publisher_sr_share']
     WRITER_FIELDS = [
         'last', 'first', 'ipi', 'pro', 'mro', 'sro', 'role',
-        'share', 'manuscript_share', 'pr_share', 'mr_share', 'sr_share',
         'controlled', 'saan',
         'publisher_name', 'publisher_ipi', 'publisher_pro', 'publisher_mro',
-        'publisher_sro', 'publisher_pr_share', 'publisher_mr_share',
-        'publisher_sr_share']
+        'publisher_sro'] + SHARE_FIELDS
     RECORDING_FIELDS = [
         'id', 'recording_title', 'version_title', 'release_date', 'duration',
         'isrc', 'artist_last', 'artist_first', 'artist_isni', 'record_label']
@@ -68,7 +70,6 @@ class DataImporter(object):
     @staticmethod
     def get_clean_key(value, tup, name):
         """Try to match either key or value from a user input mess."""
-
         key_match = re.match(r'^([0-9]+|[A-Z]+)', value)
         if not key_match:
             raise ValueError(
@@ -96,7 +97,7 @@ class DataImporter(object):
             value = value.ljust(2)
         elif key_elements[2] == 'pro':
             value = self.get_clean_key(value, SOCIETIES, 'society')
-        elif key_elements[2] in ['share', 'manuscript_share']:
+        elif key_elements[2] in self.SHARE_FIELDS:
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])
             else:
@@ -125,6 +126,8 @@ class DataImporter(object):
             'references': defaultdict(OrderedDict),
         }
         for key, value in in_dict.items():
+            if value is None:
+                continue
             if isinstance(value, str):
                 value = value.strip()
             clean_key = slugify(key).replace('-', '_')
@@ -381,6 +384,34 @@ class DataImporter(object):
             form.full_clean()
             form.is_bound = True
         formset.clean()
+        for alt_title in row_dict['alt_titles']:
+            at = AlternateTitle(work=work, title=alt_title)
+            at.clean_fields()
+            at.clean()
+            at.save()
+        for recording in row_dict['recordings'].values():
+            recording = Recording(
+                work=work,
+                isrc=recording.get('isrc')
+            )
+            recording.clean_fields()
+            recording.clean()
+            recording.save()
+            self.log(recording, 'Added during import.')
+        for reference in row_dict['references'].values():
+            society_code = self.get_clean_key(
+                reference.get('cmo', '') or '', SOCIETIES, 'reference cmo')
+            workack = WorkAcknowledgement(
+                work=work,
+                remote_work_id=reference.get('id'),
+                society_code=society_code,
+                status='AS',
+                date=now()
+            )
+            workack.clean_fields()
+            workack.clean()
+            workack.save()
+            self.log(workack, 'Added during import.')
         yield work
 
     def run(self):
