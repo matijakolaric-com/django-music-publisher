@@ -1019,8 +1019,9 @@ class WorkAdmin(MusicPublisherAdmin):
                 labels.append('Writer {} MR Share'.format(i + 1))
                 labels.append('Writer {} SR Share'.format(i + 1))
             labels.append('Writer {} Controlled'.format(i + 1))
-            if not simple and i < writer_with_publisher_max:
+            if i < writer_with_publisher_max:
                 labels.append('Writer {} SAAN'.format(i + 1))
+            if not simple and i < writer_with_publisher_max:
                 labels.append('Writer {} Publisher Name'.format(i + 1))
                 labels.append('Writer {} Publisher IPI'.format(i + 1))
                 labels.append('Writer {} Publisher PRO'.format(i + 1))
@@ -1792,7 +1793,7 @@ class DataImportAdmin(AdminWithReport):
 
     def add_view(self, request, form_url='', extra_context=None):
         if 'download_template' in request.GET:
-            fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6)
+            fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6, simple=True)
             response = HttpResponse(
                 ','.join(fieldnames),
                 content_type="text/csv")
