@@ -179,6 +179,7 @@ class DataImporter(object):
         return out_dict
 
     def get_writers(self, writer_dict):
+        """Yield Writer objects, create if needed."""
         for value in writer_dict.values():
             # variables used more than once or too complex
             general_agreement = value.get('general_agreement', False)
@@ -246,6 +247,7 @@ class DataImporter(object):
             yield writer
 
     def get_artists(self, artist_dict):
+        """Yield Artist objects, create if needed."""
         for value in artist_dict.values():
             lookup_artist = Artist(
                 last_name=value.get('last', ''),
@@ -273,6 +275,7 @@ class DataImporter(object):
             yield artist
 
     def get_library_release(self, library_name, cd_identifier):
+        """Yield LibraryRelease objects, create if needed."""
         lookup_library = Library(name=library_name)
         lookup_library.clean_fields()
         library = Library.objects.filter(
@@ -295,6 +298,7 @@ class DataImporter(object):
         return library_release
 
     def process_row(self, row):
+        """Process one row from the incoming data."""
         if not any(row.values()):
             return
         row_dict = self.unflatten(row)
@@ -380,6 +384,6 @@ class DataImporter(object):
         yield work
 
     def run(self):
-        """Run the import as atomic."""
+        """Run the import."""
         for row in self.reader:
             yield from self.process_row(row)
