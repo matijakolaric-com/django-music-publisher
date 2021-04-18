@@ -34,6 +34,13 @@ music\_publisher.apps
     :members:
     :show-inheritance:
 
+music\_publisher.societies
+----------------------------------
+
+.. automodule:: music_publisher.societies
+    :members:
+    :show-inheritance:
+
 music\_publisher.validators
 ----------------------------------
 
@@ -89,6 +96,15 @@ music\_publisher.templatetags.dmp\_dashboard
 .. automodule:: music_publisher.templatetags.dmp_dashboard
     :members:
     :show-inheritance:
+
+
+music\_publisher.forms
+-----------------------------
+
+.. automodule:: music_publisher.forms
+    :members:
+    :show-inheritance:
+
 
 music\_publisher.admin
 -----------------------------

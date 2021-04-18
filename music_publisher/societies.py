@@ -1,3 +1,5 @@
+"""Create society tuple and dict."""
+
 import csv
 import os
 from collections import OrderedDict

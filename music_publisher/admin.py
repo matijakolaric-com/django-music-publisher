@@ -6,32 +6,32 @@ All views are here, except for :mod:`.royalty_calculation`.
 """
 import re
 import zipfile
-from csv import DictWriter, writer
+from csv import DictWriter
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import FileField, ModelForm, BooleanField
-from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
-from .validators import CWRFieldValidator
+from .forms import (
+    ACKImportForm, AlternateTitleFormSet, DataImportForm, LibraryReleaseForm,
+    WorkForm, WriterInWorkFormSet,
+)
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
-    CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
-    SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
-    DataImport,
+    CommercialRelease, DataImport, Label, Library, LibraryRelease, Recording,
+    Release, SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer,
+    WriterInWork,
 )
-from .forms import DataImportForm, WriterInWorkFormSet
-
+from .validators import CWRFieldValidator
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
@@ -334,17 +334,6 @@ class ReleaseAdmin(MusicPublisherAdmin):
         return False
 
 
-class LibraryReleaseForm(forms.ModelForm):
-    """Custom form for :class:`.models.LibraryRelease`.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Make cd_identifier and library fields required."""
-        super().__init__(*args, **kwargs)
-        self.fields['cd_identifier'].required = True
-        self.fields['library'].required = True
-
-
 @admin.register(LibraryRelease)
 class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.LibraryRelease`.
@@ -631,38 +620,6 @@ class WriterAdmin(MusicPublisherAdmin):
     work_count.admin_order_field = 'work__count'
 
 
-class AlternateTitleFormSet(BaseInlineFormSet):
-    """Formset for :class:`AlternateTitleInline`.
-    """
-
-    orig_cap = ['C ', 'A ', 'CA']
-
-    def clean(self):
-        """Performs these checks:
-            if suffix is used, then validates the total length
-
-        Returns:
-            None
-
-        Raises:
-            ValidationError
-        """
-        super().clean()
-        work_title_len = len(self.instance.title)
-        for form in self.forms:
-            if not form.is_valid():
-                return
-            if form.cleaned_data and not form.cleaned_data.get('DELETE'):
-                if not form.cleaned_data.get('suffix'):
-                    continue
-                title_suffix_len = len(form.cleaned_data['title'])
-                if work_title_len + title_suffix_len > 60 - 1:
-                    form.add_error(
-                        'title',
-                        'Too long for suffix, work title plus suffix must be '
-                        '59 characters or less.')
-
-
 class AlternateTitleInline(admin.TabularInline):
     """Inline interface for :class:`.models.AlternateTitle`.
     """
@@ -708,30 +665,6 @@ class WorkAcknowledgementInline(admin.TabularInline):
     extra = 0
     fields = ('date', 'society_code', 'remote_work_id', 'status')
     ordering = ('-date', '-id')
-
-
-class WorkForm(forms.ModelForm):
-    """Custom form for :class:`.models.Work`.
-
-    Calculate values for readonly field version_type."""
-
-    class Meta:
-        model = Work
-        fields = [
-            'title', 'iswc', 'original_title', 'library_release']
-
-    version_type = forms.NullBooleanField(
-        widget=forms.Select(
-            choices=(
-                (None, ''),
-                (True, 'Modification'),
-                (False, 'Original Work'))),
-        disabled=True,
-        required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['version_type'].initial = self.instance.is_modification()
 
 
 @admin.register(Work)
@@ -1597,52 +1530,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         """
         super().save_related(request, form, formsets, change)
         form.instance.create_cwr()
-
-
-class ACKImportForm(ModelForm):
-    """Form used for CWR acknowledgement imports.
-
-    Attributes:
-        acknowledgement_file (FileField): Field for file upload
-    """
-
-    class Meta:
-        model = ACKImport
-        fields = ('acknowledgement_file', 'import_iswcs')
-
-    acknowledgement_file = FileField()
-    import_iswcs = BooleanField(
-        label='Import ISWCs if present', required=False, initial=True)
-
-    RE_HDR_21 = re.compile(
-        r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
-
-    RE_HDR_30 = re.compile(
-        r'^HDR(?:SO|AA)(.{4})(.{45})(\d{8})\d{6}(\d{8}).{15}3\.0000')
-
-    def clean(self):
-        """Perform usual clean, then process the file, returning the content
-            field as if it was the TextField."""
-        super().clean()
-        cd = self.cleaned_data
-        ack = cd.get('acknowledgement_file')
-        filename = ack.name
-        if not (len(filename) in [18, 19] and
-                filename[-4:].upper() in ['.V21', '.V22']):
-            raise ValidationError('Wrong file name format.')
-        self.cleaned_data['filename'] = filename
-        content = ack.file.read().decode('latin1')
-        match = re.match(self.RE_HDR_21, content)
-        if not match:
-            match = re.match(self.RE_HDR_30, content)
-        if not match:
-            raise ValidationError('Incorrect CWR header')
-        code, name, date1, date2 = match.groups()
-        self.cleaned_data['society_code'] = code.strip().lstrip('0')
-        self.cleaned_data['society_name'] = name.strip()
-        self.cleaned_data['date'] = datetime.strptime(
-            max([date1, date2]), '%Y%m%d').date()
-        self.cleaned_data['acknowledgement_file'] = content
 
 
 class AdminWithReport(admin.ModelAdmin):
