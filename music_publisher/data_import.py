@@ -352,7 +352,7 @@ class DataImporter(object):
                 writer=writer, work=work,
                 relative_share=share,
                 capacity=w_dict.get('role'),
-                controlled=w_dict.get('controlled'),
+                controlled=w_dict.get('controlled', False),
                 saan=saan)
             wiw.clean_fields()
             wiw.clean()
