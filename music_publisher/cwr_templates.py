@@ -82,8 +82,8 @@ TEMPLATES_21 = {
     'PWR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
-        '{{ settings.PUBLISHER_NAME|ljust:45 }}              '
+        '{{ record_sequence|rjust:8 }}{{ publisher_code|ljust:9 }}'
+        '{{ publisher_name|ljust:45 }}              '
         '{{ saan|ljust:14 }}'
         '{{ code|ljust:9 }}\r\n{% endautoescape %}'),
     'OPU': Template(
@@ -179,8 +179,8 @@ TEMPLATES_22.update({
     'PWR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
-        '{{ settings.PUBLISHER_NAME|ljust:45 }}              '
+        '{{ record_sequence|rjust:8 }}{{ publisher_code|ljust:9 }}'
+        '{{ publisher_name|ljust:45 }}              '
         '{{ saan|ljust:14 }}'
         '{{ code|ljust:9 }}01\r\n{% endautoescape %}'),
     'ORN': Template(
@@ -276,7 +276,7 @@ TEMPLATES_30 = {
         '{% load cwr_generators %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}'
-        '{{ publisher_sequence|rjust:2 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
+        '{{ publisher_sequence|rjust:2 }}{{ publisher_code|ljust:9 }}'
         '{{ code|ljust:9 }}' + ' ' * 14 +
         '{{ publisher_pr_society|ljust:4 }}'
         '{{ saan|ljust:14 }}'
