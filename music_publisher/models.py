@@ -1386,7 +1386,12 @@ class CWRExport(models.Model):
             })
         if controlled_relative_share:
             yield self.get_transaction_record(
-                'SPT', {'share': controlled_relative_share})
+                'SPT', {
+                    'share': controlled_relative_share,
+                    'pr_society': publisher.get('pr_society'),
+                    'mr_society': publisher.get('mr_society'),
+                    'sr_society': publisher.get('sr_society'),
+                })
 
     def yield_registration_lines(self, works):
         """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
