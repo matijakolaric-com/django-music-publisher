@@ -1787,7 +1787,7 @@ class ModelsSimpleTest(TransactionTestCase):
             str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)')
 
         alt = work.alternatetitle_set.create(title='MPC Academy')
-        self.assertEqual(str(alt), 'MPC ACADEMY')
+        self.assertEqual(str(alt), 'MPC Academy')
 
         self.assertEqual(
             str(music_publisher.models.Recording().recording_id),

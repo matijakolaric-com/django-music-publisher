@@ -55,7 +55,7 @@ class TitleBase(models.Model):
         validators=(CWRFieldValidator('title'),))
 
     def __str__(self):
-        return self.title.upper()
+        return self.title
 
 
 class PersonBase(models.Model):
