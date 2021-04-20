@@ -302,7 +302,10 @@ class DataImporter(object):
 
     def process_row(self, row):
         """Process one row from the incoming data."""
-        if not any(row.values()):
+        for value in row.values():
+            if value.strip():
+                break
+        else:
             return
         row_dict = self.unflatten(row)
         writers = self.get_writers(row_dict['writers'])
@@ -351,7 +354,7 @@ class DataImporter(object):
             wiw = WriterInWork(
                 writer=writer, work=work,
                 relative_share=share,
-                capacity=w_dict.get('role'),
+                capacity=w_dict.get('role', ''),
                 controlled=w_dict.get('controlled', False),
                 saan=saan)
             wiw.clean_fields()
