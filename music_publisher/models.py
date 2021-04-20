@@ -1387,6 +1387,7 @@ class CWRExport(models.Model):
         if controlled_relative_share:
             yield self.get_transaction_record(
                 'SPT', {
+                    'code': publisher.get('code'),
                     'share': controlled_relative_share,
                     'pr_society': publisher.get('pr_society'),
                     'mr_society': publisher.get('mr_society'),

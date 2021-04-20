@@ -58,7 +58,7 @@ TEMPLATES_21 = {
     'SPT': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'SPT{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}{{ settings.PUBLISHER_CODE|ljust:9 }}'
+        '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '      {{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
         '{{ share|srp|cwrshare }}'
         'I2136N001\r\n{% endautoescape %}'),
@@ -242,7 +242,7 @@ TEMPLATES_30 = {
     'SPT': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'SPT{{ transaction_sequence|rjust:8 }}'
-        '{{ record_sequence|rjust:8 }}001{{ publisher_id|ljust:9 }}'
+        '{{ record_sequence|rjust:8 }}001{{ code|ljust:9 }}'
         '{{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
         '{{ share|srp|cwrshare }}I2136'
         '{{ pr_society|ljust:4 }}'
@@ -373,8 +373,8 @@ TEMPLATES_31 = TEMPLATES_30.copy()
 TEMPLATES_31.update({
     'HDR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
-        'HDRPB{{ publisher_code|ljust:4 }}'
-        '{{ publisher_name|ljust:45 }}' + ' ' * 11 +
+        'HDRPB{{ code|ljust:4 }}'
+        '{{ name|ljust:45 }}' + ' ' * 11 +
         '{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}' +
         ' ' * 15 + '3.1000{{ settings.SOFTWARE|ljust:30 }}'
