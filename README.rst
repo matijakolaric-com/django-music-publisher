@@ -1,8 +1,4 @@
-.. |br| raw:: html
-
-   <br>
-
-Django-Music-Publisher |br| Free music publishing software 
+Django-Music-Publisher - Free music publishing software
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master

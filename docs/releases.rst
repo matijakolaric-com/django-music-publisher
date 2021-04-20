@@ -100,8 +100,7 @@ The version focuses on improving data exchange with other solutions, most notabl
 
 * More data in CSV imports:
 
-    * option to use publisher information or ``controlled`` column for imports
-    * data about recordings, including recording ID, record labels and recording artists
+    * data about recordings: ISRC, duration, release date
     * society work IDs
 
 * Improved support for ISWC imports and duplicate handling

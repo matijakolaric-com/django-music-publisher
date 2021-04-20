@@ -338,12 +338,6 @@ class DataImporter(object):
         self.log(work, 'Added during import.')
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
-        # for isrc in row_dict['recordings'].values():
-        #     recording = Recording(work=work, isrc=isrc)
-        #     recording.clean_fields()
-        #     recording.clean()
-        #     recording.save()
-        #     self.log(recording, 'Added during import.')
         wiws = []
         for w_dict in row_dict['writers'].values():
             writer = next(writers)
@@ -358,7 +352,7 @@ class DataImporter(object):
                 writer=writer, work=work,
                 relative_share=share,
                 capacity=w_dict.get('role'),
-                controlled=w_dict.get('controlled'),
+                controlled=w_dict.get('controlled', False),
                 saan=saan)
             wiw.clean_fields()
             wiw.clean()
@@ -392,7 +386,9 @@ class DataImporter(object):
         for recording in row_dict['recordings'].values():
             recording = Recording(
                 work=work,
-                isrc=recording.get('isrc')
+                isrc=recording.get('isrc'),
+                duration=recording.get('duration'),
+                release_date=recording.get('release_date'),
             )
             recording.clean_fields()
             recording.clean()
