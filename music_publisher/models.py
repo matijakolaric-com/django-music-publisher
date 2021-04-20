@@ -1500,9 +1500,8 @@ class CWRExport(models.Model):
             if w['share']:
                 yield self.get_transaction_record('MAN', w)
             w['publisher_sequence'] = 1
-            op = wiw['original_publishers'][0]['publisher']
-            w['publisher_code'] = op['code']
-            w['publisher_name'] = op['name']
+            w['publisher_code'] = publisher['code']
+            w['publisher_name'] = publisher['name']
             yield self.get_transaction_record('PWR', w)
             if (self.version in ['30', '31'] and other_publisher_share and
                     w and w['code'] in copublished_writer_ids):
