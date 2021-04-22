@@ -1797,7 +1797,7 @@ class DataImportAdmin(AdminWithReport):
             response = HttpResponse(
                 ','.join(fieldnames),
                 content_type="text/csv")
-            cd = 'attachment; filename="{}.csv"'.format(
+            cd = 'attachment; filename="{}"'.format(
                 'DMP_data_exchange_template.csv')
             response['Content-Disposition'] = cd
             return response
