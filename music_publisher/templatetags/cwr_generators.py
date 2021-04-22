@@ -71,39 +71,39 @@ def calculate_value(value, share):
 
 
 @register.filter(name='prw')
-def prw(value):
+def prw(value, default=PRW_SHARE):
     """Calculate writer share, performance"""
-    return calculate_value(value, PRW_SHARE)
+    return calculate_value(value, default)
 
 
 @register.filter(name='prp')
-def prp(value):
+def prp(value, default=PRP_SHARE):
     """Calculate publisher share, performance"""
-    return calculate_value(value, PRP_SHARE)
+    return calculate_value(value, default)
 
 
 @register.filter(name='mrw')
-def mrw(value):
+def mrw(value, default=MRW_SHARE):
     """Calculate writer share, mechanical"""
-    return calculate_value(value, MRW_SHARE)
+    return calculate_value(value, default)
 
 
 @register.filter(name='mrp')
-def mrp(value):
+def mrp(value, default=MRP_SHARE):
     """Calculate publisher share, mechanical"""
-    return calculate_value(value, MRP_SHARE)
+    return calculate_value(value, default)
 
 
 @register.filter(name='srw')
-def srw(value):
+def srw(value, default=SRW_SHARE):
     """Calculate writer share, sync"""
-    return calculate_value(value, SRW_SHARE)
+    return calculate_value(value, default)
 
 
 @register.filter(name='srp')
-def srp(value):
+def srp(value, default=SRP_SHARE):
     """Calculate publisher share, sync"""
-    return calculate_value(value, SRP_SHARE)
+    return calculate_value(value, default)
 
 
 @register.filter(name='cwrshare')
