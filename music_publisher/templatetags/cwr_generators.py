@@ -12,23 +12,6 @@ from music_metadata.territories.territory import Territory
 
 register = template.Library()
 
-if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
-    PRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
-else:
-    PRP_SHARE = Decimal('0.5')
-if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR'):
-    MRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
-else:
-    MRP_SHARE = Decimal(1)
-if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_SR'):
-    SRP_SHARE = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
-else:
-    SRP_SHARE = Decimal(1)
-PRW_SHARE = Decimal('1') - PRP_SHARE
-MRW_SHARE = Decimal('1') - MRP_SHARE
-SRW_SHARE = Decimal('1') - SRP_SHARE
-
-
 @register.filter(name='rjust')
 def rjust(value, length):
     """Format general numeric fields."""
@@ -61,49 +44,6 @@ def soc(value):
         return '   '
     value = value.rjust(3, '0')
     return value
-
-
-def calculate_value(value, share):
-    """Convert string to a decimal and multiply with share."""
-    value = Decimal(value or 0)
-    value *= share
-    return value
-
-
-@register.filter(name='prw')
-def prw(value, default=PRW_SHARE):
-    """Calculate writer share, performance"""
-    return calculate_value(value, default)
-
-
-@register.filter(name='prp')
-def prp(value, default=PRP_SHARE):
-    """Calculate publisher share, performance"""
-    return calculate_value(value, default)
-
-
-@register.filter(name='mrw')
-def mrw(value, default=MRW_SHARE):
-    """Calculate writer share, mechanical"""
-    return calculate_value(value, default)
-
-
-@register.filter(name='mrp')
-def mrp(value, default=MRP_SHARE):
-    """Calculate publisher share, mechanical"""
-    return calculate_value(value, default)
-
-
-@register.filter(name='srw')
-def srw(value, default=SRW_SHARE):
-    """Calculate writer share, sync"""
-    return calculate_value(value, default)
-
-
-@register.filter(name='srp')
-def srp(value, default=SRP_SHARE):
-    """Calculate publisher share, sync"""
-    return calculate_value(value, default)
 
 
 @register.filter(name='cwrshare')

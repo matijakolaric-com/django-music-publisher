@@ -1213,6 +1213,9 @@ class CWRExport(models.Model):
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
     publisher_code = None
+    agreement_pr = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+    agreement_mr = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+    agreement_sr = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
     @property
     def version(self):
@@ -1372,6 +1375,10 @@ class CWRExport(models.Model):
                 publisher['mr_society'] = aff['organization']['code']
             elif aff['affiliation_type']['code'] == 'SR':
                 publisher['sr_society'] = aff['organization']['code']
+
+        pr_share = controlled_relative_share * self.agreement_pr
+        mr_share = controlled_relative_share * self.agreement_mr
+        sr_share = controlled_relative_share * self.agreement_sr
         yield self.get_transaction_record(
             'SPU', {
                 'chain_sequence': 1,
@@ -1382,13 +1389,17 @@ class CWRExport(models.Model):
                 'pr_society': publisher.get('pr_society'),
                 'mr_society': publisher.get('mr_society'),
                 'sr_society': publisher.get('sr_society'),
-                'share': controlled_relative_share
+                'pr_share': pr_share,
+                'mr_share': mr_share,
+                'sr_share': sr_share,
             })
         if controlled_relative_share:
             yield self.get_transaction_record(
                 'SPT', {
                     'code': publisher.get('code'),
-                    'share': controlled_relative_share,
+                    'pr_share': pr_share,
+                    'mr_share': mr_share,
+                    'sr_share': sr_share,
                     'pr_society': publisher.get('pr_society'),
                     'mr_society': publisher.get('mr_society'),
                     'sr_society': publisher.get('sr_society'),
@@ -1467,10 +1478,18 @@ class CWRExport(models.Model):
             publisher, controlled_relative_share)
         # OPU, co-publishing only
         if other_publisher_share:
+            pr_share = other_publisher_share * self.agreement_pr
+            mr_share = other_publisher_share * self.agreement_mr
+            sr_share = other_publisher_share * self.agreement_sr
             yield self.get_transaction_record(
-                'OPU', {'sequence': 2, 'share': other_publisher_share})
+                'OPU', {
+                    'sequence': 2, 'pr_share': pr_share,
+                    'mr_share': mr_share, 'sr_share': sr_share,
+                })
             yield self.get_transaction_record(
-                'OPT', {'share': other_publisher_share})
+                'OPT', {
+                    'pr_share': pr_share, 'mr_share': mr_share, 
+                    'sr_share': sr_share,})
 
         # SWR, SWT, PWR
         for wiw in work['writers']:
@@ -1487,17 +1506,23 @@ class CWRExport(models.Model):
                     w['mr_society'] = aff['organization']['code']
                 elif aff['affiliation_type']['code'] == 'SR':
                     w['sr_society'] = aff['organization']['code']
-
+            share = controlled_shares[w['code']]
+            pr_share = share * (1 - self.agreement_pr)
+            mr_share = share * (1 - self.agreement_mr)
+            sr_share = share * (1 - self.agreement_sr)
             w.update({
                 'writer_role': wiw['writer_role']['code'],
-                'share': controlled_shares[w['code']],
+                'share': share,
+                'pr_share': pr_share,
+                'mr_share': mr_share,
+                'sr_share': sr_share,
                 'saan': saan,
                 'original_publishers': wiw['original_publishers']
             })
             yield self.get_transaction_record('SWR', w)
-            if w['share']:
+            if share:
                 yield self.get_transaction_record('SWT', w)
-            if w['share']:
+            if share:
                 yield self.get_transaction_record('MAN', w)
             w['publisher_sequence'] = 1
             w['publisher_code'] = publisher['code']
@@ -1531,11 +1556,14 @@ class CWRExport(models.Model):
                         w['sr_society'] = aff['organization']['code']
             else:
                 w = {'writer_unknown_indicator': 'Y'}
+            share = Decimal(wiw['relative_share'])
             w.update({
-                'writer_role': wiw['writer_role']['code'] if wiw[
-                    'writer_role']
-                else None,
-                'share': Decimal(wiw['relative_share'])
+                'writer_role': (wiw['writer_role']['code'] if wiw[
+                    'writer_role'] else None),
+                'share': share,
+                'pr_share': share,
+                'mr_share': share,
+                'sr_share': share
             })
             yield self.get_transaction_record('OWR', w)
             if w['share']:

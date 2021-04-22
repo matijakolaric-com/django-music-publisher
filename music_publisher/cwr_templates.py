@@ -48,9 +48,9 @@ TEMPLATES_21 = {
         '{{ name|ljust:45 }}'
         ' {{ role|default:"E "|ljust:2}}'
         '000000000{{ ipi_name_number|rjust:11 }}              '
-        '{{ pr_society|soc }}{{ share|prp|cwrshare }}'
-        '{{ mr_society|soc }}{{ share|mrp|cwrshare }}'
-        '{{ sr_society|soc }}{{ share|srp|cwrshare }}'
+        '{{ pr_society|soc }}{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_society|soc }}{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_society|soc }}{{ sr_share|default:0|cwrshare }}'
         ' N {{ ipi_base_number|ljust:13 }}'
         '              {{ saan|ljust:14 }}  '
         '{{usa_license|ljust:1}}'
@@ -59,8 +59,9 @@ TEMPLATES_21 = {
         '{% load cwr_generators %}{% autoescape off %}'
         'SPT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
-        '      {{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
-        '{{ share|srp|cwrshare }}'
+        '      {{ pr_share|default:0|cwrshare }}'
+        '{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_share|default:0|cwrshare }}'
         'I2136N001\r\n{% endautoescape %}'),
     'SWR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
@@ -68,17 +69,18 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }} '
         '{{ writer_role|ljust:2 }}000000000{{ ipi_name_number|rjust:11 }}'
-        '{{ pr_society|soc }}{{ share|prw|cwrshare }}'
-        '{{ mr_society|soc }}{{ share|mrw|cwrshare }}'
-        '{{ sr_society|soc }}{{ share|srw|cwrshare }}'
+        '{{ pr_society|soc }}{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_society|soc }}{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_society|soc }}{{ sr_share|default:0|cwrshare }}'
         ' N  {{ ipi_base_number|ljust:13 }}             \r\n'
         '{% endautoescape %}'),
     'SWT': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'SWT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
-        '{{ share|prw|cwrshare }}{{ share|mrw|cwrshare }}'
-        '{{ share|srw|cwrshare }}I2136N001\r\n{% endautoescape %}'),
+        '{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_share|default:0|cwrshare }}I2136N001\r\n{% endautoescape %}'),
     'PWR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'PWR{{ transaction_sequence|rjust:8 }}'
@@ -92,9 +94,9 @@ TEMPLATES_21 = {
         '{{ record_sequence|rjust:8 }}{{ sequence|rjust:2 }}' +
         ' ' * 54 +
         'YE 00000000000000000000              '
-        '   {{ share|prp|cwrshare }}'
-        '   {{ share|mrp|cwrshare }}'
-        '   {{ share|srp|cwrshare }}'
+        '   {{ pr_share|default:0|cwrshare }}'
+        '   {{ mr_share|default:0|cwrshare }}'
+        '   {{ sr_share|default:0|cwrshare }}'
         ' N                                             '
         '\r\n{% endautoescape %}'),
     'OWR': Template(
@@ -104,9 +106,9 @@ TEMPLATES_21 = {
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}'
         '{{ writer_unknown_indicator|default:" "}}'
         '{{ writer_role|ljust:2 }}000000000{{ ipi_name_number|rjust:11 }}'
-        '{{ pr_society|soc }}{{ share|cwrshare }}'
-        '{{ mr_society|soc }}{{ share|cwrshare }}'
-        '{{ sr_society|soc }}{{ share|cwrshare }}    '
+        '{{ pr_society|soc }}{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_society|soc }}{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_society|soc }}{{ sr_share|default:0|cwrshare }}    '
         '{{ ipi_base_number|ljust:13 }}             \r\n{% endautoescape %}'),
     'ALT': Template(
         '{% load cwr_generators %}{% autoescape off %}'
@@ -243,8 +245,9 @@ TEMPLATES_30 = {
         '{% load cwr_generators %}{% autoescape off %}'
         'SPT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}001{{ code|ljust:9 }}'
-        '{{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
-        '{{ share|srp|cwrshare }}I2136'
+        '{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_share|default:0|cwrshare }}I2136'
         '{{ pr_society|ljust:4 }}'
         '{{ mr_society|ljust:4 }}'
         '{{ sr_society|ljust:4 }}'
@@ -261,15 +264,18 @@ TEMPLATES_30 = {
         '{% load cwr_generators %}{% autoescape off %}'
         'SWT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}001{{ code|ljust:9 }}'
-        '{{ share|prw|cwrshare }}{{ share|mrw|cwrshare }}'
-        '{{ share|srw|cwrshare }}I2136{{ pr_society|ljust:4 }}'
+        '{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_share|default:0|cwrshare }}I2136{{ pr_society|ljust:4 }}'
         '{{ mr_society|ljust:4 }}{{ sr_society|ljust:4 }}'
         + ' ' * 32 + '0000\r\n{% endautoescape %}'),
     'OWT': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'OWT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}001{{ code|ljust:9 }}'
-        '{{ share|cwrshare }}{{ share|cwrshare }}{{ share|cwrshare }}'
+        '{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_share|default:0|cwrshare }}'
+        '{{ pr_share|default:0|cwrshare }}'
         'I2136            '
         + ' ' * 32 + '0000\r\n{% endautoescape %}'),
     'PWR': Template(
@@ -292,9 +298,10 @@ TEMPLATES_30 = {
         '{% load cwr_generators %}{% autoescape off %}'
         'OPT{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}001         '
-        '{{ share|prp|cwrshare }}{{ share|mrp|cwrshare }}'
-        '{{ share|srp|cwrshare }}I2136' + ' ' * 44 + '0000\r\n'
-                                                     '{% endautoescape %}'),
+        '{{ pr_share|default:0|cwrshare }}'
+        '{{ mr_share|default:0|cwrshare }}'
+        '{{ sr_share|default:0|cwrshare }}I2136' + ' ' * 44 + '0000\r\n'
+        '{% endautoescape %}'),
     'OWR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
         'OWR{{ transaction_sequence|rjust:8 }}'
