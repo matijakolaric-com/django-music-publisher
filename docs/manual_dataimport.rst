@@ -1,29 +1,21 @@
 Importing Data
 ==============================
 
+.. note:: Default *Publishing Staff* permission group does not include data imports because importing data is not everyday routine.
+
 Musical works metadata can be imported from CSV files.
 
-Caveats
--------------------
-
-Who should import data?
-_______________________
-
-Data imports should not be regarded as a part of the standard work flow and should not be performed by
-staff users.
-
-Failsafes, present during the manual data input and editing, may not be available during data imports.
-
 .. warning:: There is no way to undo a successful import other than by restoring your database from a backup. If you don't know how to back up and restore your database, do not import data!
+
 
 What is being imported?
 _______________________
 
-The import process will *add* works, including alternative titles, writers, artists, libraries
-and library releases.
+The import process will *add* works, including alternative titles, writers, recordings (partial), performing artists, 
+libraries, library releases and society work references.
 
 No data is ever *modified*, with only one exception. A general agreement for an existing writer may be
-set and a society-assigned agreement number may be added.
+*set* and a society-assigned agreement number may be *added*.
 
 Why are errors reported?
 _________________________
@@ -52,20 +44,20 @@ How to import?
 Obtaining and extending the template
 __________________________________________________
 
-Download `CSV Template <work_import_template.csv>`_.
+Download the CSV template from the `Add Data Import` view.
 You can edit it in Excel or another spreadsheet tool. 
 
-It contains 4 columns for alternative titles, as well as
-4 column sets for writers and 4 column sets for artists.
+It contains 6 columns for alternative titles, as well as
+6 column sets for writers, recordings and artists.
 
 For another writer column set, add all of:
-``Writer 5 Last``, ``Writer 5 First``, ``Writer 5 IPI``, ``Writer 5 PRO``, ``Writer 5 Role``,
-``Writer 5 Share``, ``Writer 5 Controlled``, ``Writer 5 SAAN``. 
+``Writer 7 Last``, ``Writer 7 First``, ``Writer 7 IPI``, ``Writer 7 PRO``, ``Writer 7 Role``,
+``Writer 7 Share``, ``Writer 7 Controlled``, ``Writer 7 SAAN``. 
 
-You can add as many writer-, artist- and alternative-title-sets as you require. Just keep incrementing
+You can add as many writer-, recording-, artist- and alternative-title-sets as you require. Just keep incrementing
 the counter.
 
-Note that this file has the same form as CSV exports, described in :ref:`exporting_csv`.
+Note that this file has a subset of columns described in :ref:`exporting_csv`.
 
 Filling out the template
 ______________________________
