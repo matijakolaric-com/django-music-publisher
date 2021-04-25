@@ -52,7 +52,7 @@ It contains 6 columns for alternative titles, as well as
 
 For another writer column set, add all of:
 ``Writer 7 Last``, ``Writer 7 First``, ``Writer 7 IPI``, ``Writer 7 PRO``, ``Writer 7 Role``,
-``Writer 7 Share``, ``Writer 7 Controlled``, ``Writer 7 SAAN``. 
+``Writer 7 Manuscript Share``, ``Writer 7 Controlled``, ``Writer 7 SAAN``. 
 
 You can add as many writer-, recording-, artist- and alternative-title-sets as you require. Just keep incrementing
 the counter.
