@@ -29,7 +29,7 @@ author = 'Matija Kolarić'
 # The short X.Y version
 version = '21.5 Mayday'
 # The full version, including alpha/beta/rc tags
-release = '21.5.b1'
+release = '21.5'
 
 rst_epilog = '''
 .. |version| replace:: {}
