@@ -45,7 +45,11 @@ Obtaining and extending the template
 __________________________________________________
 
 Download the CSV template from the `Add Data Import` view.
-You can edit it in Excel or another spreadsheet tool. 
+You can edit it in Excel or another spreadsheet tool.
+
+Alternativelly, you can go to `CWR Tools - CSV to CWR <https://cwr.tools/csv_to_cwr/>`_,
+and download the template in Excel format. You still need to save it as CSV before uploading to
+DMP.
 
 It contains 6 columns for alternative titles, as well as
 6 column sets for writers, recordings and artists.
