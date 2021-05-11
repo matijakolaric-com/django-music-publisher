@@ -26,17 +26,19 @@ Videos
 
 Go to :doc:`Videos <videos>` and watch the series about DMP.
 
-Facebook Group
+Questions and Discussions
 ---------------------------------
 
 If you still don't know how to resolve the issue, you should try asking in the Facebook Group 
 `Music Publisher Support <https://www.facebook.com/groups/musicpublishersupport>`_. Before you do, search the group 
-for similar questions.
+for similar questions. 
 
-Code Repository
+Alternatevelly, you can do it in `Discussions <https://github.com/matijakolaric-com/django-music-publisher/discussions>`_ within the code repository.
+
+Bug and Feature Requests
 ----------------------------------
 
-Alternatively, if you believe you have encountered a bug in DMP, you can search
+If you believe you have encountered a bug in DMP, you can search
 through `issues <https://github.com/matijakolaric-com/django-music-publisher/issues>`_, or raise a new one.
 
 How can you be sure if it is a bug? Here are some rules.
