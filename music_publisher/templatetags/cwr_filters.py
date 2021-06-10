@@ -2,7 +2,7 @@
 
 """
 
-from decimal import Decimal
+from decimal import Decimal, ConversionSyntax
 
 from django import template
 
@@ -15,9 +15,11 @@ register = template.Library()
 @register.filter(name='perc')
 def perc(value):
     """Display shares as human-readable string."""
-
-    value = Decimal(value) / Decimal('100')
-    return '{}%'.format(value)
+    try:
+        value = Decimal(value) / Decimal('100')
+        return '{}%'.format(value)
+    except ConversionSyntax:
+        return 'Not convertible to percents.'
 
 
 @register.filter(name='soc_name')
@@ -45,6 +47,8 @@ def agreement_type(value):
     return {
         'OG': 'Original general',
         'OS': 'Original specific',
+        'PG': 'Sub-Publishing general',
+        'PS': 'Sub-Publishing specific',
     }.get(value, 'Unknown')
 
 
