@@ -2,7 +2,7 @@
 
 """
 
-from decimal import Decimal, ConversionSyntax
+from decimal import Decimal, ConversionSyntax, InvalidOperation
 
 from django import template
 
@@ -18,7 +18,7 @@ def perc(value):
     try:
         value = Decimal(value) / Decimal('100')
         return '{}%'.format(value)
-    except ConversionSyntax:
+    except (ConversionSyntax, InvalidOperation):
         return 'Not convertible to percents.'
 
 
