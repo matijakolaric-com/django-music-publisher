@@ -1,6 +1,11 @@
 Installation, Configuration and Updating
 ****************************************
 
+.. note::
+
+    The `HOME PAGE <https://dmp.matijakolaric.com>`_ of this project features a 
+    `wizard <https://dmp.matijakolaric.com/install/>`_, described later in this document.
+
 Django-Music-Publisher (DMP) can be installed/deployed as a stand-alone application, or used as a Python package.
 
 Standalone Deployment
