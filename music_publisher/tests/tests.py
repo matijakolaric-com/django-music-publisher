@@ -288,6 +288,7 @@ class AdminTest(TestCase):
             work=cls.original_work, record_label=cls.label, artist=cls.artist,
             isrc='JM-K40-14-00001')
         recording.recording_id = recording.recording_id
+        recording.save()
         Track.objects.create(
             release=cls.commercial_release, recording=recording)
 
