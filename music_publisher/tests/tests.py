@@ -564,10 +564,14 @@ class AdminTest(TestCase):
                 args=(cwr_export.id,)) + '?preview=true'
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-        cwr_export = CWRExport()
+        cwr_export = CWRExport.objects.first()
         cwr_export.cwr = open(TEST_BAD_CWR2_FILENAME, 'r').read()
-        s = CWRExportAdmin.get_preview(None, cwr_export)
-        self.assertIn('XXX000000000000I2136N001', s)
+        cwr_export.save()
+        url = reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(cwr_export.id,)) + '?preview=true'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_cwr_downloads(self):
         """Test that the CWR file can be downloaded."""
