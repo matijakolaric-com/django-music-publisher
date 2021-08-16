@@ -1707,6 +1707,7 @@ class CWRExport(models.Model):
         self.publisher_code = publisher_code
         if self.cwr:
             return
+        self.created_on = now
         self.year = now.strftime('%y')
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()

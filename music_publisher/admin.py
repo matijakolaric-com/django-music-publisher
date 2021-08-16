@@ -1408,14 +1408,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def date(self, obj):
         if obj and obj.created_on:
-            if obj.version in ['21', '22']:
-                s = obj.cwr[64:78]
-            else:
-                s = obj.cwr[65:79]
-            try:
-                return datetime.strptime(s, '%Y%m%d%H%M%S').date()
-            except ValueError:
-                pass
+            return obj.created_on.date()
 
     autocomplete_fields = ('works',)
     list_display = (
