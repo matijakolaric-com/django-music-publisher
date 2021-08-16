@@ -6,6 +6,7 @@ They mostly inherit from classes in :mod:`.base`.
 
 from collections import OrderedDict, defaultdict
 from datetime import datetime
+from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
@@ -1701,7 +1702,7 @@ class CWRExport(models.Model):
     def create_cwr(self, publisher_code=None):
         """Create CWR and save.
         """
-        now = datetime.now()
+        now = timezone.now()
         if publisher_code is None:
             publisher_code = settings.PUBLISHER_CODE
         self.publisher_code = publisher_code
