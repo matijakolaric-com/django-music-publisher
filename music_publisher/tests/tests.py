@@ -31,6 +31,7 @@ from django.urls import reverse
 from django.contrib.messages import get_messages
 
 import music_publisher.models
+from music_publisher.admin import CWRExportAdmin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
@@ -563,6 +564,10 @@ class AdminTest(TestCase):
                 args=(cwr_export.id,)) + '?preview=true'
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
+        cwr_export = CWRExport()
+        cwr_export.cwr = open(TEST_BAD_CWR2_FILENAME, 'r').read()
+        s = CWRExportAdmin.get_preview(None, cwr_export)
+        self.assertIn('XXX000000000000I2136N001', s)
 
     def test_cwr_downloads(self):
         """Test that the CWR file can be downloaded."""
@@ -2007,5 +2012,6 @@ TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
 TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW210001DMP_000.V21'
+TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW210004DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW210002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW210003DMP_0000_V3-0-0.ISR'
