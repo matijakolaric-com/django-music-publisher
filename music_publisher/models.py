@@ -1206,6 +1206,7 @@ class CWRExport(models.Model):
             ('WR1', 'CWR 3.1 DRAFT: Work registration'),
         ))
     cwr = models.TextField(blank=True, editable=False)
+    created_on = models.DateTimeField(editable=False, null=True)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
     num_in_year = models.PositiveSmallIntegerField(default=0)
@@ -1700,12 +1701,13 @@ class CWRExport(models.Model):
     def create_cwr(self, publisher_code=None):
         """Create CWR and save.
         """
+        now = datetime.now()
         if publisher_code is None:
             publisher_code = settings.PUBLISHER_CODE
         self.publisher_code = publisher_code
         if self.cwr:
             return
-        self.year = datetime.now().strftime('%y')
+        self.year = now.strftime('%y')
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
         if nr:

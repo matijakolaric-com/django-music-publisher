@@ -1380,11 +1380,11 @@ class CWRExportAdmin(admin.ModelAdmin):
 
         If you are using highlighing, then override this method."""
 
-        return obj.cwr
+        return obj.cwr or ''
 
     def view_link(self, obj):
         """Link to the CWR preview."""
-        if obj.cwr:
+        if obj.created_on:
             url = reverse(
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
             url += '?preview=true'
@@ -1393,7 +1393,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def download_link(self, obj):
         """Link for downloading CWR file."""
-        if obj.cwr:
+        if obj.created_on:
             url = reverse(
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
             url += '?download=true'
@@ -1407,7 +1407,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         return qs
 
     def date(self, obj):
-        if obj and obj.cwr:
+        if obj and obj.created_on:
             if obj.version in ['21', '22']:
                 s = obj.cwr[64:78]
             else:
@@ -1730,16 +1730,15 @@ class ACKImportAdmin(AdminWithReport):
 
         If you are using highlighing, then override this method."""
 
-        return obj.cwr
+        return obj.cwr or ''
 
     def view_link(self, obj):
         """Link to CWR ACK preview."""
-        if obj.cwr:
-            url = reverse(
-                'admin:music_publisher_ackimport_change', args=(obj.id,))
-            url += '?preview=true'
-            return mark_safe(
-                '<a href="{}" target="_blank">View CWR</a>'.format(url))
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(obj.id,))
+        url += '?preview=true'
+        return mark_safe(
+            '<a href="{}" target="_blank">View CWR</a>'.format(url))
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with a sub-view defined by GET parameters:
