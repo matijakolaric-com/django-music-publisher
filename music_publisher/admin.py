@@ -1570,13 +1570,18 @@ class ACKImportAdmin(AdminWithReport):
     RE_ISW_21 = re.compile(
         r'(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)', re.S | re.M)
 
-    def process(self, request, society_code, file_content, import_iswcs=False):
+    def process(self, request, ack_import, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
 
         Big part of this code should be moved to the model, left here because
         messaging is simpler.
         """
 
+        society_code = ack_import.society_code
+        ack_import_url = reverse(
+            'admin:music_publisher_ackimport_change', 
+            args=(ack_import.id,))
+        ack_import_link = f'<a href="{ack_import_url}">{ack_import}</a>'
         from django.contrib.admin.models import CHANGE, LogEntry
 
         if import_iswcs:
@@ -1624,11 +1629,11 @@ class ACKImportAdmin(AdminWithReport):
                 else:
                     work.iswc = iswc
                     work.last_change = now()
+                    s = f'ISWC imported from ACK file: {ack_import_link}.'
                     LogEntry.objects.log_action(
                         request.user.id,
                         admin.options.get_content_type_for_model(work).id,
-                        work.id, str(work), CHANGE,
-                        'ISWC imported from ACK file.')
+                        work.id, str(work), CHANGE, s)
                     work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,
@@ -1668,11 +1673,11 @@ class ACKImportAdmin(AdminWithReport):
                     else:
                         work.iswc = iswc
                         work.last_change = now()
+                        s = f'ISWC imported from ISW file: {ack_import_link}.'
                         LogEntry.objects.log_action(
                             request.user.id,
                             admin.options.get_content_type_for_model(work).id,
-                            work.id, str(work), CHANGE,
-                            'ISWC imported from ISW file.')
+                            work.id, str(work), CHANGE, s)
                         work.save()
         if unknown_work_ids:
             messages.add_message(
@@ -1697,11 +1702,12 @@ class ACKImportAdmin(AdminWithReport):
             obj.society_name = cd['society_name']
             obj.date = cd['date']
             # TODO move process() to model, and handle messages here
+            super().save_model(request, obj, form, change)
             obj.report = self.process(
-                request, obj.society_code, cd['acknowledgement_file'],
+                request, obj, cd['acknowledgement_file'],
                 cd['import_iswcs'])
             obj.cwr = cd['acknowledgement_file']
-            super().save_model(request, obj, form, change)
+            super().save_model(request, obj, form, True)
 
     def has_add_permission(self, request):
         """Return false if CWR delivery code is not present."""
