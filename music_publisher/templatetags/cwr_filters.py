@@ -18,7 +18,7 @@ def perc(value):
     try:
         value = Decimal(value) / Decimal('100')
         return '{}%'.format(value)
-    except (ConversionSyntax, InvalidOperation):
+    except (ConversionSyntax, InvalidOperation, TypeError):
         return 'Not convertible to percents.'
 
 
@@ -34,7 +34,7 @@ def soc_name(value):
 def capacity(value):
     """Display writer capacity/role"""
 
-    value = value.strip()
+    value = value[0:2]
     obj = models.WriterInWork(capacity=value)
     return obj.get_capacity_display()
 
