@@ -57,21 +57,50 @@ class RecordingInline(admin.StackedInline):
         used in :class:`WorkAdmin`.
     """
     autocomplete_fields = ('artist', 'work', 'record_label')
-    readonly_fields = ('complete_recording_title', 'complete_version_title')
+    readonly_fields = ('complete_recording_title', 'complete_version_title',
+                       'player')
     show_change_link = True
-    fieldsets = (
-        (None, {
-            'fields': (
-                'work',
-                ('recording_title', 'recording_title_suffix',
-                 'complete_recording_title'),
-                ('version_title', 'version_title_suffix',
-                 'complete_version_title'),
-                ('isrc', 'record_label', 'artist'),
-                ('duration', 'release_date'),
-            ),
-        }),
-    )
+
+    def get_fieldsets(self, request, obj=None):
+        if settings.USE_S3:
+            return (
+                ('Metadata', {
+                    'fields': (
+                        'work',
+                        ('recording_title', 'recording_title_suffix',
+                         'complete_recording_title'),
+                        ('version_title', 'version_title_suffix',
+                         'complete_version_title'),
+                        ('isrc', 'record_label', 'artist'),
+                        ('duration', 'release_date'),
+                    ),
+                }),
+                ('Audio', {
+                    'fields': (
+                        ('audio_file', 'player')
+                    ),
+                }),
+            )
+        else:
+            return (
+                (None, {
+                    'fields': (
+                        'work',
+                        ('recording_title', 'recording_title_suffix',
+                         'complete_recording_title'),
+                        ('version_title', 'version_title_suffix',
+                         'complete_version_title'),
+                        ('isrc', 'record_label', 'artist'),
+                        ('duration', 'release_date'),
+                    ),
+                }),
+            )
+
+    def player(self, obj):
+        return mark_safe(
+            f'<audio controls><source src="{obj.audio_file.url}" '
+            'type="audio/mpeg"></audio> ')
+
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }
@@ -92,12 +121,31 @@ class ArtistAdmin(MusicPublisherAdmin):
     list_display = (
         'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
     search_fields = ('last_name', 'isni',)
-    fieldsets = (
-        ('Name', {'fields': (('first_name', 'last_name'),)}),
-        ('ISNI', {'fields': ('isni',), }),
-        ('Notes', {'fields': ('notes',), }),
-    )
 
+    def get_fieldsets(self, request, obj=None):
+        if settings.USE_S3:
+            return (
+                ('Name', {'fields': (('first_name', 'last_name'),)}),
+                ('ISNI', {'fields': ('isni',), }),
+                ('Photo', {'fields': (
+                    ('photo', 'photo_preview') if obj and obj.photo else ('photo',)
+                ), }),
+                ('Notes', {'fields': ('notes',), }),
+            )
+        else:
+            return (
+                ('Name', {'fields': (('first_name', 'last_name'),)}),
+                ('ISNI', {'fields': ('isni',), }),
+                ('Notes', {'fields': ('notes',), }),
+            )
+
+    def photo_preview(self, obj):
+        if obj:
+            return mark_safe(
+                f'<img src="{obj.photo.url}"')
+
+    readonly_fields = ('photo_preview',)
+    
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
         return obj.last_name
@@ -163,12 +211,31 @@ class LabelAdmin(MusicPublisherAdmin):
         'name', 'recording_count', 'commercialrelease_count',
         'libraryrelease_count')
     readonly_fields = (
-        'recording_count', 'commercialrelease_count', 'libraryrelease_count')
+        'recording_count', 'commercialrelease_count', 
+        'libraryrelease_count', 'photo_preview')
 
-    fieldsets = (
-        ('Name', {'fields': ('name',)}),
-        ('Notes', {'fields': ('notes',), }),
-    )
+    def get_fieldsets(self, request, obj=None):
+        if settings.USE_S3:
+            return (
+                ('Name', {'fields': ('name',)}),
+                ('Logo', {
+                    'fields': (
+                        ('photo', 'photo_preview') if obj and obj.photo else ('photo',)
+                    ),
+                }),
+                ('Notes', {'fields': ('notes',), }),
+            )
+        else:
+            return (
+                ('Name', {'fields': ('name',)}),
+                ('Notes', {'fields': ('notes',), }),
+            )
+
+    def photo_preview(self, obj):
+        if obj:
+            return mark_safe(
+                f'<img src="{obj.photo.url}"')
+    photo_preview.short_description = 'Logo preview'
 
     ordering = ('name', '-id')
 
@@ -544,38 +611,73 @@ class WriterAdmin(MusicPublisherAdmin):
 
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
-    readonly_fields = ('_can_be_controlled', 'work_count')
+    readonly_fields = ('_can_be_controlled', 'work_count', 'photo_preview')
 
     def get_fieldsets(self, request, obj=None):
         """Return the fieldsets.
 
         Depending on settings, MR and PR affiliations may not be needed.
         See :meth:`WriterAdmin.get_society_list`"""
-        return [
-            ('Name', {
-                'fields': (
-                    ('first_name', 'last_name'),)
-            }),
-            ('IPI', {
-                'fields': (
-                    ('ipi_name', 'ipi_base'),),
-            }),
-            ('Societies', {
-                'fields': (
-                    self.get_society_list(),),
-            }),
-            ('General agreement', {
-                'fields': (
-                    ('generally_controlled',
-                     ('saan', 'publisher_fee'))
-                ),
-            }),
-            ('Notes', {
-                'fields': ('notes',),
-            }),
-        ]
+        if settings.USE_S3:
+            return [
+                ('Name', {
+                    'fields': (
+                        ('first_name', 'last_name'),)
+                }),
+                ('IPI', {
+                    'fields': (
+                        ('ipi_name', 'ipi_base'),),
+                }),
+                ('Societies', {
+                    'fields': (
+                        self.get_society_list(),),
+                }),
+                ('General agreement', {
+                    'fields': (
+                        ('generally_controlled',
+                         ('saan', 'publisher_fee'))
+                    ),
+                }),
+                ('Photo', {
+                    'fields': (
+                        ('photo', 'photo_preview') if obj and obj.photo else ('photo',)
+                    ),
+                }),
+                ('Notes', {
+                    'fields': ('notes',),
+                }),
+            ]
+        else:
+            return [
+                ('Name', {
+                    'fields': (
+                        ('first_name', 'last_name'),)
+                }),
+                ('IPI', {
+                    'fields': (
+                        ('ipi_name', 'ipi_base'),),
+                }),
+                ('Societies', {
+                    'fields': (
+                        self.get_society_list(),),
+                }),
+                ('General agreement', {
+                    'fields': (
+                        ('generally_controlled',
+                         ('saan', 'publisher_fee'))
+                    ),
+                }),
+                ('Notes', {
+                    'fields': ('notes',),
+                }),
+            ]
 
     actions = None
+
+    def photo_preview(self, obj):
+        if obj:
+            return mark_safe(
+                f'<img src="{obj.photo.url}"')
 
     @staticmethod
     def get_society_list():
@@ -1248,6 +1350,12 @@ class RecordingAdmin(MusicPublisherAdmin):
         'label_link')
     ordering = ('-id',)
 
+    def player(self, obj):
+        if obj and obj.audio_file:
+            return mark_safe(
+                f'<audio controls><source src="{obj.audio_file.url}" '
+                'type="audio/mpeg"></audio> ')
+
     class HasISRCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISRC.
         """
@@ -1276,25 +1384,47 @@ class RecordingAdmin(MusicPublisherAdmin):
         'work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
-        'recording_id',
+        'recording_id', 'player',
         'complete_recording_title', 'complete_version_title', 'title',
         'work_link', 'artist_link', 'label_link')
-    fieldsets = (
-        (None, {
-            'fields': (
-                'recording_id',
-                'work',
-                (
-                    'recording_title', 'recording_title_suffix',
-                    'complete_recording_title'),
-                (
-                    'version_title', 'version_title_suffix',
-                    'complete_version_title'),
-                ('isrc', 'record_label', 'artist'),
-                ('duration', 'release_date'),
-            ),
-        }),
-    )
+
+    def get_fieldsets(self, request, obj=None):
+        if settings.USE_S3:
+            return (
+                ('Metadata', {
+                    'fields': (
+                        'recording_id',
+                        'work',
+                        ('recording_title', 'recording_title_suffix',
+                         'complete_recording_title'),
+                        ('version_title', 'version_title_suffix',
+                         'complete_version_title'),
+                        ('isrc', 'record_label', 'artist'),
+                        ('duration', 'release_date'),
+                    ),
+                }),
+                ('Audio', {
+                    'fields': (
+                        ('audio_file', 'player')
+                    ),
+                }),
+            )
+        else:
+            return (
+                (None, {
+                    'fields': (
+                        'recording_id',
+                        'work',
+                        ('recording_title', 'recording_title_suffix',
+                         'complete_recording_title'),
+                        ('version_title', 'version_title_suffix',
+                         'complete_version_title'),
+                        ('isrc', 'record_label', 'artist'),
+                        ('duration', 'release_date'),
+                    ),
+                }),
+            )
+
     formfield_overrides = {
         models.TimeField: {'widget': forms.TimeInput},
     }

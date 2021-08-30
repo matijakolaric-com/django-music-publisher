@@ -10,6 +10,15 @@ from django.db import models
 
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES
+from uuid import uuid4
+import base64
+
+
+def upload_to(instance, filename):
+    ext = filename.rsplit('.', 1)[-1]
+    folder = instance._meta.model_name
+    fn = base64.urlsafe_b64encode(uuid4().bytes).rstrip(b'=')
+    return f'{folder}/{fn}.{ext}'
 
 
 class NotesManager(models.Manager):
@@ -78,6 +87,7 @@ class PersonBase(models.Model):
     last_name = models.CharField(
         max_length=45, db_index=True,
         validators=(CWRFieldValidator('name'),))
+    photo = models.ImageField(max_length=255, upload_to=upload_to, blank=True)
 
     def __str__(self):
         if self.first_name:
@@ -269,6 +279,8 @@ class LabelBase(NotesBase):
     name = models.CharField(
         max_length=60, unique=True,
         validators=(CWRFieldValidator('name'),))
+    photo = models.ImageField(
+        'Logo', max_length=255, upload_to=upload_to, blank=True)
 
 
 class LibraryBase(models.Model):

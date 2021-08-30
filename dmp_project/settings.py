@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,23 @@ REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 # * 'smart' - Changes all UPPER CASE names and titles to Title Case
 # Anything else makes no changes to names and titles
 FORCE_CASE = os.getenv('FORCE_CASE')
+
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME') or os.getenv('S3_REGION')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') or os.getenv('S3_ID')
+AWS_SECRET_ACCESS_KEY = (
+        os.getenv('AWS_SECRET_ACCESS_KEY') or 
+        os.getenv('S3_SECRET'))
+AWS_STORAGE_BUCKET_NAME = (
+        os.getenv('AWS_STORAGE_BUCKET_NAME') or 
+        os.getenv('S3_BUCKET'))
+AWS_S3_ENDPOINT_URL = (
+        os.getenv('AWS_S3_ENDPOINT_URL') or
+        f'https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com')
+AWS_QUERYSTRING_EXPIRE = os.getenv('AWS_QUERYSTRING_EXPIRE', 300)
+
+USE_S3 = all([
+    AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
+    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+])
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

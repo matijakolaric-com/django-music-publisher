@@ -20,7 +20,7 @@ from django.utils.duration import duration_string
 
 from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
-    TitleBase, WriterBase,
+    TitleBase, WriterBase, upload_to
 )
 from .cwr_templates import (
     TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
@@ -995,6 +995,9 @@ class Recording(models.Model):
         on_delete=models.PROTECT, blank=True, null=True)
 
     releases = models.ManyToManyField(Release, through='Track')
+
+    audio_file = models.FileField(
+        upload_to=upload_to, max_length=255, blank=True)
 
     def clean_fields(self, *args, **kwargs):
         """
