@@ -164,22 +164,34 @@ REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 # Anything else makes no changes to names and titles
 FORCE_CASE = os.getenv('FORCE_CASE')
 
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME') or os.getenv('S3_REGION')
+
+# REMOTE FILES
+# The default is Digital Ocean Spaces, but any S3 should work with AWS
+# and any other S3. Support DMP by using the affiliation links below.
+# For Digital Ocean (https://www.digitalocean.com/?refcode=b05ea0e8ec84), 
+# you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84:
+# S3_BUCKET (name), S3_REGION (region code, fra1, lon3, etc.
+# and https://cloud.digitalocean.com/account/api/tokens?refcode=b05ea0e8ec84
+# S3_ID, S3 SECRET 
+
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') or os.getenv('S3_ID')
 AWS_SECRET_ACCESS_KEY = (
-        os.getenv('AWS_SECRET_ACCESS_KEY') or 
+        os.getenv('AWS_SECRET_ACCESS_KEY') or
         os.getenv('S3_SECRET'))
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME') or os.getenv('S3_REGION')
 AWS_STORAGE_BUCKET_NAME = (
-        os.getenv('AWS_STORAGE_BUCKET_NAME') or 
+        os.getenv('AWS_STORAGE_BUCKET_NAME') or
         os.getenv('S3_BUCKET'))
 AWS_S3_ENDPOINT_URL = (
         os.getenv('AWS_S3_ENDPOINT_URL') or
         f'https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com')
 AWS_QUERYSTRING_EXPIRE = os.getenv('AWS_QUERYSTRING_EXPIRE', 300)
 
-USE_S3 = all([
-    AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
-    AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-])
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+S3_ENABLED = all([AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
+                  AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY])
+
+OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
+
+if OPTION_FILES and S3_ENABLED:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

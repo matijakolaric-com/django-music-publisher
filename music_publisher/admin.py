@@ -62,7 +62,7 @@ class RecordingInline(admin.StackedInline):
     show_change_link = True
 
     def get_fieldsets(self, request, obj=None):
-        if settings.USE_S3:
+        if settings.OPTION_FILES:
             return (
                 ('Metadata', {
                     'fields': (
@@ -123,7 +123,7 @@ class ArtistAdmin(MusicPublisherAdmin):
     search_fields = ('last_name', 'isni',)
 
     def get_fieldsets(self, request, obj=None):
-        if settings.USE_S3:
+        if settings.OPTION_FILES:
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
@@ -145,7 +145,7 @@ class ArtistAdmin(MusicPublisherAdmin):
                 f'<img src="{obj.photo.url}"')
 
     readonly_fields = ('photo_preview',)
-    
+
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
         return obj.last_name
@@ -215,7 +215,7 @@ class LabelAdmin(MusicPublisherAdmin):
         'libraryrelease_count', 'photo_preview')
 
     def get_fieldsets(self, request, obj=None):
-        if settings.USE_S3:
+        if settings.OPTION_FILES:
             return (
                 ('Name', {'fields': ('name',)}),
                 ('Logo', {
@@ -618,7 +618,7 @@ class WriterAdmin(MusicPublisherAdmin):
 
         Depending on settings, MR and PR affiliations may not be needed.
         See :meth:`WriterAdmin.get_society_list`"""
-        if settings.USE_S3:
+        if settings.OPTION_FILES:
             return [
                 ('Name', {
                     'fields': (
@@ -1389,7 +1389,7 @@ class RecordingAdmin(MusicPublisherAdmin):
         'work_link', 'artist_link', 'label_link')
 
     def get_fieldsets(self, request, obj=None):
-        if settings.USE_S3:
+        if settings.OPTION_FILES:
             return (
                 ('Metadata', {
                     'fields': (
