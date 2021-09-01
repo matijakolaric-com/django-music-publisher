@@ -145,7 +145,7 @@ class ArtistAdmin(MusicPublisherAdmin):
                 f'<img src="{obj.photo.url}"')
 
     readonly_fields = ('photo_preview',)
-
+    
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
         return obj.last_name
