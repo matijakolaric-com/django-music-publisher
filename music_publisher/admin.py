@@ -365,6 +365,14 @@ class TrackInline(admin.TabularInline):
     extra = 0
 
 
+class PlaylistTrackInline(TrackInline):
+    def has_audio(self, obj):
+        return bool(obj.recording.audio_file)
+    has_audio.boolean = True
+    fields = ('recording', 'has_audio')
+    readonly_fields = ('has_audio',)
+
+
 @admin.register(Release)
 class ReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.Release`.
@@ -515,7 +523,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
 
     ordering = ('-id',)
     form = PlaylistForm
-    inlines = [TrackInline]
+    inlines = [PlaylistTrackInline]
 
     fieldsets = (
         (None, {
