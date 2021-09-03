@@ -4,7 +4,9 @@ Main interface for :mod:`music_publisher`.
 All views are here, except for :mod:`.royalty_calculation`.
 
 """
+import base64
 import re
+import uuid
 import zipfile
 from csv import DictWriter
 from datetime import datetime
@@ -23,10 +25,10 @@ from django.utils.timezone import now
 
 from .forms import (
     ACKImportForm, AlternateTitleFormSet, DataImportForm, LibraryReleaseForm,
-    WorkForm, WriterInWorkFormSet,
+    WorkForm, WriterInWorkFormSet, PlaylistForm
 )
 from .models import (
-    ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
+    ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport, Playlist,
     CommercialRelease, DataImport, Label, Library, LibraryRelease, Recording,
     Release, SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer,
     WriterInWork,
@@ -504,6 +506,80 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         if 'delete_selected' in actions:
             del actions['delete_selected']
         return actions
+
+
+@admin.register(Playlist)
+class PlaylistAdmin(MusicPublisherAdmin):
+    """Admin interface for :class:`.models.Playlist`.
+    """
+
+    ordering = ('-id',)
+    form = PlaylistForm
+    inlines = [TrackInline]
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('release_title', 'secret_url'),
+            )
+        }),
+    )
+
+    list_display = (
+        'release_title',
+        'secret_url',
+        'track_count',
+    )
+    readonly_fields = ('cd_identifier', 'secret_url')
+
+    search_fields = ('release_title', '^cd_identifier')
+
+    def get_inline_instances(self, request, obj=None):
+        """Limit inlines in popups."""
+        if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
+            return []
+        return super().get_inline_instances(request)
+
+    def get_queryset(self, request):
+        """Optimized queryset for changelist view.
+        """
+        qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count('tracks', distinct=True))
+        return qs
+
+    def track_count(self, obj):
+        """Return the work count from the database field, or count them.
+        (dealing with legacy)"""
+
+        count = obj.tracks__count
+
+        url = reverse('admin:music_publisher_recording_changelist')
+        url += '?release__id__exact={}'.format(obj.id)
+        return mark_safe('<a href="{}">{}</a>'.format(url, count))
+
+    track_count.short_description = 'Recordings'
+    track_count.admin_order_field = 'tracks__count'
+
+    # def create_json(self, request, qs):
+    #     """Batch action that downloads a JSON file containing library releases.
+    # 
+    #     Returns:
+    #         JsonResponse: JSON file with selected works
+    #     """
+    # 
+    #     j = Playlist.objects.get_dict(qs)
+    # 
+    #     response = JsonResponse(j, json_dumps_params={'indent': 4})
+    #     name = '{}-libraryreleases-{}'.format(
+    #         settings.PUBLISHER_CODE, datetime.now().toordinal())
+    #     cd = 'attachment; filename="{}.json"'.format(name)
+    #     response['Content-Disposition'] = cd
+    #     return response
+    # 
+    # create_json.short_description = \
+    #     'Export selected library releases (JSON).'
+    # 
+    # actions = ['create_json']
 
 
 @admin.register(CommercialRelease)

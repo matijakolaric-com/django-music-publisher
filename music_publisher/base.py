@@ -321,9 +321,9 @@ class ReleaseBase(models.Model):
         'CD identifier',
         max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('name'),))
-    library = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('name'),))
+    # library = models.CharField(
+    #     max_length=60, unique=True,
+    #     validators=(CWRFieldValidator('name'),))
     release_date = models.DateField(
         blank=True, null=True)
     release_title = models.CharField(
@@ -334,6 +334,6 @@ class ReleaseBase(models.Model):
         'Release (album) EAN',
         max_length=13, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('ean'),))
-    release_label = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('name'),))
+    # release_label = models.CharField(
+    #     max_length=60, unique=True,
+    #     validators=(CWRFieldValidator('name'),))

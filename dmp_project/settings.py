@@ -23,7 +23,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'music_publisher.apps.MusicPublisherConfig',
-
+    'adminsortable',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

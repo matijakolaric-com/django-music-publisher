@@ -25,6 +25,17 @@ class LibraryReleaseForm(ModelForm):
         self.fields['library'].required = True
 
 
+class PlaylistForm(ModelForm):
+    """Custom form for :class:`.models.LibraryRelease`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Make cd_identifier and library fields required."""
+        super().__init__(*args, **kwargs)
+        self.fields['release_title'].required = True
+        self.fields['release_title'].label = 'Playlist title'
+
+
 class AlternateTitleFormSet(BaseInlineFormSet):
     """Formset for :class:`AlternateTitleInline`.
     """

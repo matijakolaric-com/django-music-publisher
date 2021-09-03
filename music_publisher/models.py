@@ -27,6 +27,7 @@ from .cwr_templates import (
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
 
+import base64, uuid
 
 WORLD_DICT = {
     'tis-a': '2WL',
@@ -222,7 +223,8 @@ class LibraryReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.LibraryRelease`
         """
-        return super().get_queryset().filter(cd_identifier__isnull=False)
+        return super().get_queryset().filter(
+            cd_identifier__isnull=False, library__isnull=False)
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -294,7 +296,8 @@ class CommercialReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return super().get_queryset().filter(cd_identifier__isnull=True)
+        return super().get_queryset().filter(
+            cd_identifier__isnull=True, library__isnull=True)
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -323,6 +326,62 @@ class CommercialRelease(Release):
         verbose_name_plural = 'Commercial Releases'
 
     objects = CommercialReleaseManager()
+
+
+class PlaylistManager(models.Manager):
+    """Manager for a proxy class :class:`.models.Playlist
+    """
+
+    def get_queryset(self):
+        """Return only commercial releases
+
+        Returns:
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.CommercialRelease`
+        """
+        return super().get_queryset().filter(
+            cd_identifier__isnull=False, library__isnull=True)
+
+    def get_dict(self, qs):
+        """Get the object in an internal dictionary format
+
+        Args:
+            qs (django.db.models.query.QuerySet)
+
+        Returns:
+            dict: internal dict format
+        """
+        return {
+            'releases': [release.get_dict(with_tracks=True) for release in qs]
+        }
+
+
+class Playlist(Release):
+    """Proxy class for Playlists
+
+    Attributes:
+        objects (CommercialReleaseManager): Database Manager
+    """
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Playlist'
+        verbose_name_plural = 'Playlists'
+
+    objects = PlaylistManager()
+
+    def __str__(self):
+        return self.release_title
+
+    def clean(self, *args, **kwargs):
+        if self.cd_identifier is None:
+            self.cd_identifier = base64.urlsafe_b64encode(uuid.uuid4().bytes)
+            self.cd_identifier = self.cd_identifier.decode().rstrip('=')[:15]
+        return super().clean(*args, **kwargs)
+
+    def secret_url(self):
+        return f'https://example.com/{self.cd_identifier}/'
+    secret_url.short_description = 'Secret URL'
 
 
 class Writer(WriterBase):
@@ -1141,7 +1200,7 @@ class Track(models.Model):
     recording = models.ForeignKey(
         Recording, on_delete=models.PROTECT, related_name='tracks')
     release = models.ForeignKey(
-        Release, on_delete=models.PROTECT, related_name='tracks')
+        Release, on_delete=models.CASCADE, related_name='tracks')
     cut_number = models.PositiveSmallIntegerField(
         blank=True, null=True,
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
@@ -1158,6 +1217,9 @@ class Track(models.Model):
             'recording': self.recording.get_dict(
                 with_releases=False, with_work=True)
         }
+    
+    def __str__(self):
+        return self.recording.title
 
 
 class DeferCwrManager(models.Manager):
