@@ -36,6 +36,14 @@ from .validators import CWRFieldValidator
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
 
+class ImageWidget(forms.widgets.ClearableFileInput):
+    template_name = 'admin/widgets/image.html'
+
+
+class AudioPlayerWidget(forms.widgets.ClearableFileInput):
+    template_name = 'admin/widgets/audioplayer.html'
+
+
 class MusicPublisherAdmin(admin.ModelAdmin):
     """Parent class to all admin classes."""
     save_as = True
@@ -57,8 +65,7 @@ class RecordingInline(admin.StackedInline):
         used in :class:`WorkAdmin`.
     """
     autocomplete_fields = ('artist', 'work', 'record_label')
-    readonly_fields = ('complete_recording_title', 'complete_version_title',
-                       'player')
+    readonly_fields = ('complete_recording_title', 'complete_version_title')
     show_change_link = True
 
     def get_fieldsets(self, request, obj=None):
@@ -77,7 +84,7 @@ class RecordingInline(admin.StackedInline):
                 }),
                 ('Audio', {
                     'fields': (
-                        ('audio_file', 'player')
+                        ('audio_file',)
                     ),
                 }),
             )
@@ -96,14 +103,11 @@ class RecordingInline(admin.StackedInline):
                 }),
             )
 
-    def player(self, obj):
-        return mark_safe(
-            f'<audio controls><source src="{obj.audio_file.url}" '
-            'type="audio/mpeg"></audio> ')
-
     formfield_overrides = {
+        models.FileField: {'widget': AudioPlayerWidget},
         models.TimeField: {'widget': forms.TimeInput},
     }
+
     verbose_name_plural = \
         'Recordings (with recording artists and record labels)'
     model = Recording
@@ -127,9 +131,7 @@ class ArtistAdmin(MusicPublisherAdmin):
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Photo', {'fields': (
-                    ('photo', 'photo_preview') if obj and obj.photo else ('photo',)
-                ), }),
+                ('Photo', {'fields': ('photo', )}),
                 ('Notes', {'fields': ('notes',), }),
             )
         else:
@@ -139,13 +141,10 @@ class ArtistAdmin(MusicPublisherAdmin):
                 ('Notes', {'fields': ('notes',), }),
             )
 
-    def photo_preview(self, obj):
-        if obj:
-            return mark_safe(
-                f'<img src="{obj.photo.url}"')
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
 
-    readonly_fields = ('photo_preview',)
-    
     def last_or_band(self, obj):
         """Placeholder for :attr:`.models.Artist.last_name`."""
         return obj.last_name
@@ -211,18 +210,17 @@ class LabelAdmin(MusicPublisherAdmin):
         'name', 'recording_count', 'commercialrelease_count',
         'libraryrelease_count')
     readonly_fields = (
-        'recording_count', 'commercialrelease_count', 
-        'libraryrelease_count', 'photo_preview')
+        'recording_count', 'commercialrelease_count', 'libraryrelease_count')
+
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
 
     def get_fieldsets(self, request, obj=None):
         if settings.OPTION_FILES:
             return (
                 ('Name', {'fields': ('name',)}),
-                ('Logo', {
-                    'fields': (
-                        ('photo', 'photo_preview') if obj and obj.photo else ('photo',)
-                    ),
-                }),
+                ('Logo', {'fields': ('photo',),}),
                 ('Notes', {'fields': ('notes',), }),
             )
         else:
@@ -230,12 +228,6 @@ class LabelAdmin(MusicPublisherAdmin):
                 ('Name', {'fields': ('name',)}),
                 ('Notes', {'fields': ('notes',), }),
             )
-
-    def photo_preview(self, obj):
-        if obj:
-            return mark_safe(
-                f'<img src="{obj.photo.url}"')
-    photo_preview.short_description = 'Logo preview'
 
     ordering = ('name', '-id')
 
@@ -611,7 +603,11 @@ class WriterAdmin(MusicPublisherAdmin):
 
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
-    readonly_fields = ('_can_be_controlled', 'work_count', 'photo_preview')
+    readonly_fields = ('_can_be_controlled', 'work_count')
+
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
 
     def get_fieldsets(self, request, obj=None):
         """Return the fieldsets.
@@ -638,11 +634,7 @@ class WriterAdmin(MusicPublisherAdmin):
                          ('saan', 'publisher_fee'))
                     ),
                 }),
-                ('Photo', {
-                    'fields': (
-                        ('photo', 'photo_preview') if obj and obj.photo else ('photo',)
-                    ),
-                }),
+                ('Photo', {'fields': ('photo',), }),
                 ('Notes', {
                     'fields': ('notes',),
                 }),
@@ -673,11 +665,6 @@ class WriterAdmin(MusicPublisherAdmin):
             ]
 
     actions = None
-
-    def photo_preview(self, obj):
-        if obj:
-            return mark_safe(
-                f'<img src="{obj.photo.url}"')
 
     @staticmethod
     def get_society_list():
@@ -1350,11 +1337,10 @@ class RecordingAdmin(MusicPublisherAdmin):
         'label_link')
     ordering = ('-id',)
 
-    def player(self, obj):
-        if obj and obj.audio_file:
-            return mark_safe(
-                f'<audio controls><source src="{obj.audio_file.url}" '
-                'type="audio/mpeg"></audio> ')
+    formfield_overrides = {
+        models.FileField: {'widget': AudioPlayerWidget},
+        models.TimeField: {'widget': forms.TimeInput},
+    }
 
     class HasISRCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISRC.
@@ -1384,7 +1370,7 @@ class RecordingAdmin(MusicPublisherAdmin):
         'work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
-        'recording_id', 'player',
+        'recording_id',
         'complete_recording_title', 'complete_version_title', 'title',
         'work_link', 'artist_link', 'label_link')
 
@@ -1404,9 +1390,7 @@ class RecordingAdmin(MusicPublisherAdmin):
                     ),
                 }),
                 ('Audio', {
-                    'fields': (
-                        ('audio_file', 'player')
-                    ),
+                    'fields': ('audio_file',),
                 }),
             )
         else:
@@ -1424,10 +1408,6 @@ class RecordingAdmin(MusicPublisherAdmin):
                     ),
                 }),
             )
-
-    formfield_overrides = {
-        models.TimeField: {'widget': forms.TimeInput},
-    }
 
     def get_queryset(self, request):
         """Optimized query regarding work name
