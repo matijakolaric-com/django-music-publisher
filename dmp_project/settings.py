@@ -161,7 +161,7 @@ REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 # * 'title' - Changes all names to Title Case
 # * 'smart' - Changes all UPPER CASE names and titles to Title Case
 # Anything else makes no changes to names and titles
-FORCE_CASE = os.getenv('FORCE_CASE')
+FORCE_CASE = os.getenv('FORCE_CASE') or os.getenv('OPTION_FORCE_CASE')
 
 
 # REMOTE FILES
