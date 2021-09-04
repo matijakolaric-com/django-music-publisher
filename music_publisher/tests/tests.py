@@ -75,7 +75,7 @@ def get_data_from_response(response):
     PUBLISHER_SOCIETY_SR=None,
     REQUIRE_SAAN=False,
     REQUIRE_PUBLISHER_FEE=False,
-    FORCE_CASE='upper')
+    OPTION_FORCE_CASE='upper')
 class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
@@ -1647,7 +1647,7 @@ class ValidatorsTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
-    FORCE_CASE='smart'
+    OPTION_FORCE_CASE='smart'
 )
 class ModelsSimpleTest(TransactionTestCase):
     """These tests are modifying objects directly."""
