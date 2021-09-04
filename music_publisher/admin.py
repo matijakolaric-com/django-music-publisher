@@ -529,9 +529,12 @@ class PlaylistAdmin(MusicPublisherAdmin):
         (None, {
             'fields': (
                 ('release_title', 'secret_url'),
+                # 'recordings'
             )
         }),
     )
+
+    # autocomplete_fields = ['recordings']
 
     list_display = (
         'release_title',
