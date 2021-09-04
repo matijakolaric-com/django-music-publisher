@@ -14,7 +14,7 @@ SOFTWARE_VERSION = '22.1 EXOFILE (OPEN SOURCE)'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'aaa')
+SECRET_KEY = os.getenv('SECRET_KEY', None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
@@ -168,7 +168,7 @@ OPTION_FORCE_CASE = os.getenv('FORCE_CASE') or os.getenv('OPTION_FORCE_CASE')
 # The default is Digital Ocean Spaces, but any S3 should work with AWS
 # and any other S3. Support DMP by using the affiliation links below.
 # For Digital Ocean (https://www.digitalocean.com/?refcode=b05ea0e8ec84), 
-# you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84:
+# you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84
 # S3_BUCKET (name), S3_REGION (region code, fra1, lon3, etc.
 # and https://cloud.digitalocean.com/account/api/tokens?refcode=b05ea0e8ec84
 # S3_ID, S3 SECRET 
@@ -194,9 +194,10 @@ OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
 
 if OPTION_FILES:
     if S3_ENABLED:
+        # S3 media, use the bucket root
         DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     else:
+        # normal file storage
         MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
         MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
-# SILENCED_SYSTEM_CHECKS = ['fields.E340']
