@@ -1107,7 +1107,7 @@ class Recording(models.Model):
         """Generate title from various fields."""
         return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
-            self.work.title) + u' \U0001F508' if self.audio_file else ''
+            self.work.title) + (u' \U0001F508' if self.audio_file else '')
 
     @property
     def recording_id(self):

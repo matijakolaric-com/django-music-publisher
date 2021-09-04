@@ -23,7 +23,6 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'music_publisher.apps.MusicPublisherConfig',
-    'adminsortable',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -195,3 +194,5 @@ OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
 
 if OPTION_FILES and S3_ENABLED:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# SILENCED_SYSTEM_CHECKS = ['fields.E340']
