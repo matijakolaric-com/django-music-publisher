@@ -9,12 +9,12 @@ from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
-SOFTWARE_VERSION = '21.5.1 MAYDAY (OPEN SOURCE)'
+SOFTWARE_VERSION = '22.1 EXOFILE (OPEN SOURCE)'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', None)
+SECRET_KEY = os.getenv('SECRET_KEY', 'aaa')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
@@ -161,7 +161,7 @@ REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
 # * 'title' - Changes all names to Title Case
 # * 'smart' - Changes all UPPER CASE names and titles to Title Case
 # Anything else makes no changes to names and titles
-FORCE_CASE = os.getenv('FORCE_CASE') or os.getenv('OPTION_FORCE_CASE')
+OPTION_FORCE_CASE = os.getenv('FORCE_CASE') or os.getenv('OPTION_FORCE_CASE')
 
 
 # REMOTE FILES
@@ -192,7 +192,11 @@ S3_ENABLED = all([AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
 
 OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
 
-if OPTION_FILES and S3_ENABLED:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+if OPTION_FILES:
+    if S3_ENABLED:
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    else:
+        MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
+        MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
 # SILENCED_SYSTEM_CHECKS = ['fields.E340']

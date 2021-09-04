@@ -1913,7 +1913,7 @@ FORCE_CASE_CHOICES = {
 @receiver(pre_save)
 def change_case(sender, instance, **kwargs):
     """Change case of CharFields from :mod:`music_publisher`."""
-    force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
+    force_case = FORCE_CASE_CHOICES.get(settings.OPTION_FORCE_CASE)
     if not force_case:
         return
     if sender._meta.app_label != 'music_publisher':
