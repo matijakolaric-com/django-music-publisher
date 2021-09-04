@@ -329,7 +329,7 @@ class CommercialRelease(Release):
 
 
 class PlaylistManager(models.Manager):
-    """Manager for a proxy class :class:`.models.Playlist
+    """Manager for a proxy class :class:`.models.Playlist`
     """
 
     def get_queryset(self):
