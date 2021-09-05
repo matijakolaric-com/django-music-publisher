@@ -48,6 +48,21 @@ class NotesBase(models.Model):
     notes = models.TextField(blank=True)
 
 
+class DescriptionBase(models.Model):
+    """Abstract class for all classes that have publicly visible descriptions.
+
+    Attributes:
+        description (django.db.models.TextField): Public description
+    """
+
+    class Meta:
+        abstract = True
+
+    objects = NotesManager()
+
+    description = models.TextField(blank=True)
+
+
 class TitleBase(models.Model):
     """Abstract class for all classes that have a title.
 
@@ -229,7 +244,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         super().clean_fields(*args, **kwargs)
 
 
-class ArtistBase(PersonBase, NotesBase):
+class ArtistBase(PersonBase, NotesBase, DescriptionBase):
     """Performing artist base class.
 
     Attributes:
@@ -254,7 +269,8 @@ class ArtistBase(PersonBase, NotesBase):
         return models.Model.clean_fields(self, *args, **kwargs)
 
 
-class WriterBase(PersonBase, IPIWithGeneralAgreementBase, NotesBase):
+class WriterBase(
+        PersonBase, IPIWithGeneralAgreementBase, NotesBase, DescriptionBase):
     """Base class for writers.
     """
 
@@ -264,7 +280,7 @@ class WriterBase(PersonBase, IPIWithGeneralAgreementBase, NotesBase):
         abstract = True
 
 
-class LabelBase(NotesBase):
+class LabelBase(NotesBase, DescriptionBase):
     """Music Label base class.
 
     Attributes:

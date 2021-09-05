@@ -1,124 +1,146 @@
 Introduction
 =================================
 
-Django-Music-Publisher (DMP) is open source software for **managing music metadata**:
+Django-Music-Publisher (DMP) is free, open-source software for **managing music 
+metadata**:
 
-* works,
-* writers,
-* recordings,
-* artists,
-* labels,
-* releases and
-* libraries.
+* musical works and writers,
+* recordings, artists and labels,
+* releases (albums), playlists, and
+* music libraries.
 
-It uses
-`Common Works Registration (CWR) <https://matijakolaric.com/articles/1/>`_
-for batch registration/licencing of musical works with `Collective Management Organizations (CMOs)
-<https://en.wikipedia.org/wiki/Collective_rights_management#Collective_management_organisations>`_ and Digital
-Service Providers (DSPs).
+It implements `CWR protocol <https://matijakolaric.com/articles/1/>`_
+for **batch registration of musical works** with Collective Management Organizations 
+(CMOs) and Digital Service Providers (DSPs).
 
-It processes royalty statements in various CSV formats.
+Simple powerful **royalty management** can split received royalties among writers and 
+calculate fees.
 
-Django-Music-Publisher (DMP) is based on `Django web framework <https://www.djangoproject.com/>`_, hence the name.
+**Experimental features** added in 2022 include:
 
+* **images** (photo / logo / cover art) and descriptions for releases, writers, 
+  artists and labels,
+* **MP3 files** for recordings,
+* **sharable playlists** (secret URL).
 
-Project Scope
+Features and limitations
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DMP can be used out-of-the-box by most small original publishers, both for commercial (general) and
-production (library) music.
+Key features and limitations of DMP are listed below. If you need more, 
+`That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
+affordable Software-as-a-Service, is the recommended solution.
 
-Each DMP installation supports a **single publisher**. It is not intended to be used by
-administrators or sub-publishers, nor by publishing companies with multiple entities (including
-US publishers affiliated with multiple PROs).
+No individual support
+------------------------
 
-Features and limitations are described in detail below. Within this scope, neither user nor technical
-support is required for most publishers. For requirements outside this scope, including administrators
-and sub-publishers, as well as original publishers with multiple affiliations, professional support 
-is absolutely required, and therefore beyond the scope of free software.
+No individual human support, of any kind, is provided for this free software. Please
+don't try, you will be **automatically blacklisted** and your message deleted.
 
-
-Features
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Music Metadata Management
+Music metadata management
 -------------------------
 
-The database can store detailed metadata for *musical works* and *recordings*, data about
-*writers*, recording and performing *artists*, *releases* (albums), *labels* and *music libraries*,
-as well as *CWR exports*, *CWR acknowledgements* and `International Standard Musical Work Code (ISWC)
-<https://matijakolaric.com/articles/identifiers/iswc/>`_ *assignments*.
+The database can store detailed metadata for musical works and recordings, 
+data about writers, recording and performing artists, releases (albums), 
+labels and music libraries, as well as CWR exports and acknowledgements.
 
-All entered data is validated for *CWR and DDEX compatibility* on field-, record- and transaction-level. Different
-*CMOs* have slightly different requirements. This can be configured in the settings.
+No support for composite works
+--------------------------------
 
-Original Publishing Agreements
-------------------------------
+Composite musical works, as well as recordings based on multiple musical works 
+(e.g. medleys), are not supported.
 
-Basic *original publishing agreement* data can be entered, sufficient for registrations in societies that require
-*society-assigned agreement numbers*.
+Total data validation
+-------------------------
 
-Global *share splits* for *performance*, *mechanical* and *synchronisation rights* between the publisher and controlled
-writers can be configured, in accordance with national regulations and customs.
+All entered data is validated for *CWR and DDEX compatibility* on field-, record-,
+and transaction-level.
+
+Manuscript shares
+------------------------
+
+Django-Music-Publisher uses a **single manuscript share** model, meaning that 
+manuscript share splits between writers are same for performance, mechanical and 
+synchronisation rights.
+
+Original Publishing Agreement Data
+-----------------------------------------
+
+Basic *original publishing agreement* data can be entered, sufficient for 
+registrations in societies that require *society-assigned agreement numbers*.
+
+Share transfer
+-------------------------
+
+Share transfer from a controlled writer to the publisher can be configured, 
+in accordance with national regulations and customs. There is only a **single 
+setting for all controlled writers**.
+
+Publisher fees
+-------------------------
+
+Publisher fees are customisable per-writer, or even per-writer-per-work.
+
+No other publishers
+------------------------
+
+It does **not** manage data for **other publishers**. Non-controlled writers 
+appear as unpublished in CWR files. 
+
+Co-publishing
+------------------------
+
+**Co-publishing deals** are possible, with each publisher registering their own 
+shares. In this case, the other publisher appears as unknown in CWR files.
 
 Data Imports and Exports
 ------------------------
 
 Data about works can be imported from *CSV* files.
 
-Data for selected works can be exported as *JSON* (complete) or *CSV* (basic).
+Data for selected works can be exported as *JSON* (complete) or *CSV* (partial).
 
 Registrations
 -------------
 
-Registrations can be exported as *CWR 2.1 Revision 8*, *2.2 Revision 2* and *3.0* (zipped) files.
+Registrations can be exported as **CWR** files. Supported versions are: 2.1, 2.2, 3.0, 
+and 3.1.
 
-*Acknowledgement files* in CWR format can be imported.
+Acknowledgement files in CWR format can be imported.
 
-*CWR preview* features syntax highlighting with additional data on mouse-over, for both CWR files generated by DMP and
-imported acknowledgements.
+**CWR preview** features syntax highlighting with additional data on mouse-over, 
+for both CWR files generated by DMP and imported acknowledgements.
 
 Royalty Distribution
 --------------------
 
-Incoming *royalty statements* in *CSV* format can be processed, resulting in *CSV* statements containing data
-for distribution between controlled interested parties. Statement processing is extremely fast.
+**Incoming royalty statements** in CSV format can be processed, resulting in 
+CSV statements containing data for distribution between controlled interested 
+parties. Statement processing is extremely fast.
 
-Limitations
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Actual outgoing statements must be created in Excel using pivot tables. For
+experienced Excel user, this takes about 10 minutes for the first statement and
+then about 30 seconds per statement for all others.
 
-Django-Music-Publisher uses a *single manuscript share* model, meaning that initial share splits between writers are
-same for *performance*, *mechanical* and *synchronisation* rights.
+Limitations when creating CWR files
+---------------------------------------
 
-It does *not* manage data for *other publishers*. Non-controlled writers appear as unpublished in
-CWR files. *Co-publishing deals* are still possible, with each
-publisher registering their own shares. In this case, the other publisher appears as unknown in CWR files.
+When creating CWR, many fields are left with blank/zero values. When the fields are 
+required in CWR, it uses reasonable defaults, e.g.:
 
-*Share splits* between the controlled original publisher and *controlled writers* are global.
+* *Musical Work Distribution* is set to *Unclassified*,
+* *Recorded indicator* is set to *Yes* or *Unknown*, depending if a recording was 
+  entered, and
+* *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First 
+  Recording Refusal Indicator* are set to No.
 
-Composite musical works, as well as recordings based on multiple musical works (e.g. medleys), are *not* supported.
+Shared playlists
+----------------------
 
-When creating CWR, many fields are left with blank/zero values. When the fields are required in CWR, it uses reasonable
-defaults, e.g.:
+Shared playlists are only protected by a secret URL.
 
-* *Musical Work Distribution* is set to *Unclassified*
-* *Recorded indicator* is set to *Yes* or *Unknown*, depending if a recording was entered
-* *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First Recording Refusal Indicator* are set
-  to No
+No client access
+----------------------
 
-It does not have any kind of client access.
+DMP does not support any kind of power-protected client access.
 
-Future of Django-Music-Publisher
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DMP |version| has many important features for music publishers within the project scope. And the scope will not change.
-While new features will be added, the described limitations are permanent.
-
-Beyond Django-Music-Publisher
-+++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Some publishers require more features than DMP offers and/or technical and user support. In that case, there are two options.
-
-One is to use commercial software. `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as affordable Software-as-a-Service, is a built on top of Django-Music-Publisher. There are other solutions, of course.
-
-The other option is to hire a software developer, or a development agency, to create a custom solution to exactly match your needs. Django-Music-Publisher may be used as a starting point. Creators of Django-Music-Publisher, `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ and `Python Music Metadata Libraries <https://github.com/musicmetadata>`_ should be considered, see `matijakolaric.com <https://matijakolaric.com>`_.
