@@ -131,7 +131,7 @@ For Digital Ocean, you need to set up only four settings.
   (alias for ``AWS_STORAGE_BUCKET_NAME``), you get them when you set up your *Spaces*,
   and
 
-* ``S3_ID`` (alias for``AWS_ACCESS_KEY_ID``) and
+* ``S3_ID`` (alias for ``AWS_ACCESS_KEY_ID``) and
   ``S3_SECRET`` (alias for ``AWS_SECRET_ACCESS_KEY``), you get them when you generate 
   your *Spaces* API key.
 
@@ -147,5 +147,5 @@ Other options
   converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields 
   to Title Case, respectively.
 
-``OPTION_FILES`` - enables support for file uploads (audio files and images), should
+* ``OPTION_FILES`` - enables support for file uploads (audio files and images), should
   only be used for traditional installations, not for containers which are ephemeral.
