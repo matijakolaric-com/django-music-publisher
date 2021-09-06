@@ -128,11 +128,12 @@ than AWS. They call S3 *Spaces*.
 For Digital Ocean, you need to set up only four settings.
 
 * ``S3_REGION`` (alias for ``AWS_S3_REGION_NAME``) and ``S3_BUCKET`` 
-  (alias for ``AWS_STORAGE_BUCKET_NAME``) - when you set up your *Spaces*
+  (alias for ``AWS_STORAGE_BUCKET_NAME``), you get them when you set up your *Spaces*,
+  and
 
 * ``S3_ID`` (alias for``AWS_ACCESS_KEY_ID``) and
-  ``S3_SECRET`` (alias for ``AWS_SECRET_ACCESS_KEY``) - when you generate *Spaces* 
-  API key
+  ``S3_SECRET`` (alias for ``AWS_SECRET_ACCESS_KEY``), you get them when you generate 
+  your *Spaces* API key.
 
 If you want to use AWS or some other S3 provider, the full list of settings is 
 available 
