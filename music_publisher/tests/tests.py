@@ -797,40 +797,6 @@ class AdminTest(TestCase):
             b'IPI name and PR society must be set.',
             response.content)
 
-    def test_controllable_and_controlled_but_missing_saan(self):
-        """If SAAN is required, then it must be set in the Writer object,
-        or in the WriterInWork object or both."""
-        self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
-        response = self.client.get(url, follow=False)
-        data = get_data_from_response(response)
-        data['writerinwork_set-1-writer'] = self.controllable_writer.id
-        data['writerinwork_set-1-controlled'] = True
-        data['writerinwork_set-1-publisher_fee'] = '25.0'
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'Must be set. (controlled, no general agreement)',
-            response.content)
-
-    def test_controllable_and_controlled_but_missing_fee(self):
-        """If `publisher_fee` is required, then it must be set in the Writer,
-        or in the WriterInWork object or both."""
-        self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
-        response = self.client.get(url, follow=False)
-        data = get_data_from_response(response)
-        data['writerinwork_set-1-writer'] = self.controllable_writer.id
-        data['writerinwork_set-1-controlled'] = True
-        data['writerinwork_set-1-saan'] = 'WHATEVER'
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'Must be set. (controlled, no general agreement)',
-            response.content)
-
     def test_writer_switch(self):
         """Just replace one writer with another, just to test last change"""
         self.client.force_login(self.staffuser)
@@ -1342,7 +1308,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
@@ -1353,7 +1319,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
@@ -1365,7 +1331,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
@@ -1378,7 +1344,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         # TEST BAD

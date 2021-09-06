@@ -149,19 +149,12 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_SR', '1.0'))
 
-# Set to True for societies that require society-assigned agreement numbers
-# PRS/MCPS, BUMA/STEMRA, Scandinavian societies.
-REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
-
-# Set to True if you have a standard publishing agreement with writers
-REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
-
 # Set to one of the following options to change names and titles
 # * 'upper' - changes all names and titles to UPPER CASE
 # * 'title' - Changes all names to Title Case
 # * 'smart' - Changes all UPPER CASE names and titles to Title Case
 # Anything else makes no changes to names and titles
-OPTION_FORCE_CASE = os.getenv('FORCE_CASE') or os.getenv('OPTION_FORCE_CASE')
+OPTION_FORCE_CASE = os.getenv('OPTION_FORCE_CASE')
 
 
 # REMOTE FILES
@@ -200,4 +193,3 @@ if OPTION_FILES:
         # normal file storage
         MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
         MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
-

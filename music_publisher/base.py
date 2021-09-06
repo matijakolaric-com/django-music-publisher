@@ -212,10 +212,6 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
                 d['generally_controlled'] = (
                     'IPI name number and PR society fields are required for '
                     'a controlled writer. See "Writers" in the user manual.')
-            if settings.REQUIRE_SAAN and not self.saan:
-                d['saan'] = 'This field is required.'
-            if settings.REQUIRE_PUBLISHER_FEE and not self.publisher_fee:
-                d['publisher_fee'] = 'This field is required.'
         if d:
             raise django.core.exceptions.ValidationError(d)
 

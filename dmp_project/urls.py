@@ -18,6 +18,7 @@ from django.urls import path
 from django.conf import settings
 from music_publisher.royalty_calculation import RoyaltyCalculationView
 
+
 urlpatterns = [
     path('royalty_calculation/', RoyaltyCalculationView.as_view(),
          name='royalty_calculation'),

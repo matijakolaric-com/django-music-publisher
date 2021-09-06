@@ -931,16 +931,6 @@ class WriterInWork(models.Model):
                     d['writer'] = (
                         'IPI name and PR society must be set. '
                         'See "Writers" in the user manual')
-                if (settings.REQUIRE_SAAN and
-                        not self.writer.generally_controlled and
-                        not self.saan):
-                    d['saan'] = \
-                        'Must be set. (controlled, no general agreement)'
-                if (settings.REQUIRE_PUBLISHER_FEE and
-                        not self.writer.generally_controlled and
-                        not self.publisher_fee):
-                    d['publisher_fee'] = \
-                        'Must be set. (controlled, no general agreement)'
         else:
             if self.saan:
                 d['saan'] = 'Must be empty if writer is not controlled.'
