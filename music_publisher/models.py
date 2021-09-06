@@ -329,7 +329,7 @@ class CommercialRelease(Release):
 
 
 class PlaylistManager(models.Manager):
-    """Manager for a proxy class :class:`.models.Playlist
+    """Manager for a proxy class :class:`.models.Playlist`
     """
 
     def get_queryset(self):
@@ -931,16 +931,6 @@ class WriterInWork(models.Model):
                     d['writer'] = (
                         'IPI name and PR society must be set. '
                         'See "Writers" in the user manual')
-                if (settings.REQUIRE_SAAN and
-                        not self.writer.generally_controlled and
-                        not self.saan):
-                    d['saan'] = \
-                        'Must be set. (controlled, no general agreement)'
-                if (settings.REQUIRE_PUBLISHER_FEE and
-                        not self.writer.generally_controlled and
-                        not self.publisher_fee):
-                    d['publisher_fee'] = \
-                        'Must be set. (controlled, no general agreement)'
         else:
             if self.saan:
                 d['saan'] = 'Must be empty if writer is not controlled.'
@@ -1913,7 +1903,7 @@ FORCE_CASE_CHOICES = {
 @receiver(pre_save)
 def change_case(sender, instance, **kwargs):
     """Change case of CharFields from :mod:`music_publisher`."""
-    force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
+    force_case = FORCE_CASE_CHOICES.get(settings.OPTION_FORCE_CASE)
     if not force_case:
         return
     if sender._meta.app_label != 'music_publisher':

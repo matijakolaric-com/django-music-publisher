@@ -9,7 +9,7 @@ from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
-SOFTWARE_VERSION = '21.5.1 MAYDAY (OPEN SOURCE)'
+SOFTWARE_VERSION = '22.1 EXOFILE (OPEN SOURCE)'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -149,26 +149,19 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_SR', '1.0'))
 
-# Set to True for societies that require society-assigned agreement numbers
-# PRS/MCPS, BUMA/STEMRA, Scandinavian societies.
-REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
-
-# Set to True if you have a standard publishing agreement with writers
-REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
-
 # Set to one of the following options to change names and titles
 # * 'upper' - changes all names and titles to UPPER CASE
 # * 'title' - Changes all names to Title Case
 # * 'smart' - Changes all UPPER CASE names and titles to Title Case
 # Anything else makes no changes to names and titles
-FORCE_CASE = os.getenv('FORCE_CASE')
+OPTION_FORCE_CASE = os.getenv('OPTION_FORCE_CASE')
 
 
 # REMOTE FILES
 # The default is Digital Ocean Spaces, but any S3 should work with AWS
 # and any other S3. Support DMP by using the affiliation links below.
 # For Digital Ocean (https://www.digitalocean.com/?refcode=b05ea0e8ec84), 
-# you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84:
+# you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84
 # S3_BUCKET (name), S3_REGION (region code, fra1, lon3, etc.
 # and https://cloud.digitalocean.com/account/api/tokens?refcode=b05ea0e8ec84
 # S3_ID, S3 SECRET 
@@ -192,7 +185,11 @@ S3_ENABLED = all([AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
 
 OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
 
-if OPTION_FILES and S3_ENABLED:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# SILENCED_SYSTEM_CHECKS = ['fields.E340']
+if OPTION_FILES:
+    if S3_ENABLED:
+        # S3 media, use the bucket root
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    else:
+        # normal file storage
+        MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
+        MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
