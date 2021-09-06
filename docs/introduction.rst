@@ -1,12 +1,12 @@
 Introduction
 =================================
 
-Django-Music-Publisher (DMP) is free, open-source software for **managing music 
+**DMP** (Django-Music-Publisher) is free, open-source software for **managing music 
 metadata**:
 
-* musical works and writers,
-* recordings, artists and labels,
-* releases (albums), playlists, and
+* musical works and recordings (optionally with audio files),
+* writers, artists and labels (optionally with photos/logos),
+* releases/albums with cover art, and
 * music libraries.
 
 It implements `CWR protocol <https://matijakolaric.com/articles/1/>`_
@@ -16,12 +16,13 @@ for **batch registration of musical works** with Collective Management Organizat
 Simple powerful **royalty management** can split received royalties among writers and 
 calculate fees.
 
-**Experimental features** added in 2022 include:
+Optionally, **playlists** can be created, and shared via secret links.
 
-* **images** (photo / logo / cover art) and descriptions for releases, writers, 
-  artists and labels,
-* **MP3 files** for recordings,
-* **sharable playlists** (secret URL).
+Community support
++++++++++++++++++++++++++++
+
+No individual support, of any kind, is provided for this free software. 
+See :doc:`support` for community support options.
 
 Features and limitations
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -30,12 +31,6 @@ Key features and limitations of DMP are listed below. If you need more,
 `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
 affordable Software-as-a-Service, is the recommended solution.
 
-No individual support
-------------------------
-
-No individual human support, of any kind, is provided for this free software. Please
-don't try, you will be **automatically blacklisted** and your message deleted.
-
 Music metadata management
 -------------------------
 
@@ -43,30 +38,24 @@ The database can store detailed metadata for musical works and recordings,
 data about writers, recording and performing artists, releases (albums), 
 labels and music libraries, as well as CWR exports and acknowledgements.
 
-No support for composite works
---------------------------------
-
-Composite musical works, as well as recordings based on multiple musical works 
-(e.g. medleys), are not supported.
-
 Total data validation
 -------------------------
 
-All entered data is validated for *CWR and DDEX compatibility* on field-, record-,
+All entered data is validated for CWR and DDEX compatibility on field-, record-,
 and transaction-level.
 
 Manuscript shares
 ------------------------
 
-Django-Music-Publisher uses a **single manuscript share** model, meaning that 
+DMP uses a **single manuscript share** model, meaning that 
 manuscript share splits between writers are same for performance, mechanical and 
 synchronisation rights.
 
 Original Publishing Agreement Data
 -----------------------------------------
 
-Basic *original publishing agreement* data can be entered, sufficient for 
-registrations in societies that require *society-assigned agreement numbers*.
+Basic **original publishing agreement** data can be entered, sufficient for 
+registrations in societies that require **society-assigned agreement numbers**.
 
 Share transfer
 -------------------------
@@ -91,6 +80,12 @@ Co-publishing
 
 **Co-publishing deals** are possible, with each publisher registering their own 
 shares. In this case, the other publisher appears as unknown in CWR files.
+
+No support for composite works
+--------------------------------
+
+Composite musical works, as well as recordings based on multiple musical works 
+(e.g. medleys), are not supported.
 
 Data Imports and Exports
 ------------------------
@@ -132,11 +127,6 @@ required in CWR, it uses reasonable defaults, e.g.:
   entered, and
 * *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First 
   Recording Refusal Indicator* are set to No.
-
-Shared playlists
-----------------------
-
-Shared playlists are only protected by a secret URL.
 
 No client access
 ----------------------

@@ -1,79 +1,51 @@
-Installation, Configuration and Updating
+Installation and Upgrading
 ****************************************
 
-.. note::
+Installation on  Heroku or Digital Ocean
+++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    The `HOME PAGE <https://dmp.matijakolaric.com>`_ of this project features a 
-    `wizard <https://dmp.matijakolaric.com/install/>`_, described later in this document.
-
-Django-Music-Publisher (DMP) can be installed/deployed as a stand-alone application, or used as a Python package.
-
-Standalone Deployment
-=====================
-
-Depending on your needs and technical knowledge, there are several options. They are listed below, starting with
-the simplest option, which can be performed without any technical skills in under 5 minutes.
-
-Deployment to Heroku (free tier)
---------------------------------
-
-  Heroku is a cloud platform that lets companies build, deliver, monitor and scale apps — we're the fastest way to go
-  from idea to URL, bypassing all those infrastructure headaches.
-
-  -- https://www.heroku.com/what
-
-Django-Music-Publisher can simply be deployed to a *Free dyno* on Heroku with a free *Dev* database with up to
-10.000 rows. Depending on complexity of your metadata, this is enough for up to 1.000 musical works.
-
-.. note::
-    With *Hobby Basic* database ($9 per month), the database limit raises to 10.000.000 rows, which should be more
-    than enough for any user od DMP.
-    See `Heroku prices <https://www.heroku.com/pricing>`_ for more information.
-
-You will have to sign up with Heroku at https://signup.heroku.com/ and verify your e-mail,
-no payment information is required.
-
-There are two ways to do it:
-
-* Guided deployment, which uses a wizard that helps you fill out the deployment form, and
-* Direct deployment, which does not, but takes you directly to the deployment form.
-
-Guided Deployment to Heroku
-+++++++++++++++++++++++++++
-
-The author and maintainer of Django-Music-Publisher provides a
-`pre-installation wizard <https://matijakolaric.com/dmp-preinstallation/>`_,
-which will guide you through the deployment process.
+`This wizard <https://dmp.matijakolaric.com/install/>`_ will help you in deploying
+DMP to Heroku or Digital Ocean.
 
 .. figure:: /images/pre_wizard.png
    :width: 100%
 
-There is also a compatibility list for many collective management organizations. If your
-CMO or combination of CMOs is not supported, you can use the next method.
+Fully automated deployment to Heroku
+======================================================
 
-Direct Deployment
-+++++++++++++++++
+This is the simplest option, and free for publishers with up to several hundreds 
+of musical works, if you don't need file uploads and related features (currently
+only sharable playlists).
 
-First, you need to sign up with `Heroku <https://heroku.com>`_ and/or log in.
-Then click `here <https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher/>`_.
-This will deploy the latest code in |version| branch.
+Free tier, sufficient for publishers with hundreds of works has two limitations that 
+can both be removed for $16 per month.
 
-.. figure:: /images/heroku.png
-   :width: 100%
+* Your instance goes to sleep after a while. When you access it, it takes 30 seconds
+  to spin up.
+* Your database is limited to 10.000 rows, which is enough for publishers with several 
+  hundred works
 
-You will be taken directly to the deployment form. Please note that you must fill the form correctly, or
-Django-Music-Publisher will not be deployed. This is by design.
+Valid e-mail address is required for registration, but no payment information.
 
-See `Settings`_ for more information.
+The whole process takes under 5 minutes, and other than entering the data
+about the publisher and initial password, it is all menus and next-next-next.
 
-Updating DMP on Heroku
-++++++++++++++++++++++
+Assisted deployment to Digital Ocean
+======================================================
 
-There are three reasons for updating DMP:
+Digital Ocean provides no free tier. For $17 per month, you can have your DMP 
+instance running all the time, and this includes file storage. If you use 
+``this affiliate link``, you will get $100 of free credits, so you get almost 
+6 months for free.
 
-* if there is a security issue with the version you installed,
-* if there is a bug that affects you, or
-* if you need some features from the newer version.
+The deployment process is not fully automated, and includes reading the instructions,
+copy-pasting of data, etc. It takes between 15 and 30 minutes.
+
+Upgrading
++++++++++++++++++++++++++++++++++++++++
+
+Heroku
+==========================================
 
 While installation to Heroku is really simple, updating requires some technical knowledge. The simplest way to update is to install `Heroku CLI (command line interface) <https://devcenter.heroku.com/articles/heroku-cli>`_. It can be installed on Windows, Mac and Linux.
 
@@ -89,17 +61,20 @@ Then you log in, clone the repository, enter the folder, add a new remote and pu
    
 If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
 
-Other options - manual deployment (developers or system engineers)
---------------------------------------------------------------------------------
+Digital Ocean
+==========================================
 
-Django-Music-Publisher is based on Django, which can be installed on Windows,
+If you followed the deployment instructions, upgrades are fully automatic.
+
+Manual installation
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+DMP - Django-Music-Publisher is based on Django, which can be installed on Windows,
 Mac and Linux PCs and servers. For more information, consult the official
 `Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
 
-Installing as Python package (developers only)
-===================================================================
-
-If you plan to use Django-Music-Publisher as one of the apps in your Django project, there is nothing special about it::
+If you plan to use Django-Music-Publisher as one of the apps in your 
+Django project, there is nothing special about it::
 
     pip install --upgrade django_music_publisher
 
@@ -134,8 +109,8 @@ Publisher-related settings
 * ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO) numeric code
 * ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society numeric code, rarely used
 
-For the list of codes, please refer to the official CISAC documentation. Society codes must
-be entered *without* leading zeros.
+For the list of codes, please have a look at societies.csv file in the music_publisher
+folder of the code repository.
 
 Agreement-related settings
 -----------------------------------
@@ -144,9 +119,9 @@ Agreement-related settings
 * ``PUBLISHING_AGREEMENT_PUBLISHER_MR`` - Mechanical share transferred to the publisher, default is '1.0' (100%)
 * ``PUBLISHING_AGREEMENT_PUBLISHER_SR`` - Synchronization share transferred to the publisher, default is '1.0' (100%)
 
-Other settings
+Case change
 ------------------------------------
-* ``REQUIRE_SAAN`` - Makes *Society-assigned agreement number* field required for controlled writers
-* ``REQUIRE_PUBLISHER_FEE`` - Makes *Publisher Fee* field required for controlled writers
-* ``FORCE_CASE`` - available options are ``upper`` and ``title`` and ``smart``, converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields to Title Case,
-  respectively.
+
+* ``OPTION_FORCE_CASE`` - available options are ``upper``, ``title`` and ``smart``, 
+  converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields 
+  to Title Case, respectively.
