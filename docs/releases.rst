@@ -139,8 +139,8 @@ who are **both publishers and labels**.
 
 This version added support for file uploads, either locally (for 
 traditional installations) or to S3 storage (for containers). Please
-consult :doc:`installation` for instructions how to enable file
-uploads.
+consult :doc:`installation` for instructions how to enable and 
+configure file storage.
 
 Writers, artists, labels and releases received ``image`` and 
 ``description`` fields, to be used in front-end representations.

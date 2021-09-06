@@ -119,9 +119,32 @@ Agreement-related settings
 * ``PUBLISHING_AGREEMENT_PUBLISHER_MR`` - Mechanical share transferred to the publisher, default is '1.0' (100%)
 * ``PUBLISHING_AGREEMENT_PUBLISHER_SR`` - Synchronization share transferred to the publisher, default is '1.0' (100%)
 
-Case change
+S3 storage
+------------------------------------
+
+Recommended S3 provider is Digital Ocean, it is simpler to set up and more affordable 
+than AWS. They call S3 *Spaces*. 
+
+For Digital Ocean, you need to set up only four settings.
+
+* ``S3_REGION`` (alias for ``AWS_S3_REGION_NAME``) and ``S3_BUCKET`` 
+  (alias for ``AWS_STORAGE_BUCKET_NAME``) - when you set up your *Spaces*
+
+* ``S3_ID`` (alias for``AWS_ACCESS_KEY_ID``) and
+  ``S3_SECRET`` (alias for ``AWS_SECRET_ACCESS_KEY``) - when you generate *Spaces* 
+  API key
+
+If you want to use AWS or some other S3 provider, the full list of settings is 
+available 
+`here <https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_.
+
+
+Other options
 ------------------------------------
 
 * ``OPTION_FORCE_CASE`` - available options are ``upper``, ``title`` and ``smart``, 
   converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields 
   to Title Case, respectively.
+
+``OPTION_FILES`` - enables support for file uploads (audio files and images), should
+  only be used for traditional installations, not for containers which are ephemeral.

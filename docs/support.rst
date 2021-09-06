@@ -1,7 +1,7 @@
 Support
 =================================
 
-No individual support is available for Django-Music-Publisher (DMP), 
+No individual support is available for DMP, 
 which is usual for open-source projects. Because many music publishers 
 are unfamiliar with this concept, an explanation is due here.
 
