@@ -4,8 +4,8 @@ Introduction
 **DMP** (Django-Music-Publisher) is free, open-source software for **managing music 
 metadata**:
 
-* musical works and recordings (optionally with audio files),
-* writers, artists and labels (optionally with photos/logos),
+* musical works and recordings (with audio files [#f1]_ ),
+* writers, artists and labels (with photos/logos [#f1]_ ),
 * releases/albums with cover art, and
 * music libraries.
 
@@ -16,7 +16,7 @@ for **batch registration of musical works** with Collective Management Organizat
 Simple powerful **royalty management** can split received royalties among writers and 
 calculate fees.
 
-Optionally, **playlists** can be created, and shared via secret links.
+**Playlists** can be created, and shared via secret links. [#f1]_
 
 Community support
 +++++++++++++++++++++++++++
@@ -131,6 +131,7 @@ required in CWR, it uses reasonable defaults, e.g.:
 No client access
 ----------------------
 
-DMP does not support any kind of power-protected client access.
+DMP does not support any kind of client access. Shared playlists are protected only 
+by secret URLs.
 
-
+.. [#f1] Requires file storage, see :doc:`installation`.
