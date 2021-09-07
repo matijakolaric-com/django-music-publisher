@@ -1060,6 +1060,17 @@ class Recording(models.Model):
             return from :meth:`django.db.models.Model.clean_fields`
 
         """
+        if not any([
+            self.recording_title,
+            self.version_title,
+            self.release_date,
+            self.isrc,
+            self.duration,
+            self.record_label,
+            self.artist,
+            self.audio_file]
+        ):
+            raise ValidationError('No data left, please delete instead.')
         if self.isrc:
             # Removing all characters added for readability
             self.isrc = self.isrc.replace('-', '').replace('.', '')
