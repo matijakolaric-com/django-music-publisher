@@ -5,12 +5,12 @@ This section is targeting software developers. It is extremely technical.
 The purpose of it is to provide an overview of the code.
 Unless you are a developer, you should really not dig into this.
 
-If you are a developer with no prior experience in this domain, you may find
+If you are a developer, with no prior experience in this domain, you may find
 the documentation too vague. You will have to do some homework, most notably
-about data structure and validation in Common Works Registration, versions
-2.1 and 3.0, as well as various royalty statement formats.
+about data structure and validation in Common Works Registration, as well as 
+various royalty statement formats.
 
-Examples can be found in tests (:mod:`music_publisher.tests`).
+Some examples can be found in tests (:mod:`music_publisher.tests`).
 
 Links
 +++++++++++++++++

@@ -10,12 +10,14 @@ DMP to Heroku or Digital Ocean.
 .. figure:: /images/pre_wizard.png
    :width: 100%
 
-Fully automated deployment to Heroku
+Heroku
 ======================================================
 
+Fully automated deployment
+------------------------------------------
+
 This is the simplest option, and free for publishers with up to several hundreds 
-of musical works, if you don't need file uploads and related features (currently
-only sharable playlists).
+of musical works. File storage and related features are not available out of the box.
 
 Free tier, sufficient for publishers with hundreds of works has two limitations that 
 can both be removed for $16 per month.
@@ -30,22 +32,8 @@ Valid e-mail address is required for registration, but no payment information.
 The whole process takes under 5 minutes, and other than entering the data
 about the publisher and initial password, it is all menus and next-next-next.
 
-Assisted deployment to Digital Ocean
-======================================================
-
-Digital Ocean provides no free tier. For $17 per month, you can have your DMP 
-instance running all the time, and this includes file storage. If you use 
-``this affiliate link``, you will get $100 of free credits, so you get almost 
-6 months for free.
-
-The deployment process is not fully automated, and includes reading the instructions,
-copy-pasting of data, etc. It takes between 15 and 30 minutes.
-
 Upgrading
-+++++++++++++++++++++++++++++++++++++++
-
-Heroku
-==========================================
+-------------------
 
 While installation to Heroku is really simple, updating requires some technical knowledge. The simplest way to update is to install `Heroku CLI (command line interface) <https://devcenter.heroku.com/articles/heroku-cli>`_. It can be installed on Windows, Mac and Linux.
 
@@ -62,9 +50,23 @@ Then you log in, clone the repository, enter the folder, add a new remote and pu
 If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
 
 Digital Ocean
-==========================================
+======================================================
 
-If you followed the deployment instructions, upgrades are fully automatic.
+Assisted deployment
+--------------------------------------
+
+Digital Ocean provides no free tier. For $17 per month, you can have your DMP 
+instance running all the time, and this includes file storage. If you use 
+``this affiliate link``, you will get $100 of free credits, so you get almost 
+6 months for free.
+
+The deployment process is not fully automated, and includes reading the instructions,
+copy-pasting of data, etc. It takes between 15 and 30 minutes.
+
+Upgrading
+----------------------
+
+Upgrades are very simple.
 
 Manual installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -147,5 +149,5 @@ Other options
   converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields 
   to Title Case, respectively.
 
-* ``OPTION_FILES`` - enables support for file uploads (audio files and images), should
-  only be used for traditional installations, not for containers which are ephemeral.
+* ``OPTION_FILES`` - enables support for file uploads (audio files and images), using 
+  local file storage

@@ -2,10 +2,10 @@ Support
 =================================
 
 No individual support is available for DMP, 
-which is usual for open-source projects. Because many music publishers 
+which is usual for open-source projects. Because most music professionals 
 are unfamiliar with this concept, an explanation is due here.
 
-Creator of this software is not the vendor for your instance of DMP.
+Creator of this software is not the vendor for your instance of DMP. You are.
 
 If you run into an issue with any third party, most notably a CMO or 
 their administrative agency, and they tell you to ask your software 
@@ -17,14 +17,14 @@ can do it but you.
 If you have any issues whatsoever, solving them is solely your 
 responsibility.
 
-Having said that, here is what you should do.
+Having said that, here is what you can try.
 
 Documentation
 ---------------------------------
 
-The first step in resolving any issues should be reading the relevant 
+The first step in resolving any issues is reading the relevant 
 parts of this documentation, most notably the
-:doc:`user manual <manual>`. If you are not sure what is relevant, 
+:doc:`manual`. If you are not sure what is relevant, 
 use search. If it does not help, read everything.
 
 Videos
@@ -86,5 +86,5 @@ Upgrade to Commercial
 
 `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ is 
 the commercial upgrade to DMP. It has many more features and comes 
-with professional support. Migration from **unmodified** DMP 
+with professional support. Migration from an **unmodified** DMP 
 instance is included in the price.
