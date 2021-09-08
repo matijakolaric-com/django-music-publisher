@@ -58,8 +58,6 @@ class DescriptionBase(models.Model):
     class Meta:
         abstract = True
 
-    objects = NotesManager()
-
     description = models.TextField(blank=True)
 
 

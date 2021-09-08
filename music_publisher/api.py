@@ -1,4 +1,4 @@
-from .models import Writer, Work, Recording, Artist, Release
+from .models import Writer, Work, Recording, Artist, Release, Label
 from rest_framework import viewsets, permissions, serializers, filters
 from rest_framework.response import Response
 
@@ -19,6 +19,12 @@ class WriterSimpleSerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.CharField(source='__str__', read_only=True)
 
 
+class LabelSimpleSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Label
+        fields = ['name', 'image', 'description']
+
+
 class WorkSimpleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Work
@@ -36,8 +42,11 @@ class RecordingSimpleSerializer(serializers.HyperlinkedModelSerializer):
 class ReleaseSimpleSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Release
-        fields = ['title', 'image', 'url']
+        fields = [
+            'title', 'image', 'description', 'release_label', 'release_date', 
+            'ean', 'url']
     title = serializers.CharField(source='release_title', read_only=True)
+    release_label = LabelSimpleSerializer(read_only=True)
 
 
 class RecordingListSerializer(serializers.HyperlinkedModelSerializer):
@@ -45,11 +54,12 @@ class RecordingListSerializer(serializers.HyperlinkedModelSerializer):
         model = Recording
         fields = [
             'title', 'isrc', 'duration', 'release_date', 'audio_file',
-            'artist', 'work', 'url'
+            'artist', 'record_label', 'work', 'url'
         ]
 
     artist = ArtistSimpleSerializer(read_only=True)
     work = WorkSimpleSerializer(read_only=True)
+    record_label = LabelSimpleSerializer(read_only=True)
 
 
 class RecordingSerializer(serializers.HyperlinkedModelSerializer):
@@ -57,12 +67,13 @@ class RecordingSerializer(serializers.HyperlinkedModelSerializer):
         model = Recording
         fields = [
             'title', 'isrc', 'duration', 'release_date', 'audio_file',
-            'artist', 'work', 'releases'
+            'artist', 'record_label', 'work', 'releases'
         ]
 
     artist = ArtistSimpleSerializer(read_only=True)
     work = WorkSimpleSerializer(read_only=True)
     releases = ReleaseSimpleSerializer(read_only=True, many=True)
+    record_label = LabelSimpleSerializer(read_only=True)
 
 
 class ArtistSerializer(ArtistSimpleSerializer):
@@ -132,8 +143,18 @@ class ReleaseViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = Release.objects.all()
+    queryset = Release.objects.exclude(
+        library__isnull=True, cd_identifier__isnull=False)  # excludes playlists
     serializer_class = ReleaseSimpleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class LabelViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = Label.objects.all()
+    serializer_class = LabelSimpleSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
