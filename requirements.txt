@@ -2,6 +2,7 @@ Django>=3.2.6,<3.3
 boto3==1.18.36
 dj_database_url==0.5.0
 django-cleanup==5.2.0
+djangorestframework==3.12.4
 django-storages==1.11.1
 music-metadata-territories==21.2
 Pillow==8.3.2
