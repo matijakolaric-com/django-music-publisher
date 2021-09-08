@@ -133,14 +133,14 @@ class ArtistAdmin(MusicPublisherAdmin):
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Photo', {'fields': ('photo', )}),
-                ('Notes', {'fields': ('notes',), }),
+                ('Public', {'fields': (('image', 'description'),)}),
+                ('Internal', {'fields': ('notes',), }),
             )
         else:
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Notes', {'fields': ('notes',), }),
+                ('Internal', {'fields': ('notes',), }),
             )
 
     formfield_overrides = {
@@ -222,8 +222,8 @@ class LabelAdmin(MusicPublisherAdmin):
         if settings.OPTION_FILES:
             return (
                 ('Name', {'fields': ('name',)}),
-                ('Logo', {'fields': ('photo',),}),
-                ('Notes', {'fields': ('notes',), }),
+                ('Public', {'fields': ('image', 'description')}),
+                ('Internal', {'fields': ('notes',)}),
             )
         else:
             return (
@@ -418,10 +418,13 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
             'fields': (
                 ('library', 'cd_identifier'),)
         }),
-        ('Release (album)', {
+        ('Release (album) metadata', {
             'fields': (
                 ('release_title', 'release_label'),
                 ('ean', 'release_date'))
+        }),
+        ('Public', {
+            'fields': ('image', 'description')
         }),
     )
 
@@ -615,10 +618,13 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     search_fields = ('release_title',)
 
     fieldsets = (
-        (None, {
+        ('Release (album) metadata', {
             'fields': (
                 ('release_title', 'release_label'),
                 ('ean', 'release_date'))
+        }),
+        ('Public', {
+            'fields': ('image', 'description')
         }),
     )
 
@@ -721,8 +727,8 @@ class WriterAdmin(MusicPublisherAdmin):
                          ('saan', 'publisher_fee'))
                     ),
                 }),
-                ('Photo', {'fields': ('photo',), }),
-                ('Notes', {
+                ('Public', {'fields': ('image', 'description')}),
+                ('Internal', {
                     'fields': ('notes',),
                 }),
             ]
@@ -746,7 +752,7 @@ class WriterAdmin(MusicPublisherAdmin):
                          ('saan', 'publisher_fee'))
                     ),
                 }),
-                ('Notes', {
+                ('Internal', {
                     'fields': ('notes',),
                 }),
             ]

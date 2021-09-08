@@ -155,7 +155,7 @@ class Release(ReleaseBase):
         Label, verbose_name='Release (album) label', null=True, blank=True,
         on_delete=models.PROTECT)
     recordings = models.ManyToManyField(
-        'Recording', through='Track')
+        'Recording', through='Track', related_name='recordings')
 
     def __str__(self):
         if self.cd_identifier:
@@ -583,7 +583,8 @@ class Work(TitleBase):
     last_change = models.DateTimeField(
         'Last Edited', editable=False, null=True)
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
-    writers = models.ManyToManyField('Writer', through='WriterInWork')
+    writers = models.ManyToManyField(
+        'Writer', through='WriterInWork', related_name='works')
 
     objects = WorkManager()
 
@@ -1040,7 +1041,7 @@ class Recording(models.Model):
     work = models.ForeignKey(
         Work, on_delete=models.CASCADE, related_name='recordings')
     artist = models.ForeignKey(
-        Artist, verbose_name='Recording Artist',
+        Artist, verbose_name='Recording Artist', related_name='recordings',
         on_delete=models.PROTECT, blank=True, null=True)
 
     releases = models.ManyToManyField(Release, through='Track')
@@ -1097,7 +1098,7 @@ class Recording(models.Model):
         """Generate title from various fields."""
         return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
-            self.work.title) + (u' \U0001F508' if self.audio_file else '')
+            self.work.title) #  + (u' \U0001F508' if self.audio_file else '')
 
     @property
     def recording_id(self):

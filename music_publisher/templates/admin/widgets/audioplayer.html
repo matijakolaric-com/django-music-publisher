@@ -1,5 +1,5 @@
 <div class="fieldBox {{ widget.name }}">{% if widget.is_initial %}<audio controls><source src="{{ widget.value.url }}"></audio>
-<br>{% if widget.value %}{% endif %}<span class="help">{{ widget.initial_text }}:<a href="{{ widget.value.url }}" target="_blank">{{ widget.value|truncatechars:32 }}</a></span>{% if not widget.required %}
+<br>{% if widget.value %}{% endif %}<span class="help">{{ widget.initial_text }}: <a href="{{ widget.value.url }}" target="_blank">{{ widget.value|truncatechars:32 }}</a></span>{% if not widget.required %}
 <span class="clearable-file-input help"><input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}>
 <label for="{{ widget.checkbox_id }}">{{ widget.clear_checkbox_label }}</label></span>{% endif %}<br>
 {{ widget.input_text }}:{% endif %}

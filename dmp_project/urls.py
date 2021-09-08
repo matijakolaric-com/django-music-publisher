@@ -14,15 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
-from music_publisher.royalty_calculation import RoyaltyCalculationView
-
 
 urlpatterns = [
-    path('royalty_calculation/', RoyaltyCalculationView.as_view(),
-         name='royalty_calculation'),
-    # admin moved to root
+    path('', include('music_publisher.urls')),
     path('', admin.site.urls),
 ]
 

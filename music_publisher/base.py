@@ -102,7 +102,7 @@ class PersonBase(models.Model):
     last_name = models.CharField(
         max_length=45, db_index=True,
         validators=(CWRFieldValidator('name'),))
-    photo = models.ImageField(max_length=255, upload_to=upload_to, blank=True)
+    image = models.ImageField(max_length=255, upload_to=upload_to, blank=True)
 
     def __str__(self):
         if self.first_name:
@@ -291,7 +291,7 @@ class LabelBase(NotesBase, DescriptionBase):
     name = models.CharField(
         max_length=60, unique=True,
         validators=(CWRFieldValidator('name'),))
-    photo = models.ImageField(
+    image = models.ImageField(
         'Logo', max_length=255, upload_to=upload_to, blank=True)
 
 
@@ -312,7 +312,7 @@ class LibraryBase(models.Model):
         validators=(CWRFieldValidator('name'),))
 
 
-class ReleaseBase(models.Model):
+class ReleaseBase(DescriptionBase):
     """Music Release base class
 
     Attributes:
@@ -349,3 +349,6 @@ class ReleaseBase(models.Model):
     # release_label = models.CharField(
     #     max_length=60, unique=True,
     #     validators=(CWRFieldValidator('name'),))
+
+    image = models.ImageField(
+        'Cover Art', max_length=255, upload_to=upload_to, blank=True)
