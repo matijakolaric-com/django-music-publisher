@@ -172,7 +172,8 @@ class ArtistAdmin(MusicPublisherAdmin):
         """
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('work', distinct=True))
-        qs = qs.annotate(models.Count('recording', distinct=True))
+        qs = qs.annotate(recording__count=models.Count(
+            'recordings', distinct=True))
         return qs
 
     def work_count(self, obj):
@@ -785,7 +786,7 @@ class WriterAdmin(MusicPublisherAdmin):
         """Optimized queryset for changelist view.
         """
         qs = super().get_queryset(request)
-        qs = qs.annotate(models.Count('work', distinct=True))
+        qs = qs.annotate(work__count=models.Count('works', distinct=True))
         return qs
 
     def work_count(self, obj):
