@@ -1,9 +1,8 @@
-from .models import Writer, Work, Recording, Artist, Release, Label
+from .models import Writer, Work, Recording, Artist, Release, Label, Track
 from rest_framework import viewsets, permissions, serializers, filters
-from rest_framework.response import Response
 
 
-class ArtistSimpleSerializer(serializers.HyperlinkedModelSerializer):
+class ArtistNestedSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Artist
         fields = ['name', 'image', 'description', 'url']
@@ -11,176 +10,133 @@ class ArtistSimpleSerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.CharField(source='__str__', read_only=True)
 
 
-class WriterSimpleSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Writer
-        fields = ['name', 'image', 'description', 'url']
-
-    name = serializers.CharField(source='__str__', read_only=True)
-
-
-class LabelSimpleSerializer(serializers.HyperlinkedModelSerializer):
+class LabelNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Label
         fields = ['name', 'image', 'description']
 
 
-class WorkSimpleSerializer(serializers.HyperlinkedModelSerializer):
+class WriterNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Writer
+        fields = ['name', 'ipi_name', 'image', 'description']
+
+    name = serializers.CharField(source='__str__', read_only=True)
+
+
+class WriterNamesField(serializers.RelatedField):
+    def to_representation(self, value):
+        for writer in value.distinct():
+            yield WriterNestedSerializer(writer).data
+
+
+class WorkNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Work
-        fields = ['title', 'url']
+        fields = ['title', 'iswc', 'writers']
+
+    writers = WriterNamesField(read_only=True)
 
 
-class RecordingSimpleSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Recording
-        fields = [
-            'title', 'isrc', 'duration', 'release_date', 'audio_file', 'url'
-        ]
-
-
-class ReleaseSimpleSerializer(serializers.HyperlinkedModelSerializer):
+class ReleaseListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Release
         fields = [
-            'title', 'image', 'description', 'release_label', 'release_date', 
+            'title', 'image', 'description', 'release_label', 'release_date',
             'ean', 'url']
     title = serializers.CharField(source='release_title', read_only=True)
-    release_label = LabelSimpleSerializer(read_only=True)
+    release_label = LabelNestedSerializer(read_only=True)
 
 
-class RecordingListSerializer(serializers.HyperlinkedModelSerializer):
+class RecordingInTrackSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Recording
         fields = [
             'title', 'isrc', 'duration', 'release_date', 'audio_file',
-            'artist', 'record_label', 'work', 'url'
+            'artist',
+            'record_label',
+            'work',
         ]
 
-    artist = ArtistSimpleSerializer(read_only=True)
-    work = WorkSimpleSerializer(read_only=True)
-    record_label = LabelSimpleSerializer(read_only=True)
+    artist = ArtistNestedSerializer(read_only=True)
+    work = WorkNestedSerializer(read_only=True)
+    record_label = LabelNestedSerializer(read_only=True)
 
 
-class RecordingSerializer(serializers.HyperlinkedModelSerializer):
+class TrackNestedSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Recording
+        model = Track
+        fields = ['cut_number', 'recording']
+
+    recording = RecordingInTrackSerializer(read_only=True)
+
+
+class ReleaseDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Release
         fields = [
-            'title', 'isrc', 'duration', 'release_date', 'audio_file',
-            'artist', 'record_label', 'work', 'releases'
-        ]
-
-    artist = ArtistSimpleSerializer(read_only=True)
-    work = WorkSimpleSerializer(read_only=True)
-    releases = ReleaseSimpleSerializer(read_only=True, many=True)
-    record_label = LabelSimpleSerializer(read_only=True)
-
-
-class ArtistSerializer(ArtistSimpleSerializer):
-    class Meta:
-        model = Artist
-        fields = ['name', 'image', 'description', 'recordings']
-
-    recordings = RecordingSimpleSerializer(many=True, read_only=True)
-
-
-# class RecordingSerializer(serializers.HyperlinkedModelSerializer):
-#     class Meta:
-#         model = Recording
-#         fields = [
-#             'title', 'isrc', 'duration', 'release_date', 'audio_file', 'artist'
-#         ]
-# 
-#     artist = ArtistSimpleSerializer(read_only=True)
-
-
-class WriterSerializer(WriterSimpleSerializer):
-    class Meta:
-        model = Writer
-        fields = ['name', 'image', 'description', 'url', 'works']
-    works = WorkSimpleSerializer(many=True, read_only=True)
-
-
-class RecordingViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = Recording.objects.all()  # exclude(audio_file='')
-    serializer_class = RecordingListSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['^work__title', '^recording_title', '^version_title']
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer_class = RecordingSerializer
-        kwargs.pop('pk')
-        kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(instance, *args, **kwargs)
-        return Response(serializer.data)
-
-
-class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = Artist.objects.exclude(image='', description='').distinct()
-    serializer_class = ArtistSimpleSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['^last_name', '^first_name']
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer_class = ArtistSerializer
-        kwargs.pop('pk')
-        kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(instance, *args, **kwargs)
-        return Response(serializer.data)
+            'title', 'image', 'description', 'release_label', 'release_date',
+            'ean', 'tracks']
+    title = serializers.CharField(source='release_title', read_only=True)
+    release_label = LabelNestedSerializer(read_only=True)
+    tracks = TrackNestedSerializer(many=True, read_only=True)
 
 
 class ReleaseViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = Release.objects.exclude(
-        library__isnull=True, cd_identifier__isnull=False)  # excludes playlists
-    serializer_class = ReleaseSimpleSerializer
+    queryset = Release.objects \
+        .exclude(library__isnull=True, cd_identifier__isnull=False) \
+        .exclude(image='', description='')\
+        .select_related('release_label')
+
     permission_classes = [permissions.IsAuthenticated]
 
-
-class LabelViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = Label.objects.all()
-    serializer_class = LabelSimpleSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class WriterViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = Writer.objects.exclude(image='', description='').distinct()
-    serializer_class = WriterSimpleSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['^last_name', '^first_name']
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer_class = WriterSerializer
-        kwargs.pop('pk')
+    def get_serializer(self, *args, **kwargs):
+        if kwargs.get('many'):
+            serializer_class = ReleaseListSerializer
+        else:
+            serializer_class = ReleaseDetailSerializer
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(instance, *args, **kwargs)
-        return Response(serializer.data)
+        return serializer_class(*args, **kwargs)
 
 
-class WorkViewSet(viewsets.ReadOnlyModelViewSet):
+class RecordingInArtistSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Recording
+        fields = [
+            'title', 'isrc', 'duration', 'release_date', 'audio_file',
+            'record_label',
+            'work',
+        ]
+
+    work = WorkNestedSerializer(read_only=True)
+    record_label = LabelNestedSerializer(read_only=True)
+
+
+class ArtistDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Release
+        fields = ['name', 'image', 'description', 'recordings']
+
+    name = serializers.CharField(source='__str__', read_only=True)
+    recordings = RecordingInArtistSerializer(read_only=True, many=True)
+
+
+class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = Work.objects.all()
-    serializer_class = WorkSimpleSerializer
+    queryset = Artist.objects\
+        .exclude(image='', description='')
+
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer(self, *args, **kwargs):
+        if kwargs.get('many'):
+            serializer_class = ArtistNestedSerializer
+        else:
+            serializer_class = ArtistDetailSerializer
+        kwargs.setdefault('context', self.get_serializer_context())
+        return serializer_class(*args, **kwargs)
