@@ -10,6 +10,7 @@ from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -379,9 +380,11 @@ class Playlist(Release):
             self.cd_identifier = self.cd_identifier.decode().rstrip('=')[:15]
         return super().clean(*args, **kwargs)
 
+    @property
     def secret_url(self):
-        return f'https://example.com/{self.cd_identifier}/'
-    secret_url.short_description = 'Secret URL'
+        location = reverse('secret_playlist', args=[self.cd_identifier])
+        return location
+
 
 
 class Writer(WriterBase):

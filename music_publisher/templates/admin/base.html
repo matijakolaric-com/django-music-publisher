@@ -192,8 +192,7 @@
     <div id="header">
         <div id="branding">
         {% block branding %}{% endblock %}
-            <h2>empowered&nbsp;by&nbsp;<a href="https://matijakolaric.com/dmp-empoweredby/" target="_blank">MATIJA KOLARIĆ</a>
-            </h2>
+        {% block empoweredby %}<h2>empowered&nbsp;by&nbsp;<a href="https://matijakolaric.com/dmp-empoweredby/" target="_blank">MATIJA KOLARIĆ</a></h2>{% endblock %}
         </div>
         {% block usertools %}
         {% if has_permission %}

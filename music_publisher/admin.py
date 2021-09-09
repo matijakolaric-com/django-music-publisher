@@ -17,7 +17,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
@@ -533,7 +533,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
         (None, {
             'fields': (
                 ('release_title', 'secret_url'),
-                # 'recordings'
+                'description'
             )
         }),
     )
@@ -549,6 +549,10 @@ class PlaylistAdmin(MusicPublisherAdmin):
 
     search_fields = ('release_title', '^cd_identifier')
 
+    def secret_url(self, obj):
+        url = self.request.build_absolute_uri(obj.secret_url)
+        return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
@@ -558,6 +562,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
         """
+        self.request = request
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
