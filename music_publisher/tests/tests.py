@@ -548,6 +548,7 @@ class AdminTest(TestCase):
                 continue
             if 'first_name' in data:
                 data['first_name'] += ' JR.'
+            data.pop('image', None)
             response = self.client.post(
                 url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)

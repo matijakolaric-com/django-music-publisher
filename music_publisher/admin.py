@@ -17,7 +17,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
@@ -133,14 +133,14 @@ class ArtistAdmin(MusicPublisherAdmin):
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Photo', {'fields': ('photo', )}),
-                ('Notes', {'fields': ('notes',), }),
+                ('Public', {'fields': (('image', 'description'),)}),
+                ('Internal', {'fields': ('notes',), }),
             )
         else:
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Notes', {'fields': ('notes',), }),
+                ('Internal', {'fields': ('notes',), }),
             )
 
     formfield_overrides = {
@@ -172,7 +172,8 @@ class ArtistAdmin(MusicPublisherAdmin):
         """
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('work', distinct=True))
-        qs = qs.annotate(models.Count('recording', distinct=True))
+        qs = qs.annotate(recording__count=models.Count(
+            'recordings', distinct=True))
         return qs
 
     def work_count(self, obj):
@@ -222,8 +223,8 @@ class LabelAdmin(MusicPublisherAdmin):
         if settings.OPTION_FILES:
             return (
                 ('Name', {'fields': ('name',)}),
-                ('Logo', {'fields': ('photo',),}),
-                ('Notes', {'fields': ('notes',), }),
+                ('Public', {'fields': ('image', 'description')}),
+                ('Internal', {'fields': ('notes',)}),
             )
         else:
             return (
@@ -418,10 +419,13 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
             'fields': (
                 ('library', 'cd_identifier'),)
         }),
-        ('Release (album)', {
+        ('Release (album) metadata', {
             'fields': (
                 ('release_title', 'release_label'),
                 ('ean', 'release_date'))
+        }),
+        ('Public', {
+            'fields': ('image', 'description')
         }),
     )
 
@@ -529,7 +533,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
         (None, {
             'fields': (
                 ('release_title', 'secret_url'),
-                # 'recordings'
+                'description'
             )
         }),
     )
@@ -545,6 +549,10 @@ class PlaylistAdmin(MusicPublisherAdmin):
 
     search_fields = ('release_title', '^cd_identifier')
 
+    def secret_url(self, obj):
+        url = self.request.build_absolute_uri(obj.secret_url)
+        return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
@@ -554,6 +562,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
     def get_queryset(self, request):
         """Optimized queryset for changelist view.
         """
+        self.request = request
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
@@ -615,10 +624,13 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     search_fields = ('release_title',)
 
     fieldsets = (
-        (None, {
+        ('Release (album) metadata', {
             'fields': (
                 ('release_title', 'release_label'),
                 ('ean', 'release_date'))
+        }),
+        ('Public', {
+            'fields': ('image', 'description')
         }),
     )
 
@@ -721,8 +733,8 @@ class WriterAdmin(MusicPublisherAdmin):
                          ('saan', 'publisher_fee'))
                     ),
                 }),
-                ('Photo', {'fields': ('photo',), }),
-                ('Notes', {
+                ('Public', {'fields': ('image', 'description')}),
+                ('Internal', {
                     'fields': ('notes',),
                 }),
             ]
@@ -746,7 +758,7 @@ class WriterAdmin(MusicPublisherAdmin):
                          ('saan', 'publisher_fee'))
                     ),
                 }),
-                ('Notes', {
+                ('Internal', {
                     'fields': ('notes',),
                 }),
             ]
@@ -779,7 +791,7 @@ class WriterAdmin(MusicPublisherAdmin):
         """Optimized queryset for changelist view.
         """
         qs = super().get_queryset(request)
-        qs = qs.annotate(models.Count('work', distinct=True))
+        qs = qs.annotate(work__count=models.Count('works', distinct=True))
         return qs
 
     def work_count(self, obj):
