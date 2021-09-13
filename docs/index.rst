@@ -23,5 +23,6 @@ Content
    releases
    LICENSE
    manual
+   restapi
    videos
    modules
