@@ -9,8 +9,8 @@ class APIRootView(routers.APIRootView):
     """Root of the REST API
 
     ``artists`` and ``releases`` give access to artists and releases with \
-    public data (``image`` or ``description``) set, and **ALL** related
-    objects and their files, including recordings and MP3 files.
+    public data (``image`` or ``description``), related
+    objects and *all* files, including images and audio files.
 
     Endpoint ``artists`` requires authentication and ``view_artist``
     permission. Endpoint ``releases`` requires authentication and
@@ -29,5 +29,6 @@ urlpatterns = [
     path('royalty_calculation/', RoyaltyCalculationView.as_view(),
          name='royalty_calculation'),
     path('api/v1/', include(router.urls)),
-    path('secret_playlist/<slug:secret>/', SecretPlaylistView.as_view(), name='secret_playlist'),
+    path('secret_playlist/<slug:secret>/', SecretPlaylistView.as_view(),
+         name='secret_playlist'),
 ]

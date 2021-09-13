@@ -136,6 +136,7 @@ class RecordingInArtistSerializer(serializers.HyperlinkedModelSerializer):
 
 class ArtistDetailSerializer(serializers.ModelSerializer):
     class Meta:
+
         model = Release
         fields = ['name', 'image', 'description', 'recordings']
 
@@ -148,7 +149,7 @@ class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
     API endpoint for artists with images or descriptions.
 
     Requires authenticated user with appropriate ``view`` permission.
-    
+
     Note that all related information, including files are included in
     this view.
     """
