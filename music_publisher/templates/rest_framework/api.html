@@ -1,0 +1,42 @@
+{% extends "rest_framework/base.html" %}
+{% load static %}
+{% load i18n %}
+{% block style %}{{ block.super }}
+    <style>
+        body {background: white !important;}
+        body a {color: #d50000}
+        .breadcrumb {
+            padding: 8px 0;
+            margin-bottom: 20px;
+            list-style: none;
+            background-color: transparent;
+            border-radius: 0;
+        }
+        .breadcrumb li.active a {
+           color: #333;
+        }
+        .btn-primary {
+            color: #fff;
+            background-color: #d50000;
+            border-color: #d50000;
+        }
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #d50000;
+            border-color: #7f0000;
+        }
+        .navbar {background: #d50000; color: white}
+        .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
+            color: #fff;
+            background-color: #d50000;
+            border-color: #7f0000;
+        }
+        .str, .atv, .lit {
+            color: #d50000;
+        }
+    </style>
+{% endblock %}
+{% block branding %}
+<a class='navbar-brand' rel="nofollow" href='https://dmp.matijakolaric.com/' style="color:white">Django Music Publisher API</a>
+{% endblock %}
+ 
