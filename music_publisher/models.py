@@ -818,9 +818,9 @@ class ArtistInWork(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name = 'Performing artist'
+        verbose_name = 'Artist performing'
         verbose_name_plural = \
-            'Performing artists (not mentioned in recordings section)'
+            'Artists performing (not mentioned in recordings section)'
         unique_together = (('work', 'artist'),)
         ordering = ('artist__last_name', 'artist__first_name')
 

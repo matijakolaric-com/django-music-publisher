@@ -1,5 +1,18 @@
 from .models import Writer, Work, Recording, Artist, Release, Label, Track
-from rest_framework import viewsets, permissions, serializers, filters
+from rest_framework import viewsets, permissions, serializers, filters, permissions
+
+
+class DjangoModelPermissionsIncludingView(permissions.DjangoModelPermissions):
+    """Requires the user to have proper permissions, including view."""
+    perms_map = {
+        'GET': ['%(app_label)s.view_%(model_name)s'],
+        'OPTIONS': ['%(app_label)s.view_%(model_name)s'],
+        'HEAD': ['%(app_label)s.view_%(model_name)s'],
+        'POST': ['%(app_label)s.add_%(model_name)s'],
+        'PUT': ['%(app_label)s.change_%(model_name)s'],
+        'PATCH': ['%(app_label)s.change_%(model_name)s'],
+        'DELETE': ['%(app_label)s.delete_%(model_name)s'],
+    }
 
 
 class ArtistNestedSerializer(serializers.HyperlinkedModelSerializer):
@@ -84,14 +97,20 @@ class ReleaseDetailSerializer(serializers.ModelSerializer):
 
 class ReleaseViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint for releases with images or descriptions.
+
+    Requires authenticated user with appropriate ``view`` permission.
+
+    Note that all related information, including files are included in
+    this view.
+
     """
     queryset = Release.objects \
         .exclude(library__isnull=True, cd_identifier__isnull=False) \
         .exclude(image='', description='')\
         .select_related('release_label')
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DjangoModelPermissionsIncludingView]
 
     def get_serializer(self, *args, **kwargs):
         if kwargs.get('many'):
@@ -126,12 +145,17 @@ class ArtistDetailSerializer(serializers.ModelSerializer):
 
 class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint for artists with images or descriptions.
+
+    Requires authenticated user with appropriate ``view`` permission.
+    
+    Note that all related information, including files are included in
+    this view.
     """
     queryset = Artist.objects\
         .exclude(image='', description='')
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DjangoModelPermissionsIncludingView]
 
     def get_serializer(self, *args, **kwargs):
         if kwargs.get('many'):

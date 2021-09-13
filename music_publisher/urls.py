@@ -4,9 +4,24 @@ from rest_framework import routers
 from .api import ReleaseViewSet, ArtistViewSet
 from .views import SecretPlaylistView
 
-urlpatterns = [
-]
+
+class APIRootView(routers.APIRootView):
+    """Root of the REST API
+
+    ``artists`` and ``releases`` give access to artists and releases with \
+    public data (``image`` or ``description``) set, and **ALL** related
+    objects and their files, including recordings and MP3 files.
+
+    Endpoint ``artists`` requires authentication and ``view_artist``
+    permission. Endpoint ``releases`` requires authentication and
+    ``view_releases`` permission.
+
+    """
+    pass
+
+
 router = routers.DefaultRouter()
+router.APIRootView = APIRootView
 router.register(r'artists', ArtistViewSet)
 router.register(r'releases', ReleaseViewSet)
 
