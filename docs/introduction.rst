@@ -146,8 +146,9 @@ REST API
 Read-only REST API, with basic HTTP authentication, is available. 
 It can be used for:
 
+* Complete data export
 * Metadata exchange
 * Content exchange [#f1]_ [#f2]_ 
 
-.. [#f1] Requires persistant file storage
+.. [#f1] Requires persistent file storage
 .. [#f2] Plugin exists for WordPress

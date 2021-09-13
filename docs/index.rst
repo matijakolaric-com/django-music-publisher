@@ -9,10 +9,7 @@ DMP
 * **managing music metadata**, 
 * **registration of musical works**, 
 * **royalty management**, and
-* **data exchange**.
-
-Content
---------------------------
+* **data distribution**.
 
 .. toctree::
    :maxdepth: 1
