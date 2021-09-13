@@ -8,8 +8,8 @@ from .views import SecretPlaylistView
 class APIRootView(routers.APIRootView):
     """Root of the REST API
 
-    ``artists`` and ``releases`` give access to artists and releases with \
-    public data (``image`` or ``description``), related
+    Endpoints ``artists`` and ``releases`` give access to artists and releases 
+    with public data (``image`` or ``description``), related
     objects and *all* files, including images and audio files.
 
     Endpoint ``artists`` requires authentication and ``view_artist``
