@@ -1,7 +1,8 @@
 from .models import Writer, Work, Recording, Artist, Release, Label, Track, Playlist
-from rest_framework import viewsets, permissions, serializers, filters, permissions, mixins
-from rest_framework.decorators import action, api_view
+from rest_framework import viewsets, serializers, permissions
 from rest_framework.response import Response
+from django.utils.timezone import now
+from django.http import Http404
 
 
 class DjangoModelPermissionsIncludingView(permissions.DjangoModelPermissions):
@@ -34,9 +35,7 @@ class LabelNestedSerializer(serializers.ModelSerializer):
 class WriterNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Writer
-        fields = ['name', 'ipi_name', 'image', 'description']
-
-    name = serializers.CharField(source='__str__', read_only=True)
+        fields = ['last_name', 'first_name', 'ipi_name', 'image', 'description']
 
 
 class WriterNamesField(serializers.RelatedField):
@@ -48,7 +47,7 @@ class WriterNamesField(serializers.RelatedField):
 class WorkNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Work
-        fields = ['title', 'iswc', 'writers']
+        fields = ['title', 'work_id', 'iswc', 'writers']
 
     writers = WriterNamesField(read_only=True)
 
@@ -67,7 +66,9 @@ class RecordingInTrackSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Recording
         fields = [
-            'title', 'isrc', 'duration', 'release_date', 'audio_file',
+            'title', 
+            'recording_id', 'isrc',
+            'duration', 'release_date', 'audio_file',
             'artist',
             'record_label',
             'work',
@@ -169,13 +170,23 @@ class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
         return serializer_class(*args, **kwargs)
 
 
-class PlaylistSerializer(serializers.HyperlinkedModelSerializer):
+class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Playlist
-        fields = ['release_title', 'url']
+        fields = ['release_title', 'recordings']
+    recordings = RecordingInTrackSerializer(many=True, read_only=True)
 
 
-class PlaylistViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PlaylistSerializer
+class PlaylistViewSet(viewsets.ViewSet):
     queryset = Playlist.objects.none()
+    lookup_field = 'cd_identifier'
+    serializer_class = PlaylistSerializer
+
+    def retrieve(self, request, cd_identifier=None):
+        playlist = Playlist.objects.filter(cd_identifier=cd_identifier)
+        playlist = playlist.exclude(release_date__lt=now())
+        playlist = playlist.first()
+        if playlist is None:
+            raise Http404
+        return Response(PlaylistSerializer(playlist, context={'request': request}).data)

@@ -24,7 +24,7 @@ router = routers.DefaultRouter()
 router.APIRootView = APIRootView
 router.register(r'artists', ArtistViewSet)
 router.register(r'releases', ReleaseViewSet)
-router.register(r'playlist', PlaylistViewSet)
+router.register(r'secret_playlist', PlaylistViewSet)
 
 urlpatterns = [
     path('royalty_calculation/', RoyaltyCalculationView.as_view(),
