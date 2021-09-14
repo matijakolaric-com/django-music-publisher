@@ -34,6 +34,7 @@ class PlaylistForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['release_title'].required = True
         self.fields['release_title'].label = 'Playlist title'
+        self.fields['release_date'].label = 'Valid Until'
 
 
 class AlternateTitleFormSet(BaseInlineFormSet):

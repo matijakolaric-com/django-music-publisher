@@ -386,7 +386,6 @@ class Playlist(Release):
         return location
 
 
-
 class Writer(WriterBase):
     """Writers.
 

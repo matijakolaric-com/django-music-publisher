@@ -532,8 +532,10 @@ class PlaylistAdmin(MusicPublisherAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('release_title', 'secret_url'),
-                'description'
+                'secret_url',
+                'release_title',
+                'description',
+                'release_date'
             )
         }),
     )
@@ -542,16 +544,25 @@ class PlaylistAdmin(MusicPublisherAdmin):
 
     list_display = (
         'release_title',
+        'valid',
         'secret_url',
         'track_count',
     )
+
+    def valid(self, obj):
+        if obj.release_date and obj.release_date < now().date():
+            return False
+        return True
+    valid.boolean = True
     readonly_fields = ('cd_identifier', 'secret_url')
 
     search_fields = ('release_title', '^cd_identifier')
 
     def secret_url(self, obj):
-        url = self.request.build_absolute_uri(obj.secret_url)
-        return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+        if self.valid(obj):
+            url = self.request.build_absolute_uri(obj.secret_url)
+            return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+        return 'expired'
 
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
@@ -564,6 +575,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
         """
         self.request = request
         qs = super().get_queryset(request)
+        qs = qs.exclude(release_date__gt=now())
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
 
