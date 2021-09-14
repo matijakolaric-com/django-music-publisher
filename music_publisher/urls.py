@@ -1,7 +1,7 @@
 from django.urls import path, include
 from music_publisher.royalty_calculation import RoyaltyCalculationView
 from rest_framework import routers
-from .api import ReleaseViewSet, ArtistViewSet
+from .api import ReleaseViewSet, ArtistViewSet, PlaylistViewSet
 from .views import SecretPlaylistView
 
 
@@ -24,6 +24,7 @@ router = routers.DefaultRouter()
 router.APIRootView = APIRootView
 router.register(r'artists', ArtistViewSet)
 router.register(r'releases', ReleaseViewSet)
+router.register(r'playlist', PlaylistViewSet)
 
 urlpatterns = [
     path('royalty_calculation/', RoyaltyCalculationView.as_view(),

@@ -1,5 +1,7 @@
-from .models import Writer, Work, Recording, Artist, Release, Label, Track
-from rest_framework import viewsets, permissions, serializers, filters, permissions
+from .models import Writer, Work, Recording, Artist, Release, Label, Track, Playlist
+from rest_framework import viewsets, permissions, serializers, filters, permissions, mixins
+from rest_framework.decorators import action, api_view
+from rest_framework.response import Response
 
 
 class DjangoModelPermissionsIncludingView(permissions.DjangoModelPermissions):
@@ -165,3 +167,15 @@ class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
             serializer_class = ArtistDetailSerializer
         kwargs.setdefault('context', self.get_serializer_context())
         return serializer_class(*args, **kwargs)
+
+
+class PlaylistSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+
+        model = Playlist
+        fields = ['release_title', 'url']
+
+
+class PlaylistViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PlaylistSerializer
+    queryset = Playlist.objects.none()
