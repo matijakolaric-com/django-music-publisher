@@ -382,8 +382,11 @@ class Playlist(Release):
 
     @property
     def secret_url(self):
-        location = reverse('secret_playlist', args=[self.cd_identifier])
-        return location
+        return reverse('secret_playlist', args=[self.cd_identifier])
+
+    @property
+    def secret_api_url(self):
+        return reverse('playlist-detail', args=[self.cd_identifier])
 
 
 class Writer(WriterBase):

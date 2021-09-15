@@ -179,6 +179,9 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
 
 class PlaylistViewSet(viewsets.ViewSet):
+    """Endpoint for retrieval of playlists, using secret URL.
+    You can find the URL in the playlist ``change view``.
+    """
     queryset = Playlist.objects.none()
     lookup_field = 'cd_identifier'
     serializer_class = PlaylistSerializer
@@ -189,4 +192,5 @@ class PlaylistViewSet(viewsets.ViewSet):
         playlist = playlist.first()
         if playlist is None:
             raise Http404
-        return Response(PlaylistSerializer(playlist, context={'request': request}).data)
+        return Response(PlaylistSerializer(
+            playlist, context={'request': request}).data)
