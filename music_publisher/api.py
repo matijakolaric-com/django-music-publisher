@@ -1,5 +1,7 @@
-from .models import Writer, Work, Recording, Artist, Release, Label, Track, Playlist
-from rest_framework import viewsets, serializers, permissions
+from .models import (
+    Writer, Work, Recording, Artist, Release, CommercialRelease, 
+    LibraryRelease, Label, Track, Playlist)
+from rest_framework import viewsets, serializers, permissions, renderers
 from rest_framework.response import Response
 from django.utils.timezone import now
 from django.http import Http404
@@ -194,3 +196,27 @@ class PlaylistViewSet(viewsets.ViewSet):
             raise Http404
         return Response(PlaylistSerializer(
             playlist, context={'request': request}).data)
+
+
+class IsSuperuser(permissions.BasePermission):
+    """
+    Allows access only to authenticated superusers.
+    """
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user and request.user.is_authenticated and 
+            request.user.is_superuser)
+
+
+class BackupViewSet(viewsets.ViewSet):
+    """Creates a large json file with all works and all related metadata."""
+
+    permission_classes = [IsSuperuser]
+    renderer_classes = [renderers.JSONRenderer]
+
+    def list(self, request, *args, **kwargs):
+        d = {}
+        d.update(Work.objects.get_dict(Work.objects.all()))
+        d.update(CommercialRelease.objects.get_dict(Release.objects.all()))
+        return Response(d)
