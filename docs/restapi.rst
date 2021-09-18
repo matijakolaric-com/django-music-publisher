@@ -24,8 +24,8 @@ field, as well as details about an artist or a release.
 Details contain data about recordings (including audio files if they exist),
 record labels, underlying musical works and writers.
 
-* ``/api/v1/artists``
-* ``/api/v1/releases``
+* ``/api/v1/artists/``
+* ``/api/v1/releases/``
 
 These endpoints are not publicly available, they are protected by ``Basic HTTP 
 Authentication``. It is recommended to create a dedicated user, has to be active, 
@@ -53,7 +53,7 @@ There is currently no way to get a list of all secret playlist.
 Backup Metadata
 --------------------------------------------
 
-* ``/api/v1/backup_metadata``
+* ``/api/v1/backup_metadata/``
 
 This endpoint can be used to get all the metadata about all
 works and releases. However, public data (descriptions, images 
