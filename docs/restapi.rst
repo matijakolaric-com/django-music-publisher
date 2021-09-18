@@ -48,8 +48,7 @@ A sharable playlist can be accessed through a normal HTML
 interface, or through a REST API endpoint. Both URLs can be found
 in the ``change view``. 
 
-There is currently no way to get a list of API endpoints 
-through the REST API. 
+There is currently no way to get a list of all secret playlist. 
 
 Backup Metadata
 --------------------------------------------
