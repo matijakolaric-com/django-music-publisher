@@ -59,7 +59,7 @@ This endpoint can be used to get all the metadata about all
 works and releases. However, public data (descriptions, images 
 and audio files) are not included.
 
-It is available only to a superuser, because it's purpose is to provide 
+It is available only to a ``superuser``, because it's purpose is to provide 
 one-time backup if you choose to move to a different system.
 
 .. note::
