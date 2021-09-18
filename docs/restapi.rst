@@ -53,7 +53,7 @@ There is currently no way to get a list of all secret playlist.
 Backup Metadata
 --------------------------------------------
 
-* ``/api/v1/artists``
+* ``/api/v1/backup_metadata``
 
 This endpoint can be used to get all the metadata about all
 works and releases. However, public data (descriptions, images 
