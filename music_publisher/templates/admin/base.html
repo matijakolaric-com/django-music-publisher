@@ -17,9 +17,16 @@
 {% block extrahead %}
 <style>
     * {font-weight: 300 !important;}
+    #header {padding: 20px 40px 5px 0;}
     #branding * {font-weight: 200 !important;}
     #changelist-filter select {
         width: 100%;
+    }
+    #content {
+        padding: 0 40px;
+    }
+    #nav-sidebar {
+        border-right: none;
     }
     h1, h2, h3, h4, h5, caption {
         font-weight: 200 !important;
@@ -73,6 +80,8 @@
         font-size: 14px;
         text-align: left;
         text-transform: uppercase;
+        margin-left: 84px;
+        padding: 0 0 24px;
     }
     div.breadcrumbs * {
         font-weight: 200 !important;
@@ -81,7 +90,7 @@
         display: inline-block;
         padding: 0;
         margin: 0 20px 0 0;
-        font-size: 28px;
+        font-size: 30px;
     }
     #branding h2 {
         display: inline-block;
@@ -117,6 +126,18 @@
         font-size: 18px;
     }
 
+    .module caption {
+        color: var(--header-color);
+        background-color: var(--darkened-bg);
+        border-bottom: 1px solid var(--hairline-color);
+        border-top: 1px solid var(--hairline-color);
+    }
+    
+    .module h2, .inline-group h2 {
+        color: var(--body-bg);
+        background-color: var(--primary);
+    }
+
     .select2-selection__clear {
         font-size: 20px;
         color: var(--primary);
@@ -135,12 +156,17 @@
     #user-tools a:focus, #user-tools a:hover {
         color: var(--header-link-color);
     }
+    #content-related .module h2 {
+        padding: 8px;
+    }
     :root {
         --primary: #d50000;
-        --secondary: #d50000;
-        --link-fg: #d50000;
-        --header-color: var(--header-branding-color);
-        --accent: var(--primary-fg);
+        --secondary: var(--primary);
+        --link-fg: var(--primary);
+        --header-bg: var(--body-bg);
+        --header-color: var(--body-fg);
+        --header-link-color: var(--primary);
+        --accent: var(--primary);
         --link-selected-fg: var(--link-fg);
         --link-hover-color: var(--body-fg);
         --object-tools-bg: var(--primary);
@@ -188,11 +214,12 @@
 <div id="container">
 
     {% if not is_popup %}
+        <div>
+            <a href="https://dmp.matijakolaric.com"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" style="float:left; padding: 5px 24px 24px; max-height: 64px"></a>
     <!-- Header -->
     <div id="header">
         <div id="branding">
         {% block branding %}{% endblock %}
-        {% block empoweredby %}<h2>empowered&nbsp;by&nbsp;<a href="https://matijakolaric.com/dmp-empoweredby/" target="_blank">MATIJA KOLARIĆ</a></h2>{% endblock %}
         </div>
         {% block usertools %}
         {% if has_permission %}
@@ -222,6 +249,7 @@
     {% if title %} &rsaquo; {{ title }}{% endif %}
     </div>
     {% endblock %}
+        </div>
     {% endif %}
 
     <div class="main shifted" id="main">

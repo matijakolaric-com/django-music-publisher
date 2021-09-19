@@ -50,19 +50,8 @@
         {% endif %}
       </table>
     </div>
-    <div class="rest-api module">
-      <table>
-            {% endfor %}
-        <caption>
-          REST API
-        </caption>
-          <tr>
-              <th scope="row"><a href="{% url 'api-root' %}">API root</a></th>
-              <td>&nbsp;</td>
-          </tr>
-      </table>
-    </div>
-      {% else %}
+  {% endfor %}
+{% else %}
     <div class="app-{{ app.app_label }} module">
       <table>
         <caption>

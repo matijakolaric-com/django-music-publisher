@@ -28,9 +28,8 @@ def dmp_model_groups(model_list):
         'Musical Works': [
             'Work', 'Publisher', 'Writer', 'CWRExport', 'ACKImport',
             'DataImport', 'RoyaltyCalculation'],
-        'Recordings': ['Recording', 'Artist', 'Label'],
+        'Recordings': ['Recording', 'Artist', 'Label', 'Playlist'],
         'Releases': [
             'CommercialRelease', 'LibraryRelease', 'Library'],
-        'Playlists': ['Playlist']
     }
     yield from yield_sections(model_dict, sections)
