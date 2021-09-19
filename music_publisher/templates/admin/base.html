@@ -18,12 +18,29 @@
 <style>
     * {font-weight: 300 !important;}
     #header {padding: 20px 40px 5px 0;}
+    .login #header {
+        justify-content: left;
+        min-height: 60px;
+    }
     #branding * {font-weight: 200 !important;}
     #changelist-filter select {
         width: 100%;
     }
+    img.logo {
+        float:left; padding: 5px 24px 24px; max-height: 64px;
+    }
     #content {
         padding: 0 40px;
+    }
+    .dashboard #content {
+        padding-left: 24px;
+    }
+    .login #header h1 {
+        font-size: 30px;
+        line-height: 1em;
+    }
+    .login img.logo {
+        padding: 12px 0 0 20px;
     }
     #nav-sidebar {
         border-right: none;
@@ -184,16 +201,21 @@
     @media (prefers-color-scheme: dark) {
         * {font-weight: 400 !important;}
         :root {
-            --primary: #5f0000;
+            --primary: #750000;
+            --accent: white;
             --primary-fg: #eee;
-            --secondary: #5f0000;
-            --link-fg: #f5d5b5;
+            --link-fg: #d50000;
             --body-fg: #ddd;
             --body-quiet-color: #bbb;
             --body-loud-color: #eee;
             --selected-row: #3c0000;
             --body-bg: #000;
             --darkened-bg: #111;
+            --header-link-color: white;
+        }
+        .module h2, .inline-group h2 {
+            color: var(--primary-fg);
+            background-color: var(--primary);
         }
     }
 </style>
@@ -215,7 +237,7 @@
 
     {% if not is_popup %}
         <div>
-            <a href="https://dmp.matijakolaric.com"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" style="float:left; padding: 5px 24px 24px; max-height: 64px"></a>
+            <a href="https://dmp.matijakolaric.com"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" class="logo"></a>
     <!-- Header -->
     <div id="header">
         <div id="branding">
