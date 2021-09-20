@@ -156,7 +156,7 @@ class Release(ReleaseBase):
         Label, verbose_name='Release (album) label', null=True, blank=True,
         on_delete=models.PROTECT)
     recordings = models.ManyToManyField(
-        'Recording', through='Track', related_name='recordings')
+        'Recording', through='Track')
 
     def __str__(self):
         if self.cd_identifier:
@@ -631,11 +631,15 @@ class Work(TitleBase):
             self.iswc = self.iswc.replace('-', '').replace('.', '')
         return super().clean_fields(*args, **kwargs)
 
+    def writer_last_names(self):
+        writers = sorted(set(self.writers.all()), key=lambda w: w.last_name)
+        return ' / '.join(w.last_name.upper() for w in writers)
+
     def __str__(self):
         return '{}: {} ({})'.format(
             self.work_id,
             self.title.upper(),
-            ' / '.join(w.last_name.upper() for w in self.writers.distinct()))
+            self.writer_last_names())
 
     @staticmethod
     def get_publisher_dict():
