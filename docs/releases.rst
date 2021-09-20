@@ -146,11 +146,15 @@ Writers, artists, labels and releases received ``image`` and
 ``description`` fields, to be used in front-end representations.
 Recordings received an ``audio_file`` field.
 
-Sharable playlists can now be created, either by manually adding recordings, 
-or by using batch actions in various list views.
-
 Read-only REST API endpoints are available for releases and recording artists,
-enabling integration with websites. WordPress plugin is available.
+enabling integration with websites.
+
+Playlists can now be created, either by manually adding recordings,
+or by using batch actions in various list views, and shared
+using secret URLs.
+
+Full metadata backup can be download using REST API endpoint.
+
 
 Future open-source features
 ===========================
