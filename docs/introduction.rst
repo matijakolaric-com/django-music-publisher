@@ -28,7 +28,7 @@ Project Scope
 DMP can be used out-of-the-box by most small original publishers, both for commercial (general) and
 production (library) music.
 
-Each DMP installation supports a **single original publisher**. It is not intended to be used by
+Each DMP installation supports a **single publisher**. It is not intended to be used by
 administrators or sub-publishers, nor by publishing companies with multiple entities (including
 US publishers affiliated with multiple PROs).
 
@@ -121,4 +121,4 @@ Some publishers require more features than DMP offers and/or technical and user 
 
 One is to use commercial software. `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as affordable Software-as-a-Service, is a built on top of Django-Music-Publisher. There are other solutions, of course.
 
-The other option is to hire a software developer, or a developement agency, to create a custom solution to exactly match your needs. Django-Music-Publisher may be used as a starting point. Creators of Django-Music-Publisher, `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ and `Python Music Metadata Libraries <https://github.com/musicmetadata>`_ should be considered, see `matijakolaric.com <https://matijakolaric.com>`_.
+The other option is to hire a software developer, or a development agency, to create a custom solution to exactly match your needs. Django-Music-Publisher may be used as a starting point. Creators of Django-Music-Publisher, `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ and `Python Music Metadata Libraries <https://github.com/musicmetadata>`_ should be considered, see `matijakolaric.com <https://matijakolaric.com>`_.

@@ -299,12 +299,9 @@ Exporting CSV
 ++++++++++++++++++++++++++
 
 Select several (or all) works in the ``musical work list`` view, select the ``Export selected works (CSV)`` action and
-click ``Go``. A CSV file will be downloaded, containing **only basic** information about your works.
+click ``Go``. A CSV file will be downloaded, containing **most** information about your works.
 
-It contains no data about the controlling publisher (you) and recordings, including recording
-artists, labels, tracks and releases.
-
-This CSV format is the same as the one used for :doc:`Importing data <manual_dataimport>`.
+This CSV format is similar to the one used for :doc:`Importing data <manual_dataimport>`.
 
 CWR Exporting Wizard
 ++++++++++++++++++++

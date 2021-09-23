@@ -13,7 +13,12 @@ from .societies import SOCIETIES
 
 
 class NotesManager(models.Manager):
+    """Manager for objects inheriting from :class:`NotesBase`.
+
+    Defers :attr:`NotesBase.notes` field.
+    """
     def get_queryset(self):
+        """Defer :attr:`NotesBase.notes` field."""
         qs = super().get_queryset()
         qs = qs.defer('notes')
         return qs
@@ -23,7 +28,7 @@ class NotesBase(models.Model):
     """Abstract class for all classes that have notes.
 
     Attributes:
-        notes (django.db.models.Textfield): Notes, no use
+        notes (django.db.models.TextField): Notes, free internal text field
     """
 
     class Meta:
@@ -50,7 +55,7 @@ class TitleBase(models.Model):
         validators=(CWRFieldValidator('title'),))
 
     def __str__(self):
-        return self.title.upper()
+        return self.title
 
 
 class PersonBase(models.Model):
@@ -290,8 +295,8 @@ class ReleaseBase(models.Model):
         cd_identifier (django.db.models.CharField): CD Identifier, used when \
         origin is library
         library (django.db.models.CharField): Library Name
-        ean (django.db.models.CharField): EAN code
         release_date (django.db.models.DateField): Date of the release
+        ean (django.db.models.CharField): EAN code
         release_label (django.db.models.CharField): Label Name
         release_title (django.db.models.CharField): Title of the release
     """

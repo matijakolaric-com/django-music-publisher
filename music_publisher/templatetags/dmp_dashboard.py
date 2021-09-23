@@ -1,6 +1,4 @@
-"""Filters used in DMP dashboard.
-
-"""
+"""Filter used in DMP dashboard."""
 
 from django import template
 from collections import OrderedDict
@@ -9,6 +7,7 @@ register = template.Library()
 
 
 def yield_sections(model_dict, sections):
+    """Convert model dictionary according to section structure"""
     for name, object_names in sections.items():
         models = []
         for object_name in object_names:
@@ -33,5 +32,4 @@ def dmp_model_groups(model_list):
         'Releases': [
             'CommercialRelease', 'LibraryRelease', 'Library']
     }
-    # Works
     yield from yield_sections(model_dict, sections)

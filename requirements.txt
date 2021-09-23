@@ -1,6 +1,6 @@
-Django>=3.2,<3.3
+Django>=3.2.6,<3.3
 dj_database_url==0.5.0
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.1
 waitress==2.0.0
-whitenoise==5.2.0
+whitenoise==5.3.0
 music-metadata-territories==21.2

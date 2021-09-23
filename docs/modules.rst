@@ -34,6 +34,13 @@ music\_publisher.apps
     :members:
     :show-inheritance:
 
+music\_publisher.societies
+----------------------------------
+
+.. automodule:: music_publisher.societies
+    :members:
+    :show-inheritance:
+
 music\_publisher.validators
 ----------------------------------
 
@@ -61,6 +68,43 @@ music\_publisher.cwr_templates
 .. automodule:: music_publisher.cwr_templates
     :members:
     :show-inheritance:
+
+music\_publisher.templatetags
+-------------------------------------
+
+.. automodule:: music_publisher.templatetags
+    :members:
+    :show-inheritance:
+
+music\_publisher.templatetags.cwr\_filters
+--------------------------------------------------------------
+
+.. automodule:: music_publisher.templatetags.cwr_filters
+    :members:
+    :show-inheritance:
+
+music\_publisher.templatetags.cwr\_generators
+--------------------------------------------------------------
+
+.. automodule:: music_publisher.templatetags.cwr_generators
+    :members:
+    :show-inheritance:
+
+music\_publisher.templatetags.dmp\_dashboard
+--------------------------------------------------------------
+
+.. automodule:: music_publisher.templatetags.dmp_dashboard
+    :members:
+    :show-inheritance:
+
+
+music\_publisher.forms
+-----------------------------
+
+.. automodule:: music_publisher.forms
+    :members:
+    :show-inheritance:
+
 
 music\_publisher.admin
 -----------------------------

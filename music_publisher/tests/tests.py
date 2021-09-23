@@ -31,6 +31,7 @@ from django.urls import reverse
 from django.contrib.messages import get_messages
 
 import music_publisher.models
+from music_publisher.admin import CWRExportAdmin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
     CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
@@ -287,6 +288,8 @@ class AdminTest(TestCase):
         recording = Recording.objects.create(
             work=cls.original_work, record_label=cls.label, artist=cls.artist,
             isrc='JM-K40-14-00001')
+        recording.recording_id = recording.recording_id
+        recording.save()
         Track.objects.create(
             release=cls.commercial_release, recording=recording)
 
@@ -561,6 +564,14 @@ class AdminTest(TestCase):
                 args=(cwr_export.id,)) + '?preview=true'
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
+        cwr_export = CWRExport.objects.first()
+        cwr_export.cwr = open(TEST_BAD_CWR2_FILENAME, 'r').read()
+        cwr_export.save()
+        url = reverse(
+            'admin:music_publisher_cwrexport_change',
+            args=(cwr_export.id,)) + '?preview=true'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_cwr_downloads(self):
         """Test that the CWR file can be downloaded."""
@@ -1026,8 +1037,11 @@ class AdminTest(TestCase):
         data.update({'acknowledgement_file': mockfile})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            music_publisher.models.ACKImport.objects.first().report, '')
+        self.assertIn(
+            'A different ISWC exists for work MK000001: THE MODIFIED WORK '
+            '(SMITH): T3221234234 (old) vs T1234567893 (new).',
+            music_publisher.models.ACKImport.objects.first().report
+        )
 
         """This file has also ISWC codes."""
         mock = StringIO()
@@ -1044,7 +1058,7 @@ class AdminTest(TestCase):
         # At this point, there is a different ISWC in one of the works
         response = self.client.post(url, data, follow=False)
         messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages), 2)
+        self.assertEqual(len(messages), 3)
         self.assertIn(
             'Conflicting ISWCs found for work',
             str(messages[0]),
@@ -1094,6 +1108,10 @@ class AdminTest(TestCase):
 
         """Test the change view and the CWR preview."""
         url = reverse(
+            'admin:music_publisher_ackimport_change', args=('GARBAGE',))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        url = reverse(
             'admin:music_publisher_ackimport_change', args=(ackimport.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -1108,7 +1126,10 @@ class AdminTest(TestCase):
         url = base_url + '?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
-        url = base_url + '?in_cwr=N&ack_status=RA&has_iswc=N&has_rec=N'
+        url = base_url + '?in_cwr=N&ack_society=21&ack_status=RA&has_iswc=N&has_rec=N'
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = base_url + '?ack_status=RA&has_iswc=N&has_rec=N'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -1186,12 +1207,24 @@ class AdminTest(TestCase):
         url = reverse('admin:music_publisher_dataimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
-        data.update({'data_file': mockfile})
+        data.update({
+            'data_file': mockfile,
+        })
+        response = self.client.post(url, data, follow=False)
+
+        mock.seek(0)
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({
+            'data_file': mockfile,
+            'ignore_unknown_columns': True
+        })
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         data_import = music_publisher.models.DataImport.objects.first()
         self.assertIsNotNone(data_import)
         self.assertIsNot(data_import.report, '')
+
         url = reverse('admin:music_publisher_dataimport_change',
                       args=(data_import.id,))
         response = self.client.get(url, follow=False)
@@ -1347,6 +1380,20 @@ class AdminTest(TestCase):
         self.assertTrue(hasattr(response, 'streaming_content'))
         # The file must be processed in under 10 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
+
+        # TEST BAD
+        with open(TEST_CWR2_FILENAME) as csvfile:
+            mock = StringIO()
+            mock.write(csvfile.read())
+        mockfile = InMemoryUploadedFile(
+            mock, 'statement_file', 'statement.csv',
+            'text', 0, None)
+        url = reverse('royalty_calculation')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'in_file': mockfile})
+        response = self.client.post(url, data, follow=False)
+
 
     @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
@@ -1751,7 +1798,7 @@ class ModelsSimpleTest(TransactionTestCase):
             str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)')
 
         alt = work.alternatetitle_set.create(title='MPC Academy')
-        self.assertEqual(str(alt), 'MPC ACADEMY')
+        self.assertEqual(str(alt), 'MPC Academy')
 
         self.assertEqual(
             str(music_publisher.models.Recording().recording_id),
@@ -1896,9 +1943,9 @@ ACK0000000300000000201805160910510000100000003NWRTHREE                          
 ACK0000000400000000201805160910510000100000004NWRX                                                           DMP000025                               20180607NP
 GRT000010000005000000007
 GRHISW0000202.100020180607
-ISW0000000000000000MUSIC PUB CARTOONS                                            DMP000001                00000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-ISW0000000100000000MUSIC PUB CARTOONS                                            DMP000001     T123456789500000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-ISW0000000200000000MUSIC PUB CARTOONS                                            DMP000001     T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000000000000MUSIC PUB CARTOONS                                            MK000001      T322123423400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000100000000MUSIC PUB CARTOONS                                            MK000001      T123456789300000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+ISW0000000200000000MUSIC PUB CARTOONS                                            XX000001      T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
 GRT000020000003000000003
 TRL000010000008000000014"""
 
@@ -1969,5 +2016,6 @@ TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
 TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW210001DMP_000.V21'
+TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW210004DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW210002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW210003DMP_0000_V3-0-0.ISR'

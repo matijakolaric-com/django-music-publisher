@@ -6,32 +6,32 @@ All views are here, except for :mod:`.royalty_calculation`.
 """
 import re
 import zipfile
-from csv import DictWriter, writer
+from csv import DictWriter
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import FileField, ModelForm, BooleanField
-from django.forms.models import BaseInlineFormSet
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
-from .validators import CWRFieldValidator
+from .forms import (
+    ACKImportForm, AlternateTitleFormSet, DataImportForm, LibraryReleaseForm,
+    WorkForm, WriterInWorkFormSet,
+)
 from .models import (
     ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport,
-    CommercialRelease, Label, Library, LibraryRelease, Recording, Release,
-    SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer, WriterInWork,
-    DataImport,
+    CommercialRelease, DataImport, Label, Library, LibraryRelease, Recording,
+    Release, SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer,
+    WriterInWork,
 )
-from .forms import DataImportForm, WriterInWorkFormSet
-
+from .validators import CWRFieldValidator
 
 IS_POPUP_VAR = admin.options.IS_POPUP_VAR
 
@@ -334,17 +334,6 @@ class ReleaseAdmin(MusicPublisherAdmin):
         return False
 
 
-class LibraryReleaseForm(forms.ModelForm):
-    """Custom form for :class:`.models.LibraryRelease`.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Make cd_identifier and library fields required."""
-        super().__init__(*args, **kwargs)
-        self.fields['cd_identifier'].required = True
-        self.fields['library'].required = True
-
-
 @admin.register(LibraryRelease)
 class LibraryReleaseAdmin(MusicPublisherAdmin):
     """Admin interface for :class:`.models.LibraryRelease`.
@@ -631,38 +620,6 @@ class WriterAdmin(MusicPublisherAdmin):
     work_count.admin_order_field = 'work__count'
 
 
-class AlternateTitleFormSet(BaseInlineFormSet):
-    """Formset for :class:`AlternateTitleInline`.
-    """
-
-    orig_cap = ['C ', 'A ', 'CA']
-
-    def clean(self):
-        """Performs these checks:
-            if suffix is used, then validates the total length
-
-        Returns:
-            None
-
-        Raises:
-            ValidationError
-        """
-        super().clean()
-        work_title_len = len(self.instance.title)
-        for form in self.forms:
-            if not form.is_valid():
-                return
-            if form.cleaned_data and not form.cleaned_data.get('DELETE'):
-                if not form.cleaned_data.get('suffix'):
-                    continue
-                title_suffix_len = len(form.cleaned_data['title'])
-                if work_title_len + title_suffix_len > 60 - 1:
-                    form.add_error(
-                        'title',
-                        'Too long for suffix, work title plus suffix must be '
-                        '59 characters or less.')
-
-
 class AlternateTitleInline(admin.TabularInline):
     """Inline interface for :class:`.models.AlternateTitle`.
     """
@@ -708,30 +665,6 @@ class WorkAcknowledgementInline(admin.TabularInline):
     extra = 0
     fields = ('date', 'society_code', 'remote_work_id', 'status')
     ordering = ('-date', '-id')
-
-
-class WorkForm(forms.ModelForm):
-    """Custom form for :class:`.models.Work`.
-
-    Calculate values for readonly field version_type."""
-
-    class Meta:
-        model = Work
-        fields = [
-            'title', 'iswc', 'original_title', 'library_release']
-
-    version_type = forms.NullBooleanField(
-        widget=forms.Select(
-            choices=(
-                (None, ''),
-                (True, 'Modification'),
-                (False, 'Original Work'))),
-        disabled=True,
-        required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['version_type'].initial = self.instance.is_modification()
 
 
 @admin.register(Work)
@@ -1086,8 +1019,9 @@ class WorkAdmin(MusicPublisherAdmin):
                 labels.append('Writer {} MR Share'.format(i + 1))
                 labels.append('Writer {} SR Share'.format(i + 1))
             labels.append('Writer {} Controlled'.format(i + 1))
-            if not simple and i < writer_with_publisher_max:
+            if i < writer_with_publisher_max:
                 labels.append('Writer {} SAAN'.format(i + 1))
+            if not simple and i < writer_with_publisher_max:
                 labels.append('Writer {} Publisher Name'.format(i + 1))
                 labels.append('Writer {} Publisher IPI'.format(i + 1))
                 labels.append('Writer {} Publisher PRO'.format(i + 1))
@@ -1446,11 +1380,11 @@ class CWRExportAdmin(admin.ModelAdmin):
 
         If you are using highlighing, then override this method."""
 
-        return obj.cwr
+        return obj.cwr or ''
 
     def view_link(self, obj):
         """Link to the CWR preview."""
-        if obj.cwr:
+        if obj.created_on:
             url = reverse(
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
             url += '?preview=true'
@@ -1459,7 +1393,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def download_link(self, obj):
         """Link for downloading CWR file."""
-        if obj.cwr:
+        if obj.created_on:
             url = reverse(
                 'admin:music_publisher_cwrexport_change', args=(obj.id,))
             url += '?download=true'
@@ -1473,15 +1407,8 @@ class CWRExportAdmin(admin.ModelAdmin):
         return qs
 
     def date(self, obj):
-        if obj and obj.cwr:
-            if obj.version in ['21', '22']:
-                s = obj.cwr[64:78]
-            else:
-                s = obj.cwr[65:79]
-            try:
-                return datetime.strptime(s, '%Y%m%d%H%M%S').date()
-            except ValueError:
-                pass
+        if obj and obj.created_on:
+            return obj.created_on.date()
 
     autocomplete_fields = ('works',)
     list_display = (
@@ -1599,52 +1526,6 @@ class CWRExportAdmin(admin.ModelAdmin):
         form.instance.create_cwr()
 
 
-class ACKImportForm(ModelForm):
-    """Form used for CWR acknowledgement imports.
-
-    Attributes:
-        acknowledgement_file (FileField): Field for file upload
-    """
-
-    class Meta:
-        model = ACKImport
-        fields = ('acknowledgement_file', 'import_iswcs')
-
-    acknowledgement_file = FileField()
-    import_iswcs = BooleanField(
-        label='Import ISWCs if present', required=False, initial=True)
-
-    RE_HDR_21 = re.compile(
-        r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
-
-    RE_HDR_30 = re.compile(
-        r'^HDR(?:SO|AA)(.{4})(.{45})(\d{8})\d{6}(\d{8}).{15}3\.0000')
-
-    def clean(self):
-        """Perform usual clean, then process the file, returning the content
-            field as if it was the TextField."""
-        super().clean()
-        cd = self.cleaned_data
-        ack = cd.get('acknowledgement_file')
-        filename = ack.name
-        if not (len(filename) in [18, 19] and
-                filename[-4:].upper() in ['.V21', '.V22']):
-            raise ValidationError('Wrong file name format.')
-        self.cleaned_data['filename'] = filename
-        content = ack.file.read().decode('latin1')
-        match = re.match(self.RE_HDR_21, content)
-        if not match:
-            match = re.match(self.RE_HDR_30, content)
-        if not match:
-            raise ValidationError('Incorrect CWR header')
-        code, name, date1, date2 = match.groups()
-        self.cleaned_data['society_code'] = code.strip().lstrip('0')
-        self.cleaned_data['society_name'] = name.strip()
-        self.cleaned_data['date'] = datetime.strptime(
-            max([date1, date2]), '%Y%m%d').date()
-        self.cleaned_data['acknowledgement_file'] = content
-
-
 class AdminWithReport(admin.ModelAdmin):
     """The parent class for all admin classes with a report field."""
     def print_report(self, obj):
@@ -1689,13 +1570,18 @@ class ACKImportAdmin(AdminWithReport):
     RE_ISW_21 = re.compile(
         r'(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)', re.S | re.M)
 
-    def process(self, request, society_code, file_content, import_iswcs=False):
+    def process(self, request, ack_import, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
 
         Big part of this code should be moved to the model, left here because
         messaging is simpler.
         """
 
+        society_code = ack_import.society_code
+        ack_import_url = reverse(
+            'admin:music_publisher_ackimport_change', 
+            args=(ack_import.id,))
+        ack_import_link = f'<a href="{ack_import_url}">{ack_import}</a>'
         from django.contrib.admin.models import CHANGE, LogEntry
 
         if import_iswcs:
@@ -1743,11 +1629,11 @@ class ACKImportAdmin(AdminWithReport):
                 else:
                     work.iswc = iswc
                     work.last_change = now()
+                    s = f'ISWC imported from ACK file: {ack_import_link}.'
                     LogEntry.objects.log_action(
                         request.user.id,
                         admin.options.get_content_type_for_model(work).id,
-                        work.id, str(work), CHANGE,
-                        'ISWC imported from ACK file.')
+                        work.id, str(work), CHANGE, s)
                     work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,
@@ -1787,11 +1673,11 @@ class ACKImportAdmin(AdminWithReport):
                     else:
                         work.iswc = iswc
                         work.last_change = now()
+                        s = f'ISWC imported from ISW file: {ack_import_link}.'
                         LogEntry.objects.log_action(
                             request.user.id,
                             admin.options.get_content_type_for_model(work).id,
-                            work.id, str(work), CHANGE,
-                            'ISWC imported from ISW file.')
+                            work.id, str(work), CHANGE, s)
                         work.save()
         if unknown_work_ids:
             messages.add_message(
@@ -1816,11 +1702,12 @@ class ACKImportAdmin(AdminWithReport):
             obj.society_name = cd['society_name']
             obj.date = cd['date']
             # TODO move process() to model, and handle messages here
+            super().save_model(request, obj, form, change)
             obj.report = self.process(
-                request, obj.society_code, cd['acknowledgement_file'],
+                request, obj, cd['acknowledgement_file'],
                 cd['import_iswcs'])
             obj.cwr = cd['acknowledgement_file']
-            super().save_model(request, obj, form, change)
+            super().save_model(request, obj, form, True)
 
     def has_add_permission(self, request):
         """Return false if CWR delivery code is not present."""
@@ -1842,16 +1729,15 @@ class ACKImportAdmin(AdminWithReport):
 
         If you are using highlighing, then override this method."""
 
-        return obj.cwr
+        return obj.cwr or ''
 
     def view_link(self, obj):
         """Link to CWR ACK preview."""
-        if obj.cwr:
-            url = reverse(
-                'admin:music_publisher_ackimport_change', args=(obj.id,))
-            url += '?preview=true'
-            return mark_safe(
-                '<a href="{}" target="_blank">View CWR</a>'.format(url))
+        url = reverse(
+            'admin:music_publisher_ackimport_change', args=(obj.id,))
+        url += '?preview=true'
+        return mark_safe(
+            '<a href="{}" target="_blank">View CWR</a>'.format(url))
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with a sub-view defined by GET parameters:
@@ -1905,11 +1791,11 @@ class DataImportAdmin(AdminWithReport):
 
     def add_view(self, request, form_url='', extra_context=None):
         if 'download_template' in request.GET:
-            fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6)
+            fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6, simple=True)
             response = HttpResponse(
                 ','.join(fieldnames),
                 content_type="text/csv")
-            cd = 'attachment; filename="{}.csv"'.format(
+            cd = 'attachment; filename="{}"'.format(
                 'DMP_data_exchange_template.csv')
             response['Content-Disposition'] = cd
             return response

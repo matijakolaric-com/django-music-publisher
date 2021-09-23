@@ -1,8 +1,13 @@
-Release Policy
-##############
+Release History
+#####################
 
-Major versions of DMP are released in January and July. Minor versions of the latest major version,
-containing bug fixes and/or security updates, are released as required.
+Django-Music-Publisher was originally released in July 2018, and for the rest of 2018, development was very rapid,
+with major improvements being released in August, September and November.
+
+From January 2019 to January 2021, major versions were released every 6 months. The latest major version was released
+according to the new January-May-September schedule.
+
+Minor versions were released with bug fixes and security updates as required.
 
 
 Major Release History
@@ -13,6 +18,7 @@ Major Release History
 
 Initial release in July 2018 had a very simple data structure. It used external API
 for CWR generation. The code was open-source, but it was dependant on a free tier of a commercial service.
+
 
 19.1 Epiphany
 -------------
@@ -26,7 +32,8 @@ modified works was added, as well as basic co-publishing support. Data export in
 19.7 Metanoia
 -------------
 
-This version was about making DMP compatible with both current and future requirements within the precisely defined scope.
+This version was about making DMP compatible with both current and future requirements within the precisely defined
+scope: *single publisher*. The scope has not changed since.
 
 Most notably, support for multiple recordings per work and CWR 3.0 (labeled as "experimental") were added.
 CWR preview, for both versions, received basic syntax highlighting. Since this version, CWR files are zipped.
@@ -58,7 +65,7 @@ Index (home) page became clearer due to grouping of views. User manual was reorg
 the same structure. ``User manual`` links now lead to the relevant page in the user manual.
 
 
-21.1 Victor (current)
+21.1 Victor
 ---------------------
 
 This version was focused on improving and extending existing features.
@@ -70,11 +77,12 @@ Support for CWR was extended to include latest revisions:
 * CWR 3.0 Revision 0 (includes cross-references, experimental)
 * CWR 3.1 DRAFT (includes cross-references, experimental)
 
-CWR Syntax highlighting was improved and now includes all fields DMP generates from data, with more detailed descriptions on mouse-over, for all supported CWR versions.
+CWR Syntax highlighting was improved and now includes all fields DMP generates from data, with more detailed
+descriptions on mouse-over, for all supported CWR versions.
 
 A side menu was added to all add/change/view pages, making navigation faster. 
 
-21.7 Madeleine
+21.5 Mayday
 -------------------------------------------
 
 The version focuses on improving data exchange with other solutions, most notably
@@ -92,33 +100,39 @@ The version focuses on improving data exchange with other solutions, most notabl
 
 * More data in CSV imports:
 
-    * option to use publisher information or ``controlled`` column for imports
-    * data about recordings, including recording ID, record labels and recording artists
+    * data about recordings: ISRC, duration, release date
     * society work IDs
 
-* *Go Dutch* mode, where the sum of shares for writers adds up to something else than 100%
-  (e.g. 66.66% for BUMA/STEMRA affiliates)
+* Improved support for ISWC imports and duplicate handling
 
-* Interface now available in *dark* mode
+* Interface now also available in *dark* mode
 
 Future open-source features
 ===========================
 
-There is a business model behind Django-Music-Publisher. In order for a feature to be
-released as open-source code, all of the following must apply:
+Rules
+---------------------------
 
-* Code must be global, or near-global. Features that apply to one or couple of 
+In order for a feature to be released as open-source code, all of the following must apply:
+
+* Code must be global, or near-global. Features that apply to one or a couple of 
   countries will not be included.
-  E.g. there are several PROs in the US, and they have rules about publishers being affiliated 
-  with the same PRO as writers. The consequence is that US publishers usualy have several
-  entities, one for each of the PROs. Support for US publishers with multiple entities will not
-  be included in open-source code.
 
-* Code must be applicable to small publishers (and soon labels). The goal is to help them
+* Code must be applicable to startup publishers (and soon labels). The goal is to help them
   grow. If a feature is required only by established companies, it will not be included. 
-  E.g. features for administrators and sub-publishers will not be included in open-source code.
 
 * A feature must not require complex customisations or deployments.
   Open-source solutions for end-users must be deployable by end-users.
-  E.g. licencing of production music or password reset.
+
+
+22.1 Exofile
+----------------------------
+
+For January 2022 version, we plan to add *massive* support for music labels:
+
+* Audio files in Recordings
+
+* Image files (for cover art) in Releases
+
+
 

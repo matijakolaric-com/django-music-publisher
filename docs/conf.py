@@ -27,9 +27,9 @@ copyright = '2018-2021, Matija Kolarić'
 author = 'Matija Kolarić'
 
 # The short X.Y version
-version = '21.7 Mayday'
+version = '21.5 Mayday'
 # The full version, including alpha/beta/rc tags
-release = '21.5.b1'
+release = '21.5.1'
 
 rst_epilog = '''
 .. |version| replace:: {}
@@ -102,6 +102,8 @@ html_theme_options = {
     'logo_only': True,
     'display_version': False,
 }
+
+html_favicon = 'favicon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

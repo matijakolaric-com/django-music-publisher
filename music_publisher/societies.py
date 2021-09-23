@@ -1,3 +1,10 @@
+"""Create society tuple and dict.
+
+    Attributes:
+        SOCIETIES (tuple): (tis-n, Name (Country))
+        SOCIETY_DICT (dict): {tis-n, Name (Country)}
+"""
+
 import csv
 import os
 from collections import OrderedDict

@@ -6,6 +6,7 @@ They mostly inherit from classes in :mod:`.base`.
 
 from collections import OrderedDict, defaultdict
 from datetime import datetime
+from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
@@ -26,12 +27,12 @@ from .cwr_templates import (
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
 
+
 WORLD_DICT = {
     'tis-a': '2WL',
     'tis-n': '2136',
     'name': 'World'
 }
-
 
 
 class Artist(ArtistBase):
@@ -103,9 +104,9 @@ class Library(LibraryBase):
         verbose_name_plural = 'Music Libraries'
         ordering = ('name',)
 
-    name = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('library'),))
+    # name = models.CharField(
+    #     max_length=60, unique=True,
+    #     validators=(CWRFieldValidator('library'),))
 
     def __str__(self):
         return self.name.upper()
@@ -738,7 +739,7 @@ class AlternateTitle(TitleBase):
 
     def __str__(self):
         if self.suffix:
-            return '{} {}'.format(self.work.title.upper(), self.title.upper())
+            return '{} {}'.format(self.work.title, self.title)
         return super().__str__()
 
 
@@ -1041,6 +1042,7 @@ class Recording(models.Model):
 
     @property
     def title(self):
+        """Generate title from various fields."""
         return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
             self.work.title)
@@ -1119,7 +1121,14 @@ class Recording(models.Model):
 
 
 class Track(models.Model):
-    """Track, a recording on a release."""
+    """Track, a recording on a release.
+
+    Attributes:
+        recording (django.db.models.ForeignKey): Recording
+        release (django.db.models.ForeignKey): Release
+        cut_number (django.db.models.PositiveSmallIntegerField): Cut Number
+
+    """
 
     class Meta:
         verbose_name = 'Track'
@@ -1135,6 +1144,12 @@ class Track(models.Model):
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
 
     def get_dict(self):
+        """Create a data structure that can be serialized as JSON.
+
+        Returns:
+            dict: JSON-serializable data structure
+
+        """
         return {
             'cut_number': self.cut_number,
             'recording': self.recording.get_dict(
@@ -1143,6 +1158,11 @@ class Track(models.Model):
 
 
 class DeferCwrManager(models.Manager):
+    """Manager for CWR Exports and ACK Imports.
+
+    Defers :attr:`CWRExport.cwr` and :attr:`AckImport.cwr` fields.
+
+    """
     def get_queryset(self):
         qs = super().get_queryset()
         qs = qs.defer('cwr')
@@ -1187,6 +1207,7 @@ class CWRExport(models.Model):
             ('WR1', 'CWR 3.1 DRAFT: Work registration'),
         ))
     cwr = models.TextField(blank=True, editable=False)
+    created_on = models.DateTimeField(editable=False, null=True)
     year = models.CharField(
         max_length=2, db_index=True, editable=False, blank=True)
     num_in_year = models.PositiveSmallIntegerField(default=0)
@@ -1194,6 +1215,9 @@ class CWRExport(models.Model):
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
     publisher_code = None
+    agreement_pr = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+    agreement_mr = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+    agreement_sr = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
 
     @property
     def version(self):
@@ -1353,6 +1377,10 @@ class CWRExport(models.Model):
                 publisher['mr_society'] = aff['organization']['code']
             elif aff['affiliation_type']['code'] == 'SR':
                 publisher['sr_society'] = aff['organization']['code']
+
+        pr_share = controlled_relative_share * self.agreement_pr
+        mr_share = controlled_relative_share * self.agreement_mr
+        sr_share = controlled_relative_share * self.agreement_sr
         yield self.get_transaction_record(
             'SPU', {
                 'chain_sequence': 1,
@@ -1363,11 +1391,21 @@ class CWRExport(models.Model):
                 'pr_society': publisher.get('pr_society'),
                 'mr_society': publisher.get('mr_society'),
                 'sr_society': publisher.get('sr_society'),
-                'share': controlled_relative_share
+                'pr_share': pr_share,
+                'mr_share': mr_share,
+                'sr_share': sr_share,
             })
         if controlled_relative_share:
             yield self.get_transaction_record(
-                'SPT', {'share': controlled_relative_share})
+                'SPT', {
+                    'code': publisher.get('code'),
+                    'pr_share': pr_share,
+                    'mr_share': mr_share,
+                    'sr_share': sr_share,
+                    'pr_society': publisher.get('pr_society'),
+                    'mr_society': publisher.get('mr_society'),
+                    'sr_society': publisher.get('sr_society'),
+                })
 
     def yield_registration_lines(self, works):
         """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
@@ -1442,10 +1480,18 @@ class CWRExport(models.Model):
             publisher, controlled_relative_share)
         # OPU, co-publishing only
         if other_publisher_share:
+            pr_share = other_publisher_share * self.agreement_pr
+            mr_share = other_publisher_share * self.agreement_mr
+            sr_share = other_publisher_share * self.agreement_sr
             yield self.get_transaction_record(
-                'OPU', {'sequence': 2, 'share': other_publisher_share})
+                'OPU', {
+                    'sequence': 2, 'pr_share': pr_share,
+                    'mr_share': mr_share, 'sr_share': sr_share,
+                })
             yield self.get_transaction_record(
-                'OPT', {'share': other_publisher_share})
+                'OPT', {
+                    'pr_share': pr_share, 'mr_share': mr_share, 
+                    'sr_share': sr_share,})
 
         # SWR, SWT, PWR
         for wiw in work['writers']:
@@ -1462,19 +1508,27 @@ class CWRExport(models.Model):
                     w['mr_society'] = aff['organization']['code']
                 elif aff['affiliation_type']['code'] == 'SR':
                     w['sr_society'] = aff['organization']['code']
-
+            share = controlled_shares[w['code']]
+            pr_share = share * (1 - self.agreement_pr)
+            mr_share = share * (1 - self.agreement_mr)
+            sr_share = share * (1 - self.agreement_sr)
             w.update({
                 'writer_role': wiw['writer_role']['code'],
-                'share': controlled_shares[w['code']],
+                'share': share,
+                'pr_share': pr_share,
+                'mr_share': mr_share,
+                'sr_share': sr_share,
                 'saan': saan,
                 'original_publishers': wiw['original_publishers']
             })
             yield self.get_transaction_record('SWR', w)
-            if w['share']:
+            if share:
                 yield self.get_transaction_record('SWT', w)
-            if w['share']:
+            if share:
                 yield self.get_transaction_record('MAN', w)
             w['publisher_sequence'] = 1
+            w['publisher_code'] = publisher['code']
+            w['publisher_name'] = publisher['name']
             yield self.get_transaction_record('PWR', w)
             if (self.version in ['30', '31'] and other_publisher_share and
                     w and w['code'] in copublished_writer_ids):
@@ -1504,11 +1558,14 @@ class CWRExport(models.Model):
                         w['sr_society'] = aff['organization']['code']
             else:
                 w = {'writer_unknown_indicator': 'Y'}
+            share = Decimal(wiw['relative_share'])
             w.update({
-                'writer_role': wiw['writer_role']['code'] if wiw[
-                    'writer_role']
-                else None,
-                'share': Decimal(wiw['relative_share'])
+                'writer_role': (wiw['writer_role']['code'] if wiw[
+                    'writer_role'] else None),
+                'share': share,
+                'pr_share': share,
+                'mr_share': share,
+                'sr_share': share
             })
             yield self.get_transaction_record('OWR', w)
             if w['share']:
@@ -1595,6 +1652,7 @@ class CWRExport(models.Model):
             yield self.get_transaction_record('XRF', xrf)
 
     def get_header(self):
+        """Construct CWR HDR record."""
         return self.get_record('HDR', {
             'creation_date': datetime.now(),
             'filename': self.filename,
@@ -1644,12 +1702,14 @@ class CWRExport(models.Model):
     def create_cwr(self, publisher_code=None):
         """Create CWR and save.
         """
+        now = timezone.now()
         if publisher_code is None:
             publisher_code = settings.PUBLISHER_CODE
         self.publisher_code = publisher_code
         if self.cwr:
             return
-        self.year = datetime.now().strftime('%y')
+        self.created_on = now
+        self.year = now.strftime('%y')
         nr = type(self).objects.filter(year=self.year)
         nr = nr.order_by('-num_in_year').first()
         if nr:
@@ -1726,13 +1786,14 @@ class ACKImport(models.Model):
     """CWR acknowledgement file import.
 
     Attributes:
-        date (django.db.models.DateField): Acknowledgement date
         filename (django.db.models.CharField): Description
-        report (django.db.models.CharField): Basically a log
         society_code (models.CharField): 3-digit society code,
             please note that ``choices`` is not set.
         society_name (models.CharField): Society name,
             used if society code is missing.
+        date (django.db.models.DateField): Acknowledgement date
+        report (django.db.models.CharField): Basically a log
+        cwr (django.db.models.TextField): contents of CWR file
     """
 
     class Meta:
@@ -1771,6 +1832,7 @@ class DataImport(models.Model):
 
 
 def smart_str_conversion(value):
+    """Convert to Title Case only if UPPER CASE."""
     if value.isupper():
         return value.title()
     return value
@@ -1785,6 +1847,7 @@ FORCE_CASE_CHOICES = {
 
 @receiver(pre_save)
 def change_case(sender, instance, **kwargs):
+    """Change case of CharFields from :mod:`music_publisher`."""
     force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
     if not force_case:
         return

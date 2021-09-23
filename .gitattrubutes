@@ -1,2 +1,5 @@
 *.V21 text eol=crlf
 *.V22 text eol=crlf
+*.SUB text eol=crlf
+*.ISA text eol=crlf
+*.ISR text eol=crlf

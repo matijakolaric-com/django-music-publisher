@@ -1,9 +1,130 @@
-from django.forms import ModelForm, FileField, BooleanField
-from .models import ACKImport
-from django.core.exceptions import ValidationError
-from django.urls import reverse
-from django.forms.models import BaseInlineFormSet
+"Forms and formsets."
+
+import re
+from datetime import datetime
 from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+from django.forms import (
+    BooleanField, FileField, ModelForm, NullBooleanField, Select,
+)
+from django.forms.models import BaseInlineFormSet
+from django.urls import reverse
+
+from .models import ACKImport, Work
+
+
+class LibraryReleaseForm(ModelForm):
+    """Custom form for :class:`.models.LibraryRelease`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Make cd_identifier and library fields required."""
+        super().__init__(*args, **kwargs)
+        self.fields['cd_identifier'].required = True
+        self.fields['library'].required = True
+
+
+class AlternateTitleFormSet(BaseInlineFormSet):
+    """Formset for :class:`AlternateTitleInline`.
+    """
+
+    orig_cap = ['C ', 'A ', 'CA']
+
+    def clean(self):
+        """Performs these checks:
+            if suffix is used, then validates the total length
+
+        Returns:
+            None
+
+        Raises:
+            ValidationError
+        """
+        super().clean()
+        work_title_len = len(self.instance.title)
+        for form in self.forms:
+            if not form.is_valid():
+                return
+            if form.cleaned_data and not form.cleaned_data.get('DELETE'):
+                if not form.cleaned_data.get('suffix'):
+                    continue
+                title_suffix_len = len(form.cleaned_data['title'])
+                if work_title_len + title_suffix_len > 60 - 1:
+                    form.add_error(
+                        'title',
+                        'Too long for suffix, work title plus suffix must be '
+                        '59 characters or less.')
+
+
+class WorkForm(ModelForm):
+    """Custom form for :class:`.models.Work`.
+
+    Calculate values for readonly field version_type."""
+
+    class Meta:
+        model = Work
+        fields = [
+            'title', 'iswc', 'original_title', 'library_release']
+
+    version_type = NullBooleanField(
+        widget=Select(
+            choices=(
+                (None, ''),
+                (True, 'Modification'),
+                (False, 'Original Work'))),
+        disabled=True,
+        required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['version_type'].initial = self.instance.is_modification()
+
+
+class ACKImportForm(ModelForm):
+    """Form used for CWR acknowledgement imports.
+
+    Attributes:
+        acknowledgement_file (FileField): Field for file upload
+    """
+
+    class Meta:
+        model = ACKImport
+        fields = ('acknowledgement_file', 'import_iswcs')
+
+    acknowledgement_file = FileField()
+    import_iswcs = BooleanField(
+        label='Import ISWCs if present', required=False, initial=True)
+
+    RE_HDR_21 = re.compile(
+        r'^HDR(?:SO|AA)([ \d]{9})(.{45})01\.10(\d{8})\d{6}(\d{8})')
+
+    RE_HDR_30 = re.compile(
+        r'^HDR(?:SO|AA)(.{4})(.{45})(\d{8})\d{6}(\d{8}).{15}3\.0000')
+
+    def clean(self):
+        """Perform usual clean, then process the file, returning the content
+            field as if it was the TextField."""
+        super().clean()
+        cd = self.cleaned_data
+        ack = cd.get('acknowledgement_file')
+        filename = ack.name
+        if not (len(filename) in [18, 19] and
+                filename[-4:].upper() in ['.V21', '.V22']):
+            raise ValidationError('Wrong file name format.')
+        self.cleaned_data['filename'] = filename
+        content = ack.file.read().decode('latin1')
+        match = re.match(self.RE_HDR_21, content)
+        if not match:
+            match = re.match(self.RE_HDR_30, content)
+        if not match:
+            raise ValidationError('Incorrect CWR header')
+        code, name, date1, date2 = match.groups()
+        self.cleaned_data['society_code'] = code.strip().lstrip('0')
+        self.cleaned_data['society_name'] = name.strip()
+        self.cleaned_data['date'] = datetime.strptime(
+            max([date1, date2]), '%Y%m%d').date()
+        self.cleaned_data['acknowledgement_file'] = content
 
 
 class WriterInWorkFormSet(BaseInlineFormSet):
@@ -93,7 +214,6 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                             'capacity',
                             'Must be same as in controlled line for this '
                             'writer.')
-
 
 
 class DataImportForm(ModelForm):

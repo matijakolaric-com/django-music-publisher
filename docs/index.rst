@@ -21,6 +21,7 @@ upgrade.
 
    introduction
    installation
+   support
    releases
    LICENSE
    manual
