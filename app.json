@@ -12,7 +12,8 @@
   "env": {
     "DJANGO_SUPERUSER_USERNAME": {
       "description": "Username for the administrator, used only for installation",
-      "required": true
+      "required": true,
+      "value": "administrator"
     },
     "DJANGO_SUPERUSER_PASSWORD": {
       "description": "Password for the administrator, used only during installation",
@@ -48,10 +49,6 @@
     },
     "PUBLISHER_SOCIETY_SR": {
       "description": "Numerical synchronization society code, rarely used and only for production music blanket licencing.",
-      "required": false
-    },
-    "REQUIRE_SAAN": {
-      "description": "Enter '1' to make Society-Assigned Agreement Number a required field.\nRequired in some societies, e.g. PRS/MCPS, BUMA/STEMRA, GEMA.",
       "required": false
     },
     "PUBLISHING_AGREEMENT_PUBLISHER_PR": {
