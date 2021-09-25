@@ -9,7 +9,6 @@
   "scripts": {
     "postdeploy": "python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks"
   },
-  "success_url": "https://dmp.matijakolaric.com",
   "env": {
     "DJANGO_SUPERUSER_USERNAME": {
       "description": "Username for the administrator, used only for installation",
@@ -62,6 +61,10 @@
     },
     "PUBLISHING_AGREEMENT_PUBLISHER_SR": {
       "description": "Synchronization share transferred from a controlled writer to the publisher",
+      "required": false
+    },
+    "REQUIRE_SAAN": {
+      "description": "Enter '1' to make Society-Assigned Agreement Number a required field.\nRequired in some societies, e.g. PRS/MCPS, BUMA/STEMRA, GEMA.",
       "required": false
     }
   }
