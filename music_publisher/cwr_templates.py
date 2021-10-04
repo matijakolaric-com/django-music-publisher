@@ -276,7 +276,8 @@ TEMPLATES_30 = {
         '{{ pr_share|default:0|cwrshare }}'
         '{{ mr_share|default:0|cwrshare }}'
         '{{ pr_share|default:0|cwrshare }}'
-        'I2136            '
+        'I2136{{ pr_society|ljust:4 }}'
+        '{{ mr_society|ljust:4 }}{{ sr_society|ljust:4 }}'
         + ' ' * 32 + '0000\r\n{% endautoescape %}'),
     'PWR': Template(
         '{% load cwr_generators %}{% autoescape off %}'
