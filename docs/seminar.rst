@@ -1,17 +1,17 @@
 DMP Seminar
 ###################################
 
-DMP is perfect for practical seminars about metadata management for music 
-publishers, registrations and royalty management.
+DMP is perfect for practical seminars for music publishers about 
+metadata management, registrations and royalty management.
 
-If you are hosting a seminar, you can provide DMP for each of the 
-attendees. However, you will not be able to deploy more than 5
-instances for free. And deploying many instances manually is a recipe
-for disaster.
+If you are hosting a seminar, you can deploy an instance of DMP for 
+each of the attendees. But, deploying many instances manually is 
+a recipe for disaster.
 
-You can have attendees deploy DMP themselves, but that will be even worse.
+You can have attendees deploy DMP themselves, but that will be even 
+worse.
 
-There is a commercial alternative.
+There is a better alternative: DMP Seminar Edition.
 
 
 How does it work?
