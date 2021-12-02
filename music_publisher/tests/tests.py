@@ -223,7 +223,7 @@ class DataImportTest(TestCase):
         self.assertEqual(
             str(ve.exception),
             (
-                'A writer with this IPI or general SAAN already exists in the '
+                'A writer with this IPI already exists in the '
                 'database, but is not exactly the same as one provided in the '
                 'importing data: A B'))
 

@@ -13,6 +13,6 @@ class SecretPlaylistView(TemplateView):
         context['playlist'] = get_object_or_404(
             Playlist,
             Q(cd_identifier=secret),
-            Q(Q(release_date__isnull=True) | Q(release_date__lte=now()))
+            Q(Q(release_date__isnull=True) | Q(release_date__gte=now()))
         )
         return context
