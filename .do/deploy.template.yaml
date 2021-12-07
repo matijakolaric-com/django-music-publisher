@@ -1,8 +1,7 @@
 spec:
   name: dmp
   services:
-    - name: dmp
-      instance_size_slug: basic-xxs
+    - name: web
       git:
         branch: exofile
         repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
