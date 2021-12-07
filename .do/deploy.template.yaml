@@ -7,27 +7,24 @@ spec:
         branch: exofile
         repo_clone_url: https://github.com/matijakolaric.com/django-music-publisher.git
       envs:
+        - key: DATABASE_URL
+          scope: RUN_TIME
+          value: ${default-db.DATABASE_URL}
         - key: DJANGO_SUPERUSER_USERNAME
           value: administrator
           scope: BUILD_TIME
         - key: DJANGO_SUPERUSER_PASSWORD
-          type: SECRET
           scope: BUILD_TIME
+        - key: S3_REGION
+        - key: S3_BUCKET
+        - key: S3_ID
+        - key: S3_SECRET
         - key: SECRET_KEY
         - key: PUBLISHER
         - key: PUBLISHER_CODE
         - key: PUBLISHER_IPI_NAME
         - key: PUBLISHER_SOCIETY_PR
-        - key: PUBLISHER_SOCIETY_MR
-        - key: PUBLISHER_SOCIETY_SR
-        - key: PUBLISHING_AGREEMENT_PUBLISHER_PR
-        - key: PUBLISHING_AGREEMENT_PUBLISHER_MR
-        - key: PUBLISHING_AGREEMENT_PUBLISHER_SR
-        - key: DATABASE_URL
-          scope: RUN_TIME
-          value: ${default-db.DATABASE_URL}
       build_command: python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
-
   databases:
     - name: default-db
       engine: PG

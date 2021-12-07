@@ -5,7 +5,6 @@ Django settings for dmp_project project.
 import csv
 import os
 import dj_database_url
-from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
