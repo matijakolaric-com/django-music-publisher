@@ -1,0 +1,29 @@
+spec:
+  name: DMP (Django-Music-Publisher)
+  services:
+    - name: DMP (Django-Music-Publisher)
+      git:
+        branch: exofile
+        repo_clone_url: https://github.com/matijakolaric.com/django-music-publisher.git
+      envs:
+        - key: DJANGO_SUPERUSER_USERNAME
+          value: administrator
+          scope: BUILD_TIME
+        - key: DJANGO_SUPERUSER_PASSWORD
+          type: SECRET
+          scope: BUILD_TIME
+        - key: SECRET_KEY
+        - key: PUBLISHER
+        - key: PUBLISHER_CODE
+        - key: PUBLISHER_IPI_NAME
+        - key: PUBLISHER_SOCIETY_PR
+        - key: PUBLISHER_SOCIETY_MR
+        - key: PUBLISHER_SOCIETY_SR
+        - key: PUBLISHING_AGREEMENT_PUBLISHER_PR
+        - key: PUBLISHING_AGREEMENT_PUBLISHER_MR
+        - key: PUBLISHING_AGREEMENT_PUBLISHER_SR
+        - key: DATABASE_URL
+          scope: RUN_TIME
+          value: ${example-db.DATABASE_URL}
+    databases:
+    - name: default-db
