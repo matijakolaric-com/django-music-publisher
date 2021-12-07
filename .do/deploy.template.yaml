@@ -2,6 +2,7 @@ spec:
   name: dmp
   services:
     - name: dmp
+      instance_size_slug: basic-xxs
       git:
         branch: exofile
         repo_clone_url: https://github.com/matijakolaric.com/django-music-publisher.git
@@ -24,6 +25,10 @@ spec:
         - key: PUBLISHING_AGREEMENT_PUBLISHER_SR
         - key: DATABASE_URL
           scope: RUN_TIME
-          value: ${example-db.DATABASE_URL}
+          value: ${default-db.DATABASE_URL}
+      build-command: python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
+
   databases:
     - name: default-db
+      engine: PG
+      
