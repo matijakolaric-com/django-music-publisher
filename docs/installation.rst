@@ -97,7 +97,16 @@ and in presenting this data elsewhere (e.g. your website) using REST API.
    :width: 100%
 
 Digital Ocean calls their S3 storage "Spaces", where one space is really an S3 bucket.
-The defaults are fine, just give it a name, and this name goes into 'S3_BUCKET' variable.
+The defaults are fine, just give it a name, and this name goes into ''S3_BUCKET'' variable.
+''S3_REGION'' is the second part of the URL, first three letters of your data center location 
+and a number, see the screenshot above. Then you need to add ''Spaces access key''.
+
+.. figure:: /images/installation_do_f2.png
+   :width: 100%
+
+When you are done, put the values into ''S3_ID'' and ''S3_SECRET''. If you have additional
+fields (e.g. ''image'') in writers, your file storage is ready.
+
 
 
 
