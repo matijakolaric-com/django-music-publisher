@@ -26,7 +26,7 @@ spec:
         - key: DATABASE_URL
           scope: RUN_TIME
           value: ${default-db.DATABASE_URL}
-      build-command: python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
+      build_command: python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
 
   databases:
     - name: default-db
