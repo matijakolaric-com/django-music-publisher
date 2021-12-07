@@ -24,4 +24,3 @@ spec:
       build_command: python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
   databases:
     - name: default-db
-      engine: PG
