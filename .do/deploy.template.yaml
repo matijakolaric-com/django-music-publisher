@@ -1,7 +1,7 @@
 spec:
-  name: DMP (Django-Music-Publisher)
+  name: DMP
   services:
-    - name: DMP (Django-Music-Publisher)
+    - name: DMP
       git:
         branch: exofile
         repo_clone_url: https://github.com/matijakolaric.com/django-music-publisher.git
