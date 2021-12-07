@@ -74,7 +74,7 @@ Click on the ``Deploy to DigitalOcean`` button. This will take you to Digital Oc
 in a new tab. Once you have completed the registration, their wizard starts.
 
 Do not change values already set, unless you know exactly what you are doing.
-All you have to do is add values of variables explained here and those from the 
+All you have to do is add values of variables explained here and *all* variables from the 
 first wizard.
 
 * ''DJANGO_SUPERUSER_USERNAME'' is the username of your first user.

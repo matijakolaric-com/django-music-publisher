@@ -5,7 +5,7 @@ spec:
       instance_size_slug: basic-xxs
       git:
         branch: exofile
-        repo_clone_url: https://github.com/matijakolaric.com/django-music-publisher.git
+        repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
       envs:
         - key: DATABASE_URL
           scope: RUN_TIME
