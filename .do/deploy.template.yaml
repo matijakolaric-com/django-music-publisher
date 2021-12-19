@@ -8,6 +8,8 @@ spec:
         branch: exofile
         repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
       envs:
+        - key: DATABASE_URL
+          value: ${default-db.DATABASE_URL}
         - key: DJANGO_SUPERUSER_USERNAME
           value: administrator
         - key: DJANGO_SUPERUSER_PASSWORD
