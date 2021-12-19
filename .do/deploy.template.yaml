@@ -1,13 +1,13 @@
 spec:
   name: dmp
+  databases:
+    - name: default-db
   services:
     - name: web
       git:
         branch: exofile
         repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
       envs:
-        - key: DATABASE_URL
-          value: ${default-db.DATABASE_URL}
         - key: DJANGO_SUPERUSER_USERNAME
           value: administrator
         - key: DJANGO_SUPERUSER_PASSWORD
@@ -21,5 +21,3 @@ spec:
         - key: PUBLISHER_IPI_NAME
         - key: PUBLISHER_SOCIETY_PR
       build_command: python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
-  databases:
-    - name: default-db
