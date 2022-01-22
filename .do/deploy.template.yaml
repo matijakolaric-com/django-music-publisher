@@ -22,4 +22,3 @@ spec:
         - key: PUBLISHER_CODE
         - key: PUBLISHER_IPI_NAME
         - key: PUBLISHER_SOCIETY_PR
-      build_command: python manage.py migrate;python manage.py loaddata publishing_staff.json;python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks
