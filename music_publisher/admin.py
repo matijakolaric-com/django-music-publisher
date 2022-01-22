@@ -385,6 +385,10 @@ class ReleaseAdmin(MusicPublisherAdmin):
         '__str__',
     )
 
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
+
     search_fields = ('release_title', '^cd_identifier')
 
     def has_module_permission(self, request):
@@ -533,7 +537,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
         (None, {
             'fields': (
                 ('release_title', 'release_date'),
-                'description',
+                'description', 'image'
             )
         }),
         ('URLs', {

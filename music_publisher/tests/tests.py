@@ -73,8 +73,6 @@ def get_data_from_response(response):
     PUBLISHER_SOCIETY_PR='10',
     PUBLISHER_SOCIETY_MR='34',
     PUBLISHER_SOCIETY_SR=None,
-    REQUIRE_SAAN=False,
-    REQUIRE_PUBLISHER_FEE=False,
     OPTION_FORCE_CASE='upper')
 class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
@@ -244,8 +242,6 @@ class DataImportTest(TestCase):
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
     PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
@@ -1151,7 +1147,6 @@ class AdminTest(TestCase):
         data = get_data_from_response(response)
 
     @override_settings(
-        REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False,
         PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
     def test_data_import_and_royalty_calculations(self):
         """Test data import, ack import and royalty calculations.
@@ -1362,7 +1357,6 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
 
 
-    @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
         """Test bad data import."""
 
@@ -1609,8 +1603,6 @@ class ValidatorsTest(TestCase):
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
     PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
@@ -1837,7 +1829,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210001DMP_000.V21')
+        self.assertEqual(cwr.filename, 'CW220001DMP_000.V21')
         self.assertEqual(
             cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
         self.assertEqual(
@@ -1849,7 +1841,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210002DMP_0000_V3-0-0.SUB')
+        self.assertEqual(cwr.filename, 'CW220002DMP_0000_V3-0-0.SUB')
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
@@ -1865,7 +1857,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210003DMP_0000_V3-0-0.ISR')
+        self.assertEqual(cwr.filename, 'CW220003DMP_0000_V3-0-0.ISR')
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
@@ -1884,21 +1876,21 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210004DMP_000.V22')
+        self.assertEqual(cwr.filename, 'CW220004DMP_000.V22')
 
        # test CWR 2.2 REV
         cwr = music_publisher.models.CWRExport(nwr_rev='RE2')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210005DMP_000.V22')
+        self.assertEqual(cwr.filename, 'CW220005DMP_000.V22')
 
        # test CWR 3.1 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev='WR1')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210006DMP_0000_V3-1-0.SUB')
+        self.assertEqual(cwr.filename, 'CW220006DMP_0000_V3-1-0.SUB')
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
@@ -1982,7 +1974,7 @@ TRL000010000001000000005"""
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
 TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
-TEST_CWR2_FILENAME = 'music_publisher/tests/CW210001DMP_000.V21'
-TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW210004DMP_000.V21'
-TEST_CWR3_FILENAME = 'music_publisher/tests/CW210002DMP_0000_V3-0-0.SUB'
-TEST_ISR_FILENAME = 'music_publisher/tests/CW210003DMP_0000_V3-0-0.ISR'
+TEST_CWR2_FILENAME = 'music_publisher/tests/CW220001DMP_000.V21'
+TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW220004DMP_000.V21'
+TEST_CWR3_FILENAME = 'music_publisher/tests/CW220002DMP_0000_V3-0-0.SUB'
+TEST_ISR_FILENAME = 'music_publisher/tests/CW220003DMP_0000_V3-0-0.ISR'
