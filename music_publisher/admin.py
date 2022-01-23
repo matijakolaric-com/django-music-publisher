@@ -133,7 +133,7 @@ class ArtistAdmin(MusicPublisherAdmin):
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Public', {'fields': (('image', 'description'),)}),
+                ('Public', {'fields': ('image', 'description')}),
                 ('Internal', {'fields': ('notes',), }),
             )
         else:

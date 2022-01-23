@@ -9,9 +9,35 @@ Add View
 
    Add view
 
-Django-Music-Publisher, as a software for primarily music publishers, holds only basic
-data about an artist: ``First Name``, ``Last Name`` and ``ISNI``. For bands, the band name 
-goes into ``last name`` field. 
+``Add`` and ``change`` views for writers have four fieldsets.
+
+Name
+++++
+
+``Last name`` and ``first name`` fields in the first, quite self-explanatory.
+Only last name is required. For bands, band name goes into ``last name`` field.
+
+ISNI
+++++
+
+``ISNI`` is a unique and unambiguous identifier for performing artists.
+
+Public
++++++++++++++++++
+
+.. note::
+    This section is only visible if file uploads are configured.
+
+This section has two fields:
+
+* ``Image`` - for uploading an image of the artist
+* ``Description`` - for public description
+
+Internal
+++++++++++++++++++
+
+This section has only a single field ``Notes``. You can use it in any way you
+like.
 
 List View
 -----------------------------

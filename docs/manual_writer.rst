@@ -9,7 +9,7 @@ Add/Change View
 
    Add writer view
 
-``Add`` and ``change`` views for writers have four fieldsets.
+``Add`` and ``change`` views for writers have several fieldsets.
 
 Name
 ++++
