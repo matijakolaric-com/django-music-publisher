@@ -67,8 +67,3 @@ Any other status requires investigation. That is far beyond the scope of this us
 
 .. note::
     If you are instructed to contact the software **vendor**, according to the :doc:`MIT license <LICENSE>`, it is you, not the **creator** of this software.
-
-There are two external tools freely available that may assist you:
-
-* `ACK Tool <https://matijakolaric.com/free/cwr-x-ack-tool>`_ that creates summaries of CWR acknowledgement files
-* `CWR Syntax Highlighter <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ with complete syntax highlighting, more detailed than the one in DMP.
