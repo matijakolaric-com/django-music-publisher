@@ -96,7 +96,8 @@ class DataImporter(object):
                 value.ljust(2), WriterInWork.ROLES, 'writer role')
             value = value.ljust(2)
         elif key_elements[2] == 'pro':
-            value = self.get_clean_key(value, SOCIETIES, 'society')
+            value = self.get_clean_key(
+                value, SOCIETIES + [('99', 'NO SOCIETY')], 'society')
         elif key_elements[2] in self.SHARE_FIELDS:
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])

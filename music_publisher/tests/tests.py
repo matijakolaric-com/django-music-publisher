@@ -315,7 +315,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_copublished_work(cls):
-        """Create work, two writers, one co-published."""
+        """Create work, two writers, one co-published"""
         cls.copublished_work = Work.objects.create(title='Copublished')
         WriterInWork.objects.create(
             work=cls.copublished_work,
@@ -341,6 +341,34 @@ class AdminTest(TestCase):
             controlled=False,
         )
 
+    @classmethod
+    def create_duplicate_work(cls):
+        """Create work, two writers, one co-published, duplicate."""
+        cls.duplicate_work = Work.objects.create(title='Copublished')
+        WriterInWork.objects.create(
+            work=cls.duplicate_work,
+            writer=cls.generally_controlled_writer,
+            capacity='CA',
+            relative_share=Decimal('25'),
+            controlled=True,
+        )
+        WriterInWork.objects.create(
+            work=cls.duplicate_work,
+            writer=cls.controllable_writer,
+            capacity='CA',
+            relative_share=Decimal('25'),
+            controlled=True,
+            saan='SAAN',
+            publisher_fee=Decimal('25')
+        )
+        WriterInWork.objects.create(
+            work=cls.duplicate_work,
+            writer=cls.controllable_writer,
+            capacity='CA',
+            relative_share=Decimal('50'),
+            controlled=False,
+        )
+        
     @classmethod
     def create_writers(cls):
         """Create four writers with different properties."""
@@ -390,6 +418,7 @@ class AdminTest(TestCase):
         rev.works.add(cls.original_work)
         rev.works.add(cls.modified_work)
         rev.works.add(cls.copublished_work)
+        rev.works.add(cls.duplicate_work)
         rev.create_cwr()
 
     @classmethod
@@ -456,6 +485,7 @@ class AdminTest(TestCase):
         cls.create_modified_work()
         cls.create_original_work()
         cls.create_copublished_work()
+        cls.create_duplicate_work()
         cls.create_cwr2_export()
         cls.create_cwr3_export()
         cls.create_work_acknowledgements()
@@ -1055,6 +1085,20 @@ class AdminTest(TestCase):
         data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
+
+        """This file has duplicate ISWC codes."""
+        mockfile = InMemoryUploadedFile(
+            open(TEST_ACK_DUPLICATE_ISWCS, 'r'),
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        response = self.client.post(url, data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Duplicate works found for ISWC', response.content)
 
         """Test with a badly formatted file."""
         mock.seek(1)
@@ -1978,3 +2022,4 @@ TEST_CWR2_FILENAME = 'music_publisher/tests/CW220001DMP_000.V21'
 TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW220004DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW220002DMP_0000_V3-0-0.SUB'
 TEST_ISR_FILENAME = 'music_publisher/tests/CW220003DMP_0000_V3-0-0.ISR'
+TEST_ACK_DUPLICATE_ISWCS = 'music_publisher/tests/CW220001000_DMP.V21'
