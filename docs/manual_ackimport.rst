@@ -33,16 +33,8 @@ This view only has two fields:
 
 Once you click on ``Save`` (any of them), the file is processed.
 
-.. note::
-    If an error is encountered, **nothing** is saved.
-
-.. figure:: /images/view_ack.png
-   :width: 100%
-
-   Brief report
-
-
-A brief report is created, with links to all works that received work acknowledgements, work titles and statuses. 
+A brief report is created, with links to all works that received work acknowledgements, work titles and statuses.
+It can also hold detailed information about encountered issues. All issues are also reported as messages.
 
 .. note::
     Only works present in at least one of :doc:`CWR exports <manual_cwrexport>` are matched.
