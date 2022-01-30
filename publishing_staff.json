@@ -45,16 +45,6 @@
                 "artist"
             ],
             [
-                "api_view_artists",
-                "music_publisher",
-                "artist"
-            ],
-            [
-                "artists_api_view",
-                "music_publisher",
-                "artist"
-            ],
-            [
                 "change_artist",
                 "music_publisher",
                 "artist"
@@ -366,16 +356,6 @@
                 "view_alternatetitle",
                 "music_publisher",
                 "alternatetitle"
-            ],
-            [
-                "api_view_artists",
-                "music_publisher",
-                "artist"
-            ],
-            [
-                "artists_api_view",
-                "music_publisher",
-                "artist"
             ],
             [
                 "view_artist",

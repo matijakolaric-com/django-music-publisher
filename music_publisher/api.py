@@ -176,7 +176,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Playlist
-        fields = ['release_title', 'recordings']
+        fields = ['release_title', 'image', 'description', 'recordings']
     recordings = RecordingInTrackSerializer(many=True, read_only=True)
 
 
