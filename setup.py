@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 setuptools.setup(
     name='django-music-publisher',
-    version='21.5.1',
+    version='22.1',
     author='Matija Kolarić',
     author_email='matijakolaric@users.noreply.github.com',
     license='MIT License',
@@ -17,15 +17,15 @@ setuptools.setup(
     url='https://dmp.matijakolaric.com',
     project_urls={
         'Created by': 'https://matijakolaric.com',
-        'Video Tutorials': 'https://www.youtube.com/watch?v=duqgzK3JitU'
-            '&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP',
+        'Video Tutorials': 'https://www.youtube.com/watch?v=Tyk6tYuFBrI'
+                           '&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP',
         'Documentation': 'https://django-music-publisher.readthedocs.io/',
         'Code Repository': 'https://github.com/matijakolaric-com/django'
-            '-music-publisher/',
+                           '-music-publisher/',
     },
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=3.2,<3.3',
+        'Django>=3.2.12,<4.0',
         'requests>=2.24.0',
     ),
     include_package_data=True,
@@ -40,9 +40,9 @@ setuptools.setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     zip_safe=False,
 )

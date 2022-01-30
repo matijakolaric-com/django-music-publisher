@@ -5,7 +5,7 @@ spec:
   services:
     - name: web
       git:
-        branch: exofile
+        branch: master
         repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
       envs:
         - key: DATABASE_URL

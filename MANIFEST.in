@@ -5,8 +5,11 @@ include music_publisher/templates/admin/add_data_import.html
 include music_publisher/templates/music_publisher/royalty_calculation.html
 include music_publisher/societies.csv
 include music_publisher/tests/CW200001DMP_000.V21
-include music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR
 include music_publisher/tests/CW200002DMP_0000_V3-0-0.SUB
+include music_publisher/tests/CW200003DMP_0000_V3-0-0.ISR
+include music_publisher/tests/CW200004DMP_000.V21
+include music_publisher/tests/CW220001000_DMP.V21
+include music_publisher/tests/CW220001052_DMP.V21
 include music_publisher/tests/dataimport.csv
 include music_publisher/tests/royaltystatement.csv
 include music_publisher/tests/royaltystatement_200k_rows.csv
