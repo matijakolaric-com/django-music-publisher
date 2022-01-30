@@ -1,0 +1,24 @@
+spec:
+  name: dmp
+  databases:
+    - name: default-db
+  services:
+    - name: web
+      git:
+        branch: exofile
+        repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git
+      envs:
+        - key: DATABASE_URL
+          value: ${default-db.DATABASE_URL}
+        - key: DJANGO_SUPERUSER_USERNAME
+          value: administrator
+        - key: DJANGO_SUPERUSER_PASSWORD
+        - key: S3_REGION
+        - key: S3_BUCKET
+        - key: S3_ID
+        - key: S3_SECRET
+        - key: SECRET_KEY
+        - key: PUBLISHER
+        - key: PUBLISHER_CODE
+        - key: PUBLISHER_IPI_NAME
+        - key: PUBLISHER_SOCIETY_PR

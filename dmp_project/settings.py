@@ -5,7 +5,6 @@ Django settings for dmp_project project.
 import csv
 import os
 import dj_database_url
-from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
@@ -124,7 +123,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = not DEBUG
 
 # The name of the publisher. Use no comma in the name!
-PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
+PUBLISHER_NAME = os.getenv('PUBLISHER', 'FREE MUSIC CATALOGUE SOFTWARE')
 
 # CWR Delivery code, issued by collecting societies
 PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')

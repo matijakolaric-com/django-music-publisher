@@ -4,7 +4,6 @@
 import re
 
 import django.core.exceptions
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -196,7 +195,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         help_text='Use this field for a general original publishing '
             'agreement.',
         validators=(CWRFieldValidator('saan'),),
-        max_length=14, blank=True, null=True, unique=True)
+        max_length=14, blank=True, null=True)
 
     generally_controlled = models.BooleanField(
         'General agreement', default=False)
@@ -331,9 +330,6 @@ class ReleaseBase(DescriptionBase):
         'CD identifier',
         max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('name'),))
-    # library = models.CharField(
-    #     max_length=60, unique=True,
-    #     validators=(CWRFieldValidator('name'),))
     release_date = models.DateField(
         blank=True, null=True)
     release_title = models.CharField(
@@ -344,9 +340,5 @@ class ReleaseBase(DescriptionBase):
         'Release (album) EAN',
         max_length=13, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('ean'),))
-    # release_label = models.CharField(
-    #     max_length=60, unique=True,
-    #     validators=(CWRFieldValidator('name'),))
-
     image = models.ImageField(
         'Cover Art', max_length=255, upload_to=upload_to, blank=True)

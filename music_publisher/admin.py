@@ -133,7 +133,7 @@ class ArtistAdmin(MusicPublisherAdmin):
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 ('ISNI', {'fields': ('isni',), }),
-                ('Public', {'fields': (('image', 'description'),)}),
+                ('Public', {'fields': ('image', 'description')}),
                 ('Internal', {'fields': ('notes',), }),
             )
         else:
@@ -385,6 +385,10 @@ class ReleaseAdmin(MusicPublisherAdmin):
         '__str__',
     )
 
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
+
     search_fields = ('release_title', '^cd_identifier')
 
     def has_module_permission(self, request):
@@ -532,11 +536,14 @@ class PlaylistAdmin(MusicPublisherAdmin):
     fieldsets = (
         (None, {
             'fields': (
+                ('release_title', 'release_date'),
+                'description', 'image'
+            )
+        }),
+        ('URLs', {
+            'fields': (
                 'secret_url',
                 'secret_api_url',
-                'release_title',
-                'description',
-                'release_date'
             )
         }),
     )
@@ -551,6 +558,8 @@ class PlaylistAdmin(MusicPublisherAdmin):
     )
 
     def valid(self, obj):
+        if obj.id is None:
+            return False
         if obj.release_date and obj.release_date < now().date():
             return False
         return True
@@ -563,14 +572,14 @@ class PlaylistAdmin(MusicPublisherAdmin):
         if self.valid(obj):
             url = self.request.build_absolute_uri(obj.secret_url)
             return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
-        return 'expired'
+        return ''
     secret_url.short_description = 'Secret URL'
 
     def secret_api_url(self, obj):
         if self.valid(obj):
             url = self.request.build_absolute_uri(obj.secret_api_url)
             return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
-        return 'expired'
+        return ''
     secret_api_url.short_description = 'Secret API URL'
 
     def get_inline_instances(self, request, obj=None):
@@ -906,10 +915,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     def writer_last_names(self, obj):
         """This is a standard way how writers are shown in other apps."""
-
-        return ' / '.join(
-            writer.last_name.upper() for writer in set(
-                obj.writers.order_by('last_name')))
+        return obj.writer_last_names()
 
     writer_last_names.short_description = 'Writers\' last names'
     writer_last_names.admin_order_field = 'writers__last_name'
@@ -969,9 +975,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """Optimized queryset for changelist view.
         """
         qs = super().get_queryset(request)
-        qs = qs.prefetch_related('writerinwork_set')
-        qs = qs.prefetch_related('writers')
         qs = qs.prefetch_related('library_release__library')
+        qs = qs.prefetch_related('writerinwork_set__writer')
         qs = qs.annotate(models.Count('cwr_exports', distinct=True))
         qs = qs.annotate(models.Count('recordings', distinct=True))
         return qs
@@ -1453,14 +1458,18 @@ class RecordingAdmin(MusicPublisherAdmin):
 
     actions = None
     list_display = (
-        'recording_id', 'title', 'isrc', 'work_link', 'artist_link',
-        'label_link')
+        'recording_id', 'title', 'isrc', 'has_audio', 
+        'work_link', 'artist_link', 'label_link')
     ordering = ('-id',)
 
     formfield_overrides = {
         models.FileField: {'widget': AudioPlayerWidget},
         models.TimeField: {'widget': forms.TimeInput},
     }
+
+    def has_audio(self, obj):
+        return bool(obj.audio_file)
+    has_audio.boolean = True
 
     class HasISRCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISRC.
@@ -1485,13 +1494,42 @@ class RecordingAdmin(MusicPublisherAdmin):
             elif self.value() == 'N':
                 return queryset.filter(isrc__isnull=True)
 
-    list_filter = (HasISRCListFilter, 'artist', 'record_label')
+    class HasAudioFilter(admin.SimpleListFilter):
+        """Custom list filter on the presence of audio file.
+        """
+
+        title = 'Has audio'
+        parameter_name = 'has_audio_file'
+
+        def lookups(self, request, model_admin):
+            """Simple Yes/No filter
+            """
+            return (
+                ('Y', 'Yes'),
+                ('N', 'No'),
+            )
+
+        def queryset(self, request, queryset):
+            """Filter on presence of :attr:`.iswc`.
+            """
+            if self.value() == 'Y':
+                return queryset.exclude(audio_file='')
+            elif self.value() == 'N':
+                return queryset.filter(audio_file='')
+
+    list_filter = (HasISRCListFilter, HasAudioFilter, 'artist', 'record_label')
+
+    def lookup_allowed(self, lookup, value):
+        allowed = super().lookup_allowed(lookup, value)
+        return allowed
+
     search_fields = (
         'work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
         'recording_id',
         'complete_recording_title', 'complete_version_title', 'title',
+        'has_audio',
         'work_link', 'artist_link', 'label_link')
 
     def get_fieldsets(self, request, obj=None):
@@ -1857,14 +1895,29 @@ class ACKImportAdmin(AdminWithReport):
                             level=messages.ERROR
                         )
                 else:
-                    work.iswc = iswc
-                    work.last_change = now()
-                    s = f'ISWC imported from ACK file: {ack_import_link}.'
-                    LogEntry.objects.log_action(
-                        request.user.id,
-                        admin.options.get_content_type_for_model(work).id,
-                        work.id, str(work), CHANGE, s)
-                    work.save()
+                    duplicate = Work.objects.exclude(id=work.id)
+                    duplicate = duplicate.filter(iswc__iexact=iswc).first()
+                    if duplicate:
+                        report +=(
+                            'One ISWC can not be used for two works: ' +
+                            '{} {} {}.<br/>\n'.format(iswc, duplicate, work) +
+                            'This usually happens if one work is entered '
+                            'twice. ' +
+                            'ISWC not imported for {}.<br/>\n'.format(work))
+                        self.message_user(
+                            request,
+                            'Duplicate works found for ISWC {}!'.format(iswc),
+                            level=messages.ERROR
+                        )
+                    else:
+                        work.iswc = iswc
+                        work.last_change = now()
+                        s = f'ISWC imported from ACK file: {ack_import_link}.'
+                        LogEntry.objects.log_action(
+                            request.user.id,
+                            admin.options.get_content_type_for_model(work).id,
+                            work.id, str(work), CHANGE, s)
+                        work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,
                 remote_work_id=remote_work_id,

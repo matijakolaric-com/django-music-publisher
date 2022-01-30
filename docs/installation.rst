@@ -1,36 +1,38 @@
 Installation and Upgrading
 ****************************************
 
-Installation on  Heroku or Digital Ocean
+Installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 `This wizard <https://dmp.matijakolaric.com/install/>`_ will help you in deploying
-DMP to Heroku or Digital Ocean.
+DMP.
 
 .. figure:: /images/pre_wizard.png
    :width: 100%
 
+In the last step, you will be asked where you want to deploy it. Below are the options.
+
 Heroku
 ======================================================
 
-Fully automated deployment
-------------------------------------------
+Deployment
+--------------------
 
 This is the simplest option, and free for publishers with up to several hundreds 
-of musical works. File storage and related features are not available out of the box.
+of musical works. File storage and related features are not available out of the box,
+and file storage is very expensive if acquired through Heroku Marketplace.
 
-Free tier, sufficient for publishers with hundreds of works has two limitations that 
-can both be removed for $16 per month.
+Free tier has two limitations that can both be removed for $16 per month.
 
-* Your instance goes to sleep after a while. When you access it, it takes 30 seconds
+* Your instance goes to sleep after a while. When you access it, it takes 20-30 seconds
   to spin up.
-* Your database is limited to 10.000 rows, which is enough for publishers with several 
-  hundred works
+* Your database is limited to 10.000 rows.
 
 Valid e-mail address is required for registration, but no payment information.
 
 The whole process takes under 5 minutes, and other than entering the data
-about the publisher and initial password, it is all menus and next-next-next.
+about the publisher and initial password, it is all menus and next-next-next when using the
+`wizard <https://dmp.matijakolaric.com/install/>`_.
 
 Upgrading
 -------------------
@@ -52,21 +54,67 @@ If you are upgrading from a version older than 20.7, you may need to delete an o
 Digital Ocean
 ======================================================
 
-Assisted deployment
+Deployment
 --------------------------------------
 
 Digital Ocean provides no free tier. For $17 per month, you can have your DMP 
-instance running all the time, and this includes file storage. If you use 
-``this affiliate link``, you will get $100 of free credits, so you get almost 
-6 months for free.
+instance running all the time, and this includes file storage. You will be
+asked for email address and payment information (credit card or PayPal).
 
-The deployment process is not fully automated, and includes reading the instructions,
-copy-pasting of data, etc. It takes between 15 and 30 minutes.
+The deployment process can not be fully automated. It requires a bit of copy-pasting and selecting the options
+yourself. It can still be achieved in 5 - 10 minutes by most people if you follow these instructions closely.
+
+First, complete the `wizard <https://dmp.matijakolaric.com/install/>`_. It ends with this screen.
+Don't close it until your installation is finished.
+
+.. figure:: /images/installation_do_1.png
+   :width: 100%
+
+Click on the ``Deploy to DigitalOcean`` button. This will take you to Digital Ocean
+in a new tab. Once you have completed the registration, their wizard starts.
+
+Do not change values already set, unless you know exactly what you are doing.
+All you have to do is add values of variables explained here and *all* variables from the 
+first wizard.
+
+* ''DJANGO_SUPERUSER_USERNAME'' is the username of your first user.
+* ''DJANGO_SUPERUSER_PASSWORD'' is the initial password of your first user, you can and should change it in the app later.
+* Variables starting with ''S3'' are used for file storage, setting this up is explained later in this document.
+
+Copy-paste the of environment variables rest from the first wizard. Feel free to change ''SECRET_KEY'' to something else.
+
+In the second step, you select the size of your instance. The smallest ``Basic`` option should be enough for any small
+publisher. Then just finish the wizard.
+
+File Storage
+----------------------
+
+Support for file uploads was only added in 2022, and is not required for registrations
+of musical works or royalty processing. Currently, it is only used for secret sharable playlists
+and in presenting this data elsewhere (e.g. your website) using REST API.
+
+.. figure:: /images/installation_do_f1.png
+   :width: 100%
+
+Digital Ocean calls their S3 storage "Spaces", where one space is really an S3 bucket.
+The defaults are fine, just give it a name, and this name goes into ''S3_BUCKET'' variable.
+''S3_REGION'' is the second part of the URL, first three letters of your data center location 
+and a number, see the screenshot above. Then you need to add ''Spaces access key''.
+
+.. figure:: /images/installation_do_f2.png
+   :width: 100%
+
+When you are done, put the values into ''S3_ID'' and ''S3_SECRET''. If you have additional
+fields (e.g. ''image'') in writers, your file storage is ready.
+
+
+
 
 Upgrading
 ----------------------
 
-Upgrades are very simple.
+To be explained
+
 
 Manual installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
