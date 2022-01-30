@@ -96,7 +96,8 @@ class DataImporter(object):
                 value.ljust(2), WriterInWork.ROLES, 'writer role')
             value = value.ljust(2)
         elif key_elements[2] == 'pro':
-            value = self.get_clean_key(value, SOCIETIES, 'society')
+            value = self.get_clean_key(
+                value, SOCIETIES + [('99', 'NO SOCIETY')], 'society')
         elif key_elements[2] in self.SHARE_FIELDS:
             if isinstance(value, str) and value[-1] == '%':
                 value = Decimal(value[0:-1])
@@ -184,6 +185,7 @@ class DataImporter(object):
     def get_writers(self, writer_dict):
         """Yield Writer objects, create if needed."""
         for value in writer_dict.values():
+            ipi_name_unset = False
             # variables used more than once or too complex
             general_agreement = value.get('general_agreement', False)
             saan = value.get('saan') if general_agreement else None
@@ -191,6 +193,8 @@ class DataImporter(object):
             last_name = value.get('last', '')
             first_name = value.get('first', '')
             ipi_name = value.get('ipi', None)
+            if ipi_name == '00000000000':
+                ipi_name_unset = True
             # maybe writer is unknown
             if not any([
                     last_name, first_name, ipi_name, pr_society, saan,
@@ -210,7 +214,8 @@ class DataImporter(object):
             writer = Writer.objects.filter(
                 last_name__iexact=lookup_writer.last_name,
                 first_name__iexact=lookup_writer.first_name,
-                ipi_name=lookup_writer.ipi_name).first()
+                ipi_name=None if ipi_name_unset else lookup_writer.ipi_name
+            ).first()
             if writer:
                 # No existing general agreement for this writer
                 if (lookup_writer.generally_controlled and
@@ -242,7 +247,7 @@ class DataImporter(object):
                     self.log(writer, 'Added during import.')
                 except IntegrityError:
                     raise ValueError(
-                        'A writer with this IPI or general SAAN already '
+                        'A writer with this IPI already '
                         'exists in the database, but is not exactly the same '
                         'as one provided in the importing data: {}'.format(
                             writer

@@ -10,6 +10,7 @@ from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -20,13 +21,14 @@ from django.utils.duration import duration_string
 
 from .base import (
     ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
-    TitleBase, WriterBase,
+    TitleBase, WriterBase, upload_to
 )
 from .cwr_templates import (
     TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
 
+import base64, uuid
 
 WORLD_DICT = {
     'tis-a': '2WL',
@@ -222,7 +224,8 @@ class LibraryReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.LibraryRelease`
         """
-        return super().get_queryset().filter(cd_identifier__isnull=False)
+        return super().get_queryset().filter(
+            cd_identifier__isnull=False, library__isnull=False)
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -294,7 +297,8 @@ class CommercialReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return super().get_queryset().filter(cd_identifier__isnull=True)
+        return super().get_queryset().filter(
+            cd_identifier__isnull=True, library__isnull=True)
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -323,6 +327,66 @@ class CommercialRelease(Release):
         verbose_name_plural = 'Commercial Releases'
 
     objects = CommercialReleaseManager()
+
+
+class PlaylistManager(models.Manager):
+    """Manager for a proxy class :class:`.models.Playlist`
+    """
+
+    def get_queryset(self):
+        """Return only commercial releases
+
+        Returns:
+            django.db.models.query.QuerySet: Queryset with instances of \
+            :class:`.models.CommercialRelease`
+        """
+        return super().get_queryset().filter(
+            cd_identifier__isnull=False, library__isnull=True)
+
+    def get_dict(self, qs):
+        """Get the object in an internal dictionary format
+
+        Args:
+            qs (django.db.models.query.QuerySet)
+
+        Returns:
+            dict: internal dict format
+        """
+        return {
+            'releases': [release.get_dict(with_tracks=True) for release in qs]
+        }
+
+
+class Playlist(Release):
+    """Proxy class for Playlists
+
+    Attributes:
+        objects (CommercialReleaseManager): Database Manager
+    """
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Playlist'
+        verbose_name_plural = 'Playlists'
+
+    objects = PlaylistManager()
+
+    def __str__(self):
+        return self.release_title
+
+    def clean(self, *args, **kwargs):
+        if self.cd_identifier is None:
+            self.cd_identifier = base64.urlsafe_b64encode(uuid.uuid4().bytes)
+            self.cd_identifier = self.cd_identifier.decode().rstrip('=')[:15]
+        return super().clean(*args, **kwargs)
+
+    @property
+    def secret_url(self):
+        return reverse('secret_playlist', args=[self.cd_identifier])
+
+    @property
+    def secret_api_url(self):
+        return reverse('playlist-detail', args=[self.cd_identifier])
 
 
 class Writer(WriterBase):
@@ -524,7 +588,8 @@ class Work(TitleBase):
     last_change = models.DateTimeField(
         'Last Edited', editable=False, null=True)
     artists = models.ManyToManyField('Artist', through='ArtistInWork')
-    writers = models.ManyToManyField('Writer', through='WriterInWork')
+    writers = models.ManyToManyField(
+        'Writer', through='WriterInWork', related_name='works')
 
     objects = WorkManager()
 
@@ -566,11 +631,15 @@ class Work(TitleBase):
             self.iswc = self.iswc.replace('-', '').replace('.', '')
         return super().clean_fields(*args, **kwargs)
 
+    def writer_last_names(self):
+        writers = sorted(set(self.writers.all()), key=lambda w: w.last_name)
+        return ' / '.join(w.last_name.upper() for w in writers)
+
     def __str__(self):
         return '{}: {} ({})'.format(
             self.work_id,
             self.title.upper(),
-            ' / '.join(w.last_name.upper() for w in self.writers.distinct()))
+            self.writer_last_names())
 
     @staticmethod
     def get_publisher_dict():
@@ -755,9 +824,9 @@ class ArtistInWork(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name = 'Performing artist'
+        verbose_name = 'Artist performing'
         verbose_name_plural = \
-            'Performing artists (not mentioned in recordings section)'
+            'Artists performing (not mentioned in recordings section)'
         unique_together = (('work', 'artist'),)
         ordering = ('artist__last_name', 'artist__first_name')
 
@@ -872,16 +941,6 @@ class WriterInWork(models.Model):
                     d['writer'] = (
                         'IPI name and PR society must be set. '
                         'See "Writers" in the user manual')
-                if (settings.REQUIRE_SAAN and
-                        not self.writer.generally_controlled and
-                        not self.saan):
-                    d['saan'] = \
-                        'Must be set. (controlled, no general agreement)'
-                if (settings.REQUIRE_PUBLISHER_FEE and
-                        not self.writer.generally_controlled and
-                        not self.publisher_fee):
-                    d['publisher_fee'] = \
-                        'Must be set. (controlled, no general agreement)'
         else:
             if self.saan:
                 d['saan'] = 'Must be empty if writer is not controlled.'
@@ -991,10 +1050,13 @@ class Recording(models.Model):
     work = models.ForeignKey(
         Work, on_delete=models.CASCADE, related_name='recordings')
     artist = models.ForeignKey(
-        Artist, verbose_name='Recording Artist',
+        Artist, verbose_name='Recording Artist', related_name='recordings',
         on_delete=models.PROTECT, blank=True, null=True)
 
     releases = models.ManyToManyField(Release, through='Track')
+
+    audio_file = models.FileField(
+        upload_to=upload_to, max_length=255, blank=True)
 
     def clean_fields(self, *args, **kwargs):
         """
@@ -1008,6 +1070,17 @@ class Recording(models.Model):
             return from :meth:`django.db.models.Model.clean_fields`
 
         """
+        if not any([
+            self.recording_title,
+            self.version_title,
+            self.release_date,
+            self.isrc,
+            self.duration,
+            self.record_label,
+            self.artist,
+            self.audio_file]
+        ):
+            raise ValidationError('No data left, please delete instead.')
         if self.isrc:
             # Removing all characters added for readability
             self.isrc = self.isrc.replace('-', '').replace('.', '')
@@ -1045,7 +1118,7 @@ class Recording(models.Model):
         """Generate title from various fields."""
         return (self.complete_version_title if self.version_title else
             self.complete_recording_title if self.recording_title else
-            self.work.title)
+            self.work.title) #  + (u' \U0001F508' if self.audio_file else '')
 
     @property
     def recording_id(self):
@@ -1138,7 +1211,7 @@ class Track(models.Model):
     recording = models.ForeignKey(
         Recording, on_delete=models.PROTECT, related_name='tracks')
     release = models.ForeignKey(
-        Release, on_delete=models.PROTECT, related_name='tracks')
+        Release, on_delete=models.CASCADE, related_name='tracks')
     cut_number = models.PositiveSmallIntegerField(
         blank=True, null=True,
         validators=(MinValueValidator(1), MaxValueValidator(9999)))
@@ -1155,6 +1228,9 @@ class Track(models.Model):
             'recording': self.recording.get_dict(
                 with_releases=False, with_work=True)
         }
+    
+    def __str__(self):
+        return self.recording.title
 
 
 class DeferCwrManager(models.Manager):
@@ -1848,7 +1924,7 @@ FORCE_CASE_CHOICES = {
 @receiver(pre_save)
 def change_case(sender, instance, **kwargs):
     """Change case of CharFields from :mod:`music_publisher`."""
-    force_case = FORCE_CASE_CHOICES.get(settings.FORCE_CASE)
+    force_case = FORCE_CASE_CHOICES.get(settings.OPTION_FORCE_CASE)
     if not force_case:
         return
     if sender._meta.app_label != 'music_publisher':

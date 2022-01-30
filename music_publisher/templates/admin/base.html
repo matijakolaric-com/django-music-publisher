@@ -17,9 +17,33 @@
 {% block extrahead %}
 <style>
     * {font-weight: 300 !important;}
+    #header {padding: 20px 40px 5px 0;}
+    .login #header {
+        justify-content: left;
+        min-height: 60px;
+    }
     #branding * {font-weight: 200 !important;}
     #changelist-filter select {
         width: 100%;
+    }
+    img.logo {
+        float:left; padding: 5px 24px 24px; max-height: 64px;
+    }
+    #content {
+        padding: 0 40px;
+    }
+    .dashboard #content {
+        padding-left: 24px;
+    }
+    .login #header h1 {
+        font-size: 30px;
+        line-height: 1em;
+    }
+    .login img.logo {
+        padding: 12px 0 0 20px;
+    }
+    #nav-sidebar {
+        border-right: none;
     }
     h1, h2, h3, h4, h5, caption {
         font-weight: 200 !important;
@@ -37,13 +61,15 @@
         width: 20em;
         box-sizing: border-box;
     }
+    .clearable-file-input {margin-left: 20px}
     .fieldBox {
         min-width: 20em;
         box-sizing: border-box;
         padding: 3px 0;
     }
-    .fieldBox .related-widget-wrapper {
-        width: 20em;
+    .fieldBox .related-widget-wrapper, .form-row img {
+        max-width: 20em;
+        box-sizing: border-box;
     }
     .tabular input[type=number] {
         width: 8em;
@@ -71,6 +97,8 @@
         font-size: 14px;
         text-align: left;
         text-transform: uppercase;
+        margin-left: 84px;
+        padding: 0 0 24px;
     }
     div.breadcrumbs * {
         font-weight: 200 !important;
@@ -79,7 +107,7 @@
         display: inline-block;
         padding: 0;
         margin: 0 20px 0 0;
-        font-size: 28px;
+        font-size: 30px;
     }
     #branding h2 {
         display: inline-block;
@@ -115,6 +143,18 @@
         font-size: 18px;
     }
 
+    .module caption {
+        color: var(--header-color);
+        background-color: var(--darkened-bg);
+        border-bottom: 1px solid var(--hairline-color);
+        border-top: 1px solid var(--hairline-color);
+    }
+    
+    .module h2, .inline-group h2 {
+        color: var(--body-bg);
+        background-color: var(--primary);
+    }
+
     .select2-selection__clear {
         font-size: 20px;
         color: var(--primary);
@@ -133,12 +173,17 @@
     #user-tools a:focus, #user-tools a:hover {
         color: var(--header-link-color);
     }
+    #content-related .module h2 {
+        padding: 8px;
+    }
     :root {
         --primary: #d50000;
-        --secondary: #d50000;
-        --link-fg: #d50000;
-        --header-color: var(--header-branding-color);
-        --accent: var(--primary-fg);
+        --secondary: var(--primary);
+        --link-fg: var(--primary);
+        --header-bg: var(--body-bg);
+        --header-color: var(--body-fg);
+        --header-link-color: var(--primary);
+        --accent: var(--primary);
         --link-selected-fg: var(--link-fg);
         --link-hover-color: var(--body-fg);
         --object-tools-bg: var(--primary);
@@ -156,16 +201,21 @@
     @media (prefers-color-scheme: dark) {
         * {font-weight: 400 !important;}
         :root {
-            --primary: #5f0000;
+            --primary: #750000;
+            --accent: white;
             --primary-fg: #eee;
-            --secondary: #5f0000;
-            --link-fg: #f5d5b5;
+            --link-fg: #d50000;
             --body-fg: #ddd;
             --body-quiet-color: #bbb;
             --body-loud-color: #eee;
             --selected-row: #3c0000;
             --body-bg: #000;
             --darkened-bg: #111;
+            --header-link-color: white;
+        }
+        .module h2, .inline-group h2 {
+            color: var(--primary-fg);
+            background-color: var(--primary);
         }
     }
 </style>
@@ -186,12 +236,12 @@
 <div id="container">
 
     {% if not is_popup %}
+        <div>
+            <a href="https://dmp.matijakolaric.com"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" class="logo"></a>
     <!-- Header -->
     <div id="header">
         <div id="branding">
         {% block branding %}{% endblock %}
-            <h2>empowered&nbsp;by&nbsp;<a href="https://matijakolaric.com/dmp-empoweredby/" target="_blank">MATIJA KOLARIĆ</a>
-            </h2>
         </div>
         {% block usertools %}
         {% if has_permission %}
@@ -221,6 +271,7 @@
     {% if title %} &rsaquo; {{ title }}{% endif %}
     </div>
     {% endblock %}
+        </div>
     {% endif %}
 
     <div class="main shifted" id="main">

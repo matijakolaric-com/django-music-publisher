@@ -26,6 +26,9 @@ where the work can be chosen or added through a popup.
 .. note::
     DMP only supports recordings based on a single musical works. The link between a recording and the underlying musical work is required.
 
+Metadata
++++++++++++++++++++
+
 ``Recording title`` should only be used if the title is different than the work title. ``Version title`` should only be 
 used if different from the ``recording title``. The use of suffixes is explained in :doc:`works <manual_work>`, 
 section ``Alternative titles``.
@@ -37,6 +40,10 @@ section.
 ``duration`` and ``release date`` are obvious. ``Duration`` can be entered in seconds or in
 ``HH:MM:SS`` format. It will always be shown in the latter format.
 
+Audio
+++++++++++++++++
+
+``Audio`` field is for uploading audio files. DMP currently only supports MP3 files.
 
 List view
 ------------------------------------------------

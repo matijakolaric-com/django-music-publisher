@@ -1,10 +1,10 @@
 Related Videos
 ##############
 
-Django-Music-Publisher
+DMP
 +++++++++++++++++++++++++++++++++++
 
-A playlist specifically about `Django-Music-Publisher <https://www.youtube.com/watch?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP&v=duqgzK3JitU>`_.
+A playlist specifically about `DMP <https://www.youtube.com/watch?list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP&v=duqgzK3JitU>`_.
 This playlist no longer features user tutorials.
 
 .. raw:: html

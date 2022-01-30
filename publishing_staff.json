@@ -120,6 +120,16 @@
                 "cwrexport"
             ],
             [
+                "add_dataimport",
+                "music_publisher",
+                "dataimport"
+            ],
+            [
+                "view_dataimport",
+                "music_publisher",
+                "dataimport"
+            ],
+            [
                 "add_label",
                 "music_publisher",
                 "label"
@@ -178,6 +188,26 @@
                 "view_libraryrelease",
                 "music_publisher",
                 "libraryrelease"
+            ],
+            [
+                "add_playlist",
+                "music_publisher",
+                "playlist"
+            ],
+            [
+                "change_playlist",
+                "music_publisher",
+                "playlist"
+            ],
+            [
+                "delete_playlist",
+                "music_publisher",
+                "playlist"
+            ],
+            [
+                "view_playlist",
+                "music_publisher",
+                "playlist"
             ],
             [
                 "add_recording",
@@ -348,6 +378,11 @@
                 "cwrexport"
             ],
             [
+                "view_dataimport",
+                "music_publisher",
+                "dataimport"
+            ],
+            [
                 "view_label",
                 "music_publisher",
                 "label"
@@ -361,6 +396,11 @@
                 "view_libraryrelease",
                 "music_publisher",
                 "libraryrelease"
+            ],
+            [
+                "view_playlist",
+                "music_publisher",
+                "playlist"
             ],
             [
                 "view_recording",

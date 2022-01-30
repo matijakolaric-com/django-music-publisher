@@ -4,12 +4,20 @@
 import re
 
 import django.core.exceptions
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES
+from uuid import uuid4
+import base64
+
+
+def upload_to(instance, filename):
+    ext = filename.rsplit('.', 1)[-1]
+    folder = instance._meta.model_name
+    fn = base64.urlsafe_b64encode(uuid4().bytes).rstrip(b'=')
+    return f'{folder}/{fn}.{ext}'
 
 
 class NotesManager(models.Manager):
@@ -37,6 +45,19 @@ class NotesBase(models.Model):
     objects = NotesManager()
 
     notes = models.TextField(blank=True)
+
+
+class DescriptionBase(models.Model):
+    """Abstract class for all classes that have publicly visible descriptions.
+
+    Attributes:
+        description (django.db.models.TextField): Public description
+    """
+
+    class Meta:
+        abstract = True
+
+    description = models.TextField(blank=True)
 
 
 class TitleBase(models.Model):
@@ -78,6 +99,7 @@ class PersonBase(models.Model):
     last_name = models.CharField(
         max_length=45, db_index=True,
         validators=(CWRFieldValidator('name'),))
+    image = models.ImageField(max_length=255, upload_to=upload_to, blank=True)
 
     def __str__(self):
         if self.first_name:
@@ -173,7 +195,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         help_text='Use this field for a general original publishing '
             'agreement.',
         validators=(CWRFieldValidator('saan'),),
-        max_length=14, blank=True, null=True, unique=True)
+        max_length=14, blank=True, null=True)
 
     generally_controlled = models.BooleanField(
         'General agreement', default=False)
@@ -202,10 +224,6 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
                 d['generally_controlled'] = (
                     'IPI name number and PR society fields are required for '
                     'a controlled writer. See "Writers" in the user manual.')
-            if settings.REQUIRE_SAAN and not self.saan:
-                d['saan'] = 'This field is required.'
-            if settings.REQUIRE_PUBLISHER_FEE and not self.publisher_fee:
-                d['publisher_fee'] = 'This field is required.'
         if d:
             raise django.core.exceptions.ValidationError(d)
 
@@ -219,7 +237,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         super().clean_fields(*args, **kwargs)
 
 
-class ArtistBase(PersonBase, NotesBase):
+class ArtistBase(PersonBase, NotesBase, DescriptionBase):
     """Performing artist base class.
 
     Attributes:
@@ -244,7 +262,8 @@ class ArtistBase(PersonBase, NotesBase):
         return models.Model.clean_fields(self, *args, **kwargs)
 
 
-class WriterBase(PersonBase, IPIWithGeneralAgreementBase, NotesBase):
+class WriterBase(
+        PersonBase, IPIWithGeneralAgreementBase, NotesBase, DescriptionBase):
     """Base class for writers.
     """
 
@@ -254,7 +273,7 @@ class WriterBase(PersonBase, IPIWithGeneralAgreementBase, NotesBase):
         abstract = True
 
 
-class LabelBase(NotesBase):
+class LabelBase(NotesBase, DescriptionBase):
     """Music Label base class.
 
     Attributes:
@@ -269,6 +288,8 @@ class LabelBase(NotesBase):
     name = models.CharField(
         max_length=60, unique=True,
         validators=(CWRFieldValidator('name'),))
+    image = models.ImageField(
+        'Logo', max_length=255, upload_to=upload_to, blank=True)
 
 
 class LibraryBase(models.Model):
@@ -288,7 +309,7 @@ class LibraryBase(models.Model):
         validators=(CWRFieldValidator('name'),))
 
 
-class ReleaseBase(models.Model):
+class ReleaseBase(DescriptionBase):
     """Music Release base class
 
     Attributes:
@@ -309,9 +330,6 @@ class ReleaseBase(models.Model):
         'CD identifier',
         max_length=15, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('name'),))
-    library = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('name'),))
     release_date = models.DateField(
         blank=True, null=True)
     release_title = models.CharField(
@@ -322,6 +340,5 @@ class ReleaseBase(models.Model):
         'Release (album) EAN',
         max_length=13, blank=True, null=True, unique=True,
         validators=(CWRFieldValidator('ean'),))
-    release_label = models.CharField(
-        max_length=60, unique=True,
-        validators=(CWRFieldValidator('name'),))
+    image = models.ImageField(
+        'Cover Art', max_length=255, upload_to=upload_to, blank=True)

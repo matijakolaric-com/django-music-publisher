@@ -1,20 +1,15 @@
-.. |br| raw:: html
-
-   <br>
-
-Django-Music-Publisher |br| Free Music Publishing Software 
+DMP
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. figure:: /images/work.png
    :width: 100%
 
-Django-Music-Publisher (DMP) is free, open source software for **managing music metadata**, **registration/licencing of
-musical works** and **royalty processing**.
+**DMP** (Django-Music-Publisher) is free, open-source software for 
 
-This is the official documentation, including the user manual. 
-`Home page <https://dmp.matijakolaric.com>`_ of this project includes an installation wizard and a link to a commercial
-upgrade.
-
+* **managing music metadata**, 
+* **registration of musical works**, 
+* **royalty management**, and
+* **data distribution**.
 
 .. toctree::
    :maxdepth: 1
@@ -25,5 +20,6 @@ upgrade.
    releases
    LICENSE
    manual
+   restapi
    videos
    modules

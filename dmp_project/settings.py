@@ -5,11 +5,10 @@ Django settings for dmp_project project.
 import csv
 import os
 import dj_database_url
-from django.core.management.utils import get_random_secret_key
 from decimal import Decimal
 
 SOFTWARE = 'DMP.MATIJAKOLARIC.COM'
-SOFTWARE_VERSION = '21.5.1 MAYDAY (OPEN SOURCE)'
+SOFTWARE_VERSION = '22.1 EXOFILE (OPEN SOURCE)'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,13 +22,14 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'music_publisher.apps.MusicPublisherConfig',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cleanup',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -123,7 +123,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = not DEBUG
 
 # The name of the publisher. Use no comma in the name!
-PUBLISHER_NAME = os.getenv('PUBLISHER', 'DJANGO-MUSIC-PUBLISHER')
+PUBLISHER_NAME = os.getenv('PUBLISHER', 'FREE MUSIC CATALOGUE SOFTWARE')
 
 # CWR Delivery code, issued by collecting societies
 PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
@@ -149,16 +149,53 @@ PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
     os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_SR', '1.0'))
 
-# Set to True for societies that require society-assigned agreement numbers
-# PRS/MCPS, BUMA/STEMRA, Scandinavian societies.
-REQUIRE_SAAN = os.getenv('REQUIRE_SAAN', False)
-
-# Set to True if you have a standard publishing agreement with writers
-REQUIRE_PUBLISHER_FEE = os.getenv('REQUIRE_PUBLISHER_FEE', False)
-
 # Set to one of the following options to change names and titles
 # * 'upper' - changes all names and titles to UPPER CASE
 # * 'title' - Changes all names to Title Case
 # * 'smart' - Changes all UPPER CASE names and titles to Title Case
 # Anything else makes no changes to names and titles
-FORCE_CASE = os.getenv('FORCE_CASE')
+OPTION_FORCE_CASE = os.getenv('OPTION_FORCE_CASE')
+
+
+# REMOTE FILES
+# The default is Digital Ocean Spaces, but any S3 should work with AWS
+# and any other S3. Support DMP by using the affiliation links below.
+# For Digital Ocean (https://www.digitalocean.com/?refcode=b05ea0e8ec84), 
+# you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84
+# S3_BUCKET (name), S3_REGION (region code, fra1, lon3, etc.
+# and https://cloud.digitalocean.com/account/api/tokens?refcode=b05ea0e8ec84
+# S3_ID, S3 SECRET 
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') or os.getenv('S3_ID')
+AWS_SECRET_ACCESS_KEY = (
+        os.getenv('AWS_SECRET_ACCESS_KEY') or
+        os.getenv('S3_SECRET'))
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME') or os.getenv('S3_REGION')
+AWS_STORAGE_BUCKET_NAME = (
+        os.getenv('AWS_STORAGE_BUCKET_NAME') or
+        os.getenv('S3_BUCKET'))
+AWS_S3_ENDPOINT_URL = (
+        os.getenv('AWS_S3_ENDPOINT_URL') or
+        f'https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com')
+AWS_QUERYSTRING_EXPIRE = os.getenv('AWS_QUERYSTRING_EXPIRE', 900)
+
+
+S3_ENABLED = all([AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
+                  AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY])
+
+OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
+
+if OPTION_FILES:
+    if S3_ENABLED:
+        # S3 media, use the bucket root
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    else:
+        # normal file storage
+        MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
+        MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+    ]
+}

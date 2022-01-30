@@ -73,9 +73,7 @@ def get_data_from_response(response):
     PUBLISHER_SOCIETY_PR='10',
     PUBLISHER_SOCIETY_MR='34',
     PUBLISHER_SOCIETY_SR=None,
-    REQUIRE_SAAN=False,
-    REQUIRE_PUBLISHER_FEE=False,
-    FORCE_CASE='upper')
+    OPTION_FORCE_CASE='upper')
 class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
@@ -223,7 +221,7 @@ class DataImportTest(TestCase):
         self.assertEqual(
             str(ve.exception),
             (
-                'A writer with this IPI or general SAAN already exists in the '
+                'A writer with this IPI already exists in the '
                 'database, but is not exactly the same as one provided in the '
                 'importing data: A B'))
 
@@ -244,8 +242,6 @@ class DataImportTest(TestCase):
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
     PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
@@ -319,7 +315,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_copublished_work(cls):
-        """Create work, two writers, one co-published."""
+        """Create work, two writers, one co-published"""
         cls.copublished_work = Work.objects.create(title='Copublished')
         WriterInWork.objects.create(
             work=cls.copublished_work,
@@ -345,6 +341,34 @@ class AdminTest(TestCase):
             controlled=False,
         )
 
+    @classmethod
+    def create_duplicate_work(cls):
+        """Create work, two writers, one co-published, duplicate."""
+        cls.duplicate_work = Work.objects.create(title='Copublished')
+        WriterInWork.objects.create(
+            work=cls.duplicate_work,
+            writer=cls.generally_controlled_writer,
+            capacity='CA',
+            relative_share=Decimal('25'),
+            controlled=True,
+        )
+        WriterInWork.objects.create(
+            work=cls.duplicate_work,
+            writer=cls.controllable_writer,
+            capacity='CA',
+            relative_share=Decimal('25'),
+            controlled=True,
+            saan='SAAN',
+            publisher_fee=Decimal('25')
+        )
+        WriterInWork.objects.create(
+            work=cls.duplicate_work,
+            writer=cls.controllable_writer,
+            capacity='CA',
+            relative_share=Decimal('50'),
+            controlled=False,
+        )
+        
     @classmethod
     def create_writers(cls):
         """Create four writers with different properties."""
@@ -394,6 +418,7 @@ class AdminTest(TestCase):
         rev.works.add(cls.original_work)
         rev.works.add(cls.modified_work)
         rev.works.add(cls.copublished_work)
+        rev.works.add(cls.duplicate_work)
         rev.create_cwr()
 
     @classmethod
@@ -460,6 +485,7 @@ class AdminTest(TestCase):
         cls.create_modified_work()
         cls.create_original_work()
         cls.create_copublished_work()
+        cls.create_duplicate_work()
         cls.create_cwr2_export()
         cls.create_cwr3_export()
         cls.create_work_acknowledgements()
@@ -548,6 +574,7 @@ class AdminTest(TestCase):
                 continue
             if 'first_name' in data:
                 data['first_name'] += ' JR.'
+            data.pop('image', None)
             response = self.client.post(
                 url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)
@@ -795,40 +822,6 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             b'IPI name and PR society must be set.',
-            response.content)
-
-    def test_controllable_and_controlled_but_missing_saan(self):
-        """If SAAN is required, then it must be set in the Writer object,
-        or in the WriterInWork object or both."""
-        self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
-        response = self.client.get(url, follow=False)
-        data = get_data_from_response(response)
-        data['writerinwork_set-1-writer'] = self.controllable_writer.id
-        data['writerinwork_set-1-controlled'] = True
-        data['writerinwork_set-1-publisher_fee'] = '25.0'
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'Must be set. (controlled, no general agreement)',
-            response.content)
-
-    def test_controllable_and_controlled_but_missing_fee(self):
-        """If `publisher_fee` is required, then it must be set in the Writer,
-        or in the WriterInWork object or both."""
-        self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
-        response = self.client.get(url, follow=False)
-        data = get_data_from_response(response)
-        data['writerinwork_set-1-writer'] = self.controllable_writer.id
-        data['writerinwork_set-1-controlled'] = True
-        data['writerinwork_set-1-saan'] = 'WHATEVER'
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'Must be set. (controlled, no general agreement)',
             response.content)
 
     def test_writer_switch(self):
@@ -1093,6 +1086,20 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
 
+        """This file has duplicate ISWC codes."""
+        mockfile = InMemoryUploadedFile(
+            open(TEST_ACK_DUPLICATE_ISWCS, 'r'),
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text', 0, None)
+        url = reverse('admin:music_publisher_ackimport_add')
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({'acknowledgement_file': mockfile, 'import_iswcs': 1})
+        response = self.client.post(url, data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Duplicate works found for ISWC', response.content)
+
         """Test with a badly formatted file."""
         mock.seek(1)
         mockfile = InMemoryUploadedFile(
@@ -1184,7 +1191,6 @@ class AdminTest(TestCase):
         data = get_data_from_response(response)
 
     @override_settings(
-        REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False,
         PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
     def test_data_import_and_royalty_calculations(self):
         """Test data import, ack import and royalty calculations.
@@ -1342,7 +1348,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
@@ -1353,7 +1359,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
@@ -1365,7 +1371,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
@@ -1378,7 +1384,7 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
         self.assertTrue(hasattr(response, 'streaming_content'))
-        # The file must be processed in under 10 seconds
+        # The file must be processed in under 15 seconds
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         # TEST BAD
@@ -1395,7 +1401,6 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
 
 
-    @override_settings(REQUIRE_SAAN=False, REQUIRE_PUBLISHER_FEE=False)
     def test_bad_data_import(self):
         """Test bad data import."""
 
@@ -1642,12 +1647,10 @@ class ValidatorsTest(TestCase):
     PUBLISHER_SOCIETY_PR='52',
     PUBLISHER_SOCIETY_MR='44',
     PUBLISHER_SOCIETY_SR='44',
-    REQUIRE_SAAN=True,
-    REQUIRE_PUBLISHER_FEE=True,
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
-    FORCE_CASE='smart'
+    OPTION_FORCE_CASE='smart'
 )
 class ModelsSimpleTest(TransactionTestCase):
     """These tests are modifying objects directly."""
@@ -1870,7 +1873,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210001DMP_000.V21')
+        self.assertEqual(cwr.filename, 'CW220001DMP_000.V21')
         self.assertEqual(
             cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
         self.assertEqual(
@@ -1882,7 +1885,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210002DMP_0000_V3-0-0.SUB')
+        self.assertEqual(cwr.filename, 'CW220002DMP_0000_V3-0-0.SUB')
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
@@ -1898,7 +1901,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210003DMP_0000_V3-0-0.ISR')
+        self.assertEqual(cwr.filename, 'CW220003DMP_0000_V3-0-0.ISR')
         self.assertEqual(
             cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(
@@ -1917,21 +1920,21 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210004DMP_000.V22')
+        self.assertEqual(cwr.filename, 'CW220004DMP_000.V22')
 
        # test CWR 2.2 REV
         cwr = music_publisher.models.CWRExport(nwr_rev='RE2')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210005DMP_000.V22')
+        self.assertEqual(cwr.filename, 'CW220005DMP_000.V22')
 
        # test CWR 3.1 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev='WR1')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, 'CW210006DMP_0000_V3-1-0.SUB')
+        self.assertEqual(cwr.filename, 'CW220006DMP_0000_V3-1-0.SUB')
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
@@ -2015,7 +2018,8 @@ TRL000010000001000000005"""
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
 TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
-TEST_CWR2_FILENAME = 'music_publisher/tests/CW210001DMP_000.V21'
-TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW210004DMP_000.V21'
-TEST_CWR3_FILENAME = 'music_publisher/tests/CW210002DMP_0000_V3-0-0.SUB'
-TEST_ISR_FILENAME = 'music_publisher/tests/CW210003DMP_0000_V3-0-0.ISR'
+TEST_CWR2_FILENAME = 'music_publisher/tests/CW220001DMP_000.V21'
+TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW220004DMP_000.V21'
+TEST_CWR3_FILENAME = 'music_publisher/tests/CW220002DMP_0000_V3-0-0.SUB'
+TEST_ISR_FILENAME = 'music_publisher/tests/CW220003DMP_0000_V3-0-0.ISR'
+TEST_ACK_DUPLICATE_ISWCS = 'music_publisher/tests/CW220001000_DMP.V21'

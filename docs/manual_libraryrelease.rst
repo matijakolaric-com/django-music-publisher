@@ -9,7 +9,7 @@ Add view
 +++++++++++++++++++++++
 
 :doc:`Commercial (general) <manual_commercialrelease>` and *library* releases are actually one model with two different sets of views.
-The only difference is that *library* releases have two additional fields both required:
+The only difference is that *library* releases have two additional fields, both required:
 
 * ``Library``
 * ``CD identifier`` - a CWR field name for *release code*

@@ -33,16 +33,8 @@ This view only has two fields:
 
 Once you click on ``Save`` (any of them), the file is processed.
 
-.. note::
-    If an error is encountered, **nothing** is saved.
-
-.. figure:: /images/view_ack.png
-   :width: 100%
-
-   Brief report
-
-
-A brief report is created, with links to all works that received work acknowledgements, work titles and statuses. 
+A brief report is created, with links to all works that received work acknowledgements, work titles and statuses.
+It can also hold detailed information about encountered issues. All issues are also reported as messages.
 
 .. note::
     Only works present in at least one of :doc:`CWR exports <manual_cwrexport>` are matched.
@@ -75,8 +67,3 @@ Any other status requires investigation. That is far beyond the scope of this us
 
 .. note::
     If you are instructed to contact the software **vendor**, according to the :doc:`MIT license <LICENSE>`, it is you, not the **creator** of this software.
-
-There are two external tools freely available that may assist you:
-
-* `ACK Tool <https://matijakolaric.com/free/cwr-x-ack-tool>`_ that creates summaries of CWR acknowledgement files
-* `CWR Syntax Highlighter <https://matijakolaric.com/free/cwr-syntax-highlighter/>`_ with complete syntax highlighting, more detailed than the one in DMP.

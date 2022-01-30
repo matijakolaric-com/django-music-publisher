@@ -9,7 +9,7 @@ Add/Change View
 
    Add writer view
 
-``Add`` and ``change`` views for writers have four fieldsets.
+``Add`` and ``change`` views for writers have several fieldsets.
 
 Name
 ++++
@@ -43,6 +43,23 @@ In the last group, we have three fields:
     ``Publisher fee`` is not used in registrations. It is used only for
     :doc:`royalty statement processing <manual_royaltycalculations>`.
     Details are explained in that section.
+
+Public
++++++++++++++++++
+
+.. note::
+    This section is only visible if file uploads are configured.
+
+This section has two fields:
+
+* ``Image`` - for uploading an image of the writer
+* ``Description`` - for public description
+
+Internal
+++++++++++++++++++
+
+This section has only a single field ``Notes``. You can use it in any way you
+like.
 
 List View
 ---------
