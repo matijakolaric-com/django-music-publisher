@@ -110,7 +110,7 @@ S3 storage
 Recommended S3 provider is `Digital Ocean <https://m.do.co/c/b05ea0e8ec84>`_, it is simpler to set up and more affordable 
 than AWS. They call S3 *Spaces*. 
 
-For Digital Ocean, you need to set up only four settings.
+For Digital Ocean, you need to set up only four config (environment) variables.
 
 .. figure:: /images/installation_do_f1.png
    :width: 100%
@@ -140,29 +140,4 @@ Other options
 
 * ``OPTION_FILES`` - enables support for file uploads (audio files and images), using 
   local file storage
-
-
-External File storage
-======================================================
-
-If you install DMP in a container (this includes Heroku), external storage is required. 
-This is because containers are ephemeral. Default is S3, and 
-
-For enabling support for local file support, see `Settings`_.
-
-Here we'll explain how to set up file storage with 
-
-.. figure:: /images/installation_do_f1.png
-   :width: 100%
-
-Digital Ocean calls their S3 storage "Spaces", where one space is really an S3 bucket.
-The defaults are fine, just give it a name, and this name goes into ''S3_BUCKET'' variable.
-''S3_REGION'' is the second part of the URL, first three letters of your data center location 
-and a number, see the screenshot above. Then you need to add ''Spaces access key''.
-
-.. figure:: /images/installation_do_f2.png
-   :width: 100%
-
-When you are done, put the values into ''S3_ID'' and ''S3_SECRET''. If you have additional
-fields (e.g. ''image'') in writers, your file storage is ready.
 
