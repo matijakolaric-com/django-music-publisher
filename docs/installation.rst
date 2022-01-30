@@ -51,72 +51,7 @@ Then you log in, clone the repository, enter the folder, add a new remote and pu
    
 If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
 
-Digital Ocean
-======================================================
-
-Deployment
---------------------------------------
-
-Digital Ocean provides no free tier. For $17 per month, you can have your DMP 
-instance running all the time, and this includes file storage. You will be
-asked for email address and payment information (credit card or PayPal).
-
-The deployment process can not be fully automated. It requires a bit of copy-pasting and selecting the options
-yourself. It can still be achieved in 5 - 10 minutes by most people if you follow these instructions closely.
-
-First, complete the `wizard <https://dmp.matijakolaric.com/install/>`_. It ends with this screen.
-Don't close it until your installation is finished.
-
-.. figure:: /images/installation_do_1.png
-   :width: 100%
-
-Click on the ``Deploy to DigitalOcean`` button. This will take you to Digital Ocean
-in a new tab. Once you have completed the registration, their wizard starts.
-
-Do not change values already set, unless you know exactly what you are doing.
-All you have to do is add values of variables explained here and *all* variables from the 
-first wizard.
-
-* ''DJANGO_SUPERUSER_USERNAME'' is the username of your first user.
-* ''DJANGO_SUPERUSER_PASSWORD'' is the initial password of your first user, you can and should change it in the app later.
-* Variables starting with ''S3'' are used for file storage, setting this up is explained later in this document.
-
-Copy-paste the of environment variables rest from the first wizard. Feel free to change ''SECRET_KEY'' to something else.
-
-In the second step, you select the size of your instance. The smallest ``Basic`` option should be enough for any small
-publisher. Then just finish the wizard.
-
-File Storage
-----------------------
-
-Support for file uploads was only added in 2022, and is not required for registrations
-of musical works or royalty processing. Currently, it is only used for secret sharable playlists
-and in presenting this data elsewhere (e.g. your website) using REST API.
-
-.. figure:: /images/installation_do_f1.png
-   :width: 100%
-
-Digital Ocean calls their S3 storage "Spaces", where one space is really an S3 bucket.
-The defaults are fine, just give it a name, and this name goes into ''S3_BUCKET'' variable.
-''S3_REGION'' is the second part of the URL, first three letters of your data center location 
-and a number, see the screenshot above. Then you need to add ''Spaces access key''.
-
-.. figure:: /images/installation_do_f2.png
-   :width: 100%
-
-When you are done, put the values into ''S3_ID'' and ''S3_SECRET''. If you have additional
-fields (e.g. ''image'') in writers, your file storage is ready.
-
-
-
-
-Upgrading
-----------------------
-
-To be explained
-
-
-Manual installation
+Custom installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 DMP - Django-Music-Publisher is based on Django, which can be installed on Windows,
@@ -172,14 +107,20 @@ Agreement-related settings
 S3 storage
 ------------------------------------
 
-Recommended S3 provider is Digital Ocean, it is simpler to set up and more affordable 
+Recommended S3 provider is `Digital Ocean <https://m.do.co/c/b05ea0e8ec84>`_, it is simpler to set up and more affordable 
 than AWS. They call S3 *Spaces*. 
 
 For Digital Ocean, you need to set up only four settings.
 
+.. figure:: /images/installation_do_f1.png
+   :width: 100%
+
 * ``S3_REGION`` (alias for ``AWS_S3_REGION_NAME``) and ``S3_BUCKET`` 
   (alias for ``AWS_STORAGE_BUCKET_NAME``), you get them when you set up your *Spaces*,
   and
+
+.. figure:: /images/installation_do_f2.png
+   :width: 100%
 
 * ``S3_ID`` (alias for ``AWS_ACCESS_KEY_ID``) and
   ``S3_SECRET`` (alias for ``AWS_SECRET_ACCESS_KEY``), you get them when you generate 
@@ -199,3 +140,29 @@ Other options
 
 * ``OPTION_FILES`` - enables support for file uploads (audio files and images), using 
   local file storage
+
+
+External File storage
+======================================================
+
+If you install DMP in a container (this includes Heroku), external storage is required. 
+This is because containers are ephemeral. Default is S3, and 
+
+For enabling support for local file support, see `Settings`_.
+
+Here we'll explain how to set up file storage with 
+
+.. figure:: /images/installation_do_f1.png
+   :width: 100%
+
+Digital Ocean calls their S3 storage "Spaces", where one space is really an S3 bucket.
+The defaults are fine, just give it a name, and this name goes into ''S3_BUCKET'' variable.
+''S3_REGION'' is the second part of the URL, first three letters of your data center location 
+and a number, see the screenshot above. Then you need to add ''Spaces access key''.
+
+.. figure:: /images/installation_do_f2.png
+   :width: 100%
+
+When you are done, put the values into ''S3_ID'' and ''S3_SECRET''. If you have additional
+fields (e.g. ''image'') in writers, your file storage is ready.
+
