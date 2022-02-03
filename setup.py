@@ -25,7 +25,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
-        'Django>=3.2.11,<4.0',
+        'Django>=3.2.12,<4.0',
         'requests>=2.24.0',
     ),
     include_package_data=True,
