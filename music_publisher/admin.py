@@ -446,6 +446,10 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
     list_filter = ('release_label', 'library')
     search_fields = ('release_title', '^cd_identifier')
+    
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
 
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
@@ -548,6 +552,10 @@ class PlaylistAdmin(MusicPublisherAdmin):
         }),
     )
 
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
+    
     # autocomplete_fields = ['recordings']
 
     list_display = (
