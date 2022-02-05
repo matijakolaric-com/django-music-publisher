@@ -44,6 +44,13 @@ Total data validation
 All entered data is validated for CWR and DDEX compatibility on field-, record-,
 and transaction-level.
 
+Single controlled publisher
+-------------------------------------
+
+DMP supports only a single controlled publisher (single publishing entity),
+entered through settings. It will **not work** for publishers with multiple
+entities, most notably US publishers with multiple entities in multiple PROs.
+
 Manuscript shares
 ------------------------
 
