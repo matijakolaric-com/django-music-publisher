@@ -593,7 +593,6 @@ class PlaylistAdmin(MusicPublisherAdmin):
         """
         self.request = request
         qs = super().get_queryset(request)
-        qs = qs.exclude(release_date__gt=now())
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
 

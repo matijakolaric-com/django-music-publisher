@@ -372,7 +372,7 @@ class Playlist(Release):
     objects = PlaylistManager()
 
     def __str__(self):
-        return self.release_title
+        return self.release_title or ''
 
     def clean(self, *args, **kwargs):
         if self.cd_identifier is None:
