@@ -648,6 +648,10 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     inlines = [TrackInline]
     autocomplete_fields = ('release_label',)
 
+    formfield_overrides = {
+        models.ImageField: {'widget': ImageWidget},
+    }
+    
     list_display = (
         'release_title',
         'release_label',
