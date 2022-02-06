@@ -418,20 +418,34 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     inlines = [TrackInline]
     autocomplete_fields = ('release_label', 'library')
 
-    fieldsets = (
-        ('Library', {
-            'fields': (
-                ('library', 'cd_identifier'),)
-        }),
-        ('Release (album) metadata', {
-            'fields': (
-                ('release_title', 'release_label'),
-                ('ean', 'release_date'))
-        }),
-        ('Public', {
-            'fields': ('image', 'description')
-        }),
-    )
+    def get_fieldsets(self, request, obj=None):
+        if settings.OPTION_FILES:
+            return (
+                ('Library', {
+                    'fields': (
+                        ('library', 'cd_identifier'),)
+                }),
+                ('Release (album) metadata', {
+                    'fields': (
+                        ('release_title', 'release_label'),
+                        ('ean', 'release_date'))
+                }),
+                ('Public', {
+                    'fields': ('image', 'description')
+                }),
+            )
+        else:
+            return (
+                ('Library', {
+                    'fields': (
+                        ('library', 'cd_identifier'),)
+                }),
+                ('Release (album) metadata', {
+                    'fields': (
+                        ('release_title', 'release_label'),
+                        ('ean', 'release_date'))
+                }),
+            )
 
     list_display = (
         'cd_identifier',
@@ -664,16 +678,26 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     list_filter = ('release_label',)
     search_fields = ('release_title',)
 
-    fieldsets = (
-        ('Release (album) metadata', {
-            'fields': (
-                ('release_title', 'release_label'),
-                ('ean', 'release_date'))
-        }),
-        ('Public', {
-            'fields': ('image', 'description')
-        }),
-    )
+    def get_fieldsets(self, request, obj=None):
+        if settings.OPTION_FILES:
+            return (
+                ('Release (album) metadata', {
+                    'fields': (
+                        ('release_title', 'release_label'),
+                        ('ean', 'release_date'))
+                }),
+                ('Public', {
+                    'fields': ('image', 'description')
+                }),
+            )
+        else:
+            return (
+                ('Release (album) metadata', {
+                    'fields': (
+                        ('release_title', 'release_label'),
+                        ('ean', 'release_date'))
+                }),
+            )
 
     def get_inline_instances(self, request, obj=None):
         """Limit inlines in popups."""
