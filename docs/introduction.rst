@@ -49,7 +49,7 @@ Single controlled publisher
 
 DMP supports only a single controlled publisher (single publishing entity),
 entered through settings. It will **not work** for publishers with multiple
-entities, most notably US publishers with multiple entities in multiple PROs.
+entities, most notably US publishers affiliated with multiple PROs. 
 
 Manuscript shares
 ------------------------
