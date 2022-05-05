@@ -50,7 +50,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.coverage',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
 ]
 
 

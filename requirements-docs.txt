@@ -9,5 +9,3 @@ Markdown==3.3.6
 Pillow==9.1.0
 psycopg2-binary==2.9.3
 waitress==2.1.1
-sphinxcontrib-napoleon
-
