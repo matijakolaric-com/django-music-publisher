@@ -257,7 +257,7 @@ TEMPLATES_30 = {
         'SWR{{ transaction_sequence|rjust:8 }}'
         '{{ record_sequence|rjust:8 }}{{ code|ljust:9 }}'
         '{{ last_name|ljust:45 }}{{ first_name|ljust:30 }}N'
-        '{{ writer_role|ljust:2 }}000000000{{ ipi_name_number|rjust:11 }}'
+        '{{ writer_role|ljust:2 }}{{ ipi_name_number|rjust:11 }}'
         '{{ ipi_base_number|ljust:13 }} N  \r\n'
         '{% endautoescape %}'),
     'SWT': Template(

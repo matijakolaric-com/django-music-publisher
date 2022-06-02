@@ -120,6 +120,8 @@ class ACKImportForm(ModelForm):
         super().clean()
         cd = self.cleaned_data
         ack = cd.get('acknowledgement_file')
+        if not ack:
+            return
         filename = ack.name
         if not (len(filename) in [18, 19] and
                 filename[-4:].upper() in ['.V21', '.V22']):
