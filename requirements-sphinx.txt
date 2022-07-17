@@ -8,6 +8,7 @@ music-metadata-territories==21.2
 Markdown==3.3.6
 Pillow==9.1.1
 psycopg2-binary==2.9.3
+sphinxcontrib-mermaid==0.7.1
 waitress==2.1.1
 whitenoise==6.0.0
 
