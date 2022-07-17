@@ -15,11 +15,12 @@ DMP
    :maxdepth: 1
 
    introduction
-   installation
+   features
    support
+   videos
+   installation
    releases
    LICENSE
    manual
    restapi
-   videos
    modules
