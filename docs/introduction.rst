@@ -12,6 +12,61 @@ metadata**:
 * releases/albums (with cover art), and
 * music libraries.
 
+.. mermaid::
+    :caption: Simplified Class Diagram
+    
+    classDiagram
+        direction BT
+        class Writer {
+            first name
+            last name
+            IPI
+            CMOs
+        }
+        class Work {
+            title
+            ISWC
+        }
+        class Recording {
+            recording title
+            version title
+            ISRC
+        }
+        class Artist {
+            first name
+            last/band name
+            ISNI
+        }
+        class GeneralAgreement {
+            publisher fee
+        }
+        class WriterInWork {
+            role
+            manuscript share
+            controlled
+        }
+        class Release {
+             title
+             date
+        }
+        class Label {
+            name
+        }
+        class Library {
+            name
+        }
+        GeneralAgreement --> Writer
+        Writer <-- WriterInWork
+        WriterInWork --> Work
+        Label <-- Recording : Record Label
+        Recording --> Work
+        Recording --> Artist: Recording Artist
+        Artist <..> Work : Live Artist
+        Release <.. Work : Library Release
+        Release <--> Recording : Track
+        Release ..> Library : Library Release
+        Release --> Label : Release Label
+
 Common Works Registration (CWR)
 +++++++++++++++++++++++++++++++++
 
