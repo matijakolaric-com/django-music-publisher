@@ -115,7 +115,8 @@ parties. Statement processing is extremely fast.
 
 Actual outgoing statements must be created in Excel using pivot tables. For
 experienced Excel user, this takes about 10 minutes for the first statement and
-then about 30 seconds per statement for all others.
+then about 30 seconds per statement for all others. 
+This process can be fully automated by using scripts.
 
 Data imports and exports
 ------------------------
@@ -134,7 +135,7 @@ audio files.
 Sharable playlists
 ----------------------
 
-Playlists can be created and shared, protected only by secret URLs. [#f1]_
+Playlists can be created and shared, protected only by secret URLs.
 
 REST API
 ----------------------
@@ -144,7 +145,4 @@ It can be used for:
 
 * Complete data export
 * Metadata exchange
-* Content exchange [#f1]_ [#f2]_ 
-
-.. [#f1] Requires persistent file storage
-.. [#f2] Plugin exists for WordPress
+* Content exchange

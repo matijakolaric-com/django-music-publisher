@@ -21,33 +21,40 @@ metadata**:
             first name
             last name
             IPI
-            CMOs
+            CMO aff.
+            ...
         }
         class Work {
             title
             ISWC
+            ...
         }
         class Recording {
             recording title
             version title
             ISRC
+            ...
         }
         class Artist {
             first name
             last/band name
             ISNI
+            ...
         }
         class GeneralAgreement {
             publisher fee
+            ...
         }
         class WriterInWork {
             role
             manuscript share
             controlled
+            ...
         }
         class Release {
-             title
-             date
+            title
+            date
+            ...
         }
         class Label {
             name
@@ -90,9 +97,10 @@ Royalty Management
 Simple **royalty management** calculations can split received royalties among controlled 
 writers and calculate publisher fees. 
 
-The incoming data is accepted in
-as a CSV file, and the output is a similar CSV file with additional rows and
-columns.
+Incoming data is accepted
+as a CSV file. If registrations are done using CWR, 
+work matching is fully automatic. 
+Output is a similar CSV file with additional rows and columns.
 
 .. mermaid::
 
