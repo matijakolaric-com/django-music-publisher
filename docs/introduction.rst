@@ -82,6 +82,7 @@ for **batch registration of musical works** with Collective Management Organizat
 (CMOs) and Digital Service Providers (DSPs).
 
 .. mermaid::
+    :caption: Sequence diagram: Work registration and incoming royalty statements
 
     sequenceDiagram
         Note over Publisher,CMO: Registrations
@@ -103,6 +104,7 @@ work matching is fully automatic.
 Output is a similar CSV file with additional rows and columns.
 
 .. mermaid::
+    :caption: Sequence diagram: Processing incoming royalty statements
 
     sequenceDiagram
         CMO/DSP->>Publisher DMP: Incoming Royalty Statement (CSV)
