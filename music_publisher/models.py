@@ -643,7 +643,7 @@ class Work(TitleBase):
         if self.id is None:
             return ''
         return '{}{:06}'.format(
-            settings.__getattr__('PUBLISHER_CODE', ''),
+            getattr(settings, 'PUBLISHER_CODE'),
             self.id,
         )
 
@@ -1023,7 +1023,7 @@ class WriterInWork(models.Model):
     def get_agreement_dict(self):
         """Get agreement dictionary for this writer in work."""
 
-        pub_pr_soc = settings.__getattr__('PUBLISHER_SOCIETY_PR')
+        pub_pr_soc = getattr(settings, 'PUBLISHER_SOCIETY_PR')
         pub_pr_name = SOCIETY_DICT.get(pub_pr_soc, '').split(',')[0]
 
         if not self.controlled or not self.writer:
@@ -1240,7 +1240,7 @@ class Recording(models.Model):
         if self.id is None:
             return ''
         return '{}{:06}R'.format(
-            settings.__getattr__('PUBLISHER_CODE'),
+            getattr(settings, 'PUBLISHER_CODE'),
             self.id,
         )
 
@@ -1417,13 +1417,16 @@ class CWRExport(models.Model):
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
     publisher_code = None
-    agreement_pr = settings.__getattr__(
+    agreement_pr = getattr(
+        settings,
         'PUBLISHING_AGREEMENT_PUBLISHER_PR'
     )
-    agreement_mr = settings.__getattr__(
+    agreement_mr = sgetattr(
+        settings,
         'PUBLISHING_AGREEMENT_PUBLISHER_MR'
     )
-    agreement_sr = settings.__getattr__(
+    agreement_sr = getattr(
+        settings,
         'PUBLISHING_AGREEMENT_PUBLISHER_SR'
     )
 
@@ -1469,7 +1472,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
             self.year,
             self.num_in_year,
-            self.publisher_code or settings.__getattr__('PUBLISHER_CODE'),
+            self.publisher_code or getattr(settings, 'PUBLISHER_CODE'),
             minor_version,
             ext,
         )
@@ -1484,7 +1487,7 @@ class CWRExport(models.Model):
         return 'CW{}{:04}{}_000.V{}'.format(
             self.year,
             self.num_in_year,
-            self.publisher_code or settings.__getattr__('PUBLISHER_CODE'),
+            self.publisher_code or getattr(settings, 'PUBLISHER_CODE'),
             self.version,
         )
 
