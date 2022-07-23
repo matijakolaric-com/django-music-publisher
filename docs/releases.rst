@@ -155,6 +155,18 @@ using secret URLs.
 
 Full metadata backup can be download using REST API endpoint.
 
+22.9
+-------------------------------
+
+Documentation improvement with graphs (using Mermaid).
+
+.. note:: Below are ideas and wishes, nothing of this has been implemented yet.
+
+Code cleanup, specially when used as a Django app.
+
+Most settings to be moved to the database.
+
+
 
 Future open-source features
 ===========================
