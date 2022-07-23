@@ -1421,7 +1421,7 @@ class CWRExport(models.Model):
         settings,
         'PUBLISHING_AGREEMENT_PUBLISHER_PR'
     )
-    agreement_mr = sgetattr(
+    agreement_mr = getattr(
         settings,
         'PUBLISHING_AGREEMENT_PUBLISHER_MR'
     )
