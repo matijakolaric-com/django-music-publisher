@@ -4,19 +4,21 @@ They mostly inherit from classes in :mod:`.base`.
 
 """
 
-from collections import OrderedDict, defaultdict
+import base64
+import uuid
+from collections import defaultdict
 from datetime import datetime
-from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
-from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.template import Context
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.duration import duration_string
 
 from .base import (
@@ -36,10 +38,8 @@ from .cwr_templates import (
     TEMPLATES_30,
     TEMPLATES_31,
 )
-from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
-
-import base64, uuid
+from .validators import CWRFieldValidator
 
 WORLD_DICT = {'tis-a': '2WL', 'tis-n': '2136', 'name': 'World'}
 
@@ -995,7 +995,8 @@ class WriterInWork(models.Model):
         ):
             raise ValidationError(
                 {
-                    'controlled': 'Must be set for a generally controlled writer.'
+                    'controlled': 
+                        'Must be set for a generally controlled writer.'
                 }
             )
         d = {}
@@ -1226,7 +1227,7 @@ class Recording(models.Model):
             else self.complete_recording_title
             if self.recording_title
             else self.work.title
-        )  #  + (u' \U0001F508' if self.audio_file else '')
+        )
 
     @property
     def recording_id(self):

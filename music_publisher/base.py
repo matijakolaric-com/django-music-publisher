@@ -1,16 +1,16 @@
 """Contains base (abstract) classes used in :mod:`.models`
 """
 
+import base64
 import re
+from uuid import uuid4
 
 import django.core.exceptions
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import CWRFieldValidator
 from .societies import SOCIETIES
-from uuid import uuid4
-import base64
+from .validators import CWRFieldValidator
 
 
 def upload_to(instance, filename):
