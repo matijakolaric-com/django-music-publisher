@@ -995,8 +995,9 @@ class WriterInWork(models.Model):
         ):
             raise ValidationError(
                 {
-                    'controlled': 
+                    'controlled': (
                         'Must be set for a generally controlled writer.'
+                    )
                 }
             )
         d = {}
