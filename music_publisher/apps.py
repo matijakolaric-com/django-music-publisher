@@ -19,5 +19,5 @@ class MusicPublisherConfig(AppConfig):
 
     def ready(self):
         """Validate settings when ready to prevent deployments with invalid
-Bla        settings."""
+        settings."""
         validate_settings()
