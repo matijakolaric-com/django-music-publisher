@@ -11,17 +11,18 @@ setuptools.setup(
     license='MIT License',
     description=(
         'Software for managing music metadata, batch registration '
-        'of musical works and royalty processing.'),
+        'of musical works and royalty processing.'
+    ),
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://dmp.matijakolaric.com',
     project_urls={
         'Created by': 'https://matijakolaric.com',
         'Video Tutorials': 'https://www.youtube.com/watch?v=Tyk6tYuFBrI'
-                           '&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP',
+        '&list=PLQ3e-DuNTFt-mwtKvFLK1euk5uCZdhCUP',
         'Documentation': 'https://django-music-publisher.readthedocs.io/',
         'Code Repository': 'https://github.com/matijakolaric-com/django'
-                           '-music-publisher/',
+        '-music-publisher/',
     },
     packages=setuptools.find_packages(exclude=['dmp_project', 'docs']),
     install_requires=(
