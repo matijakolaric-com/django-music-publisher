@@ -13,7 +13,8 @@ def set_created_on(apps, schema_editor):
         else:
             s = obj.cwr[65:79]
         obj.created_on = make_aware(
-            datetime.strptime(s, '%Y%m%d%H%M%S'), get_fixed_timezone(0))
+            datetime.strptime(s, '%Y%m%d%H%M%S'), get_fixed_timezone(0)
+        )
         obj.save()
 
 

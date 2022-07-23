@@ -13,6 +13,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cwrexport',
             name='nwr_rev',
-            field=models.CharField(choices=[('NW2', 'CWR 2.2: New work registrations'), ('RE2', 'CWR 2.2: Revisions of registered works')], db_index=True, default='NWR', max_length=3, verbose_name='CWR version/type'),
+            field=models.CharField(
+                choices=[
+                    ('NW2', 'CWR 2.2: New work registrations'),
+                    ('RE2', 'CWR 2.2: Revisions of registered works'),
+                ],
+                db_index=True,
+                default='NWR',
+                max_length=3,
+                verbose_name='CWR version/type',
+            ),
         ),
     ]
