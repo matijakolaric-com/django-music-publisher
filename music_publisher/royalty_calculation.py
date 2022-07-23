@@ -35,8 +35,11 @@ def get_id_sources():
     yield 'ISWC', 'ISWC'
     yield 'ISRC', 'ISRC'
     yield None, 'Sender Work ID:'
-    codes = WorkAcknowledgement.objects.order_by(
-        'society_code').values_list('society_code', flat=True).distinct()
+    codes = (
+        WorkAcknowledgement.objects.order_by('society_code')
+        .values_list('society_code', flat=True)
+        .distinct()
+    )
     codes = [(code, SOCIETY_DICT.get(code, '')) for code in codes]
     codes.sort(key=lambda code: code[1])
     for code in codes:
@@ -56,16 +59,14 @@ def get_right_types():
 
 
 class RoyaltyCalculationForm(forms.Form):
-    """The form for royalty calculations.
-    """
+    """The form for royalty calculations."""
+
     class Meta:
         fields = ('in_file',)
 
     class Media:
         css = {'all': ('admin/css/forms.css',)}
-        js = (
-            'admin/js/vendor/jquery/jquery.js',
-            'admin/js/jquery.init.js')
+        js = ('admin/js/vendor/jquery/jquery.js', 'admin/js/jquery.init.js')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -78,32 +79,44 @@ class RoyaltyCalculationForm(forms.Form):
 
     in_file = forms.FileField(
         label='Incoming statement',
-        help_text='A CSV file with a header row is required.'
+        help_text='A CSV file with a header row is required.',
     )
     work_id_column = forms.ChoiceField(
-        choices=[], label='Work ID', initial=1,
-        help_text='Select the column containing work IDs.'
+        choices=[],
+        label='Work ID',
+        initial=1,
+        help_text='Select the column containing work IDs.',
     )
     work_id_source = forms.ChoiceField(
-        choices=get_id_sources, initial=settings.PUBLISHER_CODE,
+        choices=get_id_sources,
+        initial=settings.PUBLISHER_CODE,
         label='Work ID Source',
         help_text='You or CWR acknowledgement source.',
     )
     amount_column = forms.ChoiceField(
-        choices=[], label='Amount', initial=-1,
-        help_text='Select the column containing received amount.'
+        choices=[],
+        label='Amount',
+        initial=-1,
+        help_text='Select the column containing received amount.',
     )
     right_type_column = forms.ChoiceField(
-        choices=get_right_types, initial='p', label='Right type',
-        help_text='Select the right type or the column specifying it.'
+        choices=get_right_types,
+        initial='p',
+        label='Right type',
+        help_text='Select the right type or the column specifying it.',
     )
     algo = forms.ChoiceField(
-        choices=ALGOS, initial='fee', label='Algorithm type',
-        help_text='Choose the algorithm type, see user manual for details.'
+        choices=ALGOS,
+        initial='fee',
+        label='Algorithm type',
+        help_text='Choose the algorithm type, see user manual for details.',
     )
     default_fee = forms.DecimalField(
-        max_digits=5, decimal_places=2, initial=0, label='Default fee (%)',
-        help_text='Used if no fee is present in the database.'
+        max_digits=5,
+        decimal_places=2,
+        initial=0,
+        label='Default fee (%)',
+        help_text='Used if no fee is present in the database.',
     )
 
     def is_valid(self):
@@ -116,9 +129,11 @@ class RoyaltyCalculationForm(forms.Form):
             for i, field in enumerate(csv_reader.fieldnames):
                 self.fields['work_id_column'].choices.append((str(i), field))
                 self.fields['right_type_column'].choices = list(
-                    self.fields['right_type_column'].choices)
+                    self.fields['right_type_column'].choices
+                )
                 self.fields['right_type_column'].choices.append(
-                    (str(i), field))
+                    (str(i), field)
+                )
                 self.fields['amount_column'].choices.append((str(i), field))
             valid = super().is_valid()
         except Exception:  # to match user stupidity
@@ -130,8 +145,7 @@ class RoyaltyCalculation(object):
     """The process of royalty calculation."""
 
     def __init__(self, form):
-        """Initialization with data from thew form and empty attributes.
-        """
+        """Initialization with data from thew form and empty attributes."""
         self.file = form.file
         for key, value in form.cleaned_data.items():
             setattr(self, key, value)
@@ -164,18 +178,18 @@ class RoyaltyCalculation(object):
         fieldnames += [
             'Controlled by publisher (%)',
             'Interested party',
-            'Role']
+            'Role',
+        ]
         if self.algo == 'fee':
             fieldnames += [
                 'Manuscript share (%)',
                 'Share in amount received (%)',
                 'Amount before fee',
                 'Fee (%)',
-                'Fee amount']
+                'Fee amount',
+            ]
         elif self.algo == 'share':
-            fieldnames += [
-                'Owned share (%)',
-                'Share in amount received (%)']
+            fieldnames += ['Owned share (%)', 'Share in amount received (%)']
         fieldnames.append('Net amount')
         return fieldnames
 
@@ -217,12 +231,16 @@ class RoyaltyCalculation(object):
             qs = qs.extra(select={'query_id': "isrc"})
         else:
             qs = qs.filter(
-                work__workacknowledgement__society_code=self.work_id_source)
+                work__workacknowledgement__society_code=self.work_id_source
+            )
             qs = qs.filter(
-                work__workacknowledgement__remote_work_id__in=work_ids)
-            qs = qs.extra(select={
-                'query_id':
-                    "music_publisher_workacknowledgement.remote_work_id"})
+                work__workacknowledgement__remote_work_id__in=work_ids
+            )
+            qs = qs.extra(
+                select={
+                    'query_id': "music_publisher_workacknowledgement.remote_work_id"
+                }
+            )
         qs = qs.distinct()
         return qs
 
@@ -233,7 +251,7 @@ class RoyaltyCalculation(object):
             dict (works) of lists (writerinwork) of dicts
         """
         for wiw in qs:
-            assert (wiw.work_id is not None)
+            assert wiw.work_id is not None
             self.writer_ids.add(wiw.writer_id)
             d = {
                 'writer_id': wiw.writer_id,
@@ -252,17 +270,16 @@ class RoyaltyCalculation(object):
         for writer in qs:
             if writer.first_name:
                 name = '{}, {} [{}]'.format(
-                    writer.last_name,
-                    writer.first_name,
-                    writer.ipi_name or '')
+                    writer.last_name, writer.first_name, writer.ipi_name or ''
+                )
             else:
                 name = '{} [{}]'.format(
-                    writer.last_name,
-                    writer.ipi_name or '')
+                    writer.last_name, writer.ipi_name or ''
+                )
 
             self.writers[writer.id] = {
                 'name': name,
-                'fee': writer.publisher_fee
+                'fee': writer.publisher_fee,
             }
 
     def get_works_and_writers(self):
@@ -299,7 +316,8 @@ class RoyaltyCalculation(object):
         share_split = {
             'p': settings.PUBLISHING_AGREEMENT_PUBLISHER_PR,
             'm': settings.PUBLISHING_AGREEMENT_PUBLISHER_MR,
-            's': settings.PUBLISHING_AGREEMENT_PUBLISHER_SR}[right]
+            's': settings.PUBLISHING_AGREEMENT_PUBLISHER_SR,
+        }[right]
 
         # Add data to all output rows
         if self.algo == 'share':
@@ -326,7 +344,8 @@ class RoyaltyCalculation(object):
             if self.algo == 'fee':
                 out_row.append('{0:.4f}'.format(relative_share))
                 share = (relative_share / controlled).quantize(
-                    Decimal('.000001'))
+                    Decimal('.000001')
+                )
                 amount_before_fee = amount * share
                 out_row.append('{0:.6f}'.format(share))
                 out_row.append('{}'.format(amount_before_fee))
@@ -357,9 +376,11 @@ class RoyaltyCalculation(object):
             # "Share" algorithm has one additional row with the publisher
             if self.algo == 'share':
                 out_row = row.copy()
-                out_row.append('{}, [{}]'.format(
-                    settings.PUBLISHER_NAME,
-                    settings.PUBLISHER_IPI_NAME))
+                out_row.append(
+                    '{}, [{}]'.format(
+                        settings.PUBLISHER_NAME, settings.PUBLISHER_IPI_NAME
+                    )
+                )
                 out_row.append('Original Publisher')
                 out_row.append('{0:.6f}'.format(share_split * controlled))
                 out_row.append('{0:.6f}'.format(share_split))

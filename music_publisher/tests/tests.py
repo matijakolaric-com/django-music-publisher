@@ -26,16 +26,33 @@ from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template import Context
 from django.test import (
-    override_settings, SimpleTestCase, TestCase, TransactionTestCase)
+    override_settings,
+    SimpleTestCase,
+    TestCase,
+    TransactionTestCase,
+)
 from django.urls import reverse
 from django.contrib.messages import get_messages
 
 import music_publisher.models
 from music_publisher.admin import CWRExportAdmin
 from music_publisher import cwr_templates, data_import, validators
-from music_publisher.models import (AlternateTitle, Artist, CommercialRelease,
-    CWRExport, Label, Library, LibraryRelease, Recording, Release, Track, Work,
-    Writer, WriterInWork, WorkAcknowledgement)
+from music_publisher.models import (
+    AlternateTitle,
+    Artist,
+    CommercialRelease,
+    CWRExport,
+    Label,
+    Library,
+    LibraryRelease,
+    Recording,
+    Release,
+    Track,
+    Work,
+    Writer,
+    WriterInWork,
+    WorkAcknowledgement,
+)
 from django.conf import settings
 
 
@@ -48,11 +65,14 @@ def get_data_from_response(response):
         for d in sc:
             if 'widget' in sc:
                 if sc['widget'].get('type') == 'checkbox':
-                    data[sc['widget']['name']] = \
-                        sc['widget']['attrs'].get('checked')
+                    data[sc['widget']['name']] = sc['widget']['attrs'].get(
+                        'checked'
+                    )
                     continue
-                if (sc['widget'].get('type') == 'select' and
-                        sc['widget']['selected'] is False):
+                if (
+                    sc['widget'].get('type') == 'select'
+                    and sc['widget']['selected'] is False
+                ):
                     continue
                 data[sc['widget']['name']] = sc['widget']['value']
     if adminform:
@@ -73,7 +93,8 @@ def get_data_from_response(response):
     PUBLISHER_SOCIETY_PR='10',
     PUBLISHER_SOCIETY_MR='34',
     PUBLISHER_SOCIETY_SR=None,
-    OPTION_FORCE_CASE='upper')
+    OPTION_FORCE_CASE='upper',
+)
 class DataImportTest(TestCase):
     """Functional test for data import from CSV files."""
 
@@ -82,7 +103,8 @@ class DataImportTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
-            'superuser', '', 'password')
+            'superuser', '', 'password'
+        )
         cls.obj = Artist.objects.create(last_name='Artist One')
         del settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
         del settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
@@ -132,11 +154,13 @@ class DataImportTest(TestCase):
         self.assertEqual(str(ve.exception), 'Unknown column: "a".')
 
         value, general_agreement = di.process_writer_value(
-            'a', ['writer', '1', 'controlled'], 1)
+            'a', ['writer', '1', 'controlled'], 1
+        )
         self.assertEqual(value, True)
 
         value, general_agreement = di.process_writer_value(
-            'a', ['writer', '2', 'controlled'], 0)
+            'a', ['writer', '2', 'controlled'], 0
+        )
         self.assertEqual(value, False)
 
         self.assertNotIn('Alt Work Title 1', di.unknown_keys)
@@ -173,12 +197,13 @@ class DataImportTest(TestCase):
                     'pro': '10',
                     'general_agreement': True,
                     'saan': 'B',
-                }
+                },
             }
             writers = list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception),
-            'Two different general agreement numbers for: "X Y (*)".')
+            'Two different general agreement numbers for: "X Y (*)".',
+        )
 
         # mismatching PR societies
         with self.assertRaises(ValueError) as ve:
@@ -194,12 +219,12 @@ class DataImportTest(TestCase):
                     'last': 'Y',
                     'ipi': '199',
                     'pro': '52',
-                }
+                },
             }
             writers = list(di.get_writers(d))
         self.assertEqual(
-            str(ve.exception),
-            'Writer exists with different PRO: "X Y (*)".')
+            str(ve.exception), 'Writer exists with different PRO: "X Y (*)".'
+        )
 
         # integrity errrors
         with self.assertRaises(ValueError) as ve:
@@ -215,7 +240,7 @@ class DataImportTest(TestCase):
                     'last': 'Y',
                     'ipi': '199',
                     'pro': '52',
-                }
+                },
             }
             writers = list(di.get_writers(d))
         self.assertEqual(
@@ -223,7 +248,9 @@ class DataImportTest(TestCase):
             (
                 'A writer with this IPI already exists in the '
                 'database, but is not exactly the same as one provided in the '
-                'importing data: A B'))
+                'importing data: A B'
+            ),
+        )
 
         f = StringIO("Work Title,Library\nX,Y")
         di = data_import.DataImporter(f, user=None)
@@ -231,8 +258,12 @@ class DataImportTest(TestCase):
             list(di.run())
         self.assertEqual(
             str(ve.exception),
-            ('Library and CD Identifier fields must both be either '
-                'present or empty.'))
+            (
+                'Library and CD Identifier fields must both be either '
+                'present or empty.'
+            ),
+        )
+
 
 @override_settings(
     SECURE_SSL_REDIRECT=False,
@@ -244,7 +275,8 @@ class DataImportTest(TestCase):
     PUBLISHER_SOCIETY_SR='44',
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'))
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
+)
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests.
 
@@ -252,8 +284,15 @@ class AdminTest(TestCase):
 
     fixtures = ['publishing_staff.json']
     testing_admins = [
-        'artist', 'label', 'library', 'work', 'commercialrelease', 'writer',
-        'recording', 'cwrexport']
+        'artist',
+        'label',
+        'library',
+        'work',
+        'commercialrelease',
+        'writer',
+        'recording',
+        'cwrexport',
+    ]
 
     @classmethod
     def create_original_work(cls):
@@ -261,57 +300,83 @@ class AdminTest(TestCase):
         Create original work, three writers, one controlled,
         with recording, alternate titles, included in a commercial release."""
         cls.original_work = Work.objects.create(
-            title='The Work', iswc='T1234567893',
-            library_release=cls.library_release)
-        WriterInWork.objects.create(work=cls.original_work,
-                                    writer=cls.generally_controlled_writer,
-                                    capacity='C ',
-                                    relative_share=Decimal('50'),
-                                    controlled=True)
-        WriterInWork.objects.create(work=cls.original_work,
-                                    writer=cls.other_writer, capacity='A ',
-                                    relative_share=Decimal('25'),
-                                    controlled=False)
-        wiw = WriterInWork.objects.create(work=cls.original_work,
-                                          writer=cls.controllable_writer,
-                                          capacity='A ',
-                                          relative_share=Decimal('25'),
-                                          controlled=False)
-        assert (wiw.get_agreement_dict() is None)
-        AlternateTitle.objects.create(work=cls.original_work, suffix=True,
-                                      title='Behind the Work')
+            title='The Work',
+            iswc='T1234567893',
+            library_release=cls.library_release,
+        )
+        WriterInWork.objects.create(
+            work=cls.original_work,
+            writer=cls.generally_controlled_writer,
+            capacity='C ',
+            relative_share=Decimal('50'),
+            controlled=True,
+        )
+        WriterInWork.objects.create(
+            work=cls.original_work,
+            writer=cls.other_writer,
+            capacity='A ',
+            relative_share=Decimal('25'),
+            controlled=False,
+        )
+        wiw = WriterInWork.objects.create(
+            work=cls.original_work,
+            writer=cls.controllable_writer,
+            capacity='A ',
+            relative_share=Decimal('25'),
+            controlled=False,
+        )
+        assert wiw.get_agreement_dict() is None
+        AlternateTitle.objects.create(
+            work=cls.original_work, suffix=True, title='Behind the Work'
+        )
         AlternateTitle.objects.create(work=cls.original_work, title='Work')
         recording = Recording.objects.create(
-            work=cls.original_work, record_label=cls.label, artist=cls.artist,
-            isrc='JM-K40-14-00001')
+            work=cls.original_work,
+            record_label=cls.label,
+            artist=cls.artist,
+            isrc='JM-K40-14-00001',
+        )
         recording.recording_id = recording.recording_id
         recording.save()
         Track.objects.create(
-            release=cls.commercial_release, recording=recording)
+            release=cls.commercial_release, recording=recording
+        )
 
     @classmethod
     def create_modified_work(cls):
         """Create modified work, original writer plus arranger,
         with recording, alternate titles."""
         cls.modified_work = Work.objects.create(
-            title='The Modified Work', original_title='The Work')
+            title='The Modified Work', original_title='The Work'
+        )
         WriterInWork.objects.create(
             work=cls.modified_work,
             writer=cls.generally_controlled_writer,
             capacity='AR',
             relative_share=Decimal('100'),
             controlled=True,
-            saan='SPECIAL', publisher_fee=Decimal('25'))
-        WriterInWork.objects.create(work=cls.modified_work, writer=None,
-                                    capacity='CA', relative_share=Decimal('0'),
-                                    controlled=False)
+            saan='SPECIAL',
+            publisher_fee=Decimal('25'),
+        )
+        WriterInWork.objects.create(
+            work=cls.modified_work,
+            writer=None,
+            capacity='CA',
+            relative_share=Decimal('0'),
+            controlled=False,
+        )
         cls.modified_work.artists.add(cls.artist)
-        AlternateTitle.objects.create(work=cls.modified_work, suffix=False,
-                                      title='The Copy')
-        AlternateTitle.objects.create(work=cls.modified_work, suffix=True,
-                                      title='Behind the Modified Work')
-        Recording.objects.create(work=cls.modified_work,
-                                 isrc='US-S1Z-99-00002')
+        AlternateTitle.objects.create(
+            work=cls.modified_work, suffix=False, title='The Copy'
+        )
+        AlternateTitle.objects.create(
+            work=cls.modified_work,
+            suffix=True,
+            title='Behind the Modified Work',
+        )
+        Recording.objects.create(
+            work=cls.modified_work, isrc='US-S1Z-99-00002'
+        )
 
     @classmethod
     def create_copublished_work(cls):
@@ -331,7 +396,7 @@ class AdminTest(TestCase):
             relative_share=Decimal('25'),
             controlled=True,
             saan='SAAN',
-            publisher_fee=Decimal('25')
+            publisher_fee=Decimal('25'),
         )
         WriterInWork.objects.create(
             work=cls.copublished_work,
@@ -359,7 +424,7 @@ class AdminTest(TestCase):
             relative_share=Decimal('25'),
             controlled=True,
             saan='SAAN',
-            publisher_fee=Decimal('25')
+            publisher_fee=Decimal('25'),
         )
         WriterInWork.objects.create(
             work=cls.duplicate_work,
@@ -368,22 +433,29 @@ class AdminTest(TestCase):
             relative_share=Decimal('50'),
             controlled=False,
         )
-        
+
     @classmethod
     def create_writers(cls):
         """Create four writers with different properties."""
         cls.generally_controlled_writer = Writer(
-            first_name='JOHN', last_name='SMITH',
-            ipi_name='00000000297', ipi_base='I-123456789-3',
-            pr_society='52', sr_society='44', mr_society='44',
-            generally_controlled=True, saan='A1B2C3',
-            publisher_fee=Decimal('0.25'))
+            first_name='JOHN',
+            last_name='SMITH',
+            ipi_name='00000000297',
+            ipi_base='I-123456789-3',
+            pr_society='52',
+            sr_society='44',
+            mr_society='44',
+            generally_controlled=True,
+            saan='A1B2C3',
+            publisher_fee=Decimal('0.25'),
+        )
         cls.generally_controlled_writer.clean()
         cls.generally_controlled_writer.clean_fields()
         cls.generally_controlled_writer.save()
 
         cls.other_writer = Writer(
-            first_name='Jane', last_name='Doe', ipi_name='395')
+            first_name='Jane', last_name='Doe', ipi_name='395'
+        )
         cls.other_writer.clean()
         cls.other_writer.save()
 
@@ -394,8 +466,11 @@ class AdminTest(TestCase):
         # This one is controllable, but not yet affiliated, testing
         # "00000000000" hack and '99 Filioque' hack
         cls.controllable_writer = Writer(
-            first_name='Jack', last_name='Doe', ipi_name='00000000000',
-            pr_society='99')
+            first_name='Jack',
+            last_name='Doe',
+            ipi_name='00000000000',
+            pr_society='99',
+        )
         cls.controllable_writer.clean()
         cls.controllable_writer.save()
         cls.controllable_writer.ipi_name = '493'
@@ -407,14 +482,14 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_cwr2_export(cls):
-        """Create a NWR and a REV CWR2 Export. """
+        """Create a NWR and a REV CWR2 Export."""
         cls.cwr2_export = CWRExport.objects.create(
-            description='Test NWR', nwr_rev='NWR')
+            description='Test NWR', nwr_rev='NWR'
+        )
         cls.cwr2_export.works.add(cls.original_work)
         cls.cwr2_export.works.add(cls.modified_work)
         cls.cwr2_export.create_cwr()
-        rev = CWRExport.objects.create(
-            description='Test REV', nwr_rev='REV')
+        rev = CWRExport.objects.create(description='Test REV', nwr_rev='REV')
         rev.works.add(cls.original_work)
         rev.works.add(cls.modified_work)
         rev.works.add(cls.copublished_work)
@@ -423,14 +498,14 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_cwr3_export(cls):
-        """Create a WRK and an ISR CWR3 Export. """
+        """Create a WRK and an ISR CWR3 Export."""
         cls.cwr3_export = CWRExport.objects.create(
-            description='Test WRK', nwr_rev='WRK')
+            description='Test WRK', nwr_rev='WRK'
+        )
         cls.cwr3_export.works.add(cls.original_work)
         cls.cwr3_export.works.add(cls.modified_work)
         cls.cwr3_export.create_cwr()
-        isr = CWRExport.objects.create(
-            description='Test ISR', nwr_rev='ISR')
+        isr = CWRExport.objects.create(description='Test ISR', nwr_rev='ISR')
         isr.works.add(cls.original_work)
         isr.works.add(cls.modified_work)
         isr.works.add(cls.copublished_work)
@@ -438,13 +513,13 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_work_acknowledgements(cls):
-        """Create work acknowledgements. """
+        """Create work acknowledgements."""
         WorkAcknowledgement(
             work_id=cls.original_work.id,
             society_code='319',
             date=datetime.now(),
             remote_work_id='123456',
-            status='AC'
+            status='AC',
         ).save()
 
     @classmethod
@@ -462,24 +537,34 @@ class AdminTest(TestCase):
         """
         super().setUpClass()
         cls.superuser = User.objects.create_superuser(
-            'superuser', '', 'password')
+            'superuser', '', 'password'
+        )
         cls.staffuser = User.objects.create(
-            username='staffuser', password='password', is_active=True,
-            is_staff=True)
+            username='staffuser',
+            password='password',
+            is_active=True,
+            is_staff=True,
+        )
         cls.staffuser.groups.add(1)
         cls.audituser = User.objects.create(
-            username='audituser', password='password', is_active=True,
-            is_staff=True)
+            username='audituser',
+            password='password',
+            is_active=True,
+            is_staff=True,
+        )
         cls.audituser.groups.add(2)
         cls.label = Label.objects.create(name='LABEL')
         cls.library = Library.objects.create(name='LIBRARY')
         cls.artist = Artist.objects.create(
-            first_name='JOHN', last_name='DOE', isni='000000012146438X')
+            first_name='JOHN', last_name='DOE', isni='000000012146438X'
+        )
         cls.release = Release.objects.create(release_title='ALBUM')
         cls.library_release = Release.objects.create(
-            release_title='LIBRELEASE', library_id=1, cd_identifier='XZY')
+            release_title='LIBRELEASE', library_id=1, cd_identifier='XZY'
+        )
         cls.commercial_release = Release.objects.create(
-            release_title='COMRELEASE')
+            release_title='COMRELEASE'
+        )
 
         cls.create_writers()
         cls.create_modified_work()
@@ -493,40 +578,36 @@ class AdminTest(TestCase):
     def test_strings(self):
         """Test __str__ methods for created objects."""
         self.assertEqual(
-            str(self.original_work),
-            'MK000002: THE WORK (DOE / DOE / SMITH)')
+            str(self.original_work), 'MK000002: THE WORK (DOE / DOE / SMITH)'
+        )
         self.assertEqual(
-            str(self.generally_controlled_writer),
-            'JOHN SMITH (*)')
+            str(self.generally_controlled_writer), 'JOHN SMITH (*)'
+        )
+        self.assertEqual(str(self.other_writer), 'JANE DOE')
+        self.assertEqual(str(self.writer_no_first_name), 'JONES')
         self.assertEqual(
-            str(self.other_writer),
-            'JANE DOE')
+            str(self.original_work.writerinwork_set.first()), 'JOHN SMITH (*)'
+        )
         self.assertEqual(
-            str(self.writer_no_first_name),
-            'JONES')
-        self.assertEqual(
-            str(self.original_work.writerinwork_set.first()),
-            'JOHN SMITH (*)')
-        self.assertEqual(
-            str(self.modified_work.artistinwork_set.first()),
-            'JOHN DOE')
+            str(self.modified_work.artistinwork_set.first()), 'JOHN DOE'
+        )
         self.assertEqual(self.generally_controlled_writer.last_name, 'SMITH')
 
     def test_unknown_user(self):
-        """Several fast test to make sure that an unregistered user is blind.
-        """
+        """Several fast test to make sure that an unregistered user is blind."""
         for testing_admin in self.testing_admins:
             url = reverse(
-                'admin:music_publisher_{}_changelist'.format(testing_admin))
+                'admin:music_publisher_{}_changelist'.format(testing_admin)
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
-            url = reverse(
-                'admin:music_publisher_{}_add'.format(testing_admin))
+            url = reverse('admin:music_publisher_{}_add'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
             url = reverse(
                 'admin:music_publisher_{}_change'.format(testing_admin),
-                args=(1,))
+                args=(1,),
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 302)
             url = reverse('royalty_calculation')
@@ -552,21 +633,25 @@ class AdminTest(TestCase):
 
         for testing_admin in self.testing_admins:
             url = reverse(
-                'admin:music_publisher_{}_changelist'.format(testing_admin))
+                'admin:music_publisher_{}_changelist'.format(testing_admin)
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(
-                'admin:music_publisher_{}_add'.format(testing_admin))
+            url = reverse('admin:music_publisher_{}_add'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(
-                'admin:music_publisher_{}_add'.format(testing_admin)
-            ) + '?' + IS_POPUP_VAR + '=1'
+            url = (
+                reverse('admin:music_publisher_{}_add'.format(testing_admin))
+                + '?'
+                + IS_POPUP_VAR
+                + '=1'
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             url = reverse(
                 'admin:music_publisher_{}_change'.format(testing_admin),
-                args=(1,))
+                args=(1,),
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             data = get_data_from_response(response)
@@ -575,8 +660,7 @@ class AdminTest(TestCase):
             if 'first_name' in data:
                 data['first_name'] += ' JR.'
             data.pop('image', None)
-            response = self.client.post(
-                url, data=data, follow=False)
+            response = self.client.post(url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)
         url = reverse('royalty_calculation')
         response = self.client.get(url, follow=False)
@@ -586,17 +670,24 @@ class AdminTest(TestCase):
         """Test that CWR preview works."""
         self.client.force_login(self.staffuser)
         for cwr_export in CWRExport.objects.all():
-            url = reverse(
-                'admin:music_publisher_cwrexport_change',
-                args=(cwr_export.id,)) + '?preview=true'
+            url = (
+                reverse(
+                    'admin:music_publisher_cwrexport_change',
+                    args=(cwr_export.id,),
+                )
+                + '?preview=true'
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
         cwr_export = CWRExport.objects.first()
         cwr_export.cwr = open(TEST_BAD_CWR2_FILENAME, 'r').read()
         cwr_export.save()
-        url = reverse(
-            'admin:music_publisher_cwrexport_change',
-            args=(cwr_export.id,)) + '?preview=true'
+        url = (
+            reverse(
+                'admin:music_publisher_cwrexport_change', args=(cwr_export.id,)
+            )
+            + '?preview=true'
+        )
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -604,9 +695,13 @@ class AdminTest(TestCase):
         """Test that the CWR file can be downloaded."""
         self.client.force_login(self.staffuser)
         for cwr_export in CWRExport.objects.all():
-            url = reverse(
-                'admin:music_publisher_cwrexport_change',
-                args=(cwr_export.id,)) + '?download=true'
+            url = (
+                reverse(
+                    'admin:music_publisher_cwrexport_change',
+                    args=(cwr_export.id,),
+                )
+                + '?download=true'
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
 
@@ -616,23 +711,32 @@ class AdminTest(TestCase):
         response = self.client.post(
             reverse('admin:music_publisher_work_changelist'),
             data={
-                'action': 'create_json', 'select_across': 1,
-                'index': 0, '_selected_action': self.original_work.id
-            })
+                'action': 'create_json',
+                'select_across': 1,
+                'index': 0,
+                '_selected_action': self.original_work.id,
+            },
+        )
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
             reverse('admin:music_publisher_libraryrelease_changelist'),
             data={
-                'action': 'create_json', 'select_across': 1,
-                'index': 0, '_selected_action': self.library_release.id
-            })
+                'action': 'create_json',
+                'select_across': 1,
+                'index': 0,
+                '_selected_action': self.library_release.id,
+            },
+        )
         self.assertEqual(response.status_code, 200)
         response = self.client.post(
             reverse('admin:music_publisher_commercialrelease_changelist'),
             data={
-                'action': 'create_json', 'select_across': 1,
-                'index': 0, '_selected_action': self.library_release.id
-            })
+                'action': 'create_json',
+                'select_across': 1,
+                'index': 0,
+                '_selected_action': self.library_release.id,
+            },
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_cwr_nwr(self):
@@ -646,8 +750,9 @@ class AdminTest(TestCase):
                     self.original_work.id,
                     self.modified_work.id,
                     self.copublished_work.id,
-                ]
-            })
+                ],
+            },
+        )
         self.assertEqual(response.status_code, 302)
         cwr = CWRExport.objects.first().cwr
         self.assertIn('NWR0000000000000000THE MODIFIED WORK', cwr)
@@ -659,9 +764,12 @@ class AdminTest(TestCase):
         response = self.client.post(
             reverse('admin:music_publisher_work_changelist'),
             data={
-                'action': 'create_csv', 'select_across': 1,
-                'index': 0, '_selected_action': self.original_work.id
-            })
+                'action': 'create_csv',
+                'select_across': 1,
+                'index': 0,
+                '_selected_action': self.original_work.id,
+            },
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_label_change(self):
@@ -684,10 +792,9 @@ class AdminTest(TestCase):
         """Test that :class:`.models.Artist` objects can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse('admin:music_publisher_artist_change', args=(1,))
-        response = self.client.post(url, {
-            'last_name': 'DOVE',
-            'first_name': 'JANE'
-        }, follow=True)
+        response = self.client.post(
+            url, {'last_name': 'DOVE', 'first_name': 'JANE'}, follow=True
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Artist.objects.get(pk=1).last_name, 'DOVE')
 
@@ -695,48 +802,63 @@ class AdminTest(TestCase):
         """Test that :class:`.models.CommercialRelease` can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse(
-            'admin:music_publisher_commercialrelease_change', args=(1,))
+            'admin:music_publisher_commercialrelease_change', args=(1,)
+        )
         response = self.client.post(
-            url, {
+            url,
+            {
                 'release_title': 'NEW ALBUM',
                 'ean': '4003994155486',
                 'tracks-TOTAL_FORMS': 0,
-                'tracks-INITIAL_FORMS': 0
-            }, follow=True)
+                'tracks-INITIAL_FORMS': 0,
+            },
+            follow=True,
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            CommercialRelease.objects.get(pk=1).release_title, 'NEW ALBUM')
+            CommercialRelease.objects.get(pk=1).release_title, 'NEW ALBUM'
+        )
         with self.assertRaises(LibraryRelease.DoesNotExist):
             LibraryRelease.objects.get(pk=1)
 
     def test_libraryrelease_change(self):
         """Test that :class:`.models.LibraryRelease` can be edited."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_libraryrelease_change', args=(2,)
-        ) + '?' + IS_POPUP_VAR + '=1'
+        url = (
+            reverse('admin:music_publisher_libraryrelease_change', args=(2,))
+            + '?'
+            + IS_POPUP_VAR
+            + '=1'
+        )
         response = self.client.post(
-            url, {
+            url,
+            {
                 'release_title': 'LIB RELEASE',
                 'library': '1',
                 'cd_identifier': 'ABC',
-            }, follow=True)
+            },
+            follow=True,
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            LibraryRelease.objects.get(pk=2).release_title, 'LIB RELEASE')
-        url = reverse(
-            'admin:music_publisher_libraryrelease_change', args=(2,))
+            LibraryRelease.objects.get(pk=2).release_title, 'LIB RELEASE'
+        )
+        url = reverse('admin:music_publisher_libraryrelease_change', args=(2,))
         response = self.client.post(
-            url, {
+            url,
+            {
                 'release_title': 'LIBRARY RELEASE',
                 'library': '1',
-                'cd_identifier': 'ABC', 'tracks-TOTAL_FORMS': 0,
-                'tracks-INITIAL_FORMS': 0
-            }, follow=True)
+                'cd_identifier': 'ABC',
+                'tracks-TOTAL_FORMS': 0,
+                'tracks-INITIAL_FORMS': 0,
+            },
+            follow=True,
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            LibraryRelease.objects.get(pk=2).release_title,
-            'LIBRARY RELEASE')
+            LibraryRelease.objects.get(pk=2).release_title, 'LIBRARY RELEASE'
+        )
         with self.assertRaises(CommercialRelease.DoesNotExist):
             CommercialRelease.objects.get(pk=2)
 
@@ -753,11 +875,11 @@ class AdminTest(TestCase):
         self.client.force_login(self.audituser)
         for testing_admin in self.testing_admins:
             url = reverse(
-                'admin:music_publisher_{}_changelist'.format(testing_admin))
+                'admin:music_publisher_{}_changelist'.format(testing_admin)
+            )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(
-                'admin:music_publisher_{}_add'.format(testing_admin))
+            url = reverse('admin:music_publisher_{}_add'.format(testing_admin))
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 403)
 
@@ -765,23 +887,21 @@ class AdminTest(TestCase):
         """Test that a `controlled` flag must be set for a writer who is
         generally controlled."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-controlled'] = False
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Must be set for a generally controlled writer.',
-            response.content)
+            b'Must be set for a generally controlled writer.', response.content
+        )
 
     def test_generally_controlled_missing_capacity(self):
         """Test that if `controlled` flag is set, the `capacity` must be set
         as well."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-capacity'] = ''
@@ -789,29 +909,27 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Must be set for a controlled writer.',
-            response.content)
+            b'Must be set for a controlled writer.', response.content
+        )
 
     def test_controlled_but_no_writer(self):
         """Test that a line without a writer can not have `controlled` set."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-writer'] = ''
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Must be set for a controlled writer.',
-            response.content)
+            b'Must be set for a controlled writer.', response.content
+        )
 
     def test_controlled_but_missing_data(self):
         """The requirements for a controlled writer are higher, make sure
         they are obeyed when setting a writer as controlled."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-1-writer'] = self.other_writer.id
@@ -821,14 +939,13 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'IPI name and PR society must be set.',
-            response.content)
+            b'IPI name and PR society must be set.', response.content
+        )
 
     def test_writer_switch(self):
         """Just replace one writer with another, just to test last change"""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         # Make sure last_change is set by changing a value
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
@@ -845,8 +962,7 @@ class AdminTest(TestCase):
     def test_not_controlled_extra_saan(self):
         """SAAN can not be set if a writer is not controlled."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-1-writer'] = self.controllable_writer.id
@@ -855,14 +971,13 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Must be empty if writer is not controlled.',
-            response.content)
+            b'Must be empty if writer is not controlled.', response.content
+        )
 
     def test_not_controlled_extra_fee(self):
         """Publisher fee can not be set if a writer is not controlled."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-1-writer'] = self.controllable_writer.id
@@ -871,43 +986,40 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Must be empty if writer is not controlled.',
-            response.content)
+            b'Must be empty if writer is not controlled.', response.content
+        )
 
     def test_bad_alt_title(self):
         """Test that alternate title can not have disallowed characters."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['alternatetitle_set-1-title'] = 'LOŠ'
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'Title contains invalid characters.',
-            response.content)
+        self.assertIn(b'Title contains invalid characters.', response.content)
 
     def test_unallowed_capacity(self):
         """Some capacieties are allowed only in modifications."""
         self.client.force_login(self.staffuser)
-        url = reverse('admin:music_publisher_work_change', args=(
-            self.original_work.id,))
+        url = reverse(
+            'admin:music_publisher_work_change', args=(self.original_work.id,)
+        )
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-capacity'] = 'AR'
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'Not allowed in original works.',
-            response.content)
+        self.assertIn(b'Not allowed in original works.', response.content)
 
     def test_missing_capacity(self):
         """At least one of the additional capacieties must be set for
         modifications."""
         self.client.force_login(self.staffuser)
-        url = reverse('admin:music_publisher_work_change', args=(
-            self.modified_work.id,))
+        url = reverse(
+            'admin:music_publisher_work_change', args=(self.modified_work.id,)
+        )
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['writerinwork_set-0-capacity'] = 'CA'
@@ -915,7 +1027,8 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             b'At least one must be Arranger, Adaptor or Translator.',
-            response.content)
+            response.content,
+        )
 
     def test_none_controlled(self):
         """At least one Writer in Work line must be set as controlled."""
@@ -931,8 +1044,8 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'At least one writer must be controlled.',
-            response.content)
+            b'At least one writer must be controlled.', response.content
+        )
 
     def test_wrong_sum_of_shares(self):
         """Sum of shares must be (roughly) 100%"""
@@ -945,8 +1058,8 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            b'Sum of manuscript shares must be 100%.',
-            response.content)
+            b'Sum of manuscript shares must be 100%.', response.content
+        )
 
     def test_wrong_capacity_in_copublishing_modification(self):
         """Test the situation where one writer appears in two rows,
@@ -959,15 +1072,16 @@ class AdminTest(TestCase):
         data['writerinwork_set-0-writer'] = self.controllable_writer.id
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Must be same as in controlled line for this writer.',
-                      response.content)
+        self.assertIn(
+            b'Must be same as in controlled line for this writer.',
+            response.content,
+        )
 
     def test_altitle_sufix_too_long(self):
         """A suffix plus the base title plus one space in between must be 60
         characters or less."""
         self.client.force_login(self.staffuser)
-        url = reverse(
-            'admin:music_publisher_work_change', args=(1,))
+        url = reverse('admin:music_publisher_work_change', args=(1,))
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data['alternatetitle_set-1-title'] = 'A' * 55
@@ -976,7 +1090,8 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             b'Too long for suffix, work title plus suffix must be 59',
-            response.content)
+            response.content,
+        )
 
     def test_ack_import_and_work_filters(self):
         """Test acknowledgement import and then filters on the change view,
@@ -992,8 +1107,13 @@ class AdminTest(TestCase):
         """Upload the file that works, but with a wrong filename."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CX180001000_FOO.V23',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CX180001000_FOO.V23',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1007,8 +1127,13 @@ class AdminTest(TestCase):
         """Upload the file that works."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1022,8 +1147,13 @@ class AdminTest(TestCase):
         differently."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1033,7 +1163,7 @@ class AdminTest(TestCase):
         self.assertIn(
             'A different ISWC exists for work MK000001: THE MODIFIED WORK '
             '(SMITH): T3221234234 (old) vs T1234567893 (new).',
-            music_publisher.models.ACKImport.objects.first().report
+            music_publisher.models.ACKImport.objects.first().report,
         )
 
         """This file has also ISWC codes."""
@@ -1042,8 +1172,13 @@ class AdminTest(TestCase):
 
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1066,8 +1201,8 @@ class AdminTest(TestCase):
         self.original_work = Work.objects.get(id=self.original_work.id)
         self.assertEqual(self.original_work.iswc, 'T9270264761')
         url = reverse(
-            'admin:music_publisher_work_history',
-            args=(self.original_work.id,))
+            'admin:music_publisher_work_history', args=(self.original_work.id,)
+        )
         response = self.client.get(url)
         self.assertIn('staffuser'.encode(), response.content)
 
@@ -1077,8 +1212,13 @@ class AdminTest(TestCase):
 
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1091,7 +1231,10 @@ class AdminTest(TestCase):
             open(TEST_ACK_DUPLICATE_ISWCS, 'r'),
             'acknowledgement_file',
             'CW180001000_FOO.V21',
-            'text', 0, None)
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1103,8 +1246,13 @@ class AdminTest(TestCase):
         """Test with a badly formatted file."""
         mock.seek(1)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1115,16 +1263,19 @@ class AdminTest(TestCase):
 
         """Test the change view and the CWR preview."""
         url = reverse(
-            'admin:music_publisher_ackimport_change', args=('GARBAGE',))
+            'admin:music_publisher_ackimport_change', args=('GARBAGE',)
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         url = reverse(
-            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,)
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         url = reverse(
-            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
-        response = self.client.get(url+'?preview=1')
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,)
+        )
+        response = self.client.get(url + '?preview=1')
         self.assertEqual(response.status_code, 200)
 
         """Test Work changelist filters."""
@@ -1133,7 +1284,10 @@ class AdminTest(TestCase):
         url = base_url + '?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y'
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
-        url = base_url + '?in_cwr=N&ack_society=21&ack_status=RA&has_iswc=N&has_rec=N'
+        url = (
+            base_url
+            + '?in_cwr=N&ack_society=21&ack_status=RA&has_iswc=N&has_rec=N'
+        )
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
         url = base_url + '?ack_status=RA&has_iswc=N&has_rec=N'
@@ -1148,8 +1302,13 @@ class AdminTest(TestCase):
         """Upload the file that works."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1161,19 +1320,26 @@ class AdminTest(TestCase):
 
         """Test the change view and the CWR preview."""
         url = reverse(
-            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,)
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         url = reverse(
-            'admin:music_publisher_ackimport_change', args=(ackimport.id,))
-        response = self.client.get(url+'?preview=1')
+            'admin:music_publisher_ackimport_change', args=(ackimport.id,)
+        )
+        response = self.client.get(url + '?preview=1')
         self.assertEqual(response.status_code, 200)
 
         """Upload the file that works."""
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1190,8 +1356,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = get_data_from_response(response)
 
-    @override_settings(
-        PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
+    @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('1.0'))
     def test_data_import_and_royalty_calculations(self):
         """Test data import, ack import and royalty calculations.
 
@@ -1208,31 +1373,31 @@ class AdminTest(TestCase):
             mock.write(csvfile.read())
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'dataimport.csv',
-            'text', 0, None)
+            mock, 'acknowledgement_file', 'dataimport.csv', 'text', 0, None
+        )
         url = reverse('admin:music_publisher_dataimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
-        data.update({
-            'data_file': mockfile,
-        })
+        data.update(
+            {
+                'data_file': mockfile,
+            }
+        )
         response = self.client.post(url, data, follow=False)
 
         mock.seek(0)
         response = self.client.get(url)
         data = get_data_from_response(response)
-        data.update({
-            'data_file': mockfile,
-            'ignore_unknown_columns': True
-        })
+        data.update({'data_file': mockfile, 'ignore_unknown_columns': True})
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
         data_import = music_publisher.models.DataImport.objects.first()
         self.assertIsNotNone(data_import)
         self.assertIsNot(data_import.report, '')
 
-        url = reverse('admin:music_publisher_dataimport_change',
-                      args=(data_import.id,))
+        url = reverse(
+            'admin:music_publisher_dataimport_change', args=(data_import.id,)
+        )
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
@@ -1242,8 +1407,13 @@ class AdminTest(TestCase):
         mock.write(ACK_CONTENT_21_EXT)
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'acknowledgement_file', 'CW180001000_FOO.V21',
-            'text', 0, None)
+            mock,
+            'acknowledgement_file',
+            'CW180001000_FOO.V21',
+            'text',
+            0,
+            None,
+        )
         url = reverse('admin:music_publisher_ackimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1256,8 +1426,8 @@ class AdminTest(TestCase):
             mock.write(csvfile.read())
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'statement_file', 'statement.csv',
-            'text', 0, None)
+            mock, 'statement_file', 'statement.csv', 'text', 0, None
+        )
         url = reverse('royalty_calculation')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1268,47 +1438,57 @@ class AdminTest(TestCase):
 
         # Enough data, fee, p
         mock.seek(0)
-        data.update({
-            'work_id_column': '1',
-            'work_id_source': '52',
-            'amount_column': '5',
-        })
+        data.update(
+            {
+                'work_id_column': '1',
+                'work_id_source': '52',
+                'amount_column': '5',
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
 
         # Enough data, share, with rights column, ISWC
         mock.seek(0)
-        data.update({
-            'algo': 'share',
-            'right_type_column': '3',
-            'work_id_source': 'ISWC',
-        })
+        data.update(
+            {
+                'algo': 'share',
+                'right_type_column': '3',
+                'work_id_source': 'ISWC',
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
 
         # Enough data, share, with rights column, ISRC
         mock.seek(0)
-        data.update({
-            'work_id_source': 'ISRC',
-        })
+        data.update(
+            {
+                'work_id_source': 'ISRC',
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
 
         # Enough data, fee, sync
         mock.seek(0)
-        data.update({
-            'right_type_column': 's',
-            'work_id_source': 'MK',
-        })
+        data.update(
+            {
+                'right_type_column': 's',
+                'work_id_source': 'MK',
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
 
         # Enough data, fee, sync
         mock.seek(0)
-        data.update({
-            'right_type_column': 'm',
-            'work_id_source': 'MK',
-        })
+        data.update(
+            {
+                'right_type_column': 'm',
+                'work_id_source': 'MK',
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertTrue(hasattr(response, 'streaming_content'))
 
@@ -1321,29 +1501,35 @@ class AdminTest(TestCase):
             society = ['52', '52', '52', '52', '44'][i % 5]
             # And we do it twice. the first one should be ignored
             WorkAcknowledgement(
-                work=work, status=status, remote_work_id=work._work_id,
-                society_code=society, date=datetime.now()).save()
+                work=work,
+                status=status,
+                remote_work_id=work._work_id,
+                society_code=society,
+                date=datetime.now(),
+            ).save()
         # 200K rows
         with open(TEST_ROYALTY_PROCESSING_LARGE_FILENAME) as csvfile:
             mock = StringIO()
             mock.write(csvfile.read())
         mockfile = InMemoryUploadedFile(
-            mock, 'statement_file', 'statement.csv',
-            'text', 0, None)
+            mock, 'statement_file', 'statement.csv', 'text', 0, None
+        )
         url = reverse('royalty_calculation')
         response = self.client.get(url)
         data = get_data_from_response(response)
 
         # our ID
         mock.seek(0)
-        data.update({
-            'in_file': mockfile,
-            'algo': 'share',
-            'work_id_column': '0',
-            'work_id_source': 'MK',
-            'right_type_column': '4',
-            'amount_column': '5',
-        })
+        data.update(
+            {
+                'in_file': mockfile,
+                'algo': 'share',
+                'work_id_column': '0',
+                'work_id_source': 'MK',
+                'right_type_column': '4',
+                'amount_column': '5',
+            }
+        )
         time_before = datetime.now()
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
@@ -1352,9 +1538,11 @@ class AdminTest(TestCase):
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
-        data.update({
-            'algo': 'fee',
-        })
+        data.update(
+            {
+                'algo': 'fee',
+            }
+        )
         time_before = datetime.now()
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
@@ -1363,10 +1551,12 @@ class AdminTest(TestCase):
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
-        data.update({
-            'work_id_source': '52',
-            'default_fee': '10.00',
-        })
+        data.update(
+            {
+                'work_id_source': '52',
+                'default_fee': '10.00',
+            }
+        )
         time_before = datetime.now()
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
@@ -1375,11 +1565,13 @@ class AdminTest(TestCase):
         self.assertLess((time_after - time_before).total_seconds(), 15)
 
         mock.seek(0)
-        data.update({
-            'algo': 'share',
-            'work_id_column': '6',
-            'work_id_source': 'ISRC',
-        })
+        data.update(
+            {
+                'algo': 'share',
+                'work_id_column': '6',
+                'work_id_source': 'ISRC',
+            }
+        )
         time_before = datetime.now()
         response = self.client.post(url, data, follow=False)
         time_after = datetime.now()
@@ -1392,14 +1584,13 @@ class AdminTest(TestCase):
             mock = StringIO()
             mock.write(csvfile.read())
         mockfile = InMemoryUploadedFile(
-            mock, 'statement_file', 'statement.csv',
-            'text', 0, None)
+            mock, 'statement_file', 'statement.csv', 'text', 0, None
+        )
         url = reverse('royalty_calculation')
         response = self.client.get(url)
         data = get_data_from_response(response)
         data.update({'in_file': mockfile})
         response = self.client.post(url, data, follow=False)
-
 
     def test_bad_data_import(self):
         """Test bad data import."""
@@ -1411,8 +1602,8 @@ class AdminTest(TestCase):
             mock.write(csvfile.read())
         mock.seek(0)
         mockfile = InMemoryUploadedFile(
-            mock, 'dataimport_file', 'dataimport.csv',
-            'text', 0, None)
+            mock, 'dataimport_file', 'dataimport.csv', 'text', 0, None
+        )
         url = reverse('admin:music_publisher_dataimport_add')
         response = self.client.get(url)
         data = get_data_from_response(response)
@@ -1459,10 +1650,14 @@ class AdminTest(TestCase):
         url = reverse('admin:music_publisher_work_changelist')
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
-        data.update({
-            'action': 'create_cwr', 'select_across': 1, 'index': 0,
-            '_selected_action': 1
-        })
+        data.update(
+            {
+                'action': 'create_cwr',
+                'select_across': 1,
+                'index': 0,
+                '_selected_action': 1,
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(b'error', response.content)
@@ -1475,19 +1670,41 @@ class AdminTest(TestCase):
         url = reverse('admin:music_publisher_work_changelist')
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
-        data.update({
-            'action': 'create_cwr', 'select_across': 1, 'index': 0,
-            '_selected_action': 1
-        })
+        data.update(
+            {
+                'action': 'create_cwr',
+                'select_across': 1,
+                'index': 0,
+                '_selected_action': 1,
+            }
+        )
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
 
 
 class CWRTemplatesTest(SimpleTestCase):
     """A test related to CWR Templates."""
+
     RECORD_TYPES = [
-        'ALT', 'GRH', 'GRT', 'HDR', 'WRK', 'OPU', 'OPT', 'ORN', 'OWR', 'PER',
-        'PWR', 'REC', 'SPT', 'SPU', 'SWR', 'SWT', 'TRL', 'OWK']
+        'ALT',
+        'GRH',
+        'GRT',
+        'HDR',
+        'WRK',
+        'OPU',
+        'OPT',
+        'ORN',
+        'OWR',
+        'PER',
+        'PWR',
+        'REC',
+        'SPT',
+        'SPU',
+        'SWR',
+        'SWT',
+        'TRL',
+        'OWK',
+    ]
 
     def test_templates(self):
         """Test CWR 2.1, 2.2 and 3.0 generation with empty values."""
@@ -1500,7 +1717,7 @@ class CWRTemplatesTest(SimpleTestCase):
                 'record_sequence': None,
                 'first_name': None,
                 'pr_society': '10',
-                'share': Decimal('0.5')
+                'share': Decimal('0.5'),
             }
             self.assertIsInstance(template.render(Context(d)).upper(), str)
         self.assertIsInstance(cwr_templates.TEMPLATES_22, dict)
@@ -1512,7 +1729,7 @@ class CWRTemplatesTest(SimpleTestCase):
                 'record_sequence': None,
                 'first_name': None,
                 'pr_society': '10',
-                'share': Decimal('0.5')
+                'share': Decimal('0.5'),
             }
             self.assertIsInstance(template.render(Context(d)).upper(), str)
         self.assertIsInstance(cwr_templates.TEMPLATES_30, dict)
@@ -1524,7 +1741,7 @@ class CWRTemplatesTest(SimpleTestCase):
                 'record_sequence': None,
                 'first_name': None,
                 'pr_society': '10',
-                'share': Decimal('0.5')
+                'share': Decimal('0.5'),
             }
             self.assertIsInstance(template.render(Context(d)).upper(), str)
 
@@ -1650,19 +1867,20 @@ class ValidatorsTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal('0.333333'),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal('0.5'),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal('0.75'),
-    OPTION_FORCE_CASE='smart'
+    OPTION_FORCE_CASE='smart',
 )
 class ModelsSimpleTest(TransactionTestCase):
     """These tests are modifying objects directly."""
+
     reset_sequences = True
 
     def test_artist(self):
         artist = music_publisher.models.Artist(
-            first_name='Matija', last_name='Kolarić')
+            first_name='Matija', last_name='Kolarić'
+        )
         with self.assertRaises(exceptions.ValidationError):
             artist.clean_fields()
-        artist = music_publisher.models.Artist(
-            last_name='THE BAND', isni='1X')
+        artist = music_publisher.models.Artist(last_name='THE BAND', isni='1X')
         self.assertIsNone(artist.clean_fields())
         artist.save()
         self.assertEqual(artist.last_name, 'The Band')
@@ -1673,37 +1891,54 @@ class ModelsSimpleTest(TransactionTestCase):
         label.save()
         self.assertEqual(str(label), 'MUSIC LABEL')
         release = music_publisher.models.CommercialRelease(
-            release_title='Album', release_label=label)
+            release_title='Album', release_label=label
+        )
         release.save()
         self.assertEqual(str(release), 'ALBUM (MUSIC LABEL)')
         release.release_label = None
         self.assertEqual(str(release), 'ALBUM')
         self.assertEqual(
-            music_publisher.models.CommercialRelease.objects.count(), 1)
+            music_publisher.models.CommercialRelease.objects.count(), 1
+        )
 
     def test_writer(self):
         writer = music_publisher.models.Writer(
-            first_name='Matija', last_name='Kolarić')
+            first_name='Matija', last_name='Kolarić'
+        )
         with self.assertRaises(exceptions.ValidationError):
             writer.clean_fields()
         writer = music_publisher.models.Writer(
-            first_name='Matija', last_name='Kolaric', ipi_name='199',
-            ipi_base='I-123.456.789-3', pr_society='10', saan='J44va',
-            publisher_fee=50)
+            first_name='Matija',
+            last_name='Kolaric',
+            ipi_name='199',
+            ipi_base='I-123.456.789-3',
+            pr_society='10',
+            saan='J44va',
+            publisher_fee=50,
+        )
         self.assertEqual(str(writer), 'MATIJA KOLARIC')
         self.assertIsNone(writer.clean_fields())
         with self.assertRaises(exceptions.ValidationError):
             writer.clean()
         writer = music_publisher.models.Writer(
-            first_name='Matija', last_name='Kolaric', ipi_name='199',
-            generally_controlled=True)
+            first_name='Matija',
+            last_name='Kolaric',
+            ipi_name='199',
+            generally_controlled=True,
+        )
         self.assertIsNone(writer.clean_fields())
         with self.assertRaises(exceptions.ValidationError):
             writer.clean()
         writer = music_publisher.models.Writer(
-            first_name='Matija', last_name='Kolaric', ipi_name='199',
-            ipi_base='I-123.456.789-3', pr_society='10',
-            generally_controlled=True, saan='J44va', publisher_fee=50)
+            first_name='Matija',
+            last_name='Kolaric',
+            ipi_name='199',
+            ipi_base='I-123.456.789-3',
+            pr_society='10',
+            generally_controlled=True,
+            saan='J44va',
+            publisher_fee=50,
+        )
         self.assertIsNone(writer.clean_fields())
         self.assertIsNone(writer.clean())
         writer.save()
@@ -1723,7 +1958,8 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(str(label), 'MUSIC LABEL')
 
         release = music_publisher.models.LibraryRelease(
-            library=library, cd_identifier='ML001')
+            library=library, cd_identifier='ML001'
+        )
         release.save()
         self.assertEqual(str(release), 'ML001 (MUSIC LIBRARY)')
         self.assertIsNone(release.get_dict().get('title'))
@@ -1740,48 +1976,67 @@ class ModelsSimpleTest(TransactionTestCase):
         release.save()
 
         release2 = music_publisher.models.LibraryRelease(
-            library=library, cd_identifier='ML002')
+            library=library, cd_identifier='ML002'
+        )
         release2.clean_fields()
         release2.clean()
         release2.save()
 
         work = music_publisher.models.Work(
-            title='Muzički birtijaški crtići',
-            library_release=release)
+            title='Muzički birtijaški crtići', library_release=release
+        )
         with self.assertRaises(exceptions.ValidationError):
             work.clean_fields()
         work = music_publisher.models.Work(
             title='Music Pub Cartoons',
             iswc='T-123.456.789-4',
             original_title='Music Pub Cartoons',
-            library_release=release)
+            library_release=release,
+        )
         self.assertIsNone(work.clean_fields())
         self.assertEqual(str(work.work_id), '')
         self.assertTrue(work.is_modification())
         work.save()
 
         writer = music_publisher.models.Writer(
-            first_name='Matija', last_name='Kolaric', ipi_name='199',
-            ipi_base='I-123.456.789-3', pr_society='10',
-            generally_controlled=True, saan='J44va', publisher_fee=50)
+            first_name='Matija',
+            last_name='Kolaric',
+            ipi_name='199',
+            ipi_base='I-123.456.789-3',
+            pr_society='10',
+            generally_controlled=True,
+            saan='J44va',
+            publisher_fee=50,
+        )
         writer.clean_fields()
         writer.clean()
         writer.save()
 
         writer2 = music_publisher.models.Writer(
-            first_name='Ann', last_name='Other', ipi_name='297',
-            pr_society='10')
+            first_name='Ann',
+            last_name='Other',
+            ipi_name='297',
+            pr_society='10',
+        )
         writer2.clean_fields()
         writer2.clean()
         writer2.save()
 
         music_publisher.models.WriterInWork.objects.create(
-            work=work, writer=None, capacity='CA', relative_share=0,
-            controlled=False)
+            work=work,
+            writer=None,
+            capacity='CA',
+            relative_share=0,
+            controlled=False,
+        )
 
         wiw = music_publisher.models.WriterInWork.objects.create(
-            work=work, writer=writer, capacity='AR', relative_share=50,
-            controlled=True)
+            work=work,
+            writer=writer,
+            capacity='AR',
+            relative_share=50,
+            controlled=True,
+        )
         wiw.clean_fields()
         wiw.clean()
 
@@ -1789,29 +2044,38 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC)')
 
         music_publisher.models.WriterInWork.objects.create(
-            work=work, writer=writer2, capacity='AD', relative_share=25,
-            controlled=True)
+            work=work,
+            writer=writer2,
+            capacity='AD',
+            relative_share=25,
+            controlled=True,
+        )
         wiw = music_publisher.models.WriterInWork.objects.create(
-            work=work, writer=writer2, capacity='AD', relative_share=25,
-            controlled=False)
+            work=work,
+            writer=writer2,
+            capacity='AD',
+            relative_share=25,
+            controlled=False,
+        )
         wiw.clean_fields()
         wiw.clean()
 
         self.assertEqual(
-            str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)')
+            str(work), 'DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)'
+        )
 
         alt = work.alternatetitle_set.create(title='MPC Academy')
         self.assertEqual(str(alt), 'MPC Academy')
 
         self.assertEqual(
-            str(music_publisher.models.Recording().recording_id),
-            '')
+            str(music_publisher.models.Recording().recording_id), ''
+        )
 
         rec = music_publisher.models.Recording.objects.create(
             work=work,
             recording_title='Work Recording',
             version_title='Work Recording feat. Testing',
-            record_label=label
+            record_label=label,
         )
         rec.clean_fields()
         rec.clean()
@@ -1821,16 +2085,13 @@ class ModelsSimpleTest(TransactionTestCase):
             recording_title='Suffix',
             recording_title_suffix=True,
             version_title='Co-suffix',
-            version_title_suffix=True
+            version_title_suffix=True,
         )
         rec.clean_fields()
         rec.clean()
 
         music_publisher.models.WorkAcknowledgement.objects.create(
-            work=work,
-            society_code='10',
-            date=datetime.now(),
-            status='RA'
+            work=work, society_code='10', date=datetime.now(), status='RA'
         )
 
         music_publisher.models.WorkAcknowledgement.objects.create(
@@ -1838,7 +2099,7 @@ class ModelsSimpleTest(TransactionTestCase):
             society_code='51',
             remote_work_id='REMOTE2',
             date=datetime.now(),
-            status='AS'
+            status='AS',
         )
 
         music_publisher.models.WorkAcknowledgement.objects.create(
@@ -1846,26 +2107,23 @@ class ModelsSimpleTest(TransactionTestCase):
             society_code='51',
             remote_work_id='REMOTE1',
             date=datetime.now(),
-            status='AS'
+            status='AS',
         )
 
         track = music_publisher.models.Track.objects.create(
-            release=release,
-            recording=rec,
-            cut_number=1
+            release=release, recording=rec, cut_number=1
         )
         track.clean_fields()
         track.clean()
 
         music_publisher.models.Track.objects.create(
-            release=release2,
-            recording=rec2,
-            cut_number=2
+            release=release2, recording=rec2, cut_number=2
         )
 
         # dict
         music_publisher.models.WorkManager().get_dict(
-            qs=music_publisher.models.Work.objects.all())
+            qs=music_publisher.models.Work.objects.all()
+        )
 
         # test CWR 2.1 NWR
         TEST_CONTENT = open(TEST_CWR2_FILENAME, 'rb').read()
@@ -1874,10 +2132,8 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
         self.assertEqual(cwr.filename, 'CW220001DMP_000.V21')
-        self.assertEqual(
-            cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
-        self.assertEqual(
-            cwr.cwr.encode()[86:], TEST_CONTENT[86:])
+        self.assertEqual(cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
+        self.assertEqual(cwr.cwr.encode()[86:], TEST_CONTENT[86:])
 
         # test also CWR 3.0 WRK
         TEST_CONTENT = open(TEST_CWR3_FILENAME, 'rb').read()
@@ -1886,10 +2142,8 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
         self.assertEqual(cwr.filename, 'CW220002DMP_0000_V3-0-0.SUB')
-        self.assertEqual(
-            cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
-        self.assertEqual(
-            cwr.cwr.encode()[167:], TEST_CONTENT[167:])
+        self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
+        self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
         # should just return when once created
         num = cwr.num_in_year
         cwr.create_cwr()
@@ -1902,10 +2156,8 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
         self.assertEqual(cwr.filename, 'CW220003DMP_0000_V3-0-0.ISR')
-        self.assertEqual(
-            cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
-        self.assertEqual(
-            cwr.cwr.encode()[167:], TEST_CONTENT[167:])
+        self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
+        self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
 
         # raises error because this writer is controlled in a work
         writer.pr_society = None
@@ -1915,21 +2167,21 @@ class ModelsSimpleTest(TransactionTestCase):
         with self.assertRaises(exceptions.ValidationError):
             writer.clean()
 
-       # test CWR 2.2 NWR
+        # test CWR 2.2 NWR
         cwr = music_publisher.models.CWRExport(nwr_rev='NW2')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
         self.assertEqual(cwr.filename, 'CW220004DMP_000.V22')
 
-       # test CWR 2.2 REV
+        # test CWR 2.2 REV
         cwr = music_publisher.models.CWRExport(nwr_rev='RE2')
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
         self.assertEqual(cwr.filename, 'CW220005DMP_000.V22')
 
-       # test CWR 3.1 WRK
+        # test CWR 3.1 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev='WR1')
         cwr.save()
         cwr.works.add(work)
@@ -2017,7 +2269,9 @@ TRL000010000001000000005"""
 
 TEST_DATA_IMPORT_FILENAME = 'music_publisher/tests/dataimport.csv'
 TEST_ROYALTY_PROCESSING_FILENAME = 'music_publisher/tests/royaltystatement.csv'
-TEST_ROYALTY_PROCESSING_LARGE_FILENAME = 'music_publisher/tests/royaltystatement_200k_rows.csv'
+TEST_ROYALTY_PROCESSING_LARGE_FILENAME = (
+    'music_publisher/tests/royaltystatement_200k_rows.csv'
+)
 TEST_CWR2_FILENAME = 'music_publisher/tests/CW220001DMP_000.V21'
 TEST_BAD_CWR2_FILENAME = 'music_publisher/tests/CW220004DMP_000.V21'
 TEST_CWR3_FILENAME = 'music_publisher/tests/CW220002DMP_0000_V3-0-0.SUB'

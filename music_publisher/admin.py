@@ -24,13 +24,33 @@ from django.utils.html import mark_safe
 from django.utils.timezone import now
 
 from .forms import (
-    ACKImportForm, AlternateTitleFormSet, DataImportForm, LibraryReleaseForm,
-    WorkForm, WriterInWorkFormSet, PlaylistForm
+    ACKImportForm,
+    AlternateTitleFormSet,
+    DataImportForm,
+    LibraryReleaseForm,
+    WorkForm,
+    WriterInWorkFormSet,
+    PlaylistForm,
 )
 from .models import (
-    ACKImport, AlternateTitle, Artist, ArtistInWork, CWRExport, Playlist,
-    CommercialRelease, DataImport, Label, Library, LibraryRelease, Recording,
-    Release, SOCIETY_DICT, Track, Work, WorkAcknowledgement, Writer,
+    ACKImport,
+    AlternateTitle,
+    Artist,
+    ArtistInWork,
+    CWRExport,
+    Playlist,
+    CommercialRelease,
+    DataImport,
+    Label,
+    Library,
+    LibraryRelease,
+    Recording,
+    Release,
+    SOCIETY_DICT,
+    Track,
+    Work,
+    WorkAcknowledgement,
+    Writer,
     WriterInWork,
 )
 from .validators import CWRFieldValidator
@@ -48,24 +68,27 @@ class AudioPlayerWidget(forms.widgets.ClearableFileInput):
 
 class MusicPublisherAdmin(admin.ModelAdmin):
     """Parent class to all admin classes."""
+
     save_as = True
 
 
 class ArtistInWorkInline(admin.TabularInline):
-    """Inline interface for :class:`.models.ArtistInWork`.
-    """
+    """Inline interface for :class:`.models.ArtistInWork`."""
+
     autocomplete_fields = ('artist', 'work')
     model = ArtistInWork
     extra = 0
     ordering = ('artist__last_name', 'artist__first_name')
-    verbose_name_plural = \
+    verbose_name_plural = (
         'Artists performing Works (not mentioned in "recordings" section)'
+    )
 
 
 class RecordingInline(admin.StackedInline):
     """Inline interface for :class:`.models.Recording`,
-        used in :class:`WorkAdmin`.
+    used in :class:`WorkAdmin`.
     """
+
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = ('complete_recording_title', 'complete_version_title')
     show_change_link = True
@@ -73,36 +96,55 @@ class RecordingInline(admin.StackedInline):
     def get_fieldsets(self, request, obj=None):
         if settings.OPTION_FILES:
             return (
-                ('Metadata', {
-                    'fields': (
-                        'work',
-                        ('recording_title', 'recording_title_suffix',
-                         'complete_recording_title'),
-                        ('version_title', 'version_title_suffix',
-                         'complete_version_title'),
-                        ('isrc', 'record_label', 'artist'),
-                        ('duration', 'release_date'),
-                    ),
-                }),
-                ('Audio', {
-                    'fields': (
-                        ('audio_file',)
-                    ),
-                }),
+                (
+                    'Metadata',
+                    {
+                        'fields': (
+                            'work',
+                            (
+                                'recording_title',
+                                'recording_title_suffix',
+                                'complete_recording_title',
+                            ),
+                            (
+                                'version_title',
+                                'version_title_suffix',
+                                'complete_version_title',
+                            ),
+                            ('isrc', 'record_label', 'artist'),
+                            ('duration', 'release_date'),
+                        ),
+                    },
+                ),
+                (
+                    'Audio',
+                    {
+                        'fields': (('audio_file',)),
+                    },
+                ),
             )
         else:
             return (
-                (None, {
-                    'fields': (
-                        'work',
-                        ('recording_title', 'recording_title_suffix',
-                         'complete_recording_title'),
-                        ('version_title', 'version_title_suffix',
-                         'complete_version_title'),
-                        ('isrc', 'record_label', 'artist'),
-                        ('duration', 'release_date'),
-                    ),
-                }),
+                (
+                    None,
+                    {
+                        'fields': (
+                            'work',
+                            (
+                                'recording_title',
+                                'recording_title_suffix',
+                                'complete_recording_title',
+                            ),
+                            (
+                                'version_title',
+                                'version_title_suffix',
+                                'complete_version_title',
+                            ),
+                            ('isrc', 'record_label', 'artist'),
+                            ('duration', 'release_date'),
+                        ),
+                    },
+                ),
             )
 
     formfield_overrides = {
@@ -110,8 +152,9 @@ class RecordingInline(admin.StackedInline):
         models.TimeField: {'widget': forms.TimeInput},
     }
 
-    verbose_name_plural = \
+    verbose_name_plural = (
         'Recordings (with recording artists and record labels)'
+    )
     model = Recording
     ordering = ('recording_title', 'version_title', 'id')
     extra = 0
@@ -119,28 +162,55 @@ class RecordingInline(admin.StackedInline):
 
 @admin.register(Artist)
 class ArtistAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Artist`.
-    """
+    """Admin interface for :class:`.models.Artist`."""
 
     ordering = ('last_name', 'first_name', 'isni', '-id')
 
     list_display = (
-        'last_or_band', 'first_name', 'isni', 'recording_count', 'work_count')
-    search_fields = ('last_name', 'isni',)
+        'last_or_band',
+        'first_name',
+        'isni',
+        'recording_count',
+        'work_count',
+    )
+    search_fields = (
+        'last_name',
+        'isni',
+    )
 
     def get_fieldsets(self, request, obj=None):
         if settings.OPTION_FILES:
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
-                ('ISNI', {'fields': ('isni',), }),
+                (
+                    'ISNI',
+                    {
+                        'fields': ('isni',),
+                    },
+                ),
                 ('Public', {'fields': ('image', 'description')}),
-                ('Internal', {'fields': ('notes',), }),
+                (
+                    'Internal',
+                    {
+                        'fields': ('notes',),
+                    },
+                ),
             )
         else:
             return (
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
-                ('ISNI', {'fields': ('isni',), }),
-                ('Internal', {'fields': ('notes',), }),
+                (
+                    'ISNI',
+                    {
+                        'fields': ('isni',),
+                    },
+                ),
+                (
+                    'Internal',
+                    {
+                        'fields': ('notes',),
+                    },
+                ),
             )
 
     formfield_overrides = {
@@ -163,17 +233,18 @@ class ArtistAdmin(MusicPublisherAdmin):
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
             qs = Work.objects.filter(
-                models.Q(artistinwork__artist=obj) |
-                models.Q(recordings__artist=obj))
+                models.Q(artistinwork__artist=obj)
+                | models.Q(recordings__artist=obj)
+            )
             qs.update(last_change=now())
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('work', distinct=True))
-        qs = qs.annotate(recording__count=models.Count(
-            'recordings', distinct=True))
+        qs = qs.annotate(
+            recording__count=models.Count('recordings', distinct=True)
+        )
         return qs
 
     def work_count(self, obj):
@@ -205,15 +276,21 @@ class ArtistAdmin(MusicPublisherAdmin):
 
 @admin.register(Label)
 class LabelAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Label`.
-    """
+    """Admin interface for :class:`.models.Label`."""
+
     actions = None
     search_fields = ('name',)
     list_display = (
-        'name', 'recording_count', 'commercialrelease_count',
-        'libraryrelease_count')
+        'name',
+        'recording_count',
+        'commercialrelease_count',
+        'libraryrelease_count',
+    )
     readonly_fields = (
-        'recording_count', 'commercialrelease_count', 'libraryrelease_count')
+        'recording_count',
+        'commercialrelease_count',
+        'libraryrelease_count',
+    )
 
     formfield_overrides = {
         models.ImageField: {'widget': ImageWidget},
@@ -229,23 +306,33 @@ class LabelAdmin(MusicPublisherAdmin):
         else:
             return (
                 ('Name', {'fields': ('name',)}),
-                ('Notes', {'fields': ('notes',), }),
+                (
+                    'Notes',
+                    {
+                        'fields': ('notes',),
+                    },
+                ),
             )
 
     ordering = ('name', '-id')
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.annotate(
             libraryrelease__count=models.Count(
-                'release', distinct=True,
-                filter=models.Q(release__cd_identifier__isnull=False)))
+                'release',
+                distinct=True,
+                filter=models.Q(release__cd_identifier__isnull=False),
+            )
+        )
         qs = qs.annotate(
             commercialrelease__count=models.Count(
-                'release', distinct=True,
-                filter=models.Q(release__cd_identifier__isnull=True)))
+                'release',
+                distinct=True,
+                filter=models.Q(release__cd_identifier__isnull=True),
+            )
+        )
         qs = qs.annotate(models.Count('recording', distinct=True))
         return qs
 
@@ -289,19 +376,17 @@ class LabelAdmin(MusicPublisherAdmin):
     recording_count.admin_order_field = 'recording__count'
 
     def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
-        """
+        """Save, then update ``last_change`` of the corresponding works."""
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
-            qs = Work.objects.filter(
-                models.Q(recordings__record_label=obj))
+            qs = Work.objects.filter(models.Q(recordings__record_label=obj))
             qs.update(last_change=now())
 
 
 @admin.register(Library)
 class LibraryAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Library`.
-    """
+    """Admin interface for :class:`.models.Library`."""
+
     actions = None
     search_fields = ('name',)
     ordering = ('name', '-id')
@@ -311,13 +396,14 @@ class LibraryAdmin(MusicPublisherAdmin):
     fields = ('name',)
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.annotate(
-            work__count=models.Count('release__works', distinct=True))
+            work__count=models.Count('release__works', distinct=True)
+        )
         qs = qs.annotate(
-            release__count=models.Count('release__id', distinct=True))
+            release__count=models.Count('release__id', distinct=True)
+        )
         return qs
 
     def libraryrelease_count(self, obj):
@@ -347,12 +433,10 @@ class LibraryAdmin(MusicPublisherAdmin):
     work_count.admin_order_field = 'work__count'
 
     def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
-        """
+        """Save, then update ``last_change`` of the corresponding works."""
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
-            qs = Work.objects.filter(
-                models.Q(library_release__library=obj))
+            qs = Work.objects.filter(models.Q(library_release__library=obj))
             qs.update(last_change=now())
 
 
@@ -360,8 +444,12 @@ class TrackInline(admin.TabularInline):
     """Inline interface for :class:`.models.Track`, used in
     :class:`LibraryReleaseAdmin` and :class:`CommercialReleaseAdmin`.
     """
+
     model = Track
-    ordering = ('release', 'cut_number',)
+    ordering = (
+        'release',
+        'cut_number',
+    )
     autocomplete_fields = ('release', 'recording')
     extra = 0
 
@@ -369,6 +457,7 @@ class TrackInline(admin.TabularInline):
 class PlaylistTrackInline(TrackInline):
     def has_audio(self, obj):
         return bool(obj.recording.audio_file)
+
     has_audio.boolean = True
     fields = ('recording', 'has_audio')
     readonly_fields = ('has_audio',)
@@ -376,14 +465,11 @@ class PlaylistTrackInline(TrackInline):
 
 @admin.register(Release)
 class ReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Release`.
-    """
+    """Admin interface for :class:`.models.Release`."""
 
     ordering = ('release_title', 'cd_identifier', '-id')
     actions = None
-    list_display = (
-        '__str__',
-    )
+    list_display = ('__str__',)
 
     formfield_overrides = {
         models.ImageField: {'widget': ImageWidget},
@@ -410,8 +496,7 @@ class ReleaseAdmin(MusicPublisherAdmin):
 
 @admin.register(LibraryRelease)
 class LibraryReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.LibraryRelease`.
-    """
+    """Admin interface for :class:`.models.LibraryRelease`."""
 
     ordering = ('release_title', 'cd_identifier', '-id')
     form = LibraryReleaseForm
@@ -421,30 +506,30 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     def get_fieldsets(self, request, obj=None):
         if settings.OPTION_FILES:
             return (
-                ('Library', {
-                    'fields': (
-                        ('library', 'cd_identifier'),)
-                }),
-                ('Release (album) metadata', {
-                    'fields': (
-                        ('release_title', 'release_label'),
-                        ('ean', 'release_date'))
-                }),
-                ('Public', {
-                    'fields': ('image', 'description')
-                }),
+                ('Library', {'fields': (('library', 'cd_identifier'),)}),
+                (
+                    'Release (album) metadata',
+                    {
+                        'fields': (
+                            ('release_title', 'release_label'),
+                            ('ean', 'release_date'),
+                        )
+                    },
+                ),
+                ('Public', {'fields': ('image', 'description')}),
             )
         else:
             return (
-                ('Library', {
-                    'fields': (
-                        ('library', 'cd_identifier'),)
-                }),
-                ('Release (album) metadata', {
-                    'fields': (
-                        ('release_title', 'release_label'),
-                        ('ean', 'release_date'))
-                }),
+                ('Library', {'fields': (('library', 'cd_identifier'),)}),
+                (
+                    'Release (album) metadata',
+                    {
+                        'fields': (
+                            ('release_title', 'release_label'),
+                            ('ean', 'release_date'),
+                        )
+                    },
+                ),
             )
 
     list_display = (
@@ -460,7 +545,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
     list_filter = ('release_label', 'library')
     search_fields = ('release_title', '^cd_identifier')
-    
+
     formfield_overrides = {
         models.ImageField: {'widget': ImageWidget},
     }
@@ -472,16 +557,14 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
         return super().get_inline_instances(request)
 
     def save_model(self, request, obj, form, *args, **kwargs):
-        """Save, then update ``last_change`` of the corresponding works.
-        """
+        """Save, then update ``last_change`` of the corresponding works."""
         super().save_model(request, obj, form, *args, **kwargs)
         if form.changed_data:
             qs = Work.objects.filter(library_release=obj)
             qs.update(last_change=now())
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('tracks', distinct=True))
         qs = qs.annotate(models.Count('works', distinct=True))
@@ -524,13 +607,13 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}-libraryreleases-{}'.format(
-            settings.PUBLISHER_CODE, datetime.now().toordinal())
+            settings.PUBLISHER_CODE, datetime.now().toordinal()
+        )
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
 
-    create_json.short_description = \
-        'Export selected library releases (JSON).'
+    create_json.short_description = 'Export selected library releases (JSON).'
 
     actions = ['create_json']
 
@@ -544,32 +627,38 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
 
 @admin.register(Playlist)
 class PlaylistAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.Playlist`.
-    """
+    """Admin interface for :class:`.models.Playlist`."""
 
     ordering = ('-id',)
     form = PlaylistForm
     inlines = [PlaylistTrackInline]
 
     fieldsets = (
-        (None, {
-            'fields': (
-                ('release_title', 'release_date'),
-                'description', 'image'
-            )
-        }),
-        ('URLs', {
-            'fields': (
-                'secret_url',
-                'secret_api_url',
-            )
-        }),
+        (
+            None,
+            {
+                'fields': (
+                    ('release_title', 'release_date'),
+                    'description',
+                    'image',
+                )
+            },
+        ),
+        (
+            'URLs',
+            {
+                'fields': (
+                    'secret_url',
+                    'secret_api_url',
+                )
+            },
+        ),
     )
 
     formfield_overrides = {
         models.ImageField: {'widget': ImageWidget},
     }
-    
+
     # autocomplete_fields = ['recordings']
 
     list_display = (
@@ -585,6 +674,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
         if obj.release_date and obj.release_date < now().date():
             return False
         return True
+
     valid.boolean = True
     readonly_fields = ('cd_identifier', 'secret_url', 'secret_api_url')
 
@@ -595,6 +685,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
             url = self.request.build_absolute_uri(obj.secret_url)
             return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
         return ''
+
     secret_url.short_description = 'Secret URL'
 
     def secret_api_url(self, obj):
@@ -602,6 +693,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
             url = self.request.build_absolute_uri(obj.secret_api_url)
             return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
         return ''
+
     secret_api_url.short_description = 'Secret API URL'
 
     def get_inline_instances(self, request, obj=None):
@@ -611,8 +703,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
         return super().get_inline_instances(request)
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         self.request = request
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('tracks', distinct=True))
@@ -633,30 +724,29 @@ class PlaylistAdmin(MusicPublisherAdmin):
 
     # def create_json(self, request, qs):
     #     """Batch action that downloads a JSON file containing library releases.
-    # 
+    #
     #     Returns:
     #         JsonResponse: JSON file with selected works
     #     """
-    # 
+    #
     #     j = Playlist.objects.get_dict(qs)
-    # 
+    #
     #     response = JsonResponse(j, json_dumps_params={'indent': 4})
     #     name = '{}-libraryreleases-{}'.format(
     #         settings.PUBLISHER_CODE, datetime.now().toordinal())
     #     cd = 'attachment; filename="{}.json"'.format(name)
     #     response['Content-Disposition'] = cd
     #     return response
-    # 
+    #
     # create_json.short_description = \
     #     'Export selected library releases (JSON).'
-    # 
+    #
     # actions = ['create_json']
 
 
 @admin.register(CommercialRelease)
 class CommercialReleaseAdmin(MusicPublisherAdmin):
-    """Admin interface for :class:`.models.CommercialRelease`.
-    """
+    """Admin interface for :class:`.models.CommercialRelease`."""
 
     ordering = ('release_title', 'cd_identifier', '-id')
     inlines = [TrackInline]
@@ -665,7 +755,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     formfield_overrides = {
         models.ImageField: {'widget': ImageWidget},
     }
-    
+
     list_display = (
         'release_title',
         'release_label',
@@ -681,22 +771,28 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     def get_fieldsets(self, request, obj=None):
         if settings.OPTION_FILES:
             return (
-                ('Release (album) metadata', {
-                    'fields': (
-                        ('release_title', 'release_label'),
-                        ('ean', 'release_date'))
-                }),
-                ('Public', {
-                    'fields': ('image', 'description')
-                }),
+                (
+                    'Release (album) metadata',
+                    {
+                        'fields': (
+                            ('release_title', 'release_label'),
+                            ('ean', 'release_date'),
+                        )
+                    },
+                ),
+                ('Public', {'fields': ('image', 'description')}),
             )
         else:
             return (
-                ('Release (album) metadata', {
-                    'fields': (
-                        ('release_title', 'release_label'),
-                        ('ean', 'release_date'))
-                }),
+                (
+                    'Release (album) metadata',
+                    {
+                        'fields': (
+                            ('release_title', 'release_label'),
+                            ('ean', 'release_date'),
+                        )
+                    },
+                ),
             )
 
     def get_inline_instances(self, request, obj=None):
@@ -706,8 +802,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         return super().get_inline_instances(request)
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('tracks', distinct=True))
         return qs
@@ -737,13 +832,15 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}-libraryreleases-{}'.format(
-            settings.PUBLISHER_CODE, datetime.now().toordinal())
+            settings.PUBLISHER_CODE, datetime.now().toordinal()
+        )
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
 
-    create_json.short_description = \
+    create_json.short_description = (
         'Export selected commercial releases (JSON).'
+    )
 
     actions = ['create_json']
 
@@ -757,13 +854,18 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
-    """Interface for :class:`.models.Writer`.
-    """
+    """Interface for :class:`.models.Writer`."""
 
     ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-    list_display = ('last_name', 'first_name', 'ipi_name', 'pr_society',
-                    '_can_be_controlled', 'generally_controlled',
-                    'work_count')
+    list_display = (
+        'last_name',
+        'first_name',
+        'ipi_name',
+        'pr_society',
+        '_can_be_controlled',
+        'generally_controlled',
+        'work_count',
+    )
 
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
     search_fields = ('last_name', 'ipi_name')
@@ -780,52 +882,64 @@ class WriterAdmin(MusicPublisherAdmin):
         See :meth:`WriterAdmin.get_society_list`"""
         if settings.OPTION_FILES:
             return [
-                ('Name', {
-                    'fields': (
-                        ('first_name', 'last_name'),)
-                }),
-                ('IPI', {
-                    'fields': (
-                        ('ipi_name', 'ipi_base'),),
-                }),
-                ('Societies', {
-                    'fields': (
-                        self.get_society_list(),),
-                }),
-                ('General agreement', {
-                    'fields': (
-                        ('generally_controlled',
-                         ('saan', 'publisher_fee'))
-                    ),
-                }),
+                ('Name', {'fields': (('first_name', 'last_name'),)}),
+                (
+                    'IPI',
+                    {
+                        'fields': (('ipi_name', 'ipi_base'),),
+                    },
+                ),
+                (
+                    'Societies',
+                    {
+                        'fields': (self.get_society_list(),),
+                    },
+                ),
+                (
+                    'General agreement',
+                    {
+                        'fields': (
+                            ('generally_controlled', ('saan', 'publisher_fee'))
+                        ),
+                    },
+                ),
                 ('Public', {'fields': ('image', 'description')}),
-                ('Internal', {
-                    'fields': ('notes',),
-                }),
+                (
+                    'Internal',
+                    {
+                        'fields': ('notes',),
+                    },
+                ),
             ]
         else:
             return [
-                ('Name', {
-                    'fields': (
-                        ('first_name', 'last_name'),)
-                }),
-                ('IPI', {
-                    'fields': (
-                        ('ipi_name', 'ipi_base'),),
-                }),
-                ('Societies', {
-                    'fields': (
-                        self.get_society_list(),),
-                }),
-                ('General agreement', {
-                    'fields': (
-                        ('generally_controlled',
-                         ('saan', 'publisher_fee'))
-                    ),
-                }),
-                ('Internal', {
-                    'fields': ('notes',),
-                }),
+                ('Name', {'fields': (('first_name', 'last_name'),)}),
+                (
+                    'IPI',
+                    {
+                        'fields': (('ipi_name', 'ipi_base'),),
+                    },
+                ),
+                (
+                    'Societies',
+                    {
+                        'fields': (self.get_society_list(),),
+                    },
+                ),
+                (
+                    'General agreement',
+                    {
+                        'fields': (
+                            ('generally_controlled', ('saan', 'publisher_fee'))
+                        ),
+                    },
+                ),
+                (
+                    'Internal',
+                    {
+                        'fields': ('notes',),
+                    },
+                ),
             ]
 
     actions = None
@@ -853,8 +967,7 @@ class WriterAdmin(MusicPublisherAdmin):
             qs.update(last_change=now())
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.annotate(work__count=models.Count('works', distinct=True))
         return qs
@@ -874,16 +987,20 @@ class WriterAdmin(MusicPublisherAdmin):
 
 
 class AlternateTitleInline(admin.TabularInline):
-    """Inline interface for :class:`.models.AlternateTitle`.
-    """
+    """Inline interface for :class:`.models.AlternateTitle`."""
+
     model = AlternateTitle
     formset = AlternateTitleFormSet
     extra = 0
     readonly_fields = ('complete_alt_title',)
-    verbose_name_plural = \
+    verbose_name_plural = (
         'Alternative titles (not mentioned in "recordings" section)'
+    )
     fields = ('title', 'suffix', 'complete_alt_title')
-    ordering = ('suffix', 'title',)
+    ordering = (
+        'suffix',
+        'title',
+    )
 
     def complete_alt_title(self, obj):
         """Return the complete title, see
@@ -892,8 +1009,7 @@ class AlternateTitleInline(admin.TabularInline):
 
 
 class WriterInWorkInline(admin.TabularInline):
-    """Inline interface for :class:`.models.WriterInWork`.
-    """
+    """Inline interface for :class:`.models.WriterInWork`."""
 
     autocomplete_fields = ('writer',)
     model = WriterInWork
@@ -901,17 +1017,26 @@ class WriterInWorkInline(admin.TabularInline):
     extra = 0
     min_num = 1  # One writer is required
     fields = (
-        'writer', 'capacity', 'relative_share', 'controlled', 'saan',
-        'publisher_fee')
+        'writer',
+        'capacity',
+        'relative_share',
+        'controlled',
+        'saan',
+        'publisher_fee',
+    )
     ordering = (
-            '-controlled', 'writer__last_name', 'writer__first_name', '-id')
+        '-controlled',
+        'writer__last_name',
+        'writer__first_name',
+        '-id',
+    )
 
 
 class WorkAcknowledgementInline(admin.TabularInline):
     """Inline interface for :class:`.models.WorkAcknowledgement`,
-        used in :class:`WorkAdmin`.
+    used in :class:`WorkAdmin`.
 
-        Note that normal users should only have a 'view' permission.
+    Note that normal users should only have a 'view' permission.
     """
 
     model = WorkAcknowledgement
@@ -946,7 +1071,8 @@ class WorkAdmin(MusicPublisherAdmin):
         RecordingInline,
         AlternateTitleInline,
         ArtistInWorkInline,
-        WorkAcknowledgementInline)
+        WorkAcknowledgementInline,
+    )
 
     def writer_last_names(self, obj):
         """This is a standard way how writers are shown in other apps."""
@@ -963,8 +1089,10 @@ class WorkAdmin(MusicPublisherAdmin):
         for other reasons, so no overhead except summing.
         """
         return sum(
-            wiw.relative_share for wiw in obj.writerinwork_set.all()
-            if wiw.controlled)
+            wiw.relative_share
+            for wiw in obj.writerinwork_set.all()
+            if wiw.controlled
+        )
 
     percentage_controlled.short_description = '% controlled'
 
@@ -999,16 +1127,20 @@ class WorkAdmin(MusicPublisherAdmin):
     recording_count.short_description = 'Recordings'
     recording_count.admin_order_field = 'recordings__count'
 
-    readonly_fields = (
-        'writer_last_names', 'work_id', 'cwr_export_count')
+    readonly_fields = ('writer_last_names', 'work_id', 'cwr_export_count')
     list_display = (
-        'work_id', 'title', 'iswc', 'writer_last_names',
-        'percentage_controlled', 'library_release',
-        'recording_count', 'cwr_export_count')
+        'work_id',
+        'title',
+        'iswc',
+        'writer_last_names',
+        'percentage_controlled',
+        'library_release',
+        'recording_count',
+        'cwr_export_count',
+    )
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view.
-        """
+        """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('library_release__library')
         qs = qs.prefetch_related('writerinwork_set__writer')
@@ -1017,121 +1149,109 @@ class WorkAdmin(MusicPublisherAdmin):
         return qs
 
     class InCWRListFilter(admin.SimpleListFilter):
-        """Custom list filter if work is included in any of CWR files.
-        """
+        """Custom list filter if work is included in any of CWR files."""
 
         title = 'In CWR'
         parameter_name = 'in_cwr'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
-            """Filter if in any of CWR files.
-            """
+            """Filter if in any of CWR files."""
             if self.value() == 'Y':
                 return queryset.exclude(cwr_exports__count=0)
             elif self.value() == 'N':
                 return queryset.filter(cwr_exports__count=0)
 
     class ACKSocietyListFilter(admin.SimpleListFilter):
-        """Custom list filter of societies from ACK files.
-        """
+        """Custom list filter of societies from ACK files."""
 
         title = 'Acknowledgement society'
         parameter_name = 'ack_society'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
 
             codes = WorkAcknowledgement.objects.order_by()
-            codes = codes.values_list(
-                'society_code', flat=True).distinct()
+            codes = codes.values_list('society_code', flat=True).distinct()
             return sorted(
                 [(code, SOCIETY_DICT.get(code, code)) for code in codes],
-                key=lambda code: code[1])
+                key=lambda code: code[1],
+            )
 
         def queryset(self, request, queryset):
-            """Filter on society sending ACKs.
-            """
+            """Filter on society sending ACKs."""
             if self.value():
                 queryset = queryset.filter(
-                    workacknowledgement__society_code=self.value()).distinct()
+                    workacknowledgement__society_code=self.value()
+                ).distinct()
                 queryset.society_code = self.value()
             return queryset
 
     class ACKStatusListFilter(admin.SimpleListFilter):
-        """Custom list filter on ACK status.
-        """
+        """Custom list filter on ACK status."""
 
         title = 'Acknowledgement status'
         parameter_name = 'ack_status'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
             return WorkAcknowledgement.TRANSACTION_STATUS_CHOICES
 
         def queryset(self, request, queryset):
-            """Filter on ACK status.
-            """
+            """Filter on ACK status."""
             if self.value():
                 if hasattr(queryset, 'society_code'):
                     queryset = queryset.filter(
                         workacknowledgement__status=self.value(),
-                        workacknowledgement__society_code=queryset.society_code
+                        workacknowledgement__society_code=queryset.society_code,
                     ).distinct()
                 else:
                     queryset = queryset.filter(
-                        workacknowledgement__status=self.value()).distinct()
+                        workacknowledgement__status=self.value()
+                    ).distinct()
             return queryset
 
     class HasISWCListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISWC.
-        """
+        """Custom list filter on the presence of ISWC."""
 
         title = 'Has ISWC'
         parameter_name = 'has_iswc'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
-            """
+            """Filter on presence of :attr:`.iswc`."""
             if self.value() == 'Y':
                 return queryset.exclude(iswc__isnull=True)
             elif self.value() == 'N':
                 return queryset.filter(iswc__isnull=True)
 
     class HasRecordingListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of recordings.
-        """
+        """Custom list filter on the presence of recordings."""
+
         title = 'Has Recordings'
         parameter_name = 'has_rec'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :class:`.models.Recording`.
-            """
+            """Filter on presence of :class:`.models.Recording`."""
             if self.value() == 'Y':
                 return queryset.exclude(recordings__count=0)
             elif self.value() == 'N':
@@ -1150,30 +1270,38 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     search_fields = (
-        'title', 'alternatetitle__title', '^iswc', '^id', '^_work_id',
-        'recordings__recording_title', 'recordings__version_title',
-        '^recordings__isrc', 'writerinwork__writer__last_name')
+        'title',
+        'alternatetitle__title',
+        '^iswc',
+        '^id',
+        '^_work_id',
+        'recordings__recording_title',
+        'recordings__version_title',
+        '^recordings__isrc',
+        'writerinwork__writer__last_name',
+    )
 
     def get_search_results(self, request, queryset, search_term):
-        """Deal with the situation term is work ID.
-        """
+        """Deal with the situation term is work ID."""
         if search_term.isnumeric():
             search_term = search_term.lstrip('0')
         return super().get_search_results(request, queryset, search_term)
 
     fieldsets = (
-        (None, {
-            'fields': (
-                'work_id',
-                ('title', 'iswc'),
-                ('original_title', 'version_type')
-            )
-        }),
-        ('Library (Production music only)', {
-            'fields': (
-                ('library_release',),
-            )
-        }),
+        (
+            None,
+            {
+                'fields': (
+                    'work_id',
+                    ('title', 'iswc'),
+                    ('original_title', 'version_type'),
+                )
+            },
+        ),
+        (
+            'Library (Production music only)',
+            {'fields': (('library_release',),)},
+        ),
     )
 
     autocomplete_fields = ('library_release',)
@@ -1185,8 +1313,7 @@ class WorkAdmin(MusicPublisherAdmin):
         super().save_model(request, obj, form, *args, **kwargs)
 
     def save_formset(self, request, form, formset, change):
-        """Set last_change for the work if any of the inline forms has changed.
-        """
+        """Set last_change for the work if any of the inline forms has changed."""
         save_instance = False
         for form in formset:
             if form.changed_data:
@@ -1203,7 +1330,8 @@ class WorkAdmin(MusicPublisherAdmin):
         url = reverse('admin:music_publisher_cwrexport_add')
         work_ids = qs.values_list('id', flat=True)
         view = CWRExportAdmin(CWRExport, admin.site).add_view(
-            request, url, work_ids=work_ids)
+            request, url, work_ids=work_ids
+        )
         return view
 
     create_cwr.short_description = 'Create CWR from selected works.'
@@ -1220,19 +1348,23 @@ class WorkAdmin(MusicPublisherAdmin):
         j = Work.objects.get_dict(qs)
         response = JsonResponse(j, json_dumps_params={'indent': 4})
         name = '{}-works-{}'.format(
-            settings.PUBLISHER_CODE, datetime.now().toordinal())
+            settings.PUBLISHER_CODE, datetime.now().toordinal()
+        )
         cd = 'attachment; filename="{}.json"'.format(name)
         response['Content-Disposition'] = cd
         return response
 
-    create_json.short_description = \
-        'Export selected works (JSON).'
+    create_json.short_description = 'Export selected works (JSON).'
 
     def get_labels_for_csv(self, works, repeating_column_nr=0, simple=False):
         """Return the list of labels for the CSV file."""
         labels = [
             'Work ID',
-            'Work Title', 'ISWC', 'Original Title', 'Library', 'CD Identifier',
+            'Work Title',
+            'ISWC',
+            'Original Title',
+            'Library',
+            'CD Identifier',
         ]
         alt_title_max = repeating_column_nr
         writer_max = repeating_column_nr
@@ -1307,6 +1439,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
         class EchoWriter:
             """Class with write() method just echoing values."""
+
             def write(self, value):
                 return value
 
@@ -1340,16 +1473,19 @@ class WorkAdmin(MusicPublisherAdmin):
                 row['Writer {} Last'.format(i + 1)] = w.get('last_name', '')
                 row['Writer {} First'.format(i + 1)] = w.get('first_name', '')
                 row['Writer {} IPI'.format(i + 1)] = w.get(
-                    'ipi_name_number', '')
+                    'ipi_name_number', ''
+                )
                 role = wiw.get('writer_role', {})
                 if role:
                     row['Writer {} Role'.format(i + 1)] = '{} - {}'.format(
-                        role['code'], role['name'])
+                        role['code'], role['name']
+                    )
                 for aff in w.get('affiliations', []):
                     code = aff['affiliation_type']['code']
                     cmo = aff['organization']
-                    row['Writer {} {}O'.format(i + 1, code)] = \
-                        '{} - {}'.format(cmo['code'], cmo['name'])
+                    row[
+                        'Writer {} {}O'.format(i + 1, code)
+                    ] = '{} - {}'.format(cmo['code'], cmo['name'])
                 ops = wiw.get('original_publishers')
 
                 row['Writer {} Manuscript Share'.format(i + 1)] = Decimal(
@@ -1365,19 +1501,23 @@ class WorkAdmin(MusicPublisherAdmin):
                         controlled = 'General Agreement'
                     else:
                         controlled = 'Yes'
-                    row['Writer {} Publisher Name'.format(
-                        i + 1)] = op['publisher']['name']
-                    row['Writer {} Publisher IPI'.format(
-                        i + 1)] = op['publisher']['ipi_name_number']
+                    row['Writer {} Publisher Name'.format(i + 1)] = op[
+                        'publisher'
+                    ]['name']
+                    row['Writer {} Publisher IPI'.format(i + 1)] = op[
+                        'publisher'
+                    ]['ipi_name_number']
                     for aff in op['publisher'].get('affiliations', []):
-                        row['Writer {} Publisher {}O'.format(
-                            i + 1,
-                            aff['affiliation_type']['code']
-                        )] = '{} - {}'.format(
+                        row[
+                            'Writer {} Publisher {}O'.format(
+                                i + 1, aff['affiliation_type']['code']
+                            )
+                        ] = '{} - {}'.format(
                             aff['organization']['code'],
-                            aff['organization']['name'])
+                            aff['organization']['name'],
+                        )
                     row['Writer {} PR Share'.format(i + 1)] = (
-                        Decimal( wiw.get('relative_share')) * (1 - PR)
+                        Decimal(wiw.get('relative_share')) * (1 - PR)
                     ).quantize(Decimal('0.0001'))
                     row['Writer {} Publisher PR Share'.format(i + 1)] = (
                         Decimal(wiw.get('relative_share')) * PR
@@ -1386,7 +1526,7 @@ class WorkAdmin(MusicPublisherAdmin):
                         Decimal(wiw.get('relative_share')) * (1 - MR)
                     ).quantize(Decimal('0.0001'))
                     row['Writer {} Publisher MR Share'.format(i + 1)] = (
-                            Decimal(wiw.get('relative_share')) * MR
+                        Decimal(wiw.get('relative_share')) * MR
                     ).quantize(Decimal('0.0001'))
                     row['Writer {} SR Share'.format(i + 1)] = (
                         Decimal(wiw.get('relative_share')) * (1 - SR)
@@ -1408,38 +1548,48 @@ class WorkAdmin(MusicPublisherAdmin):
                 row['Writer {} Controlled'.format(i + 1)] = controlled
             for i, rec in enumerate(work['recordings']):
                 row['Recording {} ID'.format(i + 1)] = rec['code']
-                row['Recording {} Recording Title'.format(i + 1)] = \
-                    rec['recording_title']
-                row['Recording {} Version Title'.format(i + 1)] = \
-                    rec['version_title']
-                row['Recording {} Release Date'.format(i + 1)] = \
-                    rec['release_date']
+                row['Recording {} Recording Title'.format(i + 1)] = rec[
+                    'recording_title'
+                ]
+                row['Recording {} Version Title'.format(i + 1)] = rec[
+                    'version_title'
+                ]
+                row['Recording {} Release Date'.format(i + 1)] = rec[
+                    'release_date'
+                ]
                 row['Recording {} Duration'.format(i + 1)] = rec['duration']
                 row['Recording {} ISRC'.format(i + 1)] = rec['isrc']
-                row['Recording {} Record Label'.format(i + 1)] = \
-                    (rec['record_label'] or {}).get('name')
+                row['Recording {} Record Label'.format(i + 1)] = (
+                    rec['record_label'] or {}
+                ).get('name')
                 artist = rec.get('recording_artist') or {}
-                row['Recording {} Artist Last'.format(i + 1)] = \
-                    artist.get('last_name', '')
-                row['Recording {} Artist Last'.format(i + 1)] = \
-                    artist.get('last_name', '')
-                row['Recording {} Artist First'.format(i + 1)] = \
-                    artist.get('first_name', '')
-                row['Recording {} Artist ISNI'.format(i + 1)] = \
-                    artist.get('isni', '')
+                row['Recording {} Artist Last'.format(i + 1)] = artist.get(
+                    'last_name', ''
+                )
+                row['Recording {} Artist Last'.format(i + 1)] = artist.get(
+                    'last_name', ''
+                )
+                row['Recording {} Artist First'.format(i + 1)] = artist.get(
+                    'first_name', ''
+                )
+                row['Recording {} Artist ISNI'.format(i + 1)] = artist.get(
+                    'isni', ''
+                )
             for i, aiw in enumerate(work['performing_artists']):
                 artist = aiw.get('artist')
-                row['Artist {} Last'.format(i + 1)] = \
-                    artist.get('last_name', '')
-                row['Artist {} First'.format(i + 1)] = \
-                    artist.get('first_name', '')
-                row['Artist {} ISNI'.format(i + 1)] = \
-                    artist.get('isni', '')
+                row['Artist {} Last'.format(i + 1)] = artist.get(
+                    'last_name', ''
+                )
+                row['Artist {} First'.format(i + 1)] = artist.get(
+                    'first_name', ''
+                )
+                row['Artist {} ISNI'.format(i + 1)] = artist.get('isni', '')
             for i, xrf in enumerate(work['cross_references']):
                 code = xrf['organization']['code']
                 name = xrf['organization']['name']
                 row['Reference {} CMO'.format(i + 1)] = '{} - {}'.format(
-                    code, name)
+                    code, name
+                )
                 row['Reference {} ID'.format(i + 1)] = xrf['identifier']
             yield writer.writerow(row)
 
@@ -1455,16 +1605,16 @@ class WorkAdmin(MusicPublisherAdmin):
         j = Work.objects.get_dict(qs)
         works = j.get('works', [])
         response = HttpResponse(
-            self.get_rows_for_csv(works),
-            content_type="text/csv")
+            self.get_rows_for_csv(works), content_type="text/csv"
+        )
         name = '{}{}'.format(
-            settings.PUBLISHER_CODE, datetime.now().toordinal())
+            settings.PUBLISHER_CODE, datetime.now().toordinal()
+        )
         cd = 'attachment; filename="{}.csv"'.format(name)
         response['Content-Disposition'] = cd
         return response
 
-    create_csv.short_description = \
-        'Export selected works (CSV).'
+    create_csv.short_description = 'Export selected works (CSV).'
 
     actions = (create_cwr, create_json, create_csv)
 
@@ -1481,9 +1631,11 @@ class WorkAdmin(MusicPublisherAdmin):
         """Limit inlines in popups."""
         instances = super().get_inline_instances(request)
         if IS_POPUP_VAR in request.GET or IS_POPUP_VAR in request.POST:
-            return [i for i in instances if type(i) not in [
-                RecordingInline, WorkAcknowledgementInline
-            ]]
+            return [
+                i
+                for i in instances
+                if type(i) not in [RecordingInline, WorkAcknowledgementInline]
+            ]
         return instances
 
 
@@ -1493,8 +1645,14 @@ class RecordingAdmin(MusicPublisherAdmin):
 
     actions = None
     list_display = (
-        'recording_id', 'title', 'isrc', 'has_audio', 
-        'work_link', 'artist_link', 'label_link')
+        'recording_id',
+        'title',
+        'isrc',
+        'has_audio',
+        'work_link',
+        'artist_link',
+        'label_link',
+    )
     ordering = ('-id',)
 
     formfield_overrides = {
@@ -1504,49 +1662,44 @@ class RecordingAdmin(MusicPublisherAdmin):
 
     def has_audio(self, obj):
         return bool(obj.audio_file)
+
     has_audio.boolean = True
 
     class HasISRCListFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of ISRC.
-        """
+        """Custom list filter on the presence of ISRC."""
 
         title = 'Has ISRC'
         parameter_name = 'has_isrc'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
-            """
+            """Filter on presence of :attr:`.iswc`."""
             if self.value() == 'Y':
                 return queryset.exclude(isrc__isnull=True)
             elif self.value() == 'N':
                 return queryset.filter(isrc__isnull=True)
 
     class HasAudioFilter(admin.SimpleListFilter):
-        """Custom list filter on the presence of audio file.
-        """
+        """Custom list filter on the presence of audio file."""
 
         title = 'Has audio'
         parameter_name = 'has_audio_file'
 
         def lookups(self, request, model_admin):
-            """Simple Yes/No filter
-            """
+            """Simple Yes/No filter"""
             return (
                 ('Y', 'Yes'),
                 ('N', 'No'),
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`.
-            """
+            """Filter on presence of :attr:`.iswc`."""
             if self.value() == 'Y':
                 return queryset.exclude(audio_file='')
             elif self.value() == 'N':
@@ -1558,53 +1711,77 @@ class RecordingAdmin(MusicPublisherAdmin):
         allowed = super().lookup_allowed(lookup, value)
         return allowed
 
-    search_fields = (
-        'work__title', 'recording_title', 'version_title', 'isrc')
+    search_fields = ('work__title', 'recording_title', 'version_title', 'isrc')
     autocomplete_fields = ('artist', 'work', 'record_label')
     readonly_fields = (
         'recording_id',
-        'complete_recording_title', 'complete_version_title', 'title',
+        'complete_recording_title',
+        'complete_version_title',
+        'title',
         'has_audio',
-        'work_link', 'artist_link', 'label_link')
+        'work_link',
+        'artist_link',
+        'label_link',
+    )
 
     def get_fieldsets(self, request, obj=None):
         if settings.OPTION_FILES:
             return (
-                ('Metadata', {
-                    'fields': (
-                        'recording_id',
-                        'work',
-                        ('recording_title', 'recording_title_suffix',
-                         'complete_recording_title'),
-                        ('version_title', 'version_title_suffix',
-                         'complete_version_title'),
-                        ('isrc', 'record_label', 'artist'),
-                        ('duration', 'release_date'),
-                    ),
-                }),
-                ('Audio', {
-                    'fields': ('audio_file',),
-                }),
+                (
+                    'Metadata',
+                    {
+                        'fields': (
+                            'recording_id',
+                            'work',
+                            (
+                                'recording_title',
+                                'recording_title_suffix',
+                                'complete_recording_title',
+                            ),
+                            (
+                                'version_title',
+                                'version_title_suffix',
+                                'complete_version_title',
+                            ),
+                            ('isrc', 'record_label', 'artist'),
+                            ('duration', 'release_date'),
+                        ),
+                    },
+                ),
+                (
+                    'Audio',
+                    {
+                        'fields': ('audio_file',),
+                    },
+                ),
             )
         else:
             return (
-                (None, {
-                    'fields': (
-                        'recording_id',
-                        'work',
-                        ('recording_title', 'recording_title_suffix',
-                         'complete_recording_title'),
-                        ('version_title', 'version_title_suffix',
-                         'complete_version_title'),
-                        ('isrc', 'record_label', 'artist'),
-                        ('duration', 'release_date'),
-                    ),
-                }),
+                (
+                    None,
+                    {
+                        'fields': (
+                            'recording_id',
+                            'work',
+                            (
+                                'recording_title',
+                                'recording_title_suffix',
+                                'complete_recording_title',
+                            ),
+                            (
+                                'version_title',
+                                'version_title_suffix',
+                                'complete_version_title',
+                            ),
+                            ('isrc', 'record_label', 'artist'),
+                            ('duration', 'release_date'),
+                        ),
+                    },
+                ),
             )
 
     def get_queryset(self, request):
-        """Optimized query regarding work name
-        """
+        """Optimized query regarding work name"""
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('work__writers')
         qs = qs.prefetch_related('artist')
@@ -1637,7 +1814,8 @@ class RecordingAdmin(MusicPublisherAdmin):
         if not obj.artist:
             return None
         url = reverse(
-            'admin:music_publisher_artist_change', args=[obj.artist.id])
+            'admin:music_publisher_artist_change', args=[obj.artist.id]
+        )
         link = '<a href="{}">{}</a>'.format(url, obj.artist)
         return mark_safe(link)
 
@@ -1649,7 +1827,8 @@ class RecordingAdmin(MusicPublisherAdmin):
         if not obj.record_label:
             return None
         url = reverse(
-            'admin:music_publisher_label_change', args=[obj.record_label.id])
+            'admin:music_publisher_label_change', args=[obj.record_label.id]
+        )
         link = '<a href="{}">{}</a>'.format(url, obj.record_label)
         return mark_safe(link)
 
@@ -1659,8 +1838,7 @@ class RecordingAdmin(MusicPublisherAdmin):
 
 @admin.register(CWRExport)
 class CWRExportAdmin(admin.ModelAdmin):
-    """Admin interface for :class:`.models.CWRExport`.
-    """
+    """Admin interface for :class:`.models.CWRExport`."""
 
     actions = None
     ordering = ('-id',)
@@ -1689,22 +1867,24 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Link to the CWR preview."""
         if obj.created_on:
             url = reverse(
-                'admin:music_publisher_cwrexport_change', args=(obj.id,))
+                'admin:music_publisher_cwrexport_change', args=(obj.id,)
+            )
             url += '?preview=true'
             return mark_safe(
-                '<a href="{}" target="_blank">View CWR</a>'.format(url))
+                '<a href="{}" target="_blank">View CWR</a>'.format(url)
+            )
 
     def download_link(self, obj):
         """Link for downloading CWR file."""
         if obj.created_on:
             url = reverse(
-                'admin:music_publisher_cwrexport_change', args=(obj.id,))
+                'admin:music_publisher_cwrexport_change', args=(obj.id,)
+            )
             url += '?download=true'
             return mark_safe('<a href="{}">Download</a>'.format(url))
 
     def get_queryset(self, request):
-        """Optimized query with count of works in the export.
-        """
+        """Optimized query with count of works in the export."""
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count('works', distinct=True))
         return qs
@@ -1715,8 +1895,14 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ('works',)
     list_display = (
-        'filename', 'nwr_rev', 'date', 'work_count', 'view_link',
-        'download_link', 'description')
+        'filename',
+        'nwr_rev',
+        'date',
+        'work_count',
+        'view_link',
+        'download_link',
+        'description',
+    )
     list_editable = ('description',)
 
     list_filter = ('nwr_rev', 'year')
@@ -1726,8 +1912,13 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Read-only fields differ if CWR has been completed."""
         if obj and obj.cwr:
             return (
-                'nwr_rev', 'description', 'works', 'filename', 'view_link',
-                'download_link')
+                'nwr_rev',
+                'description',
+                'works',
+                'filename',
+                'view_link',
+                'download_link',
+            )
         else:
             return ()
 
@@ -1735,8 +1926,13 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Shown fields differ if CWR has been completed."""
         if obj and obj.cwr:
             return (
-                'nwr_rev', 'description', 'works', 'filename', 'view_link',
-                'download_link')
+                'nwr_rev',
+                'description',
+                'works',
+                'filename',
+                'view_link',
+                'download_link',
+            )
         else:
             return ('nwr_rev', 'description', 'works')
 
@@ -1768,8 +1964,9 @@ class CWRExportAdmin(admin.ModelAdmin):
             form.base_fields['works'].initial = self.work_ids
         return form
 
-    def add_view(self, request, form_url='', extra_context=None,
-                 work_ids=None):
+    def add_view(
+        self, request, form_url='', extra_context=None, work_ids=None
+    ):
         """Added work_ids as default for wizard from
         :meth:`WorkAdmin.create_cwr`."""
         if work_ids:
@@ -1786,25 +1983,30 @@ class CWRExportAdmin(admin.ModelAdmin):
         obj = get_object_or_404(CWRExport, pk=object_id)
         if 'preview' in request.GET:
             cwr = self.get_preview(obj)
-            return render(request, 'raw_cwr.html', {
-                **self.admin_site.each_context(request),
-                'version': obj.version,
-                'lines': cwr.split('\r\n'),
-                'title': obj.filename
-            })
+            return render(
+                request,
+                'raw_cwr.html',
+                {
+                    **self.admin_site.each_context(request),
+                    'version': obj.version,
+                    'lines': cwr.split('\r\n'),
+                    'title': obj.filename,
+                },
+            )
         elif 'download' in request.GET:
             response = HttpResponse(content_type='application/zip')
-            zip_file = zipfile.ZipFile(
-                response, 'w', zipfile.ZIP_DEFLATED)
+            zip_file = zipfile.ZipFile(response, 'w', zipfile.ZIP_DEFLATED)
             zip_file.writestr(obj.filename, obj.cwr.encode().decode('latin1'))
             if obj.version in ['30', '31']:
                 cd = 'attachment; filename="{}.zip"'.format(
-                    obj.filename.replace('.', '_'))
+                    obj.filename.replace('.', '_')
+                )
             else:
                 cd = 'attachment; filename="{}"'.format(
-                    obj.filename.replace(
-                        '.V21', '.zip'
-                    ).replace('.V22', '.zip'))
+                    obj.filename.replace('.V21', '.zip').replace(
+                        '.V22', '.zip'
+                    )
+                )
             response['Content-Disposition'] = cd
             return response
 
@@ -1812,18 +2014,21 @@ class CWRExportAdmin(admin.ModelAdmin):
             'show_save': False,
         }
         if obj.cwr:
-            extra_context.update({
-                'save_as': False,
-                'show_save_and_continue': False,
-                'show_delete': False,
-            })
+            extra_context.update(
+                {
+                    'save_as': False,
+                    'show_save_and_continue': False,
+                    'show_delete': False,
+                }
+            )
         return super().change_view(
-            request, object_id, form_url='', extra_context=extra_context)
+            request, object_id, form_url='', extra_context=extra_context
+        )
 
     def save_related(self, request, form, formsets, change):
         """:meth:`save_model` passes the main object, which is needed to fetch
-            CWR from the external service, but only after related objects are
-            saved.
+        CWR from the external service, but only after related objects are
+        saved.
         """
         super().save_related(request, form, formsets, change)
         form.instance.create_cwr()
@@ -1831,47 +2036,61 @@ class CWRExportAdmin(admin.ModelAdmin):
 
 class AdminWithReport(admin.ModelAdmin):
     """The parent class for all admin classes with a report field."""
+
     def print_report(self, obj):
         """Mark report as HTML-safe."""
         return mark_safe(obj.report)
+
     print_report.short_description = 'Report'
     ordering = ('-id',)
 
 
 @admin.register(ACKImport)
 class ACKImportAdmin(AdminWithReport):
-    """Admin interface for :class:`.models.ACKImport`.
-    """
+    """Admin interface for :class:`.models.ACKImport`."""
 
     def get_form(self, request, obj=None, **kwargs):
-        """Returns a custom form for new objects, default one for changes.
-        """
+        """Returns a custom form for new objects, default one for changes."""
         if obj is None:
             return ACKImportForm
         return super().get_form(request, obj, **kwargs)
 
     list_display = (
-        'filename', 'society_code', 'society_name', 'date', 'view_link')
+        'filename',
+        'society_code',
+        'society_name',
+        'date',
+        'view_link',
+    )
     list_filter = ('society_code', 'society_name')
     fields = readonly_fields = (
-        'filename', 'society_code', 'society_name', 'date', 'print_report',
-        'view_link')
+        'filename',
+        'society_code',
+        'society_name',
+        'date',
+        'print_report',
+        'view_link',
+    )
 
     add_fields = ('acknowledgement_file', 'import_iswcs')
 
     def get_fields(self, request, obj=None):
-        """Return different fields for add vs change.
-        """
+        """Return different fields for add vs change."""
         if obj:
             return self.fields
         return self.add_fields
 
     RE_ACK_21 = re.compile(
-        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M)
+        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)',
+        re.S | re.M,
+    )
     RE_ACK_30 = re.compile(
-        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)', re.S | re.M)
+        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)',
+        re.S | re.M,
+    )
     RE_ISW_21 = re.compile(
-        r'(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)', re.S | re.M)
+        r'(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)', re.S | re.M
+    )
 
     def process(self, request, ack_import, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
@@ -1882,8 +2101,8 @@ class ACKImportAdmin(AdminWithReport):
 
         society_code = ack_import.society_code
         ack_import_url = reverse(
-            'admin:music_publisher_ackimport_change', 
-            args=(ack_import.id,))
+            'admin:music_publisher_ackimport_change', args=(ack_import.id,)
+        )
         ack_import_link = f'<a href="{ack_import_url}">{ack_import}</a>'
         from django.contrib.admin.models import CHANGE, LogEntry
 
@@ -1918,31 +2137,35 @@ class ACKImportAdmin(AdminWithReport):
             if import_iswcs and iswc:
                 if work.iswc:
                     if work.iswc != iswc:
-                        report +=(
-                            'A different ISWC exists for work ' +
-                            '{}: {} (old) vs {} (new).<br/>\n'.format(
-                                work, work.iswc, iswc) +
-                            'Old ISWC kept, please investigate.<br/>\n')
+                        report += (
+                            'A different ISWC exists for work '
+                            + '{}: {} (old) vs {} (new).<br/>\n'.format(
+                                work, work.iswc, iswc
+                            )
+                            + 'Old ISWC kept, please investigate.<br/>\n'
+                        )
                         self.message_user(
                             request,
                             'Conflicting ISWCs found for work {}!'.format(
-                                work),
-                            level=messages.ERROR
+                                work
+                            ),
+                            level=messages.ERROR,
                         )
                 else:
                     duplicate = Work.objects.exclude(id=work.id)
                     duplicate = duplicate.filter(iswc__iexact=iswc).first()
                     if duplicate:
-                        report +=(
-                            'One ISWC can not be used for two works: ' +
-                            '{} {} {}.<br/>\n'.format(iswc, duplicate, work) +
-                            'This usually happens if one work is entered '
-                            'twice. ' +
-                            'ISWC not imported for {}.<br/>\n'.format(work))
+                        report += (
+                            'One ISWC can not be used for two works: '
+                            + '{} {} {}.<br/>\n'.format(iswc, duplicate, work)
+                            + 'This usually happens if one work is entered '
+                            'twice. '
+                            + 'ISWC not imported for {}.<br/>\n'.format(work)
+                        )
                         self.message_user(
                             request,
                             'Duplicate works found for ISWC {}!'.format(iswc),
-                            level=messages.ERROR
+                            level=messages.ERROR,
                         )
                     else:
                         work.iswc = iswc
@@ -1951,21 +2174,26 @@ class ACKImportAdmin(AdminWithReport):
                         LogEntry.objects.log_action(
                             request.user.id,
                             admin.options.get_content_type_for_model(work).id,
-                            work.id, str(work), CHANGE, s)
+                            work.id,
+                            str(work),
+                            CHANGE,
+                            s,
+                        )
                         work.save()
             wa, c = WorkAcknowledgement.objects.get_or_create(
                 work_id=work.id,
                 remote_work_id=remote_work_id,
                 society_code=society_code,
                 date=dat,
-                status=status)
+                status=status,
+            )
             if not c:
                 existing_work_ids.append(str(work_id))
                 continue
-            url = reverse(
-                'admin:music_publisher_work_change', args=(work.id,))
+            url = reverse('admin:music_publisher_work_change', args=(work.id,))
             report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
-                url, work.work_id, work.title, wa.get_status_display())
+                url, work.work_id, work.title, wa.get_status_display()
+            )
         if file_content[59:64] == '01.10':
             for work_id, iswc in re.findall(self.RE_ISW_21, file_content):
                 work_id = work_id.strip()
@@ -1977,16 +2205,19 @@ class ACKImportAdmin(AdminWithReport):
                     if work.iswc:
                         if work.iswc != iswc:
                             report += (
-                                    'A different ISWC exists for work ' +
-                                    '{}: {} (old) vs {} (new).<br/>\n'.format(
-                                        work, work.iswc, iswc) +
-                                    'Old ISWC kept, please '
-                                    'investigate.<br/>\n')
+                                'A different ISWC exists for work '
+                                + '{}: {} (old) vs {} (new).<br/>\n'.format(
+                                    work, work.iswc, iswc
+                                )
+                                + 'Old ISWC kept, please '
+                                'investigate.<br/>\n'
+                            )
                             self.message_user(
                                 request,
                                 'Conflicting ISWCs found for work {}!'.format(
-                                    work),
-                                level=messages.ERROR
+                                    work
+                                ),
+                                level=messages.ERROR,
                             )
                     else:
                         work.iswc = iswc
@@ -1995,23 +2226,31 @@ class ACKImportAdmin(AdminWithReport):
                         LogEntry.objects.log_action(
                             request.user.id,
                             admin.options.get_content_type_for_model(work).id,
-                            work.id, str(work), CHANGE, s)
+                            work.id,
+                            str(work),
+                            CHANGE,
+                            s,
+                        )
                         work.save()
         if unknown_work_ids:
             messages.add_message(
-                request, messages.ERROR,
-                'Unknown work IDs: {}'.format(', '.join(unknown_work_ids)))
+                request,
+                messages.ERROR,
+                'Unknown work IDs: {}'.format(', '.join(unknown_work_ids)),
+            )
         if existing_work_ids:
             messages.add_message(
-                request, messages.ERROR,
+                request,
+                messages.ERROR,
                 'Data already exists for some or all works. '
-                'Affected work IDs: {}'.format(', '.join(existing_work_ids)))
+                'Affected work IDs: {}'.format(', '.join(existing_work_ids)),
+            )
         return report
 
     def save_model(self, request, obj, form, change):
         """Custom save_model, it ignores changes, validates the form for new
-            instances, if valid, it processes the file and, upon success,
-            calls ``super().save_model``."""
+        instances, if valid, it processes the file and, upon success,
+        calls ``super().save_model``."""
 
         if form.is_valid():
             cd = form.cleaned_data
@@ -2022,8 +2261,8 @@ class ACKImportAdmin(AdminWithReport):
             # TODO move process() to model, and handle messages here
             super().save_model(request, obj, form, change)
             obj.report = self.process(
-                request, obj, cd['acknowledgement_file'],
-                cd['import_iswcs'])
+                request, obj, cd['acknowledgement_file'], cd['import_iswcs']
+            )
             obj.cwr = cd['acknowledgement_file']
             super().save_model(request, obj, form, True)
 
@@ -2034,8 +2273,7 @@ class ACKImportAdmin(AdminWithReport):
         return super().has_add_permission(request)
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
-        """Deleting ACK imports is a really bad idea.
-        """
+        """Deleting ACK imports is a really bad idea."""
         return False
 
     def has_change_permission(self, request, obj=None):
@@ -2051,11 +2289,11 @@ class ACKImportAdmin(AdminWithReport):
 
     def view_link(self, obj):
         """Link to CWR ACK preview."""
-        url = reverse(
-            'admin:music_publisher_ackimport_change', args=(obj.id,))
+        url = reverse('admin:music_publisher_ackimport_change', args=(obj.id,))
         url += '?preview=true'
         return mark_safe(
-            '<a href="{}" target="_blank">View CWR</a>'.format(url))
+            '<a href="{}" target="_blank">View CWR</a>'.format(url)
+        )
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Normal change view with a sub-view defined by GET parameters:
@@ -2066,30 +2304,40 @@ class ACKImportAdmin(AdminWithReport):
             obj = get_object_or_404(ACKImport, pk=int(object_id))
         except ValueError:
             return super().change_view(
-                request, object_id, form_url='', extra_context=extra_context)
+                request, object_id, form_url='', extra_context=extra_context
+            )
         if 'preview' in request.GET:
             cwr = self.get_preview(obj)
-            if (cwr[59:64] == '01.10'):
+            if cwr[59:64] == '01.10':
                 version = '21'
             else:
                 version = '30'  # never seen one yet
             try:
-                return render(request, 'raw_cwr.html', {
-                    **self.admin_site.each_context(request),
-                    'version': version,
-                    'lines': cwr.split('\n'),
-                    'title': obj.filename
-                })
+                return render(
+                    request,
+                    'raw_cwr.html',
+                    {
+                        **self.admin_site.each_context(request),
+                        'version': version,
+                        'lines': cwr.split('\n'),
+                        'title': obj.filename,
+                    },
+                )
             except Exception:  # Parsing user garbage, could be anything
-                return render(request, 'raw_cwr.html', {
-                    **self.admin_site.each_context(request),
-                    'version': '',
-                    'lines': cwr.split('\n'),
-                    'title': obj.filename
-                })
+                return render(
+                    request,
+                    'raw_cwr.html',
+                    {
+                        **self.admin_site.each_context(request),
+                        'version': '',
+                        'lines': cwr.split('\n'),
+                        'title': obj.filename,
+                    },
+                )
 
         return super().change_view(
-            request, object_id, form_url='', extra_context=extra_context)
+            request, object_id, form_url='', extra_context=extra_context
+        )
 
 
 @admin.register(DataImport)
@@ -2111,10 +2359,11 @@ class DataImportAdmin(AdminWithReport):
         if 'download_template' in request.GET:
             fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6, simple=True)
             response = HttpResponse(
-                ','.join(fieldnames),
-                content_type="text/csv")
+                ','.join(fieldnames), content_type="text/csv"
+            )
             cd = 'attachment; filename="{}"'.format(
-                'DMP_data_exchange_template.csv')
+                'DMP_data_exchange_template.csv'
+            )
             response['Content-Disposition'] = cd
             return response
         return super().add_view(request, form_url, extra_context)
@@ -2122,15 +2371,13 @@ class DataImportAdmin(AdminWithReport):
     add_fields = ('data_file', 'ignore_unknown_columns')
 
     def get_fields(self, request, obj=None):
-        """Return different fields for add vs change.
-        """
+        """Return different fields for add vs change."""
         if obj:
             return self.fields
         return self.add_fields
 
     def has_delete_permission(self, request, obj=None, *args, **kwargs):
-        """Deleting data imports is a really bad idea.
-        """
+        """Deleting data imports is a really bad idea."""
         return False
 
     def has_change_permission(self, request, obj=None):
@@ -2144,8 +2391,8 @@ class DataImportAdmin(AdminWithReport):
 
     def save_model(self, request, obj, form, change):
         """Custom save_model, it ignores changes, validates the form for new
-            instances, if valid, it processes the file and, upon success,
-            calls ``super().save_model``."""
+        instances, if valid, it processes the file and, upon success,
+        calls ``super().save_model``."""
 
         if form.is_valid():
             cd = form.cleaned_data

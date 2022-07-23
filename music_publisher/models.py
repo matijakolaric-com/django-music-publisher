@@ -1417,18 +1417,9 @@ class CWRExport(models.Model):
     description = models.CharField('Internal Note', blank=True, max_length=60)
 
     publisher_code = None
-    agreement_pr = getattr(
-        settings,
-        'PUBLISHING_AGREEMENT_PUBLISHER_PR'
-    )
-    agreement_mr = getattr(
-        settings,
-        'PUBLISHING_AGREEMENT_PUBLISHER_MR'
-    )
-    agreement_sr = getattr(
-        settings,
-        'PUBLISHING_AGREEMENT_PUBLISHER_SR'
-    )
+    agreement_pr = getattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR')
+    agreement_mr = getattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR')
+    agreement_sr = getattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_SR')
 
     @property
     def version(self):

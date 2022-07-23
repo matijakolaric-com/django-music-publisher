@@ -12,6 +12,7 @@ from music_metadata.territories.territory import Territory
 
 register = template.Library()
 
+
 @register.filter(name='rjust')
 def rjust(value, length):
     """Format general numeric fields."""
@@ -50,6 +51,7 @@ def soc(value):
 def cwrshare(value):
     """Get CWR-compatible output for share fields"""
     value = (value * Decimal('10000')).quantize(
-        Decimal('1.'), rounding=ROUND_HALF_UP)
+        Decimal('1.'), rounding=ROUND_HALF_UP
+    )
     value = int(value)
     return '{:05d}'.format(value)

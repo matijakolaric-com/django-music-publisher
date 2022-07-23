@@ -15,8 +15,8 @@ path = os.path.join(dir_path, 'societies.csv')
 with open(path, 'r') as f:
     reader = csv.reader(f)
     SOCIETIES = sorted(
-        ((str(row[0]), '{} ({})'.format(row[1], row[2]))
-         for row in reader),
-        key=lambda row: row[1])
+        ((str(row[0]), '{} ({})'.format(row[1], row[2])) for row in reader),
+        key=lambda row: row[1],
+    )
 
 SOCIETY_DICT = OrderedDict(SOCIETIES)

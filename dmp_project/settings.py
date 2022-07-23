@@ -65,26 +65,28 @@ WSGI_APPLICATION = 'dmp_project.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3')))}
+        default='sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
+    )
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.'
-                'UserAttributeSimilarityValidator',
+        'UserAttributeSimilarityValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.'
-                'MinimumLengthValidator',
+        'MinimumLengthValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.'
-                'CommonPasswordValidator',
+        'CommonPasswordValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.'
-                'NumericPasswordValidator',
+        'NumericPasswordValidator',
     },
 ]
 
@@ -107,8 +109,8 @@ STATICFILES_DIRS = [
 ]
 
 TIME_INPUT_FORMATS = [
-    '%H:%M:%S',     # '14:30:59'
-    '%M:%S',        # '14:30'
+    '%H:%M:%S',  # '14:30:59'
+    '%M:%S',  # '14:30'
 ]
 
 LOGIN_URL = '/login/'
@@ -143,11 +145,14 @@ PUBLISHER_SOCIETY_SR = os.getenv('PUBLISHER_SOCIETY_SR', None)
 
 # Shares transferred to the original publisher, default to 50%/100%/100%
 PUBLISHING_AGREEMENT_PUBLISHER_PR = Decimal(
-    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_PR', '0.5'))
+    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_PR', '0.5')
+)
 PUBLISHING_AGREEMENT_PUBLISHER_MR = Decimal(
-    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_MR', '1.0'))
+    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_MR', '1.0')
+)
 PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
-    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_SR', '1.0'))
+    os.getenv('PUBLISHING_AGREEMENT_PUBLISHER_SR', '1.0')
+)
 
 # Set to one of the following options to change names and titles
 # * 'upper' - changes all names and titles to UPPER CASE
@@ -160,28 +165,35 @@ OPTION_FORCE_CASE = os.getenv('OPTION_FORCE_CASE')
 # REMOTE FILES
 # The default is Digital Ocean Spaces, but any S3 should work with AWS
 # and any other S3. Support DMP by using the affiliation links below.
-# For Digital Ocean (https://www.digitalocean.com/?refcode=b05ea0e8ec84), 
+# For Digital Ocean (https://www.digitalocean.com/?refcode=b05ea0e8ec84),
 # you must set https://cloud.digitalocean.com/spaces/new?refcode=b05ea0e8ec84
 # S3_BUCKET (name), S3_REGION (region code, fra1, lon3, etc.
 # and https://cloud.digitalocean.com/account/api/tokens?refcode=b05ea0e8ec84
-# S3_ID, S3 SECRET 
+# S3_ID, S3 SECRET
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') or os.getenv('S3_ID')
-AWS_SECRET_ACCESS_KEY = (
-        os.getenv('AWS_SECRET_ACCESS_KEY') or
-        os.getenv('S3_SECRET'))
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY') or os.getenv(
+    'S3_SECRET'
+)
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME') or os.getenv('S3_REGION')
-AWS_STORAGE_BUCKET_NAME = (
-        os.getenv('AWS_STORAGE_BUCKET_NAME') or
-        os.getenv('S3_BUCKET'))
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME') or os.getenv(
+    'S3_BUCKET'
+)
 AWS_S3_ENDPOINT_URL = (
-        os.getenv('AWS_S3_ENDPOINT_URL') or
-        f'https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com')
+    os.getenv('AWS_S3_ENDPOINT_URL')
+    or f'https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com'
+)
 AWS_QUERYSTRING_EXPIRE = os.getenv('AWS_QUERYSTRING_EXPIRE', 900)
 
 
-S3_ENABLED = all([AWS_S3_REGION_NAME, AWS_STORAGE_BUCKET_NAME,
-                  AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY])
+S3_ENABLED = all(
+    [
+        AWS_S3_REGION_NAME,
+        AWS_STORAGE_BUCKET_NAME,
+        AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY,
+    ]
+)
 
 OPTION_FILES = os.getenv('OPTION_FILES', S3_ENABLED)
 

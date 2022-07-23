@@ -1,6 +1,15 @@
 from .models import (
-    Writer, Work, Recording, Artist, Release, CommercialRelease, 
-    LibraryRelease, Label, Track, Playlist)
+    Writer,
+    Work,
+    Recording,
+    Artist,
+    Release,
+    CommercialRelease,
+    LibraryRelease,
+    Label,
+    Track,
+    Playlist,
+)
 from rest_framework import viewsets, serializers, permissions, renderers
 from rest_framework.response import Response
 from django.utils.timezone import now
@@ -9,6 +18,7 @@ from django.http import Http404
 
 class DjangoModelPermissionsIncludingView(permissions.DjangoModelPermissions):
     """Requires the user to have proper permissions, including view."""
+
     perms_map = {
         'GET': ['%(app_label)s.view_%(model_name)s'],
         'OPTIONS': ['%(app_label)s.view_%(model_name)s'],
@@ -37,7 +47,13 @@ class LabelNestedSerializer(serializers.ModelSerializer):
 class WriterNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Writer
-        fields = ['last_name', 'first_name', 'ipi_name', 'image', 'description']
+        fields = [
+            'last_name',
+            'first_name',
+            'ipi_name',
+            'image',
+            'description',
+        ]
 
 
 class WriterNamesField(serializers.RelatedField):
@@ -58,8 +74,15 @@ class ReleaseListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Release
         fields = [
-            'title', 'image', 'description', 'release_label', 'release_date',
-            'ean', 'url']
+            'title',
+            'image',
+            'description',
+            'release_label',
+            'release_date',
+            'ean',
+            'url',
+        ]
+
     title = serializers.CharField(source='release_title', read_only=True)
     release_label = LabelNestedSerializer(read_only=True)
 
@@ -68,9 +91,12 @@ class RecordingInTrackSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Recording
         fields = [
-            'title', 
-            'recording_id', 'isrc',
-            'duration', 'release_date', 'audio_file',
+            'title',
+            'recording_id',
+            'isrc',
+            'duration',
+            'release_date',
+            'audio_file',
             'artist',
             'record_label',
             'work',
@@ -93,8 +119,15 @@ class ReleaseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Release
         fields = [
-            'title', 'image', 'description', 'release_label', 'release_date',
-            'ean', 'tracks']
+            'title',
+            'image',
+            'description',
+            'release_label',
+            'release_date',
+            'ean',
+            'tracks',
+        ]
+
     title = serializers.CharField(source='release_title', read_only=True)
     release_label = LabelNestedSerializer(read_only=True)
     tracks = TrackNestedSerializer(many=True, read_only=True)
@@ -110,10 +143,14 @@ class ReleaseViewSet(viewsets.ReadOnlyModelViewSet):
     this view.
 
     """
-    queryset = Release.objects \
-        .exclude(library__isnull=True, cd_identifier__isnull=False) \
-        .exclude(image='', description='')\
+
+    queryset = (
+        Release.objects.exclude(
+            library__isnull=True, cd_identifier__isnull=False
+        )
+        .exclude(image='', description='')
         .select_related('release_label')
+    )
 
     permission_classes = [DjangoModelPermissionsIncludingView]
 
@@ -130,7 +167,11 @@ class RecordingInArtistSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Recording
         fields = [
-            'title', 'isrc', 'duration', 'release_date', 'audio_file',
+            'title',
+            'isrc',
+            'duration',
+            'release_date',
+            'audio_file',
             'record_label',
             'work',
         ]
@@ -158,8 +199,8 @@ class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
     Note that all related information, including files are included in
     this view.
     """
-    queryset = Artist.objects\
-        .exclude(image='', description='')
+
+    queryset = Artist.objects.exclude(image='', description='')
 
     permission_classes = [DjangoModelPermissionsIncludingView]
 
@@ -177,6 +218,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
         model = Playlist
         fields = ['release_title', 'image', 'description', 'recordings']
+
     recordings = RecordingInTrackSerializer(many=True, read_only=True)
 
 
@@ -184,6 +226,7 @@ class PlaylistViewSet(viewsets.ViewSet):
     """Endpoint for retrieval of playlists, using secret URL.
     You can find the URL in the playlist ``change view``.
     """
+
     queryset = Playlist.objects.none()
     lookup_field = 'cd_identifier'
     serializer_class = PlaylistSerializer
@@ -194,8 +237,9 @@ class PlaylistViewSet(viewsets.ViewSet):
         playlist = playlist.first()
         if playlist is None:
             raise Http404
-        return Response(PlaylistSerializer(
-            playlist, context={'request': request}).data)
+        return Response(
+            PlaylistSerializer(playlist, context={'request': request}).data
+        )
 
 
 class IsSuperuser(permissions.BasePermission):
@@ -205,8 +249,10 @@ class IsSuperuser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return bool(
-            request.user and request.user.is_authenticated and 
-            request.user.is_superuser)
+            request.user
+            and request.user.is_authenticated
+            and request.user.is_superuser
+        )
 
 
 class BackupViewSet(viewsets.ViewSet):

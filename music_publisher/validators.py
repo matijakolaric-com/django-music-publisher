@@ -15,7 +15,8 @@ from decimal import Decimal
 
 
 TITLES_CHARS = re.escape(
-    r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€")
+    r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
+)
 NAMES_CHARS = re.escape(r"!#$%&'()+-./0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ`")
 
 RE_TITLE = r'(^[{0}][ {0}]*$)'.format(TITLES_CHARS)
@@ -38,10 +39,14 @@ def check_ean_digit(ean):
 
     number = ean[:-1]
     ch = str(
-        (10 - sum(
-            (3, 1)[i % 2] * int(n)
-            for i, n in enumerate(reversed(number))
-        )) % 10)
+        (
+            10
+            - sum(
+                (3, 1)[i % 2] * int(n) for i, n in enumerate(reversed(number))
+            )
+        )
+        % 10
+    )
     if ean[-1] != ch:
         raise ValidationError('Invalid EAN.')
 
@@ -82,8 +87,9 @@ def check_ipi_digit(all_digits):
     if total != 0:
         total = (101 - total) % 100
     if '{:02d}'.format(total) != all_digits[-2:]:
-        raise ValidationError('Not a valid IPI name number {}.'.format(
-            all_digits))
+        raise ValidationError(
+            'Not a valid IPI name number {}.'.format(all_digits)
+        )
 
 
 def check_isni_digit(all_digits):
@@ -148,7 +154,8 @@ class CWRFieldValidator:
         elif name == 'iswc':
             if not re.match(RE_ISWC, value):
                 raise ValidationError(
-                    'Value does not match TNNNNNNNNNC format.')
+                    'Value does not match TNNNNNNNNNC format.'
+                )
             check_iswc_digit(value, weight=1)
         elif name == 'isrc':
             if not re.match(RE_ISRC, value):
@@ -160,7 +167,8 @@ class CWRFieldValidator:
         elif 'ipi_base' in name:
             if not re.match(RE_IPI_BASE, value):
                 raise ValidationError(
-                    'Value does not match I-NNNNNNNNN-C format.')
+                    'Value does not match I-NNNNNNNNN-C format.'
+                )
             check_iswc_digit(value, weight=2)
         else:
             if not re.match(RE_NAME, value.upper()):
@@ -185,7 +193,8 @@ def validate_settings():
             raise ImproperlyConfigured('PUBLISHER_CODE: ' + str(e))
         if not 2 <= len(settings.PUBLISHER_CODE) <= 3:
             raise ImproperlyConfigured(
-                'PUBLISHER_CODE: must be 2-3 characters long')
+                'PUBLISHER_CODE: must be 2-3 characters long'
+            )
     if settings.PUBLISHER_IPI_BASE:
         try:
             CWRFieldValidator('ipi_base')(settings.PUBLISHER_IPI_BASE)
@@ -204,22 +213,26 @@ def validate_settings():
             raise ImproperlyConfigured(
                 'PUBLISHER_SOCIETY_{}: Unknown society code "{}".'.format(
                     t, attr
-                ))
+                )
+            )
 
     if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
         if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
             raise ImproperlyConfigured(
                 'PUBLISHING_AGREEMENT_PUBLISHER_PR: '
-                'Must be between 0.0 and 0.5')
+                'Must be between 0.0 and 0.5'
+            )
 
     if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_MR'):
         if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
             raise ImproperlyConfigured(
                 'PUBLISHING_AGREEMENT_PUBLISHER_MR: '
-                'Must be between 0.0 and 1.0')
+                'Must be between 0.0 and 1.0'
+            )
 
     if hasattr(settings, 'PUBLISHING_AGREEMENT_PUBLISHER_PR'):
         if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
             raise ImproperlyConfigured(
                 'PUBLISHING_AGREEMENT_PUBLISHER_SR: '
-                'Must be between 0.0 and 1.0')
+                'Must be between 0.0 and 1.0'
+            )

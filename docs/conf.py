@@ -16,6 +16,7 @@
 import os
 import sys
 import django
+
 sys.path.insert(0, os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dmp_project.settings'
 django.setup()
@@ -34,7 +35,9 @@ release = '22.1'
 rst_epilog = '''
 .. |version| replace:: {}
 .. |release| replace:: {}
-'''.format(version, release)
+'''.format(
+    version, release
+)
 
 
 # -- General configuration ---------------------------------------------------
@@ -51,7 +54,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
-    'sphinxcontrib.mermaid'
+    'sphinxcontrib.mermaid',
 ]
 
 
@@ -109,10 +112,7 @@ html_favicon = 'favicon.ico'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_extra_path = [
-    'googleb5723862796807b2.html',
-    'work_import_template.csv'
-]
+html_extra_path = ['googleb5723862796807b2.html', 'work_import_template.csv']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -137,19 +137,15 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     'papersize': 'a4paper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     'figure_align': 'H',
-
     'printindex': '\\footnotesize\\raggedright\\printindex',
 }
 
@@ -157,24 +153,30 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [(
-    master_doc,
-    'DjangoMusicPublisher.tex',
-    'Django-Music-Publisher Documentation',
-    'Matija Kolarić',
-    'manual')]
+latex_documents = [
+    (
+        master_doc,
+        'DjangoMusicPublisher.tex',
+        'Django-Music-Publisher Documentation',
+        'Matija Kolarić',
+        'manual',
+    )
+]
 
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(
-    master_doc,
-    'djangomusicpublisher',
-    'Django-Music-Publisher Documentation',
-    [author],
-    1)]
+man_pages = [
+    (
+        master_doc,
+        'djangomusicpublisher',
+        'Django-Music-Publisher Documentation',
+        [author],
+        1,
+    )
+]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -182,14 +184,17 @@ man_pages = [(
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [(
-    master_doc,
-    'DjangoMusicPublisher',
-    'Django-Music-Publisher Documentation',
-    author,
-    'DjangoMusicPublisher',
-    'Open source solution for original music publishers.',
-    'Miscellaneous')]
+texinfo_documents = [
+    (
+        master_doc,
+        'DjangoMusicPublisher',
+        'Django-Music-Publisher Documentation',
+        author,
+        'DjangoMusicPublisher',
+        'Open source solution for original music publishers.',
+        'Miscellaneous',
+    )
+]
 
 
 # -- Options for Epub output -------------------------------------------------
@@ -217,4 +222,5 @@ epub_exclude_files = ['search.html']
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'django': ('https://django.readthedocs.io/en/latest/', None)}
+    'django': ('https://django.readthedocs.io/en/latest/', None),
+}

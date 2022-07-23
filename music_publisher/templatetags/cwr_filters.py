@@ -110,5 +110,5 @@ def role(value):
     return {
         'E ': 'Original Publisher',
         'AM': 'Administrator',
-        'SE': 'Sub-publisher'
+        'SE': 'Sub-publisher',
     }.get(value, 'Unknown publisher role')
