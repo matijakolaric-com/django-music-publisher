@@ -442,7 +442,9 @@ class Writer(WriterBase):
         Returns:
             str: formatted writer ID
         """
-        return 'W{:06d}'.format(self.id)
+        if self.id:
+            return 'W{:06d}'.format(self.id)
+        return ''
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.

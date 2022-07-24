@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='account_number',
             field=models.CharField(
                 blank=True,
-                help_text='Use this field for linking royalty statements with your accounting',
+                help_text='Use this field for linking royalty statements with your accounting.',
                 max_length=100,
                 null=True,
                 verbose_name='Account #',

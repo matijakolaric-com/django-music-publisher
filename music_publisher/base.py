@@ -281,7 +281,7 @@ class AccountNumberBase(models.Model):
     account_number = models.CharField(
         'Account #',
         help_text='Use this field for linking royalty statements with your '
-        'accounting',
+        'accounting.',
         max_length=100,
         blank=True,
         null=True,
