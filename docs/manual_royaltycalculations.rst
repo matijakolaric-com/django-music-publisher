@@ -61,6 +61,7 @@ Both algorithms add these columns:
 
 * ``Controlled by publisher (%)``
 * ``Interested party``
+* ``IP Account Number``
 * ``Role``
 * ``Share in amount received (%)``
 * ``Net amount``

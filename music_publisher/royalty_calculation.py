@@ -178,6 +178,7 @@ class RoyaltyCalculation(object):
         fieldnames += [
             'Controlled by publisher (%)',
             'Interested party',
+            'IP Account Number',
             'Role',
         ]
         if self.algo == 'fee':
@@ -280,6 +281,7 @@ class RoyaltyCalculation(object):
             self.writers[writer.id] = {
                 'name': name,
                 'fee': writer.publisher_fee,
+                'account_number': writer.account_number or '',
             }
 
     def get_works_and_writers(self):
@@ -338,6 +340,7 @@ class RoyaltyCalculation(object):
             out_row = row.copy()
             writer = self.writers[line.get('writer_id')]
             out_row.append(writer['name'])
+            out_row.append(writer['account_number'])
             out_row.append(line['role'])
             relative_share = line['relative_share'] / 100
 
