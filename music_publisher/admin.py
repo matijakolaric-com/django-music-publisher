@@ -1319,7 +1319,8 @@ class WorkAdmin(MusicPublisherAdmin):
         super().save_model(request, obj, form, *args, **kwargs)
 
     def save_formset(self, request, form, formset, change):
-        """Set last_change for the work if any of the inline forms has changed."""
+        """Set last_change for the work if any of the inline forms has
+        changed. """
         save_instance = False
         for form in formset:
             if form.changed_data:
@@ -2088,11 +2089,13 @@ class ACKImportAdmin(AdminWithReport):
         return self.add_fields
 
     RE_ACK_21 = re.compile(
-        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)',
+        r'(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)('
+        r'?=^ACK|^GRT)',
         re.S | re.M,
     )
     RE_ACK_30 = re.compile(
-        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)',
+        r'(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)('
+        r'?=^ACK|^GRT)',
         re.S | re.M,
     )
     RE_ISW_21 = re.compile(
