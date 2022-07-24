@@ -868,8 +868,8 @@ class WriterAdmin(MusicPublisherAdmin):
     )
 
     list_filter = ('_can_be_controlled', 'generally_controlled', 'pr_society')
-    search_fields = ('last_name', 'ipi_name')
-    readonly_fields = ('_can_be_controlled', 'work_count')
+    search_fields = ('last_name', 'ipi_name', 'account_number')
+    readonly_fields = ('writer_id', '_can_be_controlled', 'work_count')
 
     formfield_overrides = {
         models.ImageField: {'widget': ImageWidget},
@@ -882,6 +882,7 @@ class WriterAdmin(MusicPublisherAdmin):
         See :meth:`WriterAdmin.get_society_list`"""
         if settings.OPTION_FILES:
             return [
+                (None, {'fields': (('writer_id', 'account_number'),)}),
                 ('Name', {'fields': (('first_name', 'last_name'),)}),
                 (
                     'IPI',
@@ -1402,6 +1403,7 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append('Writer {} Controlled'.format(i + 1))
             if i < writer_with_publisher_max:
                 labels.append('Writer {} SAAN'.format(i + 1))
+            labels.append('Writer {} Account Number'.format(i + 1))
             if not simple and i < writer_with_publisher_max:
                 labels.append('Writer {} Publisher Name'.format(i + 1))
                 labels.append('Writer {} Publisher IPI'.format(i + 1))

@@ -65,6 +65,7 @@ class DataImporter(object):
         'role',
         'controlled',
         'saan',
+        'account_number',
         'publisher_name',
         'publisher_ipi',
         'publisher_pro',
@@ -251,6 +252,7 @@ class DataImporter(object):
             last_name = value.get('last', '')
             first_name = value.get('first', '')
             ipi_name = value.get('ipi', None)
+            account_number = value.get('account_number', None)
             if ipi_name == '00000000000':
                 ipi_name_unset = True
             # maybe writer is unknown
@@ -262,6 +264,7 @@ class DataImporter(object):
                     pr_society,
                     saan,
                     general_agreement,
+                    account_number,
                 ]
             ):
                 yield None
@@ -274,6 +277,7 @@ class DataImporter(object):
                 pr_society=pr_society,
                 generally_controlled=general_agreement,
                 saan=saan,
+                account_number=account_number,
             )
             lookup_writer.clean_fields()
             lookup_writer.clean()

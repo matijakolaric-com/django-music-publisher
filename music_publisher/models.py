@@ -458,6 +458,7 @@ class Writer(WriterBase):
             'last_name': self.last_name or None,
             'ipi_name_number': self.ipi_name or None,
             'ipi_base_number': self.ipi_base or None,
+            'account_number': self.account_number,
             'affiliations': [],
         }
         if self.pr_society:

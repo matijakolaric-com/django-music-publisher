@@ -158,14 +158,12 @@ Full metadata backup can be download using REST API endpoint.
 22.9 Rubicon
 -------------------------------
 
-Most of the improvements in this release are under the bonnet. The code has been 
+Many of the improvements in this release are under the bonnet. The code has been 
 reviewed and partly cleaned up. Code style is now validated with Black.
 
-Introduction for this documentation was extended with graphs, and split into two separate documents.
+Introduction chapter of this documentation was extended with graphs, and split 
+into two separate documents.
 
-.. note:: Below are ideas and wishes, nothing of this has been implemented yet.
-
-Most settings to be moved to the database.
 
 
 
