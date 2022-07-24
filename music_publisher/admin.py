@@ -874,6 +874,10 @@ class WriterAdmin(MusicPublisherAdmin):
         models.ImageField: {'widget': ImageWidget},
     }
 
+    def writer_id(self, obj):
+        return obj.writer_id
+    writer_id.short_description = 'Writer ID'
+
     def get_fieldsets(self, request, obj=None):
         """Return the fieldsets.
 
