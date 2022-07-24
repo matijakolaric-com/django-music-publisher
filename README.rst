@@ -13,6 +13,8 @@ Django-Music-Publisher - Free music publishing software
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg?logo=github
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
     :alt: License
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
 .. image:: https://img.shields.io/pypi/v/django-music-publisher.svg?logo=pypi
     :target: https://pypi.org/project/django-music-publisher/
     :alt: PYPI
