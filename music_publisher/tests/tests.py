@@ -1915,15 +1915,12 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(str(release), 'Playlist')
         release.release_label = None
         self.assertEqual(str(release), 'Playlist')
-        self.assertEqual(
-            music_publisher.models.Playlist.objects.count(), 1
-        )
+        self.assertEqual(music_publisher.models.Playlist.objects.count(), 1)
         response = self.client.get(release.secret_url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Playlist: Playlist', response.content)
         response = self.client.get(release.secret_api_url, follow=True)
         self.assertEqual(response.status_code, 200)
-
 
     def test_writer(self):
         writer = music_publisher.models.Writer(
