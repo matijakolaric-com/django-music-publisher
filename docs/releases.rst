@@ -159,7 +159,7 @@ Full metadata backup can be download using REST API endpoint.
 -------------------------------
 
 ``Account #`` field was added to the writer model. This field can be used for linking
-data from outgoing royalty statements with accoutning.
+data from outgoing royalty statements with accounting.
 
 Many of the improvements in this release are under the bonnet. The code has been 
 reviewed and partly cleaned up. Code style is now validated with Black.
