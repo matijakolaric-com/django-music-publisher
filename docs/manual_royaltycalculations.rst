@@ -1,6 +1,12 @@
 Royalty Calculations
 ==============================
 
+If you are interested in the complete Royalty Management process,
+please read the articles about 
+`Royalty Management with DMP <https://matijakolaric.com/articles/royalty-management/>`_,
+or watch the relevant videos from :doc:`videos`.
+This document describes only a single step in this process.
+
 .. figure:: /images/royaltystatement.png
    :width: 100%
 

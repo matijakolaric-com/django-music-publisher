@@ -169,7 +169,6 @@ into two separate documents.
 
 
 
-
 Future open-source features
 ===========================
 
