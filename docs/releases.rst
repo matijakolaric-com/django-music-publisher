@@ -172,8 +172,8 @@ complexity reduced to ``A (3)`` and no block more complex than
 ``D (30)``. Code style is now validated with 
 `Black <https://black.readthedocs.io/en/stable/>`_.
 
-However, the most important feature is the implementation of
-several DDEX formats.
+However, the most important new feature is the generation of
+DDEX ERN documents.
 
 Future open-source features
 ===========================

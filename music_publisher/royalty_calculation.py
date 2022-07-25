@@ -254,7 +254,8 @@ class RoyaltyCalculation(object):
         for wiw in qs:
             if wiw.work_id is None:
                 raise NotImplementedError(
-                    'work_id must be set for all works before calling this')
+                    'work_id must be set for all works before calling this'
+                )
             self.writer_ids.add(wiw.writer_id)
             d = {
                 'writer_id': wiw.writer_id,
