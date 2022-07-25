@@ -652,7 +652,8 @@ class Work(TitleBase):
 
     @work_id.setter
     def work_id(self, value):
-        assert self._work_id is None  # this should not be called if set
+        if self._work_id is not None:
+            raise NotImplementedError('work_id can not be changed')
         if value:
             self._work_id = value
 
@@ -1251,7 +1252,8 @@ class Recording(models.Model):
 
     @recording_id.setter
     def recording_id(self, value):
-        assert self._recording_id is None  # this should not be called if set
+        if self._recording_id is not None:
+            raise NotImplementedError('recording_id can not be changed')
         if value:
             self._recording_id = value
 
