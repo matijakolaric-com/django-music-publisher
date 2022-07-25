@@ -166,7 +166,9 @@ into two separate documents. Several external articles were linked to
 improve clarity.
 
 Many of the improvements in this release are under the bonnet. The code has been 
-reviewed and partly cleaned up. Code style is now validated with Black.
+reviewed and partly cleaned up, with average complexity reduced to A (3) and
+no block more complex than D (30). 
+Code style is now validated with Black.
 
 
 Future open-source features
