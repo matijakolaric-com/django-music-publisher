@@ -158,15 +158,15 @@ Full metadata backup can be download using REST API endpoint.
 22.9 Rubicon
 -------------------------------
 
-``Account #`` field was added to the writer model. This field can be used for linking
+``Account #`` field was added to the ``Writer`` model. This field can be used for linking
 data from outgoing royalty statements with accounting.
+
+Introduction chapter of this documentation was extended with graphs, and split 
+into two separate documents. Several external articles were linked to
+improve clarity.
 
 Many of the improvements in this release are under the bonnet. The code has been 
 reviewed and partly cleaned up. Code style is now validated with Black.
-
-Introduction chapter of this documentation was extended with graphs, and split 
-into two separate documents.
-
 
 
 Future open-source features

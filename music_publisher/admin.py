@@ -119,7 +119,7 @@ class RecordingInline(admin.StackedInline):
                 (
                     'Audio',
                     {
-                        'fields': (('audio_file',)),
+                        'fields': (('audio_file',),),
                     },
                 ),
             )
@@ -596,6 +596,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
+    # noinspection PyUnusedLocal
     def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing library releases.
 
@@ -722,27 +723,6 @@ class PlaylistAdmin(MusicPublisherAdmin):
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
-    # def create_json(self, request, qs):
-    #     """Batch action that downloads a JSON file containing library releases.
-    #
-    #     Returns:
-    #         JsonResponse: JSON file with selected works
-    #     """
-    #
-    #     j = Playlist.objects.get_dict(qs)
-    #
-    #     response = JsonResponse(j, json_dumps_params={'indent': 4})
-    #     name = '{}-libraryreleases-{}'.format(
-    #         settings.PUBLISHER_CODE, datetime.now().toordinal())
-    #     cd = 'attachment; filename="{}.json"'.format(name)
-    #     response['Content-Disposition'] = cd
-    #     return response
-    #
-    # create_json.short_description = \
-    #     'Export selected library releases (JSON).'
-    #
-    # actions = ['create_json']
-
 
 @admin.register(CommercialRelease)
 class CommercialReleaseAdmin(MusicPublisherAdmin):
@@ -820,6 +800,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     track_count.short_description = 'Recordings'
     track_count.admin_order_field = 'tracks__count'
 
+    # noinspection PyUnusedLocal
     def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing commercial
         releases.
@@ -1209,19 +1190,19 @@ class WorkAdmin(MusicPublisherAdmin):
             """Simple Yes/No filter"""
             return WorkAcknowledgement.TRANSACTION_STATUS_CHOICES
 
-        def queryset(self, request, queryset):
+        def queryset(self, request, qs):
             """Filter on ACK status."""
             if self.value():
-                if hasattr(queryset, 'society_code'):
-                    queryset = queryset.filter(
+                if hasattr(qs, 'society_code'):
+                    qs = qs.filter(
                         workacknowledgement__status=self.value(),
-                        workacknowledgement__society_code=queryset.society_code,
+                        workacknowledgement__society_code=qs.society_code,
                     ).distinct()
                 else:
-                    queryset = queryset.filter(
+                    qs = qs.filter(
                         workacknowledgement__status=self.value()
                     ).distinct()
-            return queryset
+            return qs
 
     class HasISWCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISWC."""
@@ -1320,7 +1301,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     def save_formset(self, request, form, formset, change):
         """Set last_change for the work if any of the inline forms has
-        changed. """
+        changed."""
         save_instance = False
         for form in formset:
             if form.changed_data:
@@ -1343,6 +1324,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_cwr.short_description = 'Create CWR from selected works.'
 
+    # noinspection PyUnusedLocal
     def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing selected works.
 
@@ -1601,6 +1583,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 row['Reference {} ID'.format(i + 1)] = xrf['identifier']
             yield writer.writerow(row)
 
+    # noinspection PyUnusedLocal
     def create_csv(self, request, qs):
         """Batch action that downloads a CSV file containing selected works.
 
@@ -1942,7 +1925,7 @@ class CWRExportAdmin(admin.ModelAdmin):
                 'download_link',
             )
         else:
-            return ('nwr_rev', 'description', 'works')
+            return 'nwr_rev', 'description', 'works'
 
     def has_add_permission(self, request):
         """Return false if CWR delivery code is not present."""
