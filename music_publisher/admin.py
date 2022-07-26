@@ -4,9 +4,7 @@ Main interface for :mod:`music_publisher`.
 All views are here, except for :mod:`.royalty_calculation`.
 
 """
-import base64
 import re
-import uuid
 import zipfile
 from csv import DictWriter
 from datetime import datetime
@@ -17,8 +15,9 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
@@ -28,9 +27,9 @@ from .forms import (
     AlternateTitleFormSet,
     DataImportForm,
     LibraryReleaseForm,
+    PlaylistForm,
     WorkForm,
     WriterInWorkFormSet,
-    PlaylistForm,
 )
 from .models import (
     ACKImport,
@@ -38,12 +37,12 @@ from .models import (
     Artist,
     ArtistInWork,
     CWRExport,
-    Playlist,
     CommercialRelease,
     DataImport,
     Label,
     Library,
     LibraryRelease,
+    Playlist,
     Recording,
     Release,
     SOCIETY_DICT,
@@ -823,7 +822,11 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         'Export selected commercial releases (JSON).'
     )
 
-    actions = ['create_json']
+    def create_ddex_ebr(self, request, qs):
+        j = LibraryRelease.objects.get_dict(qs)
+        return TemplateResponse(request, 'ddex/ebr/4.2.xml', j)
+
+    actions = ['create_json', 'create_ddex_ebr']
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""

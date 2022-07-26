@@ -118,10 +118,7 @@ def check_dpid(dpid):
     alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     dpid = re.sub(r'[^0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ]', r'', dpid)
     for n in dpid:
-        check = (
-            ((check or 36) * 2) % 37 + alphabet.index(n)
-        ) % 36
-        print(n, alphabet.index(n), check, alphabet[check])
+        check = (((check or 36) * 2) % 37 + alphabet.index(n)) % 36
     if check != 1:
         raise ValidationError('Not a valid DPID {}.'.format(dpid))
 

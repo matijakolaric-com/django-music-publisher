@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ern:NewReleaseMessage xmlns:ern="http://ddex.net/xml/ern/42"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://ddex.net/xml/ern/42 http://ddex.net/xml/ern/42/release-notification.xsd"
+   ReleaseProfileVersionId="SimpleAudioSingle" LanguageAndScriptCode="en">
+   <MessageHeader>
+      <MessageId>W83814161</MessageId>
+      <MessageSender>
+         <PartyId>PADPIDA2007050901U</PartyId>
+      </MessageSender>
+      <MessageRecipient>
+         <PartyId>PADPIDA2007050901U</PartyId>
+      </MessageRecipient>
+      <MessageCreatedDateTime>2017-04-25T15:00:29.947Z</MessageCreatedDateTime>
+   </MessageHeader>
+   <PartyList>
+      <Party>
+         <PartyReference>PRIOPY</PartyReference>
+         <PartyName>
+            <FullName>RIOPY</FullName>
+         </PartyName>
+         <PartyId>
+            <ProprietaryId Namespace="PADPIDA2007050901U">1981969</ProprietaryId>
+         </PartyId>
+      </Party>
+      <Party>
+         <PartyReference>PWarnerClassics</PartyReference>
+         <PartyName>
+            <FullName>Warner Classics</FullName>
+         </PartyName>
+      </Party>
+      <Party>
+         <PartyReference>PWarnerClassicsUK</PartyReference>
+         <PartyName>
+            <FullName>Warner Classics UK</FullName>
+         </PartyName>
+      </Party>
+   </PartyList>
+</ern:NewReleaseMessage>
