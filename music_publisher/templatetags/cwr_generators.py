@@ -13,45 +13,45 @@ from music_metadata.territories.territory import Territory
 register = template.Library()
 
 
-@register.filter(name='rjust')
+@register.filter(name="rjust")
 def rjust(value, length):
     """Format general numeric fields."""
 
-    if value is None or value == '':
-        value = '0'
+    if value is None or value == "":
+        value = "0"
     else:
         value = str(value)
-    value = value.rjust(length, '0')[0:length]
+    value = value.rjust(length, "0")[0:length]
     return value
 
 
-@register.filter(name='ljust')
+@register.filter(name="ljust")
 def ljust(value, length):
     """Format general alphanumeric fields."""
 
     if value is None:
-        value = ''
+        value = ""
     else:
         value = str(value)
-    value = value.ljust(length, ' ')[0:length]
+    value = value.ljust(length, " ")[0:length]
     return value
 
 
-@register.filter(name='soc')
+@register.filter(name="soc")
 def soc(value):
     """Format society fields."""
 
     if not value:
-        return '   '
-    value = value.rjust(3, '0')
+        return "   "
+    value = value.rjust(3, "0")
     return value
 
 
-@register.filter(name='cwrshare')
+@register.filter(name="cwrshare")
 def cwrshare(value):
     """Get CWR-compatible output for share fields"""
-    value = (value * Decimal('10000')).quantize(
-        Decimal('1.'), rounding=ROUND_HALF_UP
+    value = (value * Decimal("10000")).quantize(
+        Decimal("1."), rounding=ROUND_HALF_UP
     )
     value = int(value)
-    return '{:05d}'.format(value)
+    return "{:05d}".format(value)

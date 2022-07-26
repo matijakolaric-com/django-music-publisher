@@ -9,38 +9,38 @@ import music_publisher.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('music_publisher', '0003_cwrexport_created_on'),
+        ("music_publisher", "0003_cwrexport_created_on"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Playlist',
+            name="Playlist",
             fields=[],
             options={
-                'verbose_name': 'Playlist',
-                'verbose_name_plural': 'Playlists',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Playlist",
+                "verbose_name_plural": "Playlists",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('music_publisher.release',),
+            bases=("music_publisher.release",),
         ),
         migrations.AlterModelOptions(
-            name='artistinwork',
+            name="artistinwork",
             options={
-                'ordering': ('artist__last_name', 'artist__first_name'),
-                'verbose_name': 'Artist performing',
-                'verbose_name_plural': 'Artists performing (not mentioned in recordings section)',
+                "ordering": ("artist__last_name", "artist__first_name"),
+                "verbose_name": "Artist performing",
+                "verbose_name_plural": "Artists performing (not mentioned in recordings section)",
             },
         ),
         migrations.AddField(
-            model_name='artist',
-            name='description',
+            model_name="artist",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='artist',
-            name='image',
+            model_name="artist",
+            name="image",
             field=models.ImageField(
                 blank=True,
                 max_length=255,
@@ -48,23 +48,23 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name='label',
-            name='description',
+            model_name="label",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='label',
-            name='image',
+            model_name="label",
+            name="image",
             field=models.ImageField(
                 blank=True,
                 max_length=255,
                 upload_to=music_publisher.base.upload_to,
-                verbose_name='Logo',
+                verbose_name="Logo",
             ),
         ),
         migrations.AddField(
-            model_name='recording',
-            name='audio_file',
+            model_name="recording",
+            name="audio_file",
             field=models.FileField(
                 blank=True,
                 max_length=255,
@@ -72,28 +72,28 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name='release',
-            name='description',
+            model_name="release",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='release',
-            name='image',
+            model_name="release",
+            name="image",
             field=models.ImageField(
                 blank=True,
                 max_length=255,
                 upload_to=music_publisher.base.upload_to,
-                verbose_name='Cover Art',
+                verbose_name="Cover Art",
             ),
         ),
         migrations.AddField(
-            model_name='writer',
-            name='description',
+            model_name="writer",
+            name="description",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='writer',
-            name='image',
+            model_name="writer",
+            name="image",
             field=models.ImageField(
                 blank=True,
                 max_length=255,
@@ -101,47 +101,47 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name='recording',
-            name='artist',
+            model_name="recording",
+            name="artist",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
-                related_name='recordings',
-                to='music_publisher.artist',
-                verbose_name='Recording Artist',
+                related_name="recordings",
+                to="music_publisher.artist",
+                verbose_name="Recording Artist",
             ),
         ),
         migrations.AlterField(
-            model_name='track',
-            name='release',
+            model_name="track",
+            name="release",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='tracks',
-                to='music_publisher.release',
+                related_name="tracks",
+                to="music_publisher.release",
             ),
         ),
         migrations.AlterField(
-            model_name='work',
-            name='writers',
+            model_name="work",
+            name="writers",
             field=models.ManyToManyField(
-                related_name='works',
-                through='music_publisher.WriterInWork',
-                to='music_publisher.Writer',
+                related_name="works",
+                through="music_publisher.WriterInWork",
+                to="music_publisher.Writer",
             ),
         ),
         migrations.AlterField(
-            model_name='writer',
-            name='saan',
+            model_name="writer",
+            name="saan",
             field=models.CharField(
                 blank=True,
-                help_text='Use this field for a general original publishing agreement.',
+                help_text="Use this field for a general original publishing agreement.",
                 max_length=14,
                 null=True,
                 validators=[
-                    music_publisher.validators.CWRFieldValidator('saan')
+                    music_publisher.validators.CWRFieldValidator("saan")
                 ],
-                verbose_name='SAAN',
+                verbose_name="SAAN",
             ),
         ),
     ]

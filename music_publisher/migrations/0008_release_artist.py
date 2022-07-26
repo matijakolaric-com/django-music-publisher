@@ -7,13 +7,20 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('music_publisher', '0007_auto_20220724_1028'),
+        ("music_publisher", "0007_auto_20220724_1028"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='release',
-            name='artist',
-            field=models.ForeignKey(blank=True, help_text='Leave empty if a compilation by different artists.', null=True, on_delete=django.db.models.deletion.PROTECT, to='music_publisher.artist', verbose_name='Display Artist'),
+            model_name="release",
+            name="artist",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Leave empty if a compilation by different artists.",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="music_publisher.artist",
+                verbose_name="Display Artist",
+            ),
         ),
     ]
