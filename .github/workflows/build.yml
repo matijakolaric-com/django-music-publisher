@@ -6,7 +6,7 @@ on:
     - 'static/**'
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   lint:
