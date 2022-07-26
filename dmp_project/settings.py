@@ -130,6 +130,9 @@ PUBLISHER_NAME = os.getenv('PUBLISHER', 'FREE MUSIC CATALOGUE SOFTWARE')
 # CWR Delivery code, issued by collecting societies
 PUBLISHER_CODE = os.getenv('PUBLISHER_CODE', '')
 
+# DDEX Party IDentifier
+PUBLISHER_DPID = os.getenv('PUBLISHER_DPID', '').replace('-', '')
+
 # IPI Name # is required, issued by collecting societies
 PUBLISHER_IPI_NAME = os.getenv('PUBLISHER_IPI_NAME', '')
 # IPI Base # is rarely used, issued by collecting societies
