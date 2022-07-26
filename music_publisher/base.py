@@ -14,10 +14,10 @@ from .validators import CWRFieldValidator
 
 
 def upload_to(instance, filename):
-    ext = filename.rsplit('.', 1)[-1]
+    ext = filename.rsplit(".", 1)[-1]
     folder = instance._meta.model_name
-    fn = base64.urlsafe_b64encode(uuid4().bytes).rstrip(b'=')
-    return f'{folder}/{fn}.{ext}'
+    fn = base64.urlsafe_b64encode(uuid4().bytes).rstrip(b"=")
+    return f"{folder}/{fn}.{ext}"
 
 
 class NotesManager(models.Manager):
@@ -29,7 +29,7 @@ class NotesManager(models.Manager):
     def get_queryset(self):
         """Defer :attr:`NotesBase.notes` field."""
         qs = super().get_queryset()
-        qs = qs.defer('notes')
+        qs = qs.defer("notes")
         return qs
 
 
@@ -73,7 +73,7 @@ class TitleBase(models.Model):
         abstract = True
 
     title = models.CharField(
-        max_length=60, db_index=True, validators=(CWRFieldValidator('title'),)
+        max_length=60, db_index=True, validators=(CWRFieldValidator("title"),)
     )
 
     def __str__(self):
@@ -95,16 +95,16 @@ class PersonBase(models.Model):
         abstract = True
 
     first_name = models.CharField(
-        max_length=30, blank=True, validators=(CWRFieldValidator('name'),)
+        max_length=30, blank=True, validators=(CWRFieldValidator("name"),)
     )
     last_name = models.CharField(
-        max_length=45, db_index=True, validators=(CWRFieldValidator('name'),)
+        max_length=45, db_index=True, validators=(CWRFieldValidator("name"),)
     )
     image = models.ImageField(max_length=255, upload_to=upload_to, blank=True)
 
     def __str__(self):
         if self.first_name:
-            return '{0.first_name} {0.last_name}'.format(self).upper()
+            return "{0.first_name} {0.last_name}".format(self).upper()
         return self.last_name.upper()
 
 
@@ -124,21 +124,21 @@ class SocietyAffiliationBase(models.Model):
         abstract = True
 
     pr_society = models.CharField(
-        'Performance rights society',
+        "Performance rights society",
         max_length=3,
         blank=True,
         null=True,
-        choices=SOCIETIES + [('99', 'NO SOCIETY')],
+        choices=SOCIETIES + [("99", "NO SOCIETY")],
     )
     mr_society = models.CharField(
-        'Mechanical rights society',
+        "Mechanical rights society",
         max_length=3,
         blank=True,
         null=True,
         choices=SOCIETIES,
     )
     sr_society = models.CharField(
-        'Synchronization rights society',
+        "Synchronization rights society",
         max_length=3,
         blank=True,
         null=True,
@@ -161,23 +161,23 @@ class IPIBase(models.Model):
         abstract = True
 
     ipi_name = models.CharField(
-        'IPI name #',
+        "IPI name #",
         max_length=11,
         blank=True,
         null=True,
         unique=True,
-        validators=(CWRFieldValidator('ipi_name'),),
+        validators=(CWRFieldValidator("ipi_name"),),
     )
     ipi_base = models.CharField(
-        'IPI base #',
+        "IPI base #",
         max_length=15,
         blank=True,
         null=True,
-        validators=(CWRFieldValidator('ipi_base'),),
+        validators=(CWRFieldValidator("ipi_base"),),
     )
 
     _can_be_controlled = models.BooleanField(
-        verbose_name='Can be controlled', editable=False, default=False
+        verbose_name="Can be controlled", editable=False, default=False
     )
 
     def clean_fields(self, *args, **kwargs):
@@ -188,9 +188,9 @@ class IPIBase(models.Model):
         if self.ipi_name:
             self.ipi_name = self.ipi_name.zfill(11)
         if self.ipi_base:
-            self.ipi_base = self.ipi_base.replace('.', '').upper()
+            self.ipi_base = self.ipi_base.replace(".", "").upper()
             self.ipi_base = re.sub(
-                r'(I).?(\d{9}).?(\d)', r'\1-\2-\3', self.ipi_base
+                r"(I).?(\d{9}).?(\d)", r"\1-\2-\3", self.ipi_base
             )
         return super().clean_fields(*args, **kwargs)
 
@@ -213,17 +213,17 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         abstract = True
 
     saan = models.CharField(
-        'SAAN',
-        help_text='Use this field for a general original publishing '
-        'agreement.',
-        validators=(CWRFieldValidator('saan'),),
+        "SAAN",
+        help_text="Use this field for a general original publishing "
+        "agreement.",
+        validators=(CWRFieldValidator("saan"),),
         max_length=14,
         blank=True,
         null=True,
     )
 
     generally_controlled = models.BooleanField(
-        'General agreement', default=False
+        "General agreement", default=False
     )
     publisher_fee = models.DecimalField(
         max_digits=5,
@@ -237,21 +237,21 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         """Clean the data and validate."""
 
         self._can_be_controlled = bool(self.ipi_name) & bool(self.pr_society)
-        if self.ipi_name == '00000000000':
+        if self.ipi_name == "00000000000":
             self.ipi_name = None
-        if self.pr_society == '99':
+        if self.pr_society == "99":
             self.pr_society = None
 
         d = {}
         if not self.generally_controlled:
             if self.saan:
-                d['saan'] = 'Only for a general agreement.'
+                d["saan"] = "Only for a general agreement."
             if self.publisher_fee:
-                d['publisher_fee'] = 'Only for a general agreement.'
+                d["publisher_fee"] = "Only for a general agreement."
         else:
             if not self._can_be_controlled:
-                d['generally_controlled'] = (
-                    'IPI name number and PR society fields are required for '
+                d["generally_controlled"] = (
+                    "IPI name number and PR society fields are required for "
                     'a controlled writer. See "Writers" in the user manual.'
                 )
         if d:
@@ -279,9 +279,9 @@ class AccountNumberBase(models.Model):
         abstract = True
 
     account_number = models.CharField(
-        'Account #',
-        help_text='Use this field for linking royalty statements with your '
-        'accounting.',
+        "Account #",
+        help_text="Use this field for linking royalty statements with your "
+        "accounting.",
         max_length=100,
         blank=True,
         null=True,
@@ -302,24 +302,24 @@ class ArtistBase(PersonBase, NotesBase, DescriptionBase):
     """
 
     class Meta:
-        verbose_name = 'Performing Artist'
-        verbose_name_plural = 'Performing Artists'
-        ordering = ('last_name', 'first_name', '-id')
+        verbose_name = "Performing Artist"
+        verbose_name_plural = "Performing Artists"
+        ordering = ("last_name", "first_name", "-id")
         abstract = True
 
     isni = models.CharField(
-        'ISNI',
+        "ISNI",
         max_length=16,
         blank=True,
         null=True,
         unique=True,
-        validators=(CWRFieldValidator('isni'),),
+        validators=(CWRFieldValidator("isni"),),
     )
 
     def clean_fields(self, *args, **kwargs):
         """ISNI cleanup"""
         if self.isni:
-            self.isni = self.isni.rjust(16, '0').upper()
+            self.isni = self.isni.rjust(16, "0").upper()
         return models.Model.clean_fields(self, *args, **kwargs)
 
 
@@ -333,8 +333,8 @@ class WriterBase(
     """Base class for writers."""
 
     class Meta:
-        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name_plural = 'Writers'
+        ordering = ("last_name", "first_name", "ipi_name", "-id")
+        verbose_name_plural = "Writers"
         abstract = True
 
 
@@ -346,15 +346,15 @@ class LabelBase(NotesBase, DescriptionBase):
     """
 
     class Meta:
-        verbose_name_plural = 'Music Labels'
-        ordering = ('name',)
+        verbose_name_plural = "Music Labels"
+        ordering = ("name",)
         abstract = True
 
     name = models.CharField(
-        max_length=60, unique=True, validators=(CWRFieldValidator('name'),)
+        max_length=60, unique=True, validators=(CWRFieldValidator("name"),)
     )
     image = models.ImageField(
-        'Logo', max_length=255, upload_to=upload_to, blank=True
+        "Logo", max_length=255, upload_to=upload_to, blank=True
     )
 
 
@@ -366,12 +366,12 @@ class LibraryBase(models.Model):
     """
 
     class Meta:
-        verbose_name_plural = 'Music Libraries'
-        ordering = ('name',)
+        verbose_name_plural = "Music Libraries"
+        ordering = ("name",)
         abstract = True
 
     name = models.CharField(
-        max_length=60, unique=True, validators=(CWRFieldValidator('name'),)
+        max_length=60, unique=True, validators=(CWRFieldValidator("name"),)
     )
 
 
@@ -389,33 +389,33 @@ class ReleaseBase(DescriptionBase):
     """
 
     class Meta:
-        ordering = ('release_title', 'cd_identifier', '-id')
+        ordering = ("release_title", "cd_identifier", "-id")
         abstract = True
 
     cd_identifier = models.CharField(
-        'CD identifier',
+        "CD identifier",
         max_length=15,
         blank=True,
         null=True,
         unique=True,
-        validators=(CWRFieldValidator('name'),),
+        validators=(CWRFieldValidator("name"),),
     )
     release_date = models.DateField(blank=True, null=True)
     release_title = models.CharField(
-        'Release (album) title ',
+        "Release (album) title ",
         max_length=60,
         blank=True,
         null=True,
-        validators=(CWRFieldValidator('title'),),
+        validators=(CWRFieldValidator("title"),),
     )
     ean = models.CharField(
-        'Release (album) EAN',
+        "Release (album) EAN",
         max_length=13,
         blank=True,
         null=True,
         unique=True,
-        validators=(CWRFieldValidator('ean'),),
+        validators=(CWRFieldValidator("ean"),),
     )
     image = models.ImageField(
-        'Cover Art', max_length=255, upload_to=upload_to, blank=True
+        "Cover Art", max_length=255, upload_to=upload_to, blank=True
     )

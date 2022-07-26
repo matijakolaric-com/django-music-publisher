@@ -27,21 +27,21 @@ class APIRootView(routers.APIRootView):
 
 router = routers.DefaultRouter()
 router.APIRootView = APIRootView
-router.register(r'artists', ArtistViewSet)
-router.register(r'releases', ReleaseViewSet)
-router.register(r'secret_playlist', PlaylistViewSet)
-router.register(r'backup_metadata', BackupViewSet, basename='backup')
+router.register(r"artists", ArtistViewSet)
+router.register(r"releases", ReleaseViewSet)
+router.register(r"secret_playlist", PlaylistViewSet)
+router.register(r"backup_metadata", BackupViewSet, basename="backup")
 
 urlpatterns = [
     path(
-        'royalty_calculation/',
+        "royalty_calculation/",
         RoyaltyCalculationView.as_view(),
-        name='royalty_calculation',
+        name="royalty_calculation",
     ),
-    path('api/v1/', include(router.urls)),
+    path("api/v1/", include(router.urls)),
     path(
-        'secret_playlist/<slug:secret>/',
+        "secret_playlist/<slug:secret>/",
         SecretPlaylistView.as_view(),
-        name='secret_playlist',
+        name="secret_playlist",
     ),
 ]

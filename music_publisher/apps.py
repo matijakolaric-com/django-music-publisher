@@ -14,9 +14,9 @@ class MusicPublisherConfig(AppConfig):
         verbose_name (str): app verbose name
     """
 
-    name = 'music_publisher'
-    label = 'music_publisher'
-    verbose_name = 'Music Publisher'
+    name = "music_publisher"
+    label = "music_publisher"
+    verbose_name = "Music Publisher"
 
     def ready(self):
         """Validate settings when ready to prevent deployments with invalid

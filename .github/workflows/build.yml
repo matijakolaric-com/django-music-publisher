@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: psf/black@stable
         with:
-          options: "--check --verbose --skip-string-normalization --line-length 79 --exclude music_publisher/migrations"
+          options: "--check --verbose --line-length 79 --exclude music_publisher/migrations"
   build:
     runs-on: ubuntu-latest
     services:
