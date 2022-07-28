@@ -20,13 +20,17 @@ Django-Music-Publisher - Free music publishing software
     :target: https://pypi.org/project/django-music-publisher/
     :alt: PYPI
 .. image:: https://img.shields.io/pypi/wheel/django-music-publisher?logo=pypi&logoColor=white
-    :alt: PyPI - Django Version
+    :target: https://pypi.org/project/django-music-publisher/
+    :alt: PyPI - Wheel
 .. image:: https://img.shields.io/pypi/status/django-music-publisher?logo=pypi&logoColor=white
+    :target: https://pypi.org/project/django-music-publisher/
     :alt: PyPI - Status
 .. image:: https://img.shields.io/pypi/djversions/django-music-publisher?logo=pypi&logoColor=white
+    :target: https://pypi.org/project/django-music-publisher/
     :alt: PyPI - Django Version
 .. image:: https://img.shields.io/pypi/pyversions/django-music-publisher?logo=pypi&logoColor=white
-    :alt: PyPI - Django Version
+    :target: https://pypi.org/project/django-music-publisher/
+    :alt: PyPI - Python Version
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg?logo=github&logoColor=white
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
     :alt: License
