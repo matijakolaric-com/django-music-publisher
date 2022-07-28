@@ -125,10 +125,10 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = not DEBUG
 
 # The name of the publisher. Use no comma in the name!
-PUBLISHER_NAME = os.getenv("PUBLISHER", "FREE MUSIC CATALOGUE SOFTWARE")
+PUBLISHER_NAME = os.getenv("PUBLISHER", "DMP - FREE MUSIC CATALOGUE SOFTWARE")
 
 # CWR Delivery code, issued by collecting societies
-PUBLISHER_CODE = os.getenv("PUBLISHER_CODE", "")
+PUBLISHER_CODE = os.getenv("PUBLISHER_CODE", "000")
 
 # DDEX Party IDentifier
 PUBLISHER_DPID = os.getenv("PUBLISHER_DPID", "").replace("-", "")

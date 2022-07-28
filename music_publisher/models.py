@@ -1606,7 +1606,7 @@ class CWRExport(models.Model):
             {
                 "chain_sequence": 1,
                 "name": publisher.get("name"),
-                "code": publisher.get("code"),
+                "code": "P000001",
                 "ipi_name_number": publisher.get("ipi_name_number"),
                 "ipi_base_number": publisher.get("ipi_base_number"),
                 "pr_society": publisher.get("pr_society"),
@@ -1621,7 +1621,7 @@ class CWRExport(models.Model):
             yield self.get_transaction_record(
                 "SPT",
                 {
-                    "code": publisher.get("code"),
+                    "code": "P000001",
                     "pr_share": pr_share,
                     "mr_share": mr_share,
                     "sr_share": sr_share,
@@ -1764,7 +1764,7 @@ class CWRExport(models.Model):
             if share:
                 yield self.get_transaction_record("MAN", w)
             w["publisher_sequence"] = 1
-            w["publisher_code"] = publisher["code"]
+            w["publisher_code"] = "P000001"
             w["publisher_name"] = publisher["name"]
             yield self.get_transaction_record("PWR", w)
             if (
