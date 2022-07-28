@@ -6,20 +6,33 @@ developed project, has legacy issues. If anyone tells you that their
 project has no legacy issues, they are either ignorant or lying. 
 Probably both.
 
-Here is how they are reduced, caught and fixed in this project.
+Here is how issues are reduced, caught and fixed in this project.
 
 Test coverage, Continuous Integration, Continuous Deployment
 =================================================================
 
+Test Coverage
+++++++++++++++++++++++
+
 For years, test coverage was around 99% (mostly functional tests), and 
 the goal is to keep it over 99.5% (rounded to 100%) for major releases.
 
-These tests are run on every push to the code repository, 
-(together with code style validation). If tests pass, the code
-is automatically deployed. 
+Continuous Integration
+++++++++++++++++++++++++++++++
 
-This instance is used for creating screenshots for documentation 
-and videos, and before each major release, all functionality is
+These tests are run on every push to the code repository, 
+(together with code style validation).
+
+Continuous Deployment
+++++++++++++++++++++++++++++++
+
+If tests pass, the code is automatically deployed. 
+
+Manual Testing
+++++++++++++++++++++++++++++++++
+
+CD instance is used for creating screenshots for documentation 
+and videos. Before each major release, all functionality is
 manually tested.
 
 Of course, there is a small chance that some edge case is not covered,
@@ -33,11 +46,19 @@ Some of these issues can be detected and/or measured, sometimes even
 fixed, with standard tools. Code style, complexity and maintainability 
 are good examples.
 
+Code Style
++++++++++++++++++
 Code style in this project is current Black, with line length of 79 
 characters. This is validated on every push.
 
+Code Complexity
+++++++++++++++++++
+
 Recently, code complexity has been improved. No code block has nor should 
 have complexity over ``C (20)``. Average should remain around ``A (3.0)``.
+
+Code Maintainability
++++++++++++++++++++++++++
 
 Code maintainability is to be improved, currently 2 files have dead low 
 index, due to their size. The goal is to have ``A`` across all files by
@@ -67,7 +88,7 @@ publishers, due to complexity and price.
 Until 2022 ... data exchange between publishers and labels ... 
 complex and expensive.
 
-QA without rules
+QA without standards
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The question is how to assure quality if there are no standards and no 
@@ -85,9 +106,3 @@ many years.
 
 And, if you break a rule, you must make a new one and document it really
 well.
-
-
-
-
-
-
