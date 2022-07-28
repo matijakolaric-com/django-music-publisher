@@ -17,6 +17,7 @@ DMP
    introduction
    features
    support
+   qa
    videos
    installation
    releases
