@@ -2094,6 +2094,19 @@ class ACKImportAdmin(AdminWithReport):
         r"(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)", re.S | re.M
     )
 
+    def validate_iswc(self, x, validator, import_iswcs):
+        tt, work_id, remote_work_id, dat, status, rest = x
+        if import_iswcs and rest:
+            header = rest.strip().split("\n")[0]
+            iswc = header[95:106].strip() or None
+            if iswc:
+                try:
+                    validator(iswc)
+                except ValidationError:
+                    iswc = None
+            return iswc
+        return None
+
     def process(self, request, ack_import, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
 
@@ -2120,14 +2133,7 @@ class ACKImportAdmin(AdminWithReport):
             pattern = self.RE_ACK_30
         for x in re.findall(pattern, file_content):
             tt, work_id, remote_work_id, dat, status, rest = x
-            if import_iswcs and rest:
-                header = rest.strip().split("\n")[0]
-                iswc = header[95:106].strip() or None
-                if iswc:
-                    try:
-                        validator(iswc)
-                    except ValidationError:
-                        iswc = None
+            iswc = self.validate_iswc(x, validator, import_iswcs)
             # work ID is numeric with an optional string
             work_id = work_id.strip()
             remote_work_id = remote_work_id.strip()

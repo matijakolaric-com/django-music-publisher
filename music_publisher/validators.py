@@ -191,12 +191,8 @@ class CWRFieldValidator:
                 raise ValidationError("Name contains invalid characters.")
 
 
-def validate_settings():
-    """CWR-compliance validation for settings.
-
-    This is used to prevent deployment with invalid settings.
-    """
-
+def validate_publisher_settings():
+    """CWR-compliance validation for publisher settings."""
     if settings.PUBLISHER_NAME:
         try:
             CWRFieldValidator("name")(settings.PUBLISHER_NAME)
@@ -230,6 +226,15 @@ def validate_settings():
             CWRFieldValidator("ipi_name")(settings.PUBLISHER_IPI_NAME)
         except ValidationError as e:
             raise ImproperlyConfigured("PUBLISHER_IPI_NAME: " + str(e))
+
+
+def validate_settings():
+    """CWR-compliance validation for settings.
+
+    This is used to prevent deployment with invalid settings.
+    """
+
+    validate_publisher_settings()
 
     keys = [s[0] for s in SOCIETIES]
     for t in ["PR", "MR", "SR"]:

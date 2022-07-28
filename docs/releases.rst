@@ -168,8 +168,8 @@ linked to improve clarity.
 
 Most improvements in this release are under the bonnet. The 
 source code has been reviewed and partly cleaned up, with average 
-complexity reduced to ``A (3)`` and no block more complex than 
-``D (30)``. Code style is now validated with 
+complexity reduced to ``A (3.0)`` and no block more complex than 
+``C``. Code style is now validated with 
 `Black <https://black.readthedocs.io/en/stable/>`_.
 
 However, the most important new feature is the generation of

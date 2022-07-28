@@ -164,6 +164,69 @@ class DataImporter(object):
                 value = bool(value)
         return value, general_agreement
 
+    def unflatten_writer_record(self, out_dict, clean_key, key, value):
+        key_elements = clean_key.split("_", 2)
+        if len(key_elements) < 3 or key_elements[2] not in self.WRITER_FIELDS:
+            self.unknown_keys.add(key)
+            return
+        value, general_agreement = self.process_writer_value(
+            key, key_elements, value
+        )
+        if general_agreement:
+            out_dict["writers"][key_elements[1]]["general_agreement"] = True
+        out_dict["writers"][key_elements[1]][key_elements[2]] = value
+
+    def unflatten_record(self, out_dict, key, value):
+        if value is None:
+            return
+        if isinstance(value, str):
+            value = value.strip()
+        clean_key = slugify(key).replace("-", "_")
+        prefix = clean_key.split("_")[0]
+        if value == "":
+            return
+        if clean_key in self.FLAT_FIELDS:
+            out_dict[clean_key] = value
+        elif prefix == "alt":
+            key_elements = clean_key.rsplit("_", 1)
+            if len(key_elements) < 2 or key_elements[0] != "alt_title":
+                self.unknown_keys.add(key)
+                return
+            out_dict["alt_titles"].append(value)
+        elif prefix == "writer":
+            return self.unflatten_writer_record(
+                out_dict, clean_key, key, value
+            )
+        elif prefix == "artist":
+            key_elements = clean_key.split("_", 2)
+            if (
+                len(key_elements) < 3
+                or key_elements[2] not in self.ARTIST_FIELDS
+            ):
+                self.unknown_keys.add(key)
+                return
+            out_dict["artists"][key_elements[1]][key_elements[2]] = value
+        elif prefix == "recording":
+            key_elements = clean_key.split("_", 2)
+            if (
+                len(key_elements) < 3
+                or key_elements[2] not in self.RECORDING_FIELDS
+            ):
+                self.unknown_keys.add(key)
+                return
+            out_dict["recordings"][key_elements[1]][key_elements[2]] = value
+        elif prefix == "reference":
+            key_elements = clean_key.split("_", 2)
+            if (
+                len(key_elements) < 3
+                or key_elements[2] not in self.REFERENCE_FIELDS
+            ):
+                self.unknown_keys.add(key)
+                return
+            out_dict["references"][key_elements[1]][key_elements[2]] = value
+        else:
+            self.unknown_keys.add(key)
+
     def unflatten(self, in_dict):
         """Create a well-structured dictionary with cleaner values."""
         out_dict = {
@@ -174,71 +237,7 @@ class DataImporter(object):
             "references": defaultdict(OrderedDict),
         }
         for key, value in in_dict.items():
-            if value is None:
-                continue
-            if isinstance(value, str):
-                value = value.strip()
-            clean_key = slugify(key).replace("-", "_")
-            prefix = clean_key.split("_")[0]
-            if value == "":
-                continue
-            if clean_key in self.FLAT_FIELDS:
-                out_dict[clean_key] = value
-            elif prefix == "alt":
-                key_elements = clean_key.rsplit("_", 1)
-                if len(key_elements) < 2 or key_elements[0] != "alt_title":
-                    self.unknown_keys.add(key)
-                    continue
-                out_dict["alt_titles"].append(value)
-            elif prefix == "writer":
-                key_elements = clean_key.split("_", 2)
-                if (
-                    len(key_elements) < 3
-                    or key_elements[2] not in self.WRITER_FIELDS
-                ):
-                    self.unknown_keys.add(key)
-                    continue
-                value, general_agreement = self.process_writer_value(
-                    key, key_elements, value
-                )
-                if general_agreement:
-                    out_dict["writers"][key_elements[1]][
-                        "general_agreement"
-                    ] = True
-                out_dict["writers"][key_elements[1]][key_elements[2]] = value
-            elif prefix == "artist":
-                key_elements = clean_key.split("_", 2)
-                if (
-                    len(key_elements) < 3
-                    or key_elements[2] not in self.ARTIST_FIELDS
-                ):
-                    self.unknown_keys.add(key)
-                    continue
-                out_dict["artists"][key_elements[1]][key_elements[2]] = value
-            elif prefix == "recording":
-                key_elements = clean_key.split("_", 2)
-                if (
-                    len(key_elements) < 3
-                    or key_elements[2] not in self.RECORDING_FIELDS
-                ):
-                    self.unknown_keys.add(key)
-                    continue
-                out_dict["recordings"][key_elements[1]][
-                    key_elements[2]
-                ] = value
-            elif prefix == "reference":
-                key_elements = clean_key.split("_", 2)
-                if (
-                    len(key_elements) < 3
-                    or key_elements[2] not in self.REFERENCE_FIELDS
-                ):
-                    self.unknown_keys.add(key)
-                    continue
-                out_dict["references"][key_elements[1]][
-                    key_elements[2]
-                ] = value
-            else:
-                self.unknown_keys.add(key)
+            self.unflatten_record(out_dict, key, value)
         return out_dict
 
     def get_writers(self, writer_dict):

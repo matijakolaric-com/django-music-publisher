@@ -200,6 +200,13 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                     and form.cleaned_data["capacity"] not in self.orig_cap
                 ):
                     needs_extended_capacity = False
+        self.check_extended_capacity(needs_extended_capacity)
+        self.check_controlled(controlled)
+        self.check_has_composer(has_composer)
+        self.check_total(total)
+        self.check_modification(is_modification)
+
+    def check_extended_capacity(self, needs_extended_capacity):
         if needs_extended_capacity:
             for form in self.forms:
                 form.add_error(
@@ -210,12 +217,16 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                 "In a modified work, "
                 "at least one writer must be Arranger, Adaptor or Translator."
             )
+
+    def check_controlled(self, controlled):
         if not controlled:
             for form in self.forms:
                 form.add_error(
                     "controlled", "At least one writer must be controlled."
                 )
             raise ValidationError("At least one writer must be controlled.")
+
+    def check_has_composer(self, has_composer):
         if not has_composer:
             for form in self.forms:
                 form.add_error(
@@ -226,12 +237,16 @@ class WriterInWorkFormSet(BaseInlineFormSet):
             raise ValidationError(
                 "At least one writer must be Composer or Composer&Lyricist."
             )
+
+    def check_total(self, total):
         if not (Decimal(99.98) <= total <= Decimal(100.02)):
             for form in self.forms:
                 form.add_error(
                     "relative_share", "Sum of manuscript shares must be 100%."
                 )
             raise ValidationError("Sum of manuscript shares must be 100%.")
+
+    def check_modification(self, is_modification):
         if is_modification:
             writer_capacities = {}
             for form in self.forms:
