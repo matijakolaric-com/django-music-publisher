@@ -731,7 +731,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     ordering = ("release_title", "cd_identifier", "-id")
     inlines = [TrackInline]
-    autocomplete_fields = ("release_label",)
+    autocomplete_fields = ("release_label", "artist")
 
     formfield_overrides = {
         models.ImageField: {"widget": ImageWidget},
@@ -770,7 +770,8 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
                     "Release (album) metadata",
                     {
                         "fields": (
-                            ("release_title", "release_label"),
+                            "release_title",
+                            ("artist", "release_label"),
                             ("ean", "release_date"),
                         )
                     },
@@ -830,7 +831,14 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         # If it is set, but invalid, ask again
         # If it is set and valid, proceed.
         j = LibraryRelease.objects.get_dict(qs)
-        return TemplateResponse(request, "ddex/ebr/4.2.xml", j)
+        j["publisher"] = settings.PUBLISHER_NAME
+        j["sender_dpid"] = settings.PUBLISHER_DPID
+        return TemplateResponse(
+            request,
+            "ddex/ebr/4.2.xml",
+            j,
+            content_type="application/xml"
+        )
 
     actions = ["create_json", "create_ddex_ebr"]
 
