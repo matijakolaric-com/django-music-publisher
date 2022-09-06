@@ -834,10 +834,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         j["publisher"] = settings.PUBLISHER_NAME
         j["sender_dpid"] = settings.PUBLISHER_DPID
         return TemplateResponse(
-            request,
-            "ddex/ebr/4.2.xml",
-            j,
-            content_type="application/xml"
+            request, "ddex/ebr/4.2.xml", j, content_type="application/xml"
         )
 
     actions = ["create_json", "create_ddex_ebr"]
