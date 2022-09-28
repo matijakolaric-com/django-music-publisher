@@ -825,36 +825,11 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
         "Export selected commercial releases (JSON)."
     )
 
-    def create_ddex_ebr(self, request, qs, receiver_dpid=None):
-        sender_dpid = settings.PUBLISHER_DPID
-        from uuid import uuid4
-
-        # If receiver DPID is not set, ask for it.
-        # If it is set, but invalid, ask again
-        # If it is set and valid, proceed.
-        receiver_dpid = sender_dpid
-        cdt = datetime.now().isoformat(timespec="milliseconds") + "Z"
-        j = LibraryRelease.objects.get_dict(qs)
-        d = {
-            "message_id": uuid4().hex.replace("-", "").upper(),
-            "sender_dpid": sender_dpid,
-            "receiver_dpid": receiver_dpid,
-            "created_datetime": cdt,
-            "releases": qs,
-            "data": j,
-        }
-        response = TemplateResponse(request, "ddex/ebr/4.2.xml", d)
-        response["Content-Type"] = "text/xml; charset=utf-8"
-        return response
-
-    actions = ["create_json", "create_ddex_ebr"]
+    actions = ["create_json"]
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
         actions = super().get_actions(request)
-        sender_dpid = settings.PUBLISHER_DPID
-        if not sender_dpid:
-            del actions["create_ddex_ebr"]
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
