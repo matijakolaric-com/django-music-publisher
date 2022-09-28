@@ -146,8 +146,8 @@ Writers, artists, labels and releases received ``image`` and
 ``description`` fields, to be used in front-end representations.
 Recordings received an ``audio_file`` field.
 
-Read-only REST API endpoints are available for releases and recording artists,
-enabling integration with websites.
+Read-only REST API endpoints are available for releases and recording 
+artists, enabling integration with websites.
 
 Playlists can now be created, either by manually adding recordings,
 or by using batch actions in various list views, and shared
@@ -155,6 +155,26 @@ using secret URLs.
 
 Full metadata backup can be download using REST API endpoint.
 
+22.9 Rubicon
+-------------------------------
+
+``Account #`` field was added to the ``Writer`` model. This field can
+be used for linking data from outgoing royalty statements with 
+accounting.
+
+Introduction chapter of this documentation was extended with graphs, 
+and split into two separate documents. Several external articles were 
+linked to improve clarity.
+
+Most improvements in this release are under the bonnet. The 
+source code has been reviewed and partly cleaned up, with average 
+complexity reduced to ``A (3.0)`` and no block more complex than 
+``C``. Code style is now validated with 
+`Black <https://black.readthedocs.io/en/stable/>`_.
+
+However, the most important new feature is the generation of
+DDEX ERN documents for commercial releases. Adding features for 
+labels will continue in next releases.
 
 Future open-source features
 ===========================

@@ -4,9 +4,7 @@ Main interface for :mod:`music_publisher`.
 All views are here, except for :mod:`.royalty_calculation`.
 
 """
-import base64
 import re
-import uuid
 import zipfile
 from csv import DictWriter
 from datetime import datetime
@@ -17,8 +15,9 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
@@ -28,9 +27,9 @@ from .forms import (
     AlternateTitleFormSet,
     DataImportForm,
     LibraryReleaseForm,
+    PlaylistForm,
     WorkForm,
     WriterInWorkFormSet,
-    PlaylistForm,
 )
 from .models import (
     ACKImport,
@@ -38,12 +37,12 @@ from .models import (
     Artist,
     ArtistInWork,
     CWRExport,
-    Playlist,
     CommercialRelease,
     DataImport,
     Label,
     Library,
     LibraryRelease,
+    Playlist,
     Recording,
     Release,
     SOCIETY_DICT,
@@ -119,7 +118,7 @@ class RecordingInline(admin.StackedInline):
                 (
                     "Audio",
                     {
-                        "fields": (("audio_file",)),
+                        "fields": (("audio_file",),),
                     },
                 ),
             )
@@ -511,7 +510,8 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
                     "Release (album) metadata",
                     {
                         "fields": (
-                            ("release_title", "release_label"),
+                            "release_title",
+                            ("artist", "release_label"),
                             ("ean", "release_date"),
                         )
                     },
@@ -596,6 +596,7 @@ class LibraryReleaseAdmin(MusicPublisherAdmin):
     track_count.short_description = "Recordings"
     track_count.admin_order_field = "tracks__count"
 
+    # noinspection PyUnusedLocal
     def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing library releases.
 
@@ -639,6 +640,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
             {
                 "fields": (
                     ("release_title", "release_date"),
+                    ("artist", "release_label"),
                     "description",
                     "image",
                 )
@@ -722,27 +724,6 @@ class PlaylistAdmin(MusicPublisherAdmin):
     track_count.short_description = "Recordings"
     track_count.admin_order_field = "tracks__count"
 
-    # def create_json(self, request, qs):
-    #     """Batch action that downloads a JSON file containing library releases.
-    #
-    #     Returns:
-    #         JsonResponse: JSON file with selected works
-    #     """
-    #
-    #     j = Playlist.objects.get_dict(qs)
-    #
-    #     response = JsonResponse(j, json_dumps_params={'indent': 4})
-    #     name = '{}-libraryreleases-{}'.format(
-    #         settings.PUBLISHER_CODE, datetime.now().toordinal())
-    #     cd = 'attachment; filename="{}.json"'.format(name)
-    #     response['Content-Disposition'] = cd
-    #     return response
-    #
-    # create_json.short_description = \
-    #     'Export selected library releases (JSON).'
-    #
-    # actions = ['create_json']
-
 
 @admin.register(CommercialRelease)
 class CommercialReleaseAdmin(MusicPublisherAdmin):
@@ -750,8 +731,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     ordering = ("release_title", "cd_identifier", "-id")
     inlines = [TrackInline]
-    autocomplete_fields = ("release_label",)
-
+    autocomplete_fields = ("release_label", "artist")
     formfield_overrides = {
         models.ImageField: {"widget": ImageWidget},
     }
@@ -775,7 +755,8 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
                     "Release (album) metadata",
                     {
                         "fields": (
-                            ("release_title", "release_label"),
+                            "release_title",
+                            ("artist", "release_label"),
                             ("ean", "release_date"),
                         )
                     },
@@ -788,7 +769,8 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
                     "Release (album) metadata",
                     {
                         "fields": (
-                            ("release_title", "release_label"),
+                            "release_title",
+                            ("artist", "release_label"),
                             ("ean", "release_date"),
                         )
                     },
@@ -820,6 +802,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     track_count.short_description = "Recordings"
     track_count.admin_order_field = "tracks__count"
 
+    # noinspection PyUnusedLocal
     def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing commercial
         releases.
@@ -866,14 +849,17 @@ class WriterAdmin(MusicPublisherAdmin):
         "generally_controlled",
         "work_count",
     )
-
     list_filter = ("_can_be_controlled", "generally_controlled", "pr_society")
-    search_fields = ("last_name", "ipi_name")
-    readonly_fields = ("_can_be_controlled", "work_count")
-
+    search_fields = ("last_name", "ipi_name", "account_number")
+    readonly_fields = ("writer_id", "_can_be_controlled", "work_count")
     formfield_overrides = {
         models.ImageField: {"widget": ImageWidget},
     }
+
+    def writer_id(self, obj):
+        return obj.writer_id
+
+    writer_id.short_description = "Writer ID"
 
     def get_fieldsets(self, request, obj=None):
         """Return the fieldsets.
@@ -882,6 +868,7 @@ class WriterAdmin(MusicPublisherAdmin):
         See :meth:`WriterAdmin.get_society_list`"""
         if settings.OPTION_FILES:
             return [
+                (None, {"fields": ("writer_id", "account_number")}),
                 ("Name", {"fields": (("first_name", "last_name"),)}),
                 (
                     "IPI",
@@ -913,6 +900,7 @@ class WriterAdmin(MusicPublisherAdmin):
             ]
         else:
             return [
+                (None, {"fields": ("writer_id", "account_number")}),
                 ("Name", {"fields": (("first_name", "last_name"),)}),
                 (
                     "IPI",
@@ -1203,19 +1191,19 @@ class WorkAdmin(MusicPublisherAdmin):
             """Simple Yes/No filter"""
             return WorkAcknowledgement.TRANSACTION_STATUS_CHOICES
 
-        def queryset(self, request, queryset):
+        def queryset(self, request, qs):
             """Filter on ACK status."""
             if self.value():
-                if hasattr(queryset, "society_code"):
-                    queryset = queryset.filter(
+                if hasattr(qs, "society_code"):
+                    qs = qs.filter(
                         workacknowledgement__status=self.value(),
-                        workacknowledgement__society_code=queryset.society_code,
+                        workacknowledgement__society_code=qs.society_code,
                     ).distinct()
                 else:
-                    queryset = queryset.filter(
+                    qs = qs.filter(
                         workacknowledgement__status=self.value()
                     ).distinct()
-            return queryset
+            return qs
 
     class HasISWCListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of ISWC."""
@@ -1313,7 +1301,8 @@ class WorkAdmin(MusicPublisherAdmin):
         super().save_model(request, obj, form, *args, **kwargs)
 
     def save_formset(self, request, form, formset, change):
-        """Set last_change for the work if any of the inline forms has changed."""
+        """Set last_change for the work if any of the inline forms has
+        changed."""
         save_instance = False
         for form in formset:
             if form.changed_data:
@@ -1336,6 +1325,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_cwr.short_description = "Create CWR from selected works."
 
+    # noinspection PyUnusedLocal
     def create_json(self, request, qs):
         """Batch action that downloads a JSON file containing selected works.
 
@@ -1402,6 +1392,7 @@ class WorkAdmin(MusicPublisherAdmin):
             labels.append("Writer {} Controlled".format(i + 1))
             if i < writer_with_publisher_max:
                 labels.append("Writer {} SAAN".format(i + 1))
+            labels.append("Writer {} Account Number".format(i + 1))
             if not simple and i < writer_with_publisher_max:
                 labels.append("Writer {} Publisher Name".format(i + 1))
                 labels.append("Writer {} Publisher IPI".format(i + 1))
@@ -1593,6 +1584,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 row["Reference {} ID".format(i + 1)] = xrf["identifier"]
             yield writer.writerow(row)
 
+    # noinspection PyUnusedLocal
     def create_csv(self, request, qs):
         """Batch action that downloads a CSV file containing selected works.
 
@@ -1934,7 +1926,7 @@ class CWRExportAdmin(admin.ModelAdmin):
                 "download_link",
             )
         else:
-            return ("nwr_rev", "description", "works")
+            return "nwr_rev", "description", "works"
 
     def has_add_permission(self, request):
         """Return false if CWR delivery code is not present."""
@@ -2081,16 +2073,31 @@ class ACKImportAdmin(AdminWithReport):
         return self.add_fields
 
     RE_ACK_21 = re.compile(
-        r"(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)(?=^ACK|^GRT)",
+        r"(?<=\n)ACK.{43}(NWR|REV).{60}(.{20})(.{20})(.{8})(.{2})(.*?)("
+        r"?=^ACK|^GRT)",
         re.S | re.M,
     )
     RE_ACK_30 = re.compile(
-        r"(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)(?=^ACK|^GRT)",
+        r"(?<=\n)ACK.{43}(WRK).{60}(.{20})(.{20}){20}(.{8})(.{2})(.*?)("
+        r"?=^ACK|^GRT)",
         re.S | re.M,
     )
     RE_ISW_21 = re.compile(
         r"(?<=\n)ISW.{78}(.{14})(.{11}).*?(?=^ISW|^GRT)", re.S | re.M
     )
+
+    def validate_iswc(self, x, validator, import_iswcs):
+        tt, work_id, remote_work_id, dat, status, rest = x
+        if import_iswcs and rest:
+            header = rest.strip().split("\n")[0]
+            iswc = header[95:106].strip() or None
+            if iswc:
+                try:
+                    validator(iswc)
+                except ValidationError:
+                    iswc = None
+            return iswc
+        return None
 
     def process(self, request, ack_import, file_content, import_iswcs=False):
         """Create appropriate WorkAcknowledgement objects, without duplicates.
@@ -2118,14 +2125,7 @@ class ACKImportAdmin(AdminWithReport):
             pattern = self.RE_ACK_30
         for x in re.findall(pattern, file_content):
             tt, work_id, remote_work_id, dat, status, rest = x
-            if import_iswcs and rest:
-                header = rest.strip().split("\n")[0]
-                iswc = header[95:106].strip() or None
-                if iswc:
-                    try:
-                        validator(iswc)
-                    except ValidationError:
-                        iswc = None
+            iswc = self.validate_iswc(x, validator, import_iswcs)
             # work ID is numeric with an optional string
             work_id = work_id.strip()
             remote_work_id = remote_work_id.strip()

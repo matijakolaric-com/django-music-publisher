@@ -11,6 +11,13 @@ Add/Change View
 
 ``Add`` and ``change`` views for writers have several fieldsets.
 
+Writer ID and Account Number
+++++++++++++++++++++++++++++
+
+At the top, before the first fieldset are two fields, ``Writer ID``, assigned by the system
+and not editable, and ``Account #``, used for linking data from DMP with your accounting, when
+processing royalty statements.
+
 Name
 ++++
 

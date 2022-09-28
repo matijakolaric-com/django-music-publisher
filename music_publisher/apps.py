@@ -1,6 +1,7 @@
 """Django app definition for :mod:`music_publisher`."""
 
 from django.apps import AppConfig
+
 from .validators import validate_settings
 
 

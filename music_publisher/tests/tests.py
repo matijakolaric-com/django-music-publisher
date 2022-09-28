@@ -565,6 +565,9 @@ class AdminTest(TestCase):
         cls.commercial_release = Release.objects.create(
             release_title="COMRELEASE"
         )
+        cls.playlist = Release.objects.create(
+            release_title="PLAYLIST", cd_identifier="PL1"
+        )
 
         cls.create_writers()
         cls.create_modified_work()
@@ -1900,6 +1903,24 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(
             music_publisher.models.CommercialRelease.objects.count(), 1
         )
+
+    def test_playlist(self):
+        label = music_publisher.models.Label(name="Playlist Label")
+        label.save()
+        release = music_publisher.models.Playlist(
+            release_title="Playlist", release_label=label
+        )
+        release.clean()
+        release.save()
+        self.assertEqual(str(release), "Playlist")
+        release.release_label = None
+        self.assertEqual(str(release), "Playlist")
+        self.assertEqual(music_publisher.models.Playlist.objects.count(), 1)
+        response = self.client.get(release.secret_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Playlist: Playlist", response.content)
+        response = self.client.get(release.secret_api_url, follow=True)
+        self.assertEqual(response.status_code, 200)
 
     def test_writer(self):
         writer = music_publisher.models.Writer(

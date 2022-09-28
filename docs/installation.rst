@@ -83,13 +83,18 @@ There are several required `settings`_.
 Settings
 ===================================
 
+Secret key
+-----------------------------------
+
+Django requires ``SECRET_KEY`` to be set.
+
 Publisher-related settings
 -----------------------------------
 
 * ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, required
-* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, without it CWR generation will not work.
 * ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
 * ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
+* ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, defaults to ``000``, which is not accepted by CMOs, but may be accepted by (sub-)publishers.
 * ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO) numeric code, required
 * ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO) numeric code
 * ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society numeric code, rarely used

@@ -1,16 +1,16 @@
 """Contains base (abstract) classes used in :mod:`.models`
 """
 
+import base64
 import re
+from uuid import uuid4
 
 import django.core.exceptions
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import CWRFieldValidator
 from .societies import SOCIETIES
-from uuid import uuid4
-import base64
+from .validators import CWRFieldValidator
 
 
 def upload_to(instance, filename):
@@ -267,6 +267,33 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         super().clean_fields(*args, **kwargs)
 
 
+class AccountNumberBase(models.Model):
+    """Abstract base for all objects with an account number.
+
+    Attributes:
+        account_number (django.db.models.CharField):
+            account number, used for royalty processing
+    """
+
+    class Meta:
+        abstract = True
+
+    account_number = models.CharField(
+        "Account #",
+        help_text="Use this field for linking royalty statements with your "
+        "accounting.",
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    def clean_fields(self, *args, **kwargs):
+        """Account Number cleanup"""
+        if self.account_number:
+            self.account_number = self.account_number.strip()
+        return models.Model.clean_fields(self, *args, **kwargs)
+
+
 class ArtistBase(PersonBase, NotesBase, DescriptionBase):
     """Performing artist base class.
 
@@ -297,7 +324,11 @@ class ArtistBase(PersonBase, NotesBase, DescriptionBase):
 
 
 class WriterBase(
-    PersonBase, IPIWithGeneralAgreementBase, NotesBase, DescriptionBase
+    PersonBase,
+    IPIWithGeneralAgreementBase,
+    NotesBase,
+    DescriptionBase,
+    AccountNumberBase,
 ):
     """Base class for writers."""
 

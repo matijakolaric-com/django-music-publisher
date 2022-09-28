@@ -112,9 +112,9 @@ Output is a similar CSV file with additional rows and columns.
         Publisher Excel->>Writer: Outgoing Royalty Statement
         Publisher Excel->>Accounting: Accounting data
 
-This file can be then imported into excel and turned into individual
+This file can be then imported into Excel and turned into individual
 outgoing statements and accounting data using pivot tables. This process
-can be automated using simple scripts.
+can be automated using Excel templates and simple scripts.
 
 Data Distribution
 ++++++++++++++++++++++++++++++++++

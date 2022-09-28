@@ -6,9 +6,16 @@ on:
     - 'static/**'
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose --line-length 79 --exclude music_publisher/migrations"
   build:
     runs-on: ubuntu-latest
     services:
@@ -25,15 +32,15 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Setup Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
 
     - name: Setup cache for pip
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}

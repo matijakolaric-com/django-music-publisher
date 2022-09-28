@@ -87,6 +87,15 @@ class ReleaseListSerializer(serializers.HyperlinkedModelSerializer):
     release_label = LabelNestedSerializer(read_only=True)
 
 
+class ArtistField(serializers.RelatedField):
+    def to_representation(self, artist):
+        print(dir(self))
+        if artist.description or artist.image:
+            yield ArtistNestedSerializer(artist, context=self.context).data
+        else:
+            yield ArtistPlaylistSerializer(artist).data
+
+
 class RecordingInTrackSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Recording
@@ -102,7 +111,7 @@ class RecordingInTrackSerializer(serializers.HyperlinkedModelSerializer):
             "work",
         ]
 
-    artist = ArtistNestedSerializer(read_only=True)
+    artist = ArtistField(read_only=True)
     work = WorkNestedSerializer(read_only=True)
     record_label = LabelNestedSerializer(read_only=True)
 
@@ -120,6 +129,7 @@ class ReleaseDetailSerializer(serializers.ModelSerializer):
         model = Release
         fields = [
             "title",
+            "artist",
             "image",
             "description",
             "release_label",
@@ -190,6 +200,35 @@ class ArtistDetailSerializer(serializers.ModelSerializer):
     recordings = RecordingInArtistSerializer(read_only=True, many=True)
 
 
+class ArtistPlaylistSerializer(serializers.ModelSerializer):
+    class Meta:
+
+        model = Release
+        fields = ["name", "image", "description"]
+
+    name = serializers.CharField(source="__str__", read_only=True)
+
+
+class RecordingPlaylistSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Recording
+        fields = [
+            "title",
+            "recording_id",
+            "isrc",
+            "duration",
+            "release_date",
+            "audio_file",
+            "artist",
+            "record_label",
+            "work",
+        ]
+
+    artist = ArtistPlaylistSerializer(read_only=True)
+    work = WorkNestedSerializer(read_only=True)
+    record_label = LabelNestedSerializer(read_only=True)
+
+
 class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint for artists with images or descriptions.
@@ -217,9 +256,18 @@ class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Playlist
-        fields = ["release_title", "image", "description", "recordings"]
+        fields = [
+            "release_title",
+            "image",
+            "description",
+            "artist",
+            "release_label",
+            "recordings",
+        ]
 
-    recordings = RecordingInTrackSerializer(many=True, read_only=True)
+    artist = ArtistPlaylistSerializer(read_only=True)
+    release_label = LabelNestedSerializer(read_only=True)
+    recordings = RecordingPlaylistSerializer(many=True, read_only=True)
 
 
 class PlaylistViewSet(viewsets.ViewSet):

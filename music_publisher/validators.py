@@ -25,6 +25,7 @@ RE_ISWC = re.compile(r"(^T\d{10}$)")
 RE_ISRC = re.compile(r"(^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$)")
 RE_ISNI = re.compile(r"(^[0-9]{15}[0-9X]$)")
 RE_IPI_BASE = re.compile(r"(I-\d{9}-\d)")
+RE_DPID = re.compile(r"PADPIDA\d{10}[0-9A-Z]")
 
 
 def check_ean_digit(ean):
@@ -111,6 +112,17 @@ def check_isni_digit(all_digits):
         raise ValidationError("Not a valid ISNI {}.".format(all_digits))
 
 
+def check_dpid(dpid):
+    """Calculate the checksum. A valid number should have a checksum of 1."""
+    check = 18
+    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    dpid = re.sub(r"[^0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ]", r"", dpid)
+    for n in dpid:
+        check = (((check or 36) * 2) % 37 + alphabet.index(n)) % 36
+    if check != 1:
+        raise ValidationError("Not a valid DPID {}.".format(dpid))
+
+
 @deconstructible
 class CWRFieldValidator:
     """Validate fields for CWR compliance.
@@ -160,6 +172,10 @@ class CWRFieldValidator:
         elif name == "isrc":
             if not re.match(RE_ISRC, value):
                 raise ValidationError("Value does not match ISRC format.")
+        elif name == "dpid":
+            if not re.match(RE_DPID, value):
+                raise ValidationError("Value does not match DPID format.")
+            check_dpid(value)
         elif "ipi_name" in name:
             if not value.isnumeric():
                 raise ValidationError("Value must be numeric.")
@@ -175,12 +191,8 @@ class CWRFieldValidator:
                 raise ValidationError("Name contains invalid characters.")
 
 
-def validate_settings():
-    """CWR-compliance validation for settings.
-
-    This is used to prevent deployment with invalid settings.
-    """
-
+def validate_publisher_settings():
+    """CWR-compliance validation for publisher settings."""
     if settings.PUBLISHER_NAME:
         try:
             CWRFieldValidator("name")(settings.PUBLISHER_NAME)
@@ -205,6 +217,15 @@ def validate_settings():
             CWRFieldValidator("ipi_name")(settings.PUBLISHER_IPI_NAME)
         except ValidationError as e:
             raise ImproperlyConfigured("PUBLISHER_IPI_NAME: " + str(e))
+
+
+def validate_settings():
+    """CWR-compliance validation for settings.
+
+    This is used to prevent deployment with invalid settings.
+    """
+
+    validate_publisher_settings()
 
     keys = [s[0] for s in SOCIETIES]
     for t in ["PR", "MR", "SR"]:

@@ -23,14 +23,14 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = "Django-Music-Publisher - Free Music Publishing Software -"
-copyright = "2018-2021, Matija Kolarić"
+project = "DMP - Free Music Publishing Software -"
+copyright = "2018-2022, Matija Kolarić"
 author = "Matija Kolarić"
 
 # The short X.Y version
-version = "22.1 Exofile"
+version = "22.9 Rubicon"
 # The full version, including alpha/beta/rc tags
-release = "22.1"
+release = "22.9"
 
 rst_epilog = """
 .. |version| replace:: {}
@@ -77,7 +77,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -156,8 +156,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "DjangoMusicPublisher.tex",
-        "Django-Music-Publisher Documentation",
+        "DMP.tex",
+        "DMP Documentation",
         "Matija Kolarić",
         "manual",
     )
@@ -171,8 +171,8 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "djangomusicpublisher",
-        "Django-Music-Publisher Documentation",
+        "dmp",
+        "DMP Documentation",
         [author],
         1,
     )
@@ -187,10 +187,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "DjangoMusicPublisher",
-        "Django-Music-Publisher Documentation",
+        "DMP",
+        "DMP Documentation",
         author,
-        "DjangoMusicPublisher",
+        "DMP",
         "Open source solution for original music publishers.",
         "Miscellaneous",
     )

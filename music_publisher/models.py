@@ -4,19 +4,21 @@ They mostly inherit from classes in :mod:`.base`.
 
 """
 
-from collections import OrderedDict, defaultdict
+import base64
+import uuid
+from collections import defaultdict
 from datetime import datetime
-from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
-from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.template import Context
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.duration import duration_string
 
 from .base import (
@@ -36,10 +38,8 @@ from .cwr_templates import (
     TEMPLATES_30,
     TEMPLATES_31,
 )
-from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
-
-import base64, uuid
+from .validators import CWRFieldValidator
 
 WORLD_DICT = {"tis-a": "2WL", "tis-n": "2136", "name": "World"}
 
@@ -164,6 +164,14 @@ class Release(ReleaseBase):
         blank=True,
         on_delete=models.PROTECT,
     )
+    artist = models.ForeignKey(
+        Artist,
+        verbose_name="Display Artist",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        help_text="Leave empty if a compilation by different artists.",
+    )
     recordings = models.ManyToManyField("Recording", through="Track")
 
     def __str__(self):
@@ -214,6 +222,7 @@ class Release(ReleaseBase):
             "label": self.release_label.get_dict()
             if self.release_label
             else None,
+            "artist": self.artist.get_dict() if self.artist else None,
             "ean": self.ean,
         }
         if with_tracks:
@@ -442,7 +451,9 @@ class Writer(WriterBase):
         Returns:
             str: formatted writer ID
         """
-        return "W{:06d}".format(self.id)
+        if self.id:
+            return "W{:06d}".format(self.id)
+        return ""
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -458,6 +469,7 @@ class Writer(WriterBase):
             "last_name": self.last_name or None,
             "ipi_name_number": self.ipi_name or None,
             "ipi_base_number": self.ipi_base or None,
+            "account_number": self.account_number,
             "affiliations": [],
         }
         if self.pr_society:
@@ -642,11 +654,15 @@ class Work(TitleBase):
             return self._work_id
         if self.id is None:
             return ""
-        return "{}{:06}".format(settings.PUBLISHER_CODE, self.id)
+        return "{}{:06}".format(
+            settings.PUBLISHER_CODE,
+            self.id,
+        )
 
     @work_id.setter
     def work_id(self, value):
-        assert self._work_id is None  # this should not be called if set
+        if self._work_id is not None:
+            raise NotImplementedError("work_id can not be changed")
         if value:
             self._work_id = value
 
@@ -992,7 +1008,9 @@ class WriterInWork(models.Model):
         ):
             raise ValidationError(
                 {
-                    "controlled": "Must be set for a generally controlled writer."
+                    "controlled": (
+                        "Must be set for a generally controlled writer."
+                    )
                 }
             )
         d = {}
@@ -1223,7 +1241,7 @@ class Recording(models.Model):
             else self.complete_recording_title
             if self.recording_title
             else self.work.title
-        )  #  + (u' \U0001F508' if self.audio_file else '')
+        )
 
     @property
     def recording_id(self):
@@ -1236,11 +1254,15 @@ class Recording(models.Model):
             return self._recording_id
         if self.id is None:
             return ""
-        return "{}{:06}R".format(settings.PUBLISHER_CODE, self.id)
+        return "{}{:06}R".format(
+            settings.PUBLISHER_CODE,
+            self.id,
+        )
 
     @recording_id.setter
     def recording_id(self, value):
-        assert self._recording_id is None  # this should not be called if set
+        if self._recording_id is not None:
+            raise NotImplementedError("recording_id can not be changed")
         if value:
             self._recording_id = value
 
@@ -1560,6 +1582,7 @@ class CWRExport(models.Model):
         """Yield SPU/SPT lines.
 
         Args:
+            publisher (dict): dictionary with publisher data
             controlled_relative_share (Decimal): sum of manuscript shares \
             for controlled writers
 
@@ -1583,7 +1606,7 @@ class CWRExport(models.Model):
             {
                 "chain_sequence": 1,
                 "name": publisher.get("name"),
-                "code": publisher.get("code"),
+                "code": "P000001",
                 "ipi_name_number": publisher.get("ipi_name_number"),
                 "ipi_base_number": publisher.get("ipi_base_number"),
                 "pr_society": publisher.get("pr_society"),
@@ -1598,7 +1621,7 @@ class CWRExport(models.Model):
             yield self.get_transaction_record(
                 "SPT",
                 {
-                    "code": publisher.get("code"),
+                    "code": "P000001",
                     "pr_share": pr_share,
                     "mr_share": mr_share,
                     "sr_share": sr_share,
@@ -1646,42 +1669,7 @@ class CWRExport(models.Model):
             yield from self.get_other_lines(work)
             self.transaction_count += 1
 
-    def get_party_lines(self, work):
-        """Yield SPU, SPT, OPU, SWR, SWT, OPT and PWR lines
-
-        Args:
-            work: musical work
-
-        Yields:
-            str: CWR record (row/line)
-        """
-
-        # SPU, SPT
-        controlled_relative_share = Decimal(0)  # total pub share
-        other_publisher_share = Decimal(0)  # used for co-publishing
-        controlled_writer_ids = set()  # used for co-publishing
-        copublished_writer_ids = set()  # used for co-publishing
-        controlled_shares = defaultdict(Decimal)
-        for wiw in work["writers"]:
-            if wiw["controlled"]:
-                controlled_writer_ids.add(wiw["writer"]["code"])
-        for wiw in work["writers"]:
-            writer = wiw["writer"]
-            share = Decimal(wiw["relative_share"])
-            if wiw["controlled"]:
-                key = writer["code"]
-                controlled_relative_share += share
-                controlled_shares[key] += share
-            elif writer and writer["code"] in controlled_writer_ids:
-                key = writer["code"]
-                copublished_writer_ids.add(key)
-                other_publisher_share += share
-                controlled_shares[key] += share
-        publisher = work["writers"][0]["original_publishers"][0]["publisher"]
-        yield from self.yield_publisher_lines(
-            publisher, controlled_relative_share
-        )
-        # OPU, co-publishing only
+    def yield_other_publisher_lines(self, other_publisher_share):
         if other_publisher_share:
             pr_share = other_publisher_share * self.agreement_pr
             mr_share = other_publisher_share * self.agreement_mr
@@ -1704,7 +1692,44 @@ class CWRExport(models.Model):
                 },
             )
 
-        # SWR, SWT, PWR
+    def calculate_publisher_shares(self, work):
+        controlled_relative_share = Decimal(0)  # total pub share
+        other_publisher_share = Decimal(0)  # used for co-publishing
+        controlled_writer_ids = set()  # used for co-publishing
+        copublished_writer_ids = set()  # used for co-publishing
+        controlled_shares = defaultdict(Decimal)
+        for wiw in work["writers"]:
+            if wiw["controlled"]:
+                controlled_writer_ids.add(wiw["writer"]["code"])
+        for wiw in work["writers"]:
+            writer = wiw["writer"]
+            share = Decimal(wiw["relative_share"])
+            if wiw["controlled"]:
+                key = writer["code"]
+                controlled_relative_share += share
+                controlled_shares[key] += share
+            elif writer and writer["code"] in controlled_writer_ids:
+                key = writer["code"]
+                copublished_writer_ids.add(key)
+                other_publisher_share += share
+                controlled_shares[key] += share
+        return (
+            controlled_relative_share,
+            other_publisher_share,
+            controlled_shares,
+            controlled_writer_ids,
+            copublished_writer_ids,
+        )
+
+    def yield_controlled_writer_lines(
+        self,
+        work,
+        publisher,
+        controlled_shares,
+        copublished_writer_ids,
+        other_publisher_share,
+    ):
+
         for wiw in work["writers"]:
             if not wiw["controlled"]:
                 continue  # goes to OWR
@@ -1740,7 +1765,7 @@ class CWRExport(models.Model):
             if share:
                 yield self.get_transaction_record("MAN", w)
             w["publisher_sequence"] = 1
-            w["publisher_code"] = publisher["code"]
+            w["publisher_code"] = "P000001"
             w["publisher_name"] = publisher["name"]
             yield self.get_transaction_record("PWR", w)
             if (
@@ -1754,7 +1779,9 @@ class CWRExport(models.Model):
                     "PWR", {"code": w["code"], "publisher_sequence": 2}
                 )
 
-        # OWR
+    def yield_other_writer_lines(
+        self, work, controlled_writer_ids, other_publisher_share
+    ):
         for wiw in work["writers"]:
             if wiw["controlled"]:
                 continue  # done in SWR
@@ -1796,8 +1823,8 @@ class CWRExport(models.Model):
                 w["publisher_sequence"] = 2
                 yield self.get_transaction_record("PWR", w)
 
-    def get_other_lines(self, work):
-        """Yield ALT and subsequent lines
+    def get_party_lines(self, work):
+        """Yield SPU, SPT, OPU, SWR, SWT, OPT and PWR lines
 
         Args:
             work: musical work
@@ -1806,7 +1833,37 @@ class CWRExport(models.Model):
             str: CWR record (row/line)
         """
 
-        # ALT
+        # SPU, SPT
+        (
+            controlled_relative_share,
+            other_publisher_share,
+            controlled_shares,
+            controlled_writer_ids,
+            copublished_writer_ids,
+        ) = self.calculate_publisher_shares(work)
+        publisher = work["writers"][0]["original_publishers"][0]["publisher"]
+        yield from self.yield_publisher_lines(
+            publisher, controlled_relative_share
+        )
+        yield from self.yield_other_publisher_lines(other_publisher_share)
+
+        # SWR, SWT, PWR
+
+        yield from self.yield_controlled_writer_lines(
+            work,
+            publisher,
+            controlled_shares,
+            copublished_writer_ids,
+            other_publisher_share,
+        )
+
+        # OWR
+
+        yield from self.yield_other_writer_lines(
+            work, controlled_writer_ids, other_publisher_share
+        )
+
+    def get_alt_lines(self, work):
         alt_titles = set()
         for at in work["other_titles"]:
             alt_titles.add(at["title"])
@@ -1822,12 +1879,7 @@ class CWRExport(models.Model):
                 "ALT", {"alternate_title": alt_title}
             )
 
-        # VER
-        if work["version_type"]["code"] == "MOD":
-            yield self.get_transaction_record("OWK", work["original_works"][0])
-
-        # PER
-        # artists can be recording and/or live, so let's see
+    def get_per_lines(self, work):
         artists = {}
         for aiw in work["performing_artists"]:
             artists.update({aiw["artist"]["code"]: aiw["artist"]})
@@ -1840,7 +1892,7 @@ class CWRExport(models.Model):
         for artist in artists.values():
             yield self.get_transaction_record("PER", artist)
 
-        # REC
+    def get_rec_lines(self, work):
         for rec in work["recordings"]:
             if rec["recording_artist"]:
                 rec["display_artist"] = "{} {}".format(
@@ -1860,6 +1912,31 @@ class CWRExport(models.Model):
             ):
                 continue
             yield self.get_transaction_record("REC", rec)
+
+    def get_other_lines(self, work):
+        """Yield ALT and subsequent lines
+
+        Args:
+            work: musical work
+
+        Yields:
+            str: CWR record (row/line)
+        """
+
+        # ALT
+        yield from self.get_alt_lines(work)
+
+        # VER
+        if work["version_type"]["code"] == "MOD":
+            yield self.get_transaction_record("OWK", work["original_works"][0])
+
+        # PER
+
+        yield from self.get_per_lines(work)
+
+        # REC
+
+        yield from self.get_rec_lines(work)
 
         # ORN
         if work["origin"]:
