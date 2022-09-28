@@ -20,26 +20,32 @@ from django.template import Context
 from django.utils.duration import duration_string
 
 from .base import (
-    ArtistBase, IPIBase, LabelBase, LibraryBase, PersonBase, ReleaseBase,
-    TitleBase, WriterBase, upload_to
+    ArtistBase,
+    IPIBase,
+    LabelBase,
+    LibraryBase,
+    PersonBase,
+    ReleaseBase,
+    TitleBase,
+    WriterBase,
+    upload_to,
 )
 from .cwr_templates import (
-    TEMPLATES_21, TEMPLATES_22, TEMPLATES_30, TEMPLATES_31)
+    TEMPLATES_21,
+    TEMPLATES_22,
+    TEMPLATES_30,
+    TEMPLATES_31,
+)
 from .validators import CWRFieldValidator
 from .societies import SOCIETIES, SOCIETY_DICT
 
 import base64, uuid
 
-WORLD_DICT = {
-    'tis-a': '2WL',
-    'tis-n': '2136',
-    'name': 'World'
-}
+WORLD_DICT = {"tis-a": "2WL", "tis-n": "2136", "name": "World"}
 
 
 class Artist(ArtistBase):
-    """Performing artist.
-    """
+    """Performing artist."""
 
     def get_dict(self):
         """Get the object in an internal dictionary format
@@ -48,11 +54,11 @@ class Artist(ArtistBase):
             dict: internal dict format
         """
         return {
-            'id': self.id,
-            'code': self.artist_id,
-            'last_name': self.last_name,
-            'first_name': self.first_name or None,
-            'isni': self.isni or None,
+            "id": self.id,
+            "code": self.artist_id,
+            "last_name": self.last_name,
+            "first_name": self.first_name or None,
+            "isni": self.isni or None,
         }
 
     @property
@@ -62,15 +68,14 @@ class Artist(ArtistBase):
         Returns:
             str: Artist ID
         """
-        return 'A{:06d}'.format(self.id)
+        return "A{:06d}".format(self.id)
 
 
 class Label(LabelBase):
-    """Music Label.
-    """
+    """Music Label."""
 
     class Meta:
-        verbose_name = 'Music Label'
+        verbose_name = "Music Label"
 
     def __str__(self):
         return self.name.upper()
@@ -82,7 +87,7 @@ class Label(LabelBase):
         Returns:
             str: Label ID
         """
-        return 'LA{:06d}'.format(self.id)
+        return "LA{:06d}".format(self.id)
 
     def get_dict(self):
         """Get the object in an internal dictionary format
@@ -91,20 +96,19 @@ class Label(LabelBase):
             dict: internal dict format
         """
         return {
-            'id': self.id,
-            'code': self.label_id,
-            'name': self.name,
+            "id": self.id,
+            "code": self.label_id,
+            "name": self.name,
         }
 
 
 class Library(LibraryBase):
-    """Music Library.
-    """
+    """Music Library."""
 
     class Meta:
-        verbose_name = 'Music Library'
-        verbose_name_plural = 'Music Libraries'
-        ordering = ('name',)
+        verbose_name = "Music Library"
+        verbose_name_plural = "Music Libraries"
+        ordering = ("name",)
 
     # name = models.CharField(
     #     max_length=60, unique=True,
@@ -120,7 +124,7 @@ class Library(LibraryBase):
         Returns:
             str: Library ID
         """
-        return 'LI{:06d}'.format(self.id)
+        return "LI{:06d}".format(self.id)
 
     def get_dict(self):
         """Get the object in an internal dictionary format
@@ -129,9 +133,9 @@ class Library(LibraryBase):
             dict: internal dict format
         """
         return {
-            'id': self.id,
-            'code': self.library_id,
-            'name': self.name,
+            "id": self.id,
+            "code": self.library_id,
+            "name": self.name,
         }
 
 
@@ -148,32 +152,37 @@ class Release(ReleaseBase):
     """
 
     class Meta:
-        verbose_name = 'Release'
+        verbose_name = "Release"
 
     library = models.ForeignKey(
-        Library, null=True, blank=True, on_delete=models.PROTECT)
+        Library, null=True, blank=True, on_delete=models.PROTECT
+    )
     release_label = models.ForeignKey(
-        Label, verbose_name='Release (album) label', null=True, blank=True,
-        on_delete=models.PROTECT)
-    recordings = models.ManyToManyField(
-        'Recording', through='Track')
+        Label,
+        verbose_name="Release (album) label",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+    recordings = models.ManyToManyField("Recording", through="Track")
 
     def __str__(self):
         if self.cd_identifier:
             if self.release_title:
-                return '{}: {} ({})'.format(
+                return "{}: {} ({})".format(
                     self.cd_identifier,
                     self.release_title.upper(),
-                    self.library)
+                    self.library,
+                )
             else:
-                return '{} ({})'.format(
-                    self.cd_identifier, self.library)
+                return "{} ({})".format(self.cd_identifier, self.library)
         else:
             if self.release_label:
-                return '{} ({})'.format(
-                    (self.release_title or '<no title>').upper(),
-                    self.release_label)
-            return (self.release_title or '<no title>').upper()
+                return "{} ({})".format(
+                    (self.release_title or "<no title>").upper(),
+                    self.release_label,
+                )
+            return (self.release_title or "<no title>").upper()
 
     @property
     def release_id(self):
@@ -182,7 +191,7 @@ class Release(ReleaseBase):
         Returns:
             str: Release ID
         """
-        return 'RE{:06d}'.format(self.id)
+        return "RE{:06d}".format(self.id)
 
     def get_dict(self, with_tracks=False):
         """Get the object in an internal dictionary format
@@ -196,26 +205,24 @@ class Release(ReleaseBase):
         """
 
         d = {
-            'id': self.id,
-            'code': self.release_id,
-            'title':
-                self.release_title or None,
-            'date':
-                self.release_date.strftime('%Y%m%d') if self.release_date
-                else None,
-            'label':
-                self.release_label.get_dict() if self.release_label else None,
-            'ean':
-                self.ean,
+            "id": self.id,
+            "code": self.release_id,
+            "title": self.release_title or None,
+            "date": self.release_date.strftime("%Y%m%d")
+            if self.release_date
+            else None,
+            "label": self.release_label.get_dict()
+            if self.release_label
+            else None,
+            "ean": self.ean,
         }
         if with_tracks:
-            d['tracks'] = [track.get_dict() for track in self.tracks.all()]
+            d["tracks"] = [track.get_dict() for track in self.tracks.all()]
         return d
 
 
 class LibraryReleaseManager(models.Manager):
-    """Manager for a proxy class :class:`.models.LibraryRelease`
-    """
+    """Manager for a proxy class :class:`.models.LibraryRelease`"""
 
     def get_queryset(self):
         """Return only library releases
@@ -224,8 +231,11 @@ class LibraryReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.LibraryRelease`
         """
-        return super().get_queryset().filter(
-            cd_identifier__isnull=False, library__isnull=False)
+        return (
+            super()
+            .get_queryset()
+            .filter(cd_identifier__isnull=False, library__isnull=False)
+        )
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -237,7 +247,7 @@ class LibraryReleaseManager(models.Manager):
             dict: internal dict format
         """
         return {
-            'releases': [release.get_dict(with_tracks=True) for release in qs]
+            "releases": [release.get_dict(with_tracks=True) for release in qs]
         }
 
 
@@ -250,8 +260,8 @@ class LibraryRelease(Release):
 
     class Meta:
         proxy = True
-        verbose_name = 'Library Release'
-        verbose_name_plural = 'Library Releases'
+        verbose_name = "Library Release"
+        verbose_name_plural = "Library Releases"
 
     objects = LibraryReleaseManager()
 
@@ -262,11 +272,12 @@ class LibraryRelease(Release):
         Raises:
             ValidationError: If not compliant.
         """
-        if ((self.ean or self.release_date or self.release_label)
-                and not self.release_title):
-            raise ValidationError({
-                'release_title': 'Required if other release data is set.'
-            })
+        if (
+            self.ean or self.release_date or self.release_label
+        ) and not self.release_title:
+            raise ValidationError(
+                {"release_title": "Required if other release data is set."}
+            )
 
     def get_origin_dict(self):
         """Get the object in an internal dictionary format.
@@ -277,18 +288,14 @@ class LibraryRelease(Release):
             dict: internal dict format
         """
         return {
-            'origin_type': {
-                'code': 'LIB',
-                'name': 'Library Work'
-            },
-            'cd_identifier': self.cd_identifier,
-            'library': self.library.get_dict()
+            "origin_type": {"code": "LIB", "name": "Library Work"},
+            "cd_identifier": self.cd_identifier,
+            "library": self.library.get_dict(),
         }
 
 
 class CommercialReleaseManager(models.Manager):
-    """Manager for a proxy class :class:`.models.CommercialRelease`
-    """
+    """Manager for a proxy class :class:`.models.CommercialRelease`"""
 
     def get_queryset(self):
         """Return only commercial releases
@@ -297,8 +304,11 @@ class CommercialReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return super().get_queryset().filter(
-            cd_identifier__isnull=True, library__isnull=True)
+        return (
+            super()
+            .get_queryset()
+            .filter(cd_identifier__isnull=True, library__isnull=True)
+        )
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -310,7 +320,7 @@ class CommercialReleaseManager(models.Manager):
             dict: internal dict format
         """
         return {
-            'releases': [release.get_dict(with_tracks=True) for release in qs]
+            "releases": [release.get_dict(with_tracks=True) for release in qs]
         }
 
 
@@ -323,15 +333,14 @@ class CommercialRelease(Release):
 
     class Meta:
         proxy = True
-        verbose_name = 'Commercial Release'
-        verbose_name_plural = 'Commercial Releases'
+        verbose_name = "Commercial Release"
+        verbose_name_plural = "Commercial Releases"
 
     objects = CommercialReleaseManager()
 
 
 class PlaylistManager(models.Manager):
-    """Manager for a proxy class :class:`.models.Playlist`
-    """
+    """Manager for a proxy class :class:`.models.Playlist`"""
 
     def get_queryset(self):
         """Return only commercial releases
@@ -340,8 +349,11 @@ class PlaylistManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return super().get_queryset().filter(
-            cd_identifier__isnull=False, library__isnull=True)
+        return (
+            super()
+            .get_queryset()
+            .filter(cd_identifier__isnull=False, library__isnull=True)
+        )
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format
@@ -353,7 +365,7 @@ class PlaylistManager(models.Manager):
             dict: internal dict format
         """
         return {
-            'releases': [release.get_dict(with_tracks=True) for release in qs]
+            "releases": [release.get_dict(with_tracks=True) for release in qs]
         }
 
 
@@ -366,27 +378,27 @@ class Playlist(Release):
 
     class Meta:
         proxy = True
-        verbose_name = 'Playlist'
-        verbose_name_plural = 'Playlists'
+        verbose_name = "Playlist"
+        verbose_name_plural = "Playlists"
 
     objects = PlaylistManager()
 
     def __str__(self):
-        return self.release_title or ''
+        return self.release_title or ""
 
     def clean(self, *args, **kwargs):
         if self.cd_identifier is None:
             self.cd_identifier = base64.urlsafe_b64encode(uuid.uuid4().bytes)
-            self.cd_identifier = self.cd_identifier.decode().rstrip('=')[:15]
+            self.cd_identifier = self.cd_identifier.decode().rstrip("=")[:15]
         return super().clean(*args, **kwargs)
 
     @property
     def secret_url(self):
-        return reverse('secret_playlist', args=[self.cd_identifier])
+        return reverse("secret_playlist", args=[self.cd_identifier])
 
     @property
     def secret_api_url(self):
-        return reverse('playlist-detail', args=[self.cd_identifier])
+        return reverse("playlist-detail", args=[self.cd_identifier])
 
 
 class Writer(WriterBase):
@@ -398,14 +410,14 @@ class Writer(WriterBase):
     """
 
     class Meta:
-        ordering = ('last_name', 'first_name', 'ipi_name', '-id')
-        verbose_name = 'Writer'
-        verbose_name_plural = 'Writers'
+        ordering = ("last_name", "first_name", "ipi_name", "-id")
+        verbose_name = "Writer"
+        verbose_name_plural = "Writers"
 
     def __str__(self):
         name = super().__str__()
         if self.generally_controlled:
-            return name + ' (*)'
+            return name + " (*)"
         return name
 
     def clean(self, *args, **kwargs):
@@ -417,9 +429,10 @@ class Writer(WriterBase):
         # that role, it is not allowed to remove required data."""
         if self.writerinwork_set.filter(controlled=True).exists():
             raise ValidationError(
-                'This writer is controlled in at least one work. ' +
-                'Required fields are: Last name, IPI name and PR society. ' +
-                'See "Writers" in the user manual.')
+                "This writer is controlled in at least one work. "
+                + "Required fields are: Last name, IPI name and PR society. "
+                + 'See "Writers" in the user manual.'
+            )
 
     @property
     def writer_id(self):
@@ -429,7 +442,7 @@ class Writer(WriterBase):
         Returns:
             str: formatted writer ID
         """
-        return 'W{:06d}'.format(self.id)
+        return "W{:06d}".format(self.id)
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -439,56 +452,61 @@ class Writer(WriterBase):
         """
 
         d = {
-            'id': self.id,
-            'code': self.writer_id,
-            'first_name': self.first_name or None,
-            'last_name': self.last_name or None,
-            'ipi_name_number': self.ipi_name or None,
-            'ipi_base_number': self.ipi_base or None,
-            'affiliations': [],
+            "id": self.id,
+            "code": self.writer_id,
+            "first_name": self.first_name or None,
+            "last_name": self.last_name or None,
+            "ipi_name_number": self.ipi_name or None,
+            "ipi_base_number": self.ipi_base or None,
+            "affiliations": [],
         }
         if self.pr_society:
-            d['affiliations'].append({
-                'organization': {
-                    'code': self.pr_society,
-                    'name': self.get_pr_society_display().split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'PR',
-                    'name': 'Performance Rights'
-                },
-                'territory': WORLD_DICT,
-            })
+            d["affiliations"].append(
+                {
+                    "organization": {
+                        "code": self.pr_society,
+                        "name": self.get_pr_society_display().split(",")[0],
+                    },
+                    "affiliation_type": {
+                        "code": "PR",
+                        "name": "Performance Rights",
+                    },
+                    "territory": WORLD_DICT,
+                }
+            )
         if self.mr_society:
-            d['affiliations'].append({
-                'organization': {
-                    'code': self.mr_society,
-                    'name': self.get_mr_society_display().split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'MR',
-                    'name': 'Mechanical Rights'
-                },
-                'territory': WORLD_DICT,
-            })
+            d["affiliations"].append(
+                {
+                    "organization": {
+                        "code": self.mr_society,
+                        "name": self.get_mr_society_display().split(",")[0],
+                    },
+                    "affiliation_type": {
+                        "code": "MR",
+                        "name": "Mechanical Rights",
+                    },
+                    "territory": WORLD_DICT,
+                }
+            )
         if self.sr_society:
-            d['affiliations'].append({
-                'organization': {
-                    'code': self.sr_society,
-                    'name': self.get_sr_society_display().split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'SR',
-                    'name': 'Synchronization Rights'
-                },
-                'territory': WORLD_DICT,
-            })
+            d["affiliations"].append(
+                {
+                    "organization": {
+                        "code": self.sr_society,
+                        "name": self.get_sr_society_display().split(",")[0],
+                    },
+                    "affiliation_type": {
+                        "code": "SR",
+                        "name": "Synchronization Rights",
+                    },
+                    "territory": WORLD_DICT,
+                }
+            )
         return d
 
 
 class WorkManager(models.Manager):
-    """Manager for class :class:`.models.Work`
-    """
+    """Manager for class :class:`.models.Work`"""
 
     def get_queryset(self):
         """
@@ -498,7 +516,7 @@ class WorkManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.Work`
         """
-        return super().get_queryset().prefetch_related('writers')
+        return super().get_queryset().prefetch_related("writers")
 
     def get_dict(self, qs):
         """
@@ -511,15 +529,15 @@ class WorkManager(models.Manager):
             dict: dictionary with works
 
         """
-        qs = qs.prefetch_related('alternatetitle_set')
-        qs = qs.prefetch_related('writerinwork_set__writer')
-        qs = qs.prefetch_related('artistinwork_set__artist')
-        qs = qs.prefetch_related('library_release__library')
-        qs = qs.prefetch_related('recordings__record_label')
-        qs = qs.prefetch_related('recordings__artist')
-        qs = qs.prefetch_related('recordings__tracks__release__library')
-        qs = qs.prefetch_related('recordings__tracks__release__release_label')
-        qs = qs.prefetch_related('workacknowledgement_set')
+        qs = qs.prefetch_related("alternatetitle_set")
+        qs = qs.prefetch_related("writerinwork_set__writer")
+        qs = qs.prefetch_related("artistinwork_set__artist")
+        qs = qs.prefetch_related("library_release__library")
+        qs = qs.prefetch_related("recordings__record_label")
+        qs = qs.prefetch_related("recordings__artist")
+        qs = qs.prefetch_related("recordings__tracks__release__library")
+        qs = qs.prefetch_related("recordings__tracks__release__release_label")
+        qs = qs.prefetch_related("workacknowledgement_set")
 
         works = []
 
@@ -528,7 +546,7 @@ class WorkManager(models.Manager):
             works.append(j)
 
         return {
-            'works': works,
+            "works": works,
         }
 
 
@@ -554,14 +572,15 @@ class Work(TitleBase):
     """
 
     class Meta:
-        verbose_name = 'Musical Work'
-        ordering = ('-id',)
+        verbose_name = "Musical Work"
+        ordering = ("-id",)
         permissions = (
-            ('can_process_royalties', 'Can perform royalty calculations'),)
+            ("can_process_royalties", "Can perform royalty calculations"),
+        )
 
     @staticmethod
     def persist_work_ids(qs):
-        qs = qs.prefetch_related('recordings')
+        qs = qs.prefetch_related("recordings")
         for work in qs.filter(_work_id__isnull=True):
             work.work_id = work.work_id
             work.save()
@@ -570,26 +589,45 @@ class Work(TitleBase):
                     rec.recording_id = rec.recording_id
 
     _work_id = models.CharField(
-        'Work ID', max_length=14, blank=True, null=True, unique=True,
+        "Work ID",
+        max_length=14,
+        blank=True,
+        null=True,
+        unique=True,
         editable=False,
-        validators=(CWRFieldValidator('name'),))
+        validators=(CWRFieldValidator("name"),),
+    )
     iswc = models.CharField(
-        'ISWC', max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('iswc'),))
+        "ISWC",
+        max_length=15,
+        blank=True,
+        null=True,
+        unique=True,
+        validators=(CWRFieldValidator("iswc"),),
+    )
     original_title = models.CharField(
-        verbose_name='Title of original work',
-        max_length=60, db_index=True, blank=True,
-        help_text='Use only for modification of existing works.',
-        validators=(CWRFieldValidator('title'),))
+        verbose_name="Title of original work",
+        max_length=60,
+        db_index=True,
+        blank=True,
+        help_text="Use only for modification of existing works.",
+        validators=(CWRFieldValidator("title"),),
+    )
     library_release = models.ForeignKey(
-        'LibraryRelease', on_delete=models.PROTECT, blank=True, null=True,
-        related_name='works',
-        verbose_name='Library release')
+        "LibraryRelease",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name="works",
+        verbose_name="Library release",
+    )
     last_change = models.DateTimeField(
-        'Last Edited', editable=False, null=True)
-    artists = models.ManyToManyField('Artist', through='ArtistInWork')
+        "Last Edited", editable=False, null=True
+    )
+    artists = models.ManyToManyField("Artist", through="ArtistInWork")
     writers = models.ManyToManyField(
-        'Writer', through='WriterInWork', related_name='works')
+        "Writer", through="WriterInWork", related_name="works"
+    )
 
     objects = WorkManager()
 
@@ -603,8 +641,8 @@ class Work(TitleBase):
         if self._work_id:
             return self._work_id
         if self.id is None:
-            return ''
-        return '{}{:06}'.format(settings.PUBLISHER_CODE, self.id)
+            return ""
+        return "{}{:06}".format(settings.PUBLISHER_CODE, self.id)
 
     @work_id.setter
     def work_id(self, value):
@@ -622,24 +660,22 @@ class Work(TitleBase):
         return bool(self.original_title)
 
     def clean_fields(self, *args, **kwargs):
-        """Deal with various ways ISWC is written.
-        """
+        """Deal with various ways ISWC is written."""
         if self.iswc:
             # CWR 2.x holds ISWC in TNNNNNNNNNC format
             # CWR 3.0 holds ISWC in T-NNNNNNNNN-C format
             # sometimes it comes in T-NNN.NNN.NNN-C format
-            self.iswc = self.iswc.replace('-', '').replace('.', '')
+            self.iswc = self.iswc.replace("-", "").replace(".", "")
         return super().clean_fields(*args, **kwargs)
 
     def writer_last_names(self):
         writers = sorted(set(self.writers.all()), key=lambda w: w.last_name)
-        return ' / '.join(w.last_name.upper() for w in writers)
+        return " / ".join(w.last_name.upper() for w in writers)
 
     def __str__(self):
-        return '{}: {} ({})'.format(
-            self.work_id,
-            self.title.upper(),
-            self.writer_last_names())
+        return "{}: {} ({})".format(
+            self.work_id, self.title.upper(), self.writer_last_names()
+        )
 
     @staticmethod
     def get_publisher_dict():
@@ -649,60 +685,63 @@ class Work(TitleBase):
             dict: JSON-serializable data structure
         """
         j = {
-            'id': 1,
-            'code': settings.PUBLISHER_CODE,
-            'name': settings.PUBLISHER_NAME,
-            'ipi_name_number': settings.PUBLISHER_IPI_NAME,
-            'ipi_base_number': settings.PUBLISHER_IPI_BASE,
-            'affiliations': [{
-                'organization': {
-                    'code': settings.PUBLISHER_SOCIETY_PR,
-                    'name': SOCIETY_DICT.get(
-                        settings.PUBLISHER_SOCIETY_PR,
-                        ''
-                    ).split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'PR',
-                    'name': 'Performance Rights'
-                },
-                'territory': WORLD_DICT,
-            }]
+            "id": 1,
+            "code": settings.PUBLISHER_CODE,
+            "name": settings.PUBLISHER_NAME,
+            "ipi_name_number": settings.PUBLISHER_IPI_NAME,
+            "ipi_base_number": settings.PUBLISHER_IPI_BASE,
+            "affiliations": [
+                {
+                    "organization": {
+                        "code": settings.PUBLISHER_SOCIETY_PR,
+                        "name": SOCIETY_DICT.get(
+                            settings.PUBLISHER_SOCIETY_PR, ""
+                        ).split(",")[0],
+                    },
+                    "affiliation_type": {
+                        "code": "PR",
+                        "name": "Performance Rights",
+                    },
+                    "territory": WORLD_DICT,
+                }
+            ],
         }
 
         # append MR data to affiliations id needed
         if settings.PUBLISHER_SOCIETY_MR:
-            j['affiliations'].append({
-                'organization': {
-                    'code': settings.PUBLISHER_SOCIETY_MR,
-                    'name': SOCIETY_DICT.get(
-                        settings.PUBLISHER_SOCIETY_MR,
-                        ''
-                    ).split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'MR',
-                    'name': 'Mechanical Rights'
-                },
-                'territory': WORLD_DICT,
-            })
+            j["affiliations"].append(
+                {
+                    "organization": {
+                        "code": settings.PUBLISHER_SOCIETY_MR,
+                        "name": SOCIETY_DICT.get(
+                            settings.PUBLISHER_SOCIETY_MR, ""
+                        ).split(",")[0],
+                    },
+                    "affiliation_type": {
+                        "code": "MR",
+                        "name": "Mechanical Rights",
+                    },
+                    "territory": WORLD_DICT,
+                }
+            )
 
         # append SR data to affiliations id needed
         if settings.PUBLISHER_SOCIETY_SR:
-            j['affiliations'].append({
-                'organization': {
-                    'code': settings.PUBLISHER_SOCIETY_SR,
-                    'name': SOCIETY_DICT.get(
-                        settings.PUBLISHER_SOCIETY_SR,
-                        ''
-                    ).split(',')[0],
-                },
-                'affiliation_type': {
-                    'code': 'SR',
-                    'name': 'Synchronization Rights'
-                },
-                'territory': WORLD_DICT,
-            })
+            j["affiliations"].append(
+                {
+                    "organization": {
+                        "code": settings.PUBLISHER_SOCIETY_SR,
+                        "name": SOCIETY_DICT.get(
+                            settings.PUBLISHER_SOCIETY_SR, ""
+                        ).split(",")[0],
+                    },
+                    "affiliation_type": {
+                        "code": "SR",
+                        "name": "Synchronization Rights",
+                    },
+                    "territory": WORLD_DICT,
+                }
+            )
 
         return j
 
@@ -716,48 +755,53 @@ class Work(TitleBase):
         """
 
         j = {
-            'id': self.id,
-            'code': self.work_id,
-            'work_title': self.title,
-            'last_change': self.last_change,
-            'version_type': {
-                'code': 'MOD',
-                'name': 'Modified Version of a musical work',
-            } if self.original_title else {
-                'code': 'ORI',
-                'name': 'Original Work',
+            "id": self.id,
+            "code": self.work_id,
+            "work_title": self.title,
+            "last_change": self.last_change,
+            "version_type": {
+                "code": "MOD",
+                "name": "Modified Version of a musical work",
+            }
+            if self.original_title
+            else {
+                "code": "ORI",
+                "name": "Original Work",
             },
-            'iswc': self.iswc,
-            'other_titles': [
-                at.get_dict() for at in self.alternatetitle_set.all()],
-
-            'origin': (
-                self.library_release.get_origin_dict() if self.library_release
-                else None),
-            'writers': [],
-            'performing_artists': [],
-            'original_works': [],
-            'cross_references': []
+            "iswc": self.iswc,
+            "other_titles": [
+                at.get_dict() for at in self.alternatetitle_set.all()
+            ],
+            "origin": (
+                self.library_release.get_origin_dict()
+                if self.library_release
+                else None
+            ),
+            "writers": [],
+            "performing_artists": [],
+            "original_works": [],
+            "cross_references": [],
         }
 
         if self.original_title:
-            d = {'work_title': self.original_title}
-            j['original_works'].append(d)
+            d = {"work_title": self.original_title}
+            j["original_works"].append(d)
 
         # add data for (live) artists in work, normalize of required
         for aiw in self.artistinwork_set.all():
             d = aiw.get_dict()
-            j['performing_artists'].append(d)
+            j["performing_artists"].append(d)
 
         # add data for writers in work, normalize of required
         for wiw in self.writerinwork_set.all():
             d = wiw.get_dict()
-            j['writers'].append(d)
+            j["writers"].append(d)
 
         if with_recordings:
-            j['recordings'] = [
+            j["recordings"] = [
                 recording.get_dict(with_releases=True)
-                for recording in self.recordings.all()]
+                for recording in self.recordings.all()
+            ]
 
         # add cross references, currently only society work ids from ACKs
         used_society_codes = []
@@ -768,7 +812,7 @@ class Work(TitleBase):
                 continue
             used_society_codes.append(wa.society_code)
             d = wa.get_dict()
-            j['cross_references'].append(d)
+            j["cross_references"].append(d)
 
         return j
 
@@ -785,12 +829,13 @@ class AlternateTitle(TitleBase):
     work = models.ForeignKey(Work, on_delete=models.CASCADE)
     suffix = models.BooleanField(
         default=False,
-        help_text='Select if this title is only a suffix to the main title.')
+        help_text="Select if this title is only a suffix to the main title.",
+    )
 
     class Meta:
-        unique_together = (('work', 'title'),)
-        ordering = ('-suffix', 'title')
-        verbose_name = 'Alternative Title'
+        unique_together = (("work", "title"),)
+        ordering = ("-suffix", "title")
+        verbose_name = "Alternative Title"
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -799,16 +844,16 @@ class AlternateTitle(TitleBase):
             dict: JSON-serializable data structure
         """
         return {
-            'title': str(self),
-            'title_type': {
-                'code': 'AT',
-                'name': 'Alternative Title',
+            "title": str(self),
+            "title_type": {
+                "code": "AT",
+                "name": "Alternative Title",
             },
         }
 
     def __str__(self):
         if self.suffix:
-            return '{} {}'.format(self.work.title, self.title)
+            return "{} {}".format(self.work.title, self.title)
         return super().__str__()
 
 
@@ -824,11 +869,12 @@ class ArtistInWork(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
 
     class Meta:
-        verbose_name = 'Artist performing'
-        verbose_name_plural = \
-            'Artists performing (not mentioned in recordings section)'
-        unique_together = (('work', 'artist'),)
-        ordering = ('artist__last_name', 'artist__first_name')
+        verbose_name = "Artist performing"
+        verbose_name_plural = (
+            "Artists performing (not mentioned in recordings section)"
+        )
+        unique_together = (("work", "artist"),)
+        ordering = ("artist__last_name", "artist__first_name")
 
     def __str__(self):
         return str(self.artist)
@@ -839,7 +885,7 @@ class ArtistInWork(models.Model):
         Returns:
             dict: taken from :meth:`models.Artist.get_dict`
         """
-        return {'artist': self.artist.get_dict()}
+        return {"artist": self.artist.get_dict()}
 
 
 class WriterInWork(models.Model):
@@ -865,41 +911,56 @@ class WriterInWork(models.Model):
     """
 
     class Meta:
-        verbose_name = 'Writer in Work'
-        verbose_name_plural = 'Writers in Work'
-        unique_together = (('work', 'writer', 'controlled'),)
+        verbose_name = "Writer in Work"
+        verbose_name_plural = "Writers in Work"
+        unique_together = (("work", "writer", "controlled"),)
         ordering = (
-            '-controlled', 'writer__last_name', 'writer__first_name', '-id')
-    ROLES = (
-        ('CA', 'Composer&Lyricist'),
-        ('C ', 'Composer'),
-        ('A ', 'Lyricist'),
-        ('AR', 'Arranger'),
-        ('AD', 'Adaptor'),
-        ('TR', 'Translator'))
+            "-controlled",
+            "writer__last_name",
+            "writer__first_name",
+            "-id",
+        )
 
-    work = models.ForeignKey(
-        Work, on_delete=models.CASCADE)
+    ROLES = (
+        ("CA", "Composer&Lyricist"),
+        ("C ", "Composer"),
+        ("A ", "Lyricist"),
+        ("AR", "Arranger"),
+        ("AD", "Adaptor"),
+        ("TR", "Translator"),
+    )
+
+    work = models.ForeignKey(Work, on_delete=models.CASCADE)
     writer = models.ForeignKey(
-        Writer, on_delete=models.PROTECT, blank=True, null=True)
+        Writer, on_delete=models.PROTECT, blank=True, null=True
+    )
     saan = models.CharField(
-        'Society-assigned specific agreement number',
-        help_text='Use this field for specific agreements only.'
-                  'For general agreements use the field in the Writer form.',
-        max_length=14, blank=True, null=True,
-        validators=(CWRFieldValidator('saan'),), )
+        "Society-assigned specific agreement number",
+        help_text="Use this field for specific agreements only."
+        "For general agreements use the field in the Writer form.",
+        max_length=14,
+        blank=True,
+        null=True,
+        validators=(CWRFieldValidator("saan"),),
+    )
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(
-        'Manuscript share', max_digits=5, decimal_places=2)
+        "Manuscript share", max_digits=5, decimal_places=2
+    )
     capacity = models.CharField(
-        'Role',
-        max_length=2, blank=True, choices=ROLES)
+        "Role", max_length=2, blank=True, choices=ROLES
+    )
     publisher_fee = models.DecimalField(
-        max_digits=5, decimal_places=2, blank=True, null=True,
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text=(
-            'Percentage of royalties kept by the publisher,\n'
-            'in a specific agreement.'))
+            "Percentage of royalties kept by the publisher,\n"
+            "in a specific agreement."
+        ),
+    )
 
     def __str__(self):
         return str(self.writer)
@@ -924,29 +985,35 @@ class WriterInWork(models.Model):
         Also check that writers that are not controlled do not have data
         that can not apply to them."""
 
-        if (self.writer and
-                self.writer.generally_controlled and
-                not self.controlled):
-            raise ValidationError({
-                'controlled': 'Must be set for a generally controlled writer.'
-            })
+        if (
+            self.writer
+            and self.writer.generally_controlled
+            and not self.controlled
+        ):
+            raise ValidationError(
+                {
+                    "controlled": "Must be set for a generally controlled writer."
+                }
+            )
         d = {}
         if self.controlled:
             if not self.capacity:
-                d['capacity'] = 'Must be set for a controlled writer.'
+                d["capacity"] = "Must be set for a controlled writer."
             if not self.writer:
-                d['writer'] = 'Must be set for a controlled writer.'
+                d["writer"] = "Must be set for a controlled writer."
             else:
                 if not self.writer._can_be_controlled:
-                    d['writer'] = (
-                        'IPI name and PR society must be set. '
-                        'See "Writers" in the user manual')
+                    d["writer"] = (
+                        "IPI name and PR society must be set. "
+                        'See "Writers" in the user manual'
+                    )
         else:
             if self.saan:
-                d['saan'] = 'Must be empty if writer is not controlled.'
+                d["saan"] = "Must be empty if writer is not controlled."
             if self.publisher_fee:
-                d['publisher_fee'] = \
-                    'Must be empty if writer is not controlled.'
+                d[
+                    "publisher_fee"
+                ] = "Must be empty if writer is not controlled."
         if d:
             raise ValidationError(d)
 
@@ -954,32 +1021,33 @@ class WriterInWork(models.Model):
         """Get agreement dictionary for this writer in work."""
 
         pub_pr_soc = settings.PUBLISHER_SOCIETY_PR
-        pub_pr_name = SOCIETY_DICT.get(pub_pr_soc, '').split(',')[0]
+        pub_pr_name = SOCIETY_DICT.get(pub_pr_soc, "").split(",")[0]
 
         if not self.controlled or not self.writer:
             return None
         if self.writer.generally_controlled and not self.saan:
             # General
             return {
-                'recipient_organization': {
-                    'code': pub_pr_soc,
-                    'name': pub_pr_name,
+                "recipient_organization": {
+                    "code": pub_pr_soc,
+                    "name": pub_pr_name,
                 },
-                'recipient_agreement_number': self.writer.saan,
-                'agreement_type': {
-                    'code': 'OG', 'name': 'Original General',
-                }
+                "recipient_agreement_number": self.writer.saan,
+                "agreement_type": {
+                    "code": "OG",
+                    "name": "Original General",
+                },
             }
         else:
             return {
-                'recipient_organization': {
-                    'code': pub_pr_soc,
+                "recipient_organization": {
+                    "code": pub_pr_soc,
                 },
-                'recipient_agreement_number': self.saan,
-                'agreement_type': {
-                    'code': 'OS',
-                    'name': 'Original Specific',
-                }
+                "recipient_agreement_number": self.saan,
+                "agreement_type": {
+                    "code": "OS",
+                    "name": "Original Specific",
+                },
             }
 
     def get_dict(self):
@@ -990,21 +1058,27 @@ class WriterInWork(models.Model):
         """
 
         j = {
-            'writer': self.writer.get_dict() if self.writer else None,
-            'controlled': self.controlled,
-            'relative_share': str(self.relative_share / 100),
-            'writer_role': {
-                'code': self.capacity.strip(),
-                'name': self.get_capacity_display()
-            } if self.capacity else None,
-            'original_publishers': [{
-                'publisher': self.work.get_publisher_dict(),
-                'publisher_role': {
-                    'code': 'E',
-                    'name': 'Original publisher'
-                },
-                'agreement': self.get_agreement_dict()
-            }] if self.controlled else [],
+            "writer": self.writer.get_dict() if self.writer else None,
+            "controlled": self.controlled,
+            "relative_share": str(self.relative_share / 100),
+            "writer_role": {
+                "code": self.capacity.strip(),
+                "name": self.get_capacity_display(),
+            }
+            if self.capacity
+            else None,
+            "original_publishers": [
+                {
+                    "publisher": self.work.get_publisher_dict(),
+                    "publisher_role": {
+                        "code": "E",
+                        "name": "Original publisher",
+                    },
+                    "agreement": self.get_agreement_dict(),
+                }
+            ]
+            if self.controlled
+            else [],
         }
         return j
 
@@ -1021,42 +1095,65 @@ class Recording(models.Model):
     """
 
     class Meta:
-        verbose_name = 'Recording'
-        verbose_name_plural = 'Recordings'
-        ordering = ('-id',)
+        verbose_name = "Recording"
+        verbose_name_plural = "Recordings"
+        ordering = ("-id",)
 
     _recording_id = models.CharField(
-        'Recording ID', max_length=14, blank=True, null=True, unique=True,
+        "Recording ID",
+        max_length=14,
+        blank=True,
+        null=True,
+        unique=True,
         editable=False,
-        validators=(CWRFieldValidator('name'),))
+        validators=(CWRFieldValidator("name"),),
+    )
     recording_title = models.CharField(
-        blank=True, max_length=60,
-        validators=(CWRFieldValidator('title'),))
+        blank=True, max_length=60, validators=(CWRFieldValidator("title"),)
+    )
     recording_title_suffix = models.BooleanField(
-        default=False, help_text='A suffix to the WORK title.')
+        default=False, help_text="A suffix to the WORK title."
+    )
     version_title = models.CharField(
-        blank=True, max_length=60,
-        validators=(CWRFieldValidator('title'),))
+        blank=True, max_length=60, validators=(CWRFieldValidator("title"),)
+    )
     version_title_suffix = models.BooleanField(
-        default=False, help_text='A suffix to the RECORDING title.')
+        default=False, help_text="A suffix to the RECORDING title."
+    )
     release_date = models.DateField(blank=True, null=True)
     duration = models.DurationField(blank=True, null=True)
     isrc = models.CharField(
-        'ISRC', max_length=15, blank=True, null=True, unique=True,
-        validators=(CWRFieldValidator('isrc'),))
+        "ISRC",
+        max_length=15,
+        blank=True,
+        null=True,
+        unique=True,
+        validators=(CWRFieldValidator("isrc"),),
+    )
     record_label = models.ForeignKey(
-        Label, verbose_name='Record label',
-        null=True, blank=True, on_delete=models.PROTECT)
+        Label,
+        verbose_name="Record label",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
     work = models.ForeignKey(
-        Work, on_delete=models.CASCADE, related_name='recordings')
+        Work, on_delete=models.CASCADE, related_name="recordings"
+    )
     artist = models.ForeignKey(
-        Artist, verbose_name='Recording Artist', related_name='recordings',
-        on_delete=models.PROTECT, blank=True, null=True)
+        Artist,
+        verbose_name="Recording Artist",
+        related_name="recordings",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+    )
 
-    releases = models.ManyToManyField(Release, through='Track')
+    releases = models.ManyToManyField(Release, through="Track")
 
     audio_file = models.FileField(
-        upload_to=upload_to, max_length=255, blank=True)
+        upload_to=upload_to, max_length=255, blank=True
+    )
 
     def clean_fields(self, *args, **kwargs):
         """
@@ -1070,20 +1167,22 @@ class Recording(models.Model):
             return from :meth:`django.db.models.Model.clean_fields`
 
         """
-        if not any([
-            self.recording_title,
-            self.version_title,
-            self.release_date,
-            self.isrc,
-            self.duration,
-            self.record_label,
-            self.artist,
-            self.audio_file]
+        if not any(
+            [
+                self.recording_title,
+                self.version_title,
+                self.release_date,
+                self.isrc,
+                self.duration,
+                self.record_label,
+                self.artist,
+                self.audio_file,
+            ]
         ):
-            raise ValidationError('No data left, please delete instead.')
+            raise ValidationError("No data left, please delete instead.")
         if self.isrc:
             # Removing all characters added for readability
-            self.isrc = self.isrc.replace('-', '').replace('.', '')
+            self.isrc = self.isrc.replace("-", "").replace(".", "")
         return super().clean_fields(*args, **kwargs)
 
     @property
@@ -1095,8 +1194,9 @@ class Recording(models.Model):
             str
         """
         if self.recording_title_suffix:
-            return '{} {}'.format(
-                self.work.title, self.recording_title).strip()
+            return "{} {}".format(
+                self.work.title, self.recording_title
+            ).strip()
         return self.recording_title
 
     @property
@@ -1108,17 +1208,22 @@ class Recording(models.Model):
             str
         """
         if self.version_title_suffix:
-            return '{} {}'.format(
+            return "{} {}".format(
                 self.complete_recording_title or self.work.title,
-                self.version_title).strip()
+                self.version_title,
+            ).strip()
         return self.version_title
 
     @property
     def title(self):
         """Generate title from various fields."""
-        return (self.complete_version_title if self.version_title else
-            self.complete_recording_title if self.recording_title else
-            self.work.title) #  + (u' \U0001F508' if self.audio_file else '')
+        return (
+            self.complete_version_title
+            if self.version_title
+            else self.complete_recording_title
+            if self.recording_title
+            else self.work.title
+        )  #  + (u' \U0001F508' if self.audio_file else '')
 
     @property
     def recording_id(self):
@@ -1130,8 +1235,8 @@ class Recording(models.Model):
         if self._recording_id:
             return self._recording_id
         if self.id is None:
-            return ''
-        return '{}{:06}R'.format(settings.PUBLISHER_CODE, self.id)
+            return ""
+        return "{}{:06}R".format(settings.PUBLISHER_CODE, self.id)
 
     @recording_id.setter
     def recording_id(self, value):
@@ -1142,11 +1247,11 @@ class Recording(models.Model):
     def __str__(self):
         """Return the most precise type of title"""
         if self.artist:
-            return '{}: {} ({})'.format(
-                self.recording_id, self.title, self.artist)
+            return "{}: {} ({})".format(
+                self.recording_id, self.title, self.artist
+            )
         else:
-            return '{}: {}'.format(
-                self.recording_id, self.title)
+            return "{}: {}".format(self.recording_id, self.title)
 
     def get_dict(self, with_releases=False, with_work=True):
         """Create a data structure that can be serialized as JSON.
@@ -1160,36 +1265,37 @@ class Recording(models.Model):
 
         """
         j = {
-            'id':
-                self.id,
-            'code':
-                self.recording_id,
-            'recording_title':
-                self.complete_recording_title or self.work.title,
-            'version_title':
-                self.complete_version_title,
-            'release_date':
-                self.release_date.strftime('%Y%m%d') if self.release_date
-                else None,
-            'duration':
-                duration_string(self.duration) if self.duration else None,
-            'isrc':
-                self.isrc,
-            'recording_artist':
-                self.artist.get_dict() if self.artist else None,
-            'record_label':
-                self.record_label.get_dict() if self.record_label else None,
+            "id": self.id,
+            "code": self.recording_id,
+            "recording_title": self.complete_recording_title
+            or self.work.title,
+            "version_title": self.complete_version_title,
+            "release_date": self.release_date.strftime("%Y%m%d")
+            if self.release_date
+            else None,
+            "duration": duration_string(self.duration)
+            if self.duration
+            else None,
+            "isrc": self.isrc,
+            "recording_artist": self.artist.get_dict()
+            if self.artist
+            else None,
+            "record_label": self.record_label.get_dict()
+            if self.record_label
+            else None,
         }
         if with_releases:
-            j['tracks'] = []
+            j["tracks"] = []
             for track in self.tracks.all():
                 d = track.release.get_dict()
-                j['tracks'].append({
-                    'release': d,
-                    'cut_number': track.cut_number,
-                })
+                j["tracks"].append(
+                    {
+                        "release": d,
+                        "cut_number": track.cut_number,
+                    }
+                )
         if with_work:
-            j['works'] = [{'work': self.work.get_dict(with_recordings=False)}]
+            j["works"] = [{"work": self.work.get_dict(with_recordings=False)}]
         return j
 
 
@@ -1204,17 +1310,24 @@ class Track(models.Model):
     """
 
     class Meta:
-        verbose_name = 'Track'
-        unique_together = (('recording', 'release'), ('release', 'cut_number'))
-        ordering = ('release', 'cut_number',)
+        verbose_name = "Track"
+        unique_together = (("recording", "release"), ("release", "cut_number"))
+        ordering = (
+            "release",
+            "cut_number",
+        )
 
     recording = models.ForeignKey(
-        Recording, on_delete=models.PROTECT, related_name='tracks')
+        Recording, on_delete=models.PROTECT, related_name="tracks"
+    )
     release = models.ForeignKey(
-        Release, on_delete=models.CASCADE, related_name='tracks')
+        Release, on_delete=models.CASCADE, related_name="tracks"
+    )
     cut_number = models.PositiveSmallIntegerField(
-        blank=True, null=True,
-        validators=(MinValueValidator(1), MaxValueValidator(9999)))
+        blank=True,
+        null=True,
+        validators=(MinValueValidator(1), MaxValueValidator(9999)),
+    )
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -1224,11 +1337,12 @@ class Track(models.Model):
 
         """
         return {
-            'cut_number': self.cut_number,
-            'recording': self.recording.get_dict(
-                with_releases=False, with_work=True)
+            "cut_number": self.cut_number,
+            "recording": self.recording.get_dict(
+                with_releases=False, with_work=True
+            ),
         }
-    
+
     def __str__(self):
         return self.recording.title
 
@@ -1239,9 +1353,10 @@ class DeferCwrManager(models.Manager):
     Defers :attr:`CWRExport.cwr` and :attr:`AckImport.cwr` fields.
 
     """
+
     def get_queryset(self):
         qs = super().get_queryset()
-        qs = qs.defer('cwr')
+        qs = qs.defer("cwr")
         return qs
 
 
@@ -1265,30 +1380,35 @@ class CWRExport(models.Model):
     """
 
     class Meta:
-        verbose_name = 'CWR Export'
-        verbose_name_plural = 'CWR Exports'
-        ordering = ('-id',)
+        verbose_name = "CWR Export"
+        verbose_name_plural = "CWR Exports"
+        ordering = ("-id",)
 
     objects = DeferCwrManager()
 
     nwr_rev = models.CharField(
-        'CWR version/type', max_length=3, db_index=True, default='NWR',
+        "CWR version/type",
+        max_length=3,
+        db_index=True,
+        default="NWR",
         choices=(
-            ('NWR', 'CWR 2.1: New work registrations'),
-            ('REV', 'CWR 2.1: Revisions of registered works'),
-            ('NW2', 'CWR 2.2: New work registrations'),
-            ('RE2', 'CWR 2.2: Revisions of registered works'),
-            ('WRK', 'CWR 3.0: Work registration'),
-            ('ISR', 'CWR 3.0: ISWC request (EDI)'),
-            ('WR1', 'CWR 3.1 DRAFT: Work registration'),
-        ))
+            ("NWR", "CWR 2.1: New work registrations"),
+            ("REV", "CWR 2.1: Revisions of registered works"),
+            ("NW2", "CWR 2.2: New work registrations"),
+            ("RE2", "CWR 2.2: Revisions of registered works"),
+            ("WRK", "CWR 3.0: Work registration"),
+            ("ISR", "CWR 3.0: ISWC request (EDI)"),
+            ("WR1", "CWR 3.1 DRAFT: Work registration"),
+        ),
+    )
     cwr = models.TextField(blank=True, editable=False)
     created_on = models.DateTimeField(editable=False, null=True)
     year = models.CharField(
-        max_length=2, db_index=True, editable=False, blank=True)
+        max_length=2, db_index=True, editable=False, blank=True
+    )
     num_in_year = models.PositiveSmallIntegerField(default=0)
-    works = models.ManyToManyField(Work, related_name='cwr_exports')
-    description = models.CharField('Internal Note', blank=True, max_length=60)
+    works = models.ManyToManyField(Work, related_name="cwr_exports")
+    description = models.CharField("Internal Note", blank=True, max_length=60)
 
     publisher_code = None
     agreement_pr = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
@@ -1298,13 +1418,13 @@ class CWRExport(models.Model):
     @property
     def version(self):
         """Return CWR version."""
-        if self.nwr_rev in ['WRK', 'ISR']:
-            return '30'
-        elif self.nwr_rev == 'WR1':
-            return '31'
-        elif self.nwr_rev in ['NW2', 'RE2']:
-            return '22'
-        return '21'
+        if self.nwr_rev in ["WRK", "ISR"]:
+            return "30"
+        elif self.nwr_rev == "WR1":
+            return "31"
+        elif self.nwr_rev in ["NW2", "RE2"]:
+            return "22"
+        return "21"
 
     @property
     def filename(self):
@@ -1313,7 +1433,7 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        if self.version in ['30', '31']:
+        if self.version in ["30", "31"]:
             return self.filename3
         return self.filename2
 
@@ -1326,20 +1446,21 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        if self.version == '30':
-            minor_version = '0-0'
+        if self.version == "30":
+            minor_version = "0-0"
         else:
-            minor_version = '1-0'
-        if self.nwr_rev == 'ISR':
-            ext = 'ISR'
+            minor_version = "1-0"
+        if self.nwr_rev == "ISR":
+            ext = "ISR"
         else:
-            ext = 'SUB'
-        return 'CW{}{:04}{}_0000_V3-{}.{}'.format(
+            ext = "SUB"
+        return "CW{}{:04}{}_0000_V3-{}.{}".format(
             self.year,
             self.num_in_year,
             self.publisher_code or settings.PUBLISHER_CODE,
             minor_version,
-            ext)
+            ext,
+        )
 
     @property
     def filename2(self):
@@ -1348,11 +1469,12 @@ class CWRExport(models.Model):
         Returns:
             str: CWR file name
         """
-        return 'CW{}{:04}{}_000.V{}'.format(
+        return "CW{}{:04}{}_000.V{}".format(
             self.year,
             self.num_in_year,
             self.publisher_code or settings.PUBLISHER_CODE,
-            self.version)
+            self.version,
+        )
 
     def __str__(self):
         return self.filename
@@ -1367,24 +1489,21 @@ class CWRExport(models.Model):
         Returns:
             str: CWR record (row)
         """
-        if self.version == '30':
+        if self.version == "30":
             template = TEMPLATES_30.get(key)
-        elif self.version == '31':
+        elif self.version == "31":
             template = TEMPLATES_31.get(key)
         else:
-            if self.version == '22':
+            if self.version == "22":
                 tdict = TEMPLATES_22
             else:
                 tdict = TEMPLATES_21
-            if (
-                    key == 'HDR' and
-                    len(record['ipi_name_number'].lstrip('0')) > 9
-            ):
+            if key == "HDR" and len(record["ipi_name_number"].lstrip("0")) > 9:
                 # CWR 2.1 revision 8 "hack" for 10+ digit IPI name numbers
-                template = tdict.get('HDR_8')
+                template = tdict.get("HDR_8")
             else:
                 template = tdict.get(key)
-        record.update({'settings': settings})
+        record.update({"settings": settings})
         return template.render(Context(record)).upper()
 
     def get_transaction_record(self, key, record):
@@ -1399,8 +1518,8 @@ class CWRExport(models.Model):
         Returns:
             str: CWR record (row)
         """
-        record['transaction_sequence'] = self.transaction_count
-        record['record_sequence'] = self.record_sequence
+        record["transaction_sequence"] = self.transaction_count
+        record["record_sequence"] = self.record_sequence
         line = self.get_record(key, record)
         if line:
             self.record_count += 1
@@ -1414,24 +1533,26 @@ class CWRExport(models.Model):
 
             # ISR
             self.record_sequence = 0
-            if work['iswc']:
-                work['indicator'] = 'U'
-            yield self.get_transaction_record('ISR', work)
+            if work["iswc"]:
+                work["indicator"] = "U"
+            yield self.get_transaction_record("ISR", work)
 
             # WRI
             reported = set()
-            for wiw in work['writers']:
-                w = wiw['writer']
+            for wiw in work["writers"]:
+                w = wiw["writer"]
                 if not w:
                     continue  # goes to OWR
-                tup = (w['code'], wiw['writer_role']['code'])
+                tup = (w["code"], wiw["writer_role"]["code"])
                 if tup in reported:
                     continue
                 reported.add(tup)
-                w.update({
-                    'writer_role': wiw['writer_role']['code'],
-                })
-                yield self.get_transaction_record('WRI', w)
+                w.update(
+                    {
+                        "writer_role": wiw["writer_role"]["code"],
+                    }
+                )
+                yield self.get_transaction_record("WRI", w)
 
             self.transaction_count += 1
 
@@ -1445,43 +1566,47 @@ class CWRExport(models.Model):
         Yields:
               str: CWR record (row/line)
         """
-        affiliations = publisher.get('affiliations', [])
+        affiliations = publisher.get("affiliations", [])
         for aff in affiliations:
-            if aff['affiliation_type']['code'] == 'PR':
-                publisher['pr_society'] = aff['organization']['code']
-            elif aff['affiliation_type']['code'] == 'MR':
-                publisher['mr_society'] = aff['organization']['code']
-            elif aff['affiliation_type']['code'] == 'SR':
-                publisher['sr_society'] = aff['organization']['code']
+            if aff["affiliation_type"]["code"] == "PR":
+                publisher["pr_society"] = aff["organization"]["code"]
+            elif aff["affiliation_type"]["code"] == "MR":
+                publisher["mr_society"] = aff["organization"]["code"]
+            elif aff["affiliation_type"]["code"] == "SR":
+                publisher["sr_society"] = aff["organization"]["code"]
 
         pr_share = controlled_relative_share * self.agreement_pr
         mr_share = controlled_relative_share * self.agreement_mr
         sr_share = controlled_relative_share * self.agreement_sr
         yield self.get_transaction_record(
-            'SPU', {
-                'chain_sequence': 1,
-                'name': publisher.get('name'),
-                'code': publisher.get('code'),
-                'ipi_name_number': publisher.get('ipi_name_number'),
-                'ipi_base_number': publisher.get('ipi_base_number'),
-                'pr_society': publisher.get('pr_society'),
-                'mr_society': publisher.get('mr_society'),
-                'sr_society': publisher.get('sr_society'),
-                'pr_share': pr_share,
-                'mr_share': mr_share,
-                'sr_share': sr_share,
-            })
+            "SPU",
+            {
+                "chain_sequence": 1,
+                "name": publisher.get("name"),
+                "code": publisher.get("code"),
+                "ipi_name_number": publisher.get("ipi_name_number"),
+                "ipi_base_number": publisher.get("ipi_base_number"),
+                "pr_society": publisher.get("pr_society"),
+                "mr_society": publisher.get("mr_society"),
+                "sr_society": publisher.get("sr_society"),
+                "pr_share": pr_share,
+                "mr_share": mr_share,
+                "sr_share": sr_share,
+            },
+        )
         if controlled_relative_share:
             yield self.get_transaction_record(
-                'SPT', {
-                    'code': publisher.get('code'),
-                    'pr_share': pr_share,
-                    'mr_share': mr_share,
-                    'sr_share': sr_share,
-                    'pr_society': publisher.get('pr_society'),
-                    'mr_society': publisher.get('mr_society'),
-                    'sr_society': publisher.get('sr_society'),
-                })
+                "SPT",
+                {
+                    "code": publisher.get("code"),
+                    "pr_share": pr_share,
+                    "mr_share": mr_share,
+                    "sr_share": sr_share,
+                    "pr_society": publisher.get("pr_society"),
+                    "mr_society": publisher.get("mr_society"),
+                    "sr_society": publisher.get("sr_society"),
+                },
+            )
 
     def yield_registration_lines(self, works):
         """Yield lines for CWR registrations (WRK in 3.x, NWR and REV in 2.x)
@@ -1496,26 +1621,27 @@ class CWRExport(models.Model):
 
             # WRK
             self.record_sequence = 0
-            if self.version == '22':
-                if self.nwr_rev == 'NW2':
-                    record_type = 'NWR'
-                elif self.nwr_rev == 'RE2':
-                    record_type = 'REV'
+            if self.version == "22":
+                if self.nwr_rev == "NW2":
+                    record_type = "NWR"
+                elif self.nwr_rev == "RE2":
+                    record_type = "REV"
             else:
                 record_type = self.nwr_rev
 
             d = {
-                'record_type': record_type,
-                'code': work['code'],
-                'work_title': work['work_title'],
-                'iswc': work['iswc'],
-                'recorded_indicator': 'Y' if work['recordings'] else 'U',
-                'version_type': (
-                    'MOD   UNSUNS'
-                    if work['version_type']['code'] == 'MOD' else
-                    'ORI         ')
+                "record_type": record_type,
+                "code": work["code"],
+                "work_title": work["work_title"],
+                "iswc": work["iswc"],
+                "recorded_indicator": "Y" if work["recordings"] else "U",
+                "version_type": (
+                    "MOD   UNSUNS"
+                    if work["version_type"]["code"] == "MOD"
+                    else "ORI         "
+                ),
             }
-            yield self.get_transaction_record('WRK', d)
+            yield self.get_transaction_record("WRK", d)
             yield from self.get_party_lines(work)
             yield from self.get_other_lines(work)
             self.transaction_count += 1
@@ -1536,121 +1662,139 @@ class CWRExport(models.Model):
         controlled_writer_ids = set()  # used for co-publishing
         copublished_writer_ids = set()  # used for co-publishing
         controlled_shares = defaultdict(Decimal)
-        for wiw in work['writers']:
-            if wiw['controlled']:
-                controlled_writer_ids.add(wiw['writer']['code'])
-        for wiw in work['writers']:
-            writer = wiw['writer']
-            share = Decimal(wiw['relative_share'])
-            if wiw['controlled']:
-                key = writer['code']
+        for wiw in work["writers"]:
+            if wiw["controlled"]:
+                controlled_writer_ids.add(wiw["writer"]["code"])
+        for wiw in work["writers"]:
+            writer = wiw["writer"]
+            share = Decimal(wiw["relative_share"])
+            if wiw["controlled"]:
+                key = writer["code"]
                 controlled_relative_share += share
                 controlled_shares[key] += share
-            elif (writer and writer['code'] in controlled_writer_ids):
-                key = writer['code']
+            elif writer and writer["code"] in controlled_writer_ids:
+                key = writer["code"]
                 copublished_writer_ids.add(key)
                 other_publisher_share += share
                 controlled_shares[key] += share
-        publisher = work['writers'][0]['original_publishers'][0]['publisher']
+        publisher = work["writers"][0]["original_publishers"][0]["publisher"]
         yield from self.yield_publisher_lines(
-            publisher, controlled_relative_share)
+            publisher, controlled_relative_share
+        )
         # OPU, co-publishing only
         if other_publisher_share:
             pr_share = other_publisher_share * self.agreement_pr
             mr_share = other_publisher_share * self.agreement_mr
             sr_share = other_publisher_share * self.agreement_sr
             yield self.get_transaction_record(
-                'OPU', {
-                    'sequence': 2, 'pr_share': pr_share,
-                    'mr_share': mr_share, 'sr_share': sr_share,
-                })
+                "OPU",
+                {
+                    "sequence": 2,
+                    "pr_share": pr_share,
+                    "mr_share": mr_share,
+                    "sr_share": sr_share,
+                },
+            )
             yield self.get_transaction_record(
-                'OPT', {
-                    'pr_share': pr_share, 'mr_share': mr_share, 
-                    'sr_share': sr_share,})
+                "OPT",
+                {
+                    "pr_share": pr_share,
+                    "mr_share": mr_share,
+                    "sr_share": sr_share,
+                },
+            )
 
         # SWR, SWT, PWR
-        for wiw in work['writers']:
-            if not wiw['controlled']:
+        for wiw in work["writers"]:
+            if not wiw["controlled"]:
                 continue  # goes to OWR
-            w = wiw['writer']
-            agr = wiw['original_publishers'][0]['agreement']
-            saan = agr['recipient_agreement_number'] if agr else None
-            affiliations = w.get('affiliations', [])
+            w = wiw["writer"]
+            agr = wiw["original_publishers"][0]["agreement"]
+            saan = agr["recipient_agreement_number"] if agr else None
+            affiliations = w.get("affiliations", [])
             for aff in affiliations:
-                if aff['affiliation_type']['code'] == 'PR':
-                    w['pr_society'] = aff['organization']['code']
-                elif aff['affiliation_type']['code'] == 'MR':
-                    w['mr_society'] = aff['organization']['code']
-                elif aff['affiliation_type']['code'] == 'SR':
-                    w['sr_society'] = aff['organization']['code']
-            share = controlled_shares[w['code']]
+                if aff["affiliation_type"]["code"] == "PR":
+                    w["pr_society"] = aff["organization"]["code"]
+                elif aff["affiliation_type"]["code"] == "MR":
+                    w["mr_society"] = aff["organization"]["code"]
+                elif aff["affiliation_type"]["code"] == "SR":
+                    w["sr_society"] = aff["organization"]["code"]
+            share = controlled_shares[w["code"]]
             pr_share = share * (1 - self.agreement_pr)
             mr_share = share * (1 - self.agreement_mr)
             sr_share = share * (1 - self.agreement_sr)
-            w.update({
-                'writer_role': wiw['writer_role']['code'],
-                'share': share,
-                'pr_share': pr_share,
-                'mr_share': mr_share,
-                'sr_share': sr_share,
-                'saan': saan,
-                'original_publishers': wiw['original_publishers']
-            })
-            yield self.get_transaction_record('SWR', w)
+            w.update(
+                {
+                    "writer_role": wiw["writer_role"]["code"],
+                    "share": share,
+                    "pr_share": pr_share,
+                    "mr_share": mr_share,
+                    "sr_share": sr_share,
+                    "saan": saan,
+                    "original_publishers": wiw["original_publishers"],
+                }
+            )
+            yield self.get_transaction_record("SWR", w)
             if share:
-                yield self.get_transaction_record('SWT', w)
+                yield self.get_transaction_record("SWT", w)
             if share:
-                yield self.get_transaction_record('MAN', w)
-            w['publisher_sequence'] = 1
-            w['publisher_code'] = publisher['code']
-            w['publisher_name'] = publisher['name']
-            yield self.get_transaction_record('PWR', w)
-            if (self.version in ['30', '31'] and other_publisher_share and
-                    w and w['code'] in copublished_writer_ids):
-                w['publisher_sequence'] = 2
+                yield self.get_transaction_record("MAN", w)
+            w["publisher_sequence"] = 1
+            w["publisher_code"] = publisher["code"]
+            w["publisher_name"] = publisher["name"]
+            yield self.get_transaction_record("PWR", w)
+            if (
+                self.version in ["30", "31"]
+                and other_publisher_share
+                and w
+                and w["code"] in copublished_writer_ids
+            ):
+                w["publisher_sequence"] = 2
                 yield self.get_transaction_record(
-                    'PWR', {
-                        'code': w['code'],
-                        'publisher_sequence': 2
-                    })
+                    "PWR", {"code": w["code"], "publisher_sequence": 2}
+                )
 
         # OWR
-        for wiw in work['writers']:
-            if wiw['controlled']:
+        for wiw in work["writers"]:
+            if wiw["controlled"]:
                 continue  # done in SWR
-            writer = wiw['writer']
-            if writer and writer['code'] in controlled_writer_ids:
+            writer = wiw["writer"]
+            if writer and writer["code"] in controlled_writer_ids:
                 continue  # co-publishing, already solved
             if writer:
-                w = wiw['writer']
-                affiliations = w.get('affiliations', [])
+                w = wiw["writer"]
+                affiliations = w.get("affiliations", [])
                 for aff in affiliations:
-                    if aff['affiliation_type']['code'] == 'PR':
-                        w['pr_society'] = aff['organization']['code']
-                    elif aff['affiliation_type']['code'] == 'MR':
-                        w['mr_society'] = aff['organization']['code']
-                    elif aff['affiliation_type']['code'] == 'SR':
-                        w['sr_society'] = aff['organization']['code']
+                    if aff["affiliation_type"]["code"] == "PR":
+                        w["pr_society"] = aff["organization"]["code"]
+                    elif aff["affiliation_type"]["code"] == "MR":
+                        w["mr_society"] = aff["organization"]["code"]
+                    elif aff["affiliation_type"]["code"] == "SR":
+                        w["sr_society"] = aff["organization"]["code"]
             else:
-                w = {'writer_unknown_indicator': 'Y'}
-            share = Decimal(wiw['relative_share'])
-            w.update({
-                'writer_role': (wiw['writer_role']['code'] if wiw[
-                    'writer_role'] else None),
-                'share': share,
-                'pr_share': share,
-                'mr_share': share,
-                'sr_share': share
-            })
-            yield self.get_transaction_record('OWR', w)
-            if w['share']:
-                yield self.get_transaction_record('OWT', w)
-            if w['share']:
-                yield self.get_transaction_record('MAN', w)
-            if self.version in ['30', '31'] and other_publisher_share:
-                w['publisher_sequence'] = 2
-                yield self.get_transaction_record('PWR', w)
+                w = {"writer_unknown_indicator": "Y"}
+            share = Decimal(wiw["relative_share"])
+            w.update(
+                {
+                    "writer_role": (
+                        wiw["writer_role"]["code"]
+                        if wiw["writer_role"]
+                        else None
+                    ),
+                    "share": share,
+                    "pr_share": share,
+                    "mr_share": share,
+                    "sr_share": share,
+                }
+            )
+            yield self.get_transaction_record("OWR", w)
+            if w["share"]:
+                yield self.get_transaction_record("OWT", w)
+            if w["share"]:
+                yield self.get_transaction_record("MAN", w)
+            if self.version in ["30", "31"] and other_publisher_share:
+                w["publisher_sequence"] = 2
+                yield self.get_transaction_record("PWR", w)
 
     def get_other_lines(self, work):
         """Yield ALT and subsequent lines
@@ -1664,78 +1808,85 @@ class CWRExport(models.Model):
 
         # ALT
         alt_titles = set()
-        for at in work['other_titles']:
-            alt_titles.add(at['title'])
-        for rec in work['recordings']:
-            if rec['recording_title']:
-                alt_titles.add(rec['recording_title'])
-            if rec['version_title']:
-                alt_titles.add(rec['version_title'])
+        for at in work["other_titles"]:
+            alt_titles.add(at["title"])
+        for rec in work["recordings"]:
+            if rec["recording_title"]:
+                alt_titles.add(rec["recording_title"])
+            if rec["version_title"]:
+                alt_titles.add(rec["version_title"])
         for alt_title in sorted(alt_titles):
-            if alt_title == work['work_title']:
+            if alt_title == work["work_title"]:
                 continue
-            yield self.get_transaction_record('ALT', {
-                'alternate_title': alt_title
-            })
+            yield self.get_transaction_record(
+                "ALT", {"alternate_title": alt_title}
+            )
 
         # VER
-        if work['version_type']['code'] == 'MOD':
-            yield self.get_transaction_record('OWK',
-                                              work['original_works'][0])
+        if work["version_type"]["code"] == "MOD":
+            yield self.get_transaction_record("OWK", work["original_works"][0])
 
         # PER
         # artists can be recording and/or live, so let's see
         artists = {}
-        for aiw in work['performing_artists']:
-            artists.update({aiw['artist']['code']: aiw['artist']})
-        for rec in work['recordings']:
-            if not rec['recording_artist']:
+        for aiw in work["performing_artists"]:
+            artists.update({aiw["artist"]["code"]: aiw["artist"]})
+        for rec in work["recordings"]:
+            if not rec["recording_artist"]:
                 continue
-            artists.update({
-                rec['recording_artist']['code']: rec['recording_artist']
-            })
+            artists.update(
+                {rec["recording_artist"]["code"]: rec["recording_artist"]}
+            )
         for artist in artists.values():
-            yield self.get_transaction_record('PER', artist)
+            yield self.get_transaction_record("PER", artist)
 
         # REC
-        for rec in work['recordings']:
-            if rec['recording_artist']:
-                rec['display_artist'] = '{} {}'.format(
-                    rec['recording_artist']['first_name'] or '',
-                    rec['recording_artist']['last_name'],
+        for rec in work["recordings"]:
+            if rec["recording_artist"]:
+                rec["display_artist"] = "{} {}".format(
+                    rec["recording_artist"]["first_name"] or "",
+                    rec["recording_artist"]["last_name"],
                 ).strip()[:60]
-            if rec['isrc']:
-                rec['isrc_validity'] = 'Y'
-            if rec['duration']:
-                rec['duration'] = rec['duration'].replace(':', '')[0:6]
-            if self.version in ['21', '22'] and not any([
-                rec['release_date'],
-                rec['duration'],
-                rec['isrc'],
-            ]):
+            if rec["isrc"]:
+                rec["isrc_validity"] = "Y"
+            if rec["duration"]:
+                rec["duration"] = rec["duration"].replace(":", "")[0:6]
+            if self.version in ["21", "22"] and not any(
+                [
+                    rec["release_date"],
+                    rec["duration"],
+                    rec["isrc"],
+                ]
+            ):
                 continue
-            yield self.get_transaction_record('REC', rec)
+            yield self.get_transaction_record("REC", rec)
 
         # ORN
-        if work['origin']:
-            yield self.get_transaction_record('ORN', {
-                'library': work['origin']['library']['name'],
-                'cd_identifier': work['origin']['cd_identifier'],
-            })
+        if work["origin"]:
+            yield self.get_transaction_record(
+                "ORN",
+                {
+                    "library": work["origin"]["library"]["name"],
+                    "cd_identifier": work["origin"]["cd_identifier"],
+                },
+            )
 
         # XRF
-        for xrf in work['cross_references']:
-            yield self.get_transaction_record('XRF', xrf)
+        for xrf in work["cross_references"]:
+            yield self.get_transaction_record("XRF", xrf)
 
     def get_header(self):
         """Construct CWR HDR record."""
-        return self.get_record('HDR', {
-            'creation_date': datetime.now(),
-            'filename': self.filename,
-            'ipi_name_number': settings.PUBLISHER_IPI_NAME,
-            'name': settings.PUBLISHER_NAME,
-            'code': settings.PUBLISHER_CODE,
-        })
+        return self.get_record(
+            "HDR",
+            {
+                "creation_date": datetime.now(),
+                "filename": self.filename,
+                "ipi_name_number": settings.PUBLISHER_IPI_NAME,
+                "name": settings.PUBLISHER_NAME,
+                "code": settings.PUBLISHER_CODE,
+            },
+        )
 
     def yield_lines(self, works):
         """Yield CWR transaction records (rows/lines) for works
@@ -1751,14 +1902,14 @@ class CWRExport(models.Model):
 
         yield self.get_header()
 
-        if self.nwr_rev == 'NW2':
-            yield self.get_record('GRH', {'transaction_type': 'NWR'})
-        elif self.nwr_rev == 'RE2':
-            yield self.get_record('GRH', {'transaction_type': 'REV'})
+        if self.nwr_rev == "NW2":
+            yield self.get_record("GRH", {"transaction_type": "NWR"})
+        elif self.nwr_rev == "RE2":
+            yield self.get_record("GRH", {"transaction_type": "REV"})
         else:
-            yield self.get_record('GRH', {'transaction_type': self.nwr_rev})
+            yield self.get_record("GRH", {"transaction_type": self.nwr_rev})
 
-        if self.nwr_rev == 'ISR':
+        if self.nwr_rev == "ISR":
             lines = self.yield_iswc_request_lines(works)
         else:
             lines = self.yield_registration_lines(works)
@@ -1766,18 +1917,23 @@ class CWRExport(models.Model):
         for line in lines:
             yield line
 
-        yield self.get_record('GRT', {
-            'transaction_count': self.transaction_count,
-            'record_count': self.record_count + 2
-        })
-        yield self.get_record('TRL', {
-            'transaction_count': self.transaction_count,
-            'record_count': self.record_count + 4
-        })
+        yield self.get_record(
+            "GRT",
+            {
+                "transaction_count": self.transaction_count,
+                "record_count": self.record_count + 2,
+            },
+        )
+        yield self.get_record(
+            "TRL",
+            {
+                "transaction_count": self.transaction_count,
+                "record_count": self.record_count + 4,
+            },
+        )
 
     def create_cwr(self, publisher_code=None):
-        """Create CWR and save.
-        """
+        """Create CWR and save."""
         now = timezone.now()
         if publisher_code is None:
             publisher_code = settings.PUBLISHER_CODE
@@ -1785,16 +1941,18 @@ class CWRExport(models.Model):
         if self.cwr:
             return
         self.created_on = now
-        self.year = now.strftime('%y')
+        self.year = now.strftime("%y")
         nr = type(self).objects.filter(year=self.year)
-        nr = nr.order_by('-num_in_year').first()
+        nr = nr.order_by("-num_in_year").first()
         if nr:
             self.num_in_year = nr.num_in_year + 1
         else:
             self.num_in_year = 1
-        qs = self.works.order_by('id', )
-        works = Work.objects.get_dict(qs)['works']
-        self.cwr = ''.join(self.yield_lines(works))
+        qs = self.works.order_by(
+            "id",
+        )
+        works = Work.objects.get_dict(qs)["works"]
+        self.cwr = "".join(self.yield_lines(works))
         self.save()
         Work.persist_work_ids(self.works)
 
@@ -1812,32 +1970,32 @@ class WorkAcknowledgement(models.Model):
     """
 
     class Meta:
-        verbose_name = 'Registration Acknowledgement'
-        ordering = ('-date', '-id')
-        index_together = (('society_code', 'remote_work_id'),)
+        verbose_name = "Registration Acknowledgement"
+        ordering = ("-date", "-id")
+        index_together = (("society_code", "remote_work_id"),)
 
     TRANSACTION_STATUS_CHOICES = (
-        ('CO', 'Conflict'),
-        ('DU', 'Duplicate'),
-        ('RA', 'Transaction Accepted'),
-        ('AS', 'Registration Accepted'),
-        ('AC', 'Registration Accepted with Changes'),
-        ('SR', 'Registration Accepted - Ready for Payment'),
-        ('CR', 'Registration Accepted with Changes - Ready for Payment'),
-        ('RJ', 'Rejected'),
-        ('NP', 'No Participation'),
-        ('RC', 'Claim rejected'),
-        ('NA', 'Rejected - No Society Agreement Number'),
-        ('WA', 'Rejected - Wrong Society Agreement Number'),
+        ("CO", "Conflict"),
+        ("DU", "Duplicate"),
+        ("RA", "Transaction Accepted"),
+        ("AS", "Registration Accepted"),
+        ("AC", "Registration Accepted with Changes"),
+        ("SR", "Registration Accepted - Ready for Payment"),
+        ("CR", "Registration Accepted with Changes - Ready for Payment"),
+        ("RJ", "Rejected"),
+        ("NP", "No Participation"),
+        ("RC", "Claim rejected"),
+        ("NA", "Rejected - No Society Agreement Number"),
+        ("WA", "Rejected - Wrong Society Agreement Number"),
     )
 
     work = models.ForeignKey(Work, on_delete=models.PROTECT)
-    society_code = models.CharField(
-        'Society', max_length=3, choices=SOCIETIES)
+    society_code = models.CharField("Society", max_length=3, choices=SOCIETIES)
     date = models.DateField()
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS_CHOICES)
     remote_work_id = models.CharField(
-        'Remote work ID', max_length=20, blank=True, db_index=True)
+        "Remote work ID", max_length=20, blank=True, db_index=True
+    )
 
     def get_dict(self):
         """
@@ -1849,11 +2007,11 @@ class WorkAcknowledgement(models.Model):
         # if not self.remote_work_id:
         #     return None
         j = {
-            'organization': {
-                'code': self.society_code,
-                'name': self.get_society_code_display().split(',')[0],
+            "organization": {
+                "code": self.society_code,
+                "name": self.get_society_code_display().split(",")[0],
             },
-            'identifier': self.remote_work_id,
+            "identifier": self.remote_work_id,
         }
         return j
 
@@ -1873,8 +2031,8 @@ class ACKImport(models.Model):
     """
 
     class Meta:
-        verbose_name = 'CWR ACK Import'
-        ordering = ('-date', '-id')
+        verbose_name = "CWR ACK Import"
+        ordering = ("-date", "-id")
 
     objects = DeferCwrManager()
 
@@ -1896,8 +2054,8 @@ class DataImport(models.Model):
     """
 
     class Meta:
-        verbose_name = 'Data Import'
-        ordering = ('-date', '-id')
+        verbose_name = "Data Import"
+        ordering = ("-date", "-id")
 
     filename = models.CharField(max_length=60, editable=False)
     report = models.TextField(editable=False)
@@ -1915,9 +2073,9 @@ def smart_str_conversion(value):
 
 
 FORCE_CASE_CHOICES = {
-    'upper': str.upper,
-    'title': str.title,
-    'smart': smart_str_conversion,
+    "upper": str.upper,
+    "title": str.title,
+    "smart": smart_str_conversion,
 }
 
 
@@ -1927,15 +2085,16 @@ def change_case(sender, instance, **kwargs):
     force_case = FORCE_CASE_CHOICES.get(settings.OPTION_FORCE_CASE)
     if not force_case:
         return
-    if sender._meta.app_label != 'music_publisher':
+    if sender._meta.app_label != "music_publisher":
         return
     for field in instance._meta.get_fields():
         if isinstance(field, models.CharField):
             value = getattr(instance, field.name)
-            if (isinstance(value, str) and
-                    field.editable and
-                    field.choices is None and (
-                        'name' in field.name or
-                        'title' in field.name)):
+            if (
+                isinstance(value, str)
+                and field.editable
+                and field.choices is None
+                and ("name" in field.name or "title" in field.name)
+            ):
                 value = force_case(value)
                 setattr(instance, field.name, value)

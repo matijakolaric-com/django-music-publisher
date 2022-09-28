@@ -12,25 +12,25 @@ from music_metadata.territories.territory import Territory
 register = template.Library()
 
 
-@register.filter(name='perc')
+@register.filter(name="perc")
 def perc(value):
     """Display shares as human-readable string."""
     try:
-        value = Decimal(value) / Decimal('100')
-        return '{}%'.format(value)
+        value = Decimal(value) / Decimal("100")
+        return "{}%".format(value)
     except (ConversionSyntax, InvalidOperation, TypeError):
-        return 'Not convertible to percents.'
+        return "Not convertible to percents."
 
 
-@register.filter(name='soc_name')
+@register.filter(name="soc_name")
 def soc_name(value):
     """Display society name"""
 
-    value = value.strip().lstrip('0')
-    return models.SOCIETY_DICT.get(value, '')
+    value = value.strip().lstrip("0")
+    return models.SOCIETY_DICT.get(value, "")
 
 
-@register.filter(name='capacity')
+@register.filter(name="capacity")
 def capacity(value):
     """Display writer capacity/role"""
 
@@ -39,20 +39,20 @@ def capacity(value):
     return obj.get_capacity_display()
 
 
-@register.filter(name='agreement_type')
+@register.filter(name="agreement_type")
 def agreement_type(value):
     """Display publishing agreement type"""
 
     value = value.strip()
     return {
-        'OG': 'Original general',
-        'OS': 'Original specific',
-        'PG': 'Sub-Publishing general',
-        'PS': 'Sub-Publishing specific',
-    }.get(value, 'Unknown')
+        "OG": "Original general",
+        "OS": "Original specific",
+        "PG": "Sub-Publishing general",
+        "PS": "Sub-Publishing specific",
+    }.get(value, "Unknown")
 
 
-@register.filter(name='status')
+@register.filter(name="status")
 def status(value):
     """Display acknowledgement status"""
 
@@ -61,30 +61,30 @@ def status(value):
     return obj.get_status_display()
 
 
-@register.filter(name='flag')
+@register.filter(name="flag")
 def flag(value):
     """Display flag value"""
 
     value = value.strip()
     return {
-        'Y': 'Yes',
-        'N': 'No',
-        'U': 'Unknown',
-    }.get(value, 'Not set')
+        "Y": "Yes",
+        "N": "No",
+        "U": "Unknown",
+    }.get(value, "Not set")
 
 
-@register.filter(name='orimod')
+@register.filter(name="orimod")
 def orimod(value):
     """Display original or modification"""
 
     value = value.strip()
     return {
-        'ORI': 'Original Work',
-        'MOD': 'Modification',
-    }.get(value, 'Not set')
+        "ORI": "Original Work",
+        "MOD": "Modification",
+    }.get(value, "Not set")
 
 
-@register.filter(name='terr')
+@register.filter(name="terr")
 def terr(value):
     """Display territory"""
 
@@ -93,22 +93,22 @@ def terr(value):
     return str(territory)
 
 
-@register.filter(name='ie')
+@register.filter(name="ie")
 def ie(value):
     """Display Included / Excluded"""
 
     value = value.strip()
-    if value == 'E':
-        return 'excluding '
-    return ''
+    if value == "E":
+        return "excluding "
+    return ""
 
 
-@register.filter(name='role')
+@register.filter(name="role")
 def role(value):
     """Display publisher role/capacity"""
 
     return {
-        'E ': 'Original Publisher',
-        'AM': 'Administrator',
-        'SE': 'Sub-publisher'
-    }.get(value, 'Unknown publisher role')
+        "E ": "Original Publisher",
+        "AM": "Administrator",
+        "SE": "Sub-publisher",
+    }.get(value, "Unknown publisher role")

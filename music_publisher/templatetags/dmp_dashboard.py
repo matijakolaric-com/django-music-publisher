@@ -15,21 +15,24 @@ def yield_sections(model_dict, sections):
                 models.append(model_dict[object_name])
                 del model_dict[object_name]
         if models:
-            yield {
-                'name': name,
-                'models': models}
+            yield {"name": name, "models": models}
 
 
-@register.filter(name='dmp_model_groups')
+@register.filter(name="dmp_model_groups")
 def dmp_model_groups(model_list):
     """Return groups of models."""
-    model_dict = OrderedDict([(el['object_name'], el) for el in model_list])
+    model_dict = OrderedDict([(el["object_name"], el) for el in model_list])
     sections = {
-        'Musical Works': [
-            'Work', 'Publisher', 'Writer', 'CWRExport', 'ACKImport',
-            'DataImport', 'RoyaltyCalculation'],
-        'Recordings': ['Recording', 'Artist', 'Label', 'Playlist'],
-        'Releases': [
-            'CommercialRelease', 'LibraryRelease', 'Library'],
+        "Musical Works": [
+            "Work",
+            "Publisher",
+            "Writer",
+            "CWRExport",
+            "ACKImport",
+            "DataImport",
+            "RoyaltyCalculation",
+        ],
+        "Recordings": ["Recording", "Artist", "Label", "Playlist"],
+        "Releases": ["CommercialRelease", "LibraryRelease", "Library"],
     }
     yield from yield_sections(model_dict, sections)

@@ -18,11 +18,11 @@ from django.urls import path, include
 from django.conf import settings
 
 urlpatterns = [
-    path('', include('music_publisher.urls')),
-    path('', admin.site.urls),
+    path("", include("music_publisher.urls")),
+    path("", admin.site.urls),
 ]
 
 admin.site.site_header = settings.PUBLISHER_NAME
 admin.site.site_title = admin.site.site_header
-admin.site.index_title = ''
-admin.site.site_url = ''
+admin.site.index_title = ""
+admin.site.site_url = ""
