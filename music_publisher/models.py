@@ -1729,6 +1729,7 @@ class CWRExport(models.Model):
         copublished_writer_ids,
         other_publisher_share,
     ):
+
         for wiw in work["writers"]:
             if not wiw["controlled"]:
                 continue  # goes to OWR

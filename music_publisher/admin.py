@@ -732,7 +732,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
     ordering = ("release_title", "cd_identifier", "-id")
     inlines = [TrackInline]
     autocomplete_fields = ("release_label", "artist")
-
     formfield_overrides = {
         models.ImageField: {"widget": ImageWidget},
     }
@@ -839,7 +838,6 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
     """Interface for :class:`.models.Writer`."""
-
     ordering = ("last_name", "first_name", "ipi_name", "-id")
     list_display = (
         "last_name",
@@ -850,7 +848,6 @@ class WriterAdmin(MusicPublisherAdmin):
         "generally_controlled",
         "work_count",
     )
-
     list_filter = ("_can_be_controlled", "generally_controlled", "pr_society")
     search_fields = ("last_name", "ipi_name", "account_number")
     readonly_fields = ("writer_id", "_can_be_controlled", "work_count")
