@@ -172,10 +172,6 @@ complexity reduced to ``A (3.0)`` and no block more complex than
 ``C``. Code style is now validated with 
 `Black <https://black.readthedocs.io/en/stable/>`_.
 
-However, the most important new feature is the generation of
-DDEX ERN documents for commercial releases. Adding features for 
-labels will continue in next releases.
-
 Future open-source features
 ===========================
 
