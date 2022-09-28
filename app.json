@@ -5,7 +5,7 @@
   "logo": "https://avatars2.githubusercontent.com/u/57564555",
   "website": "https://matijakolaric.com/",
   "stack": "heroku-20",
-  "addons": ["heroku-postgresql:dev"],
+  "addons": ["heroku-postgresql"],
   "scripts": {
     "postdeploy": "python manage.py loaddata publishing_staff.json; python manage.py createsuperuser --noinput --email noreply@example.com --skip-checks"
   },
