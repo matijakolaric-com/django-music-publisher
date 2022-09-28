@@ -123,7 +123,6 @@ def check_dpid(dpid):
         raise ValidationError("Not a valid DPID {}.".format(dpid))
 
 
-
 @deconstructible
 class CWRFieldValidator:
     """Validate fields for CWR compliance.
@@ -204,15 +203,6 @@ def validate_publisher_settings():
             CWRFieldValidator("name")(settings.PUBLISHER_CODE)
         except ValidationError as e:
             raise ImproperlyConfigured("PUBLISHER_CODE: " + str(e))
-        if not 2 <= len(settings.PUBLISHER_CODE) <= 3:
-            raise ImproperlyConfigured(
-                "PUBLISHER_CODE: must be 2-3 characters long"
-            )
-    if settings.PUBLISHER_DPID:
-        try:
-            CWRFieldValidator("dpid")(settings.PUBLISHER_DPID)
-        except ValidationError as e:
-            raise ImproperlyConfigured("PUBLISHER_DPID: " + str(e))
         if not 2 <= len(settings.PUBLISHER_CODE) <= 3:
             raise ImproperlyConfigured(
                 "PUBLISHER_CODE: must be 2-3 characters long"

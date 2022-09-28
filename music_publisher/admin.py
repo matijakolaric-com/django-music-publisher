@@ -838,6 +838,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 @admin.register(Writer)
 class WriterAdmin(MusicPublisherAdmin):
     """Interface for :class:`.models.Writer`."""
+
     ordering = ("last_name", "first_name", "ipi_name", "-id")
     list_display = (
         "last_name",
