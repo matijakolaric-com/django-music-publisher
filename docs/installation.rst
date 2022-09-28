@@ -1,58 +1,63 @@
 Installation and Upgrading
 ****************************************
 
+.. note::
+
+    Heroku announced that they are discontinuing all free services on 28th of November 2022, and
+    deleting all existing free databases. (https://devcenter.heroku.com/changelog-items/2461)
+
+.. note::
+
+    Due to the situation, Matija Kolarić temporarily removed the pre-installation wizard. 
+    (https://dmp.matijakolaric.com/install)
+
 Installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-`This wizard <https://dmp.matijakolaric.com/install/>`_ will help you in deploying
-DMP.
+Code repository for DMP can be found at https://github.com/matijakolaric-com/django-music-publisher.
 
-.. figure:: /images/pre_wizard.png
-   :width: 100%
+Without the pre-installation wizard, which is not available for the time being, installation of DMP requires 
+significant technical skills.
 
-In the last step, you will be asked where you want to deploy it. Below are the options.
-
-Heroku
-======================================================
-
-Deployment
---------------------
-
-This is the simplest option, and free for publishers with up to several hundreds 
-of musical works. File storage and related features are not available out of the box,
-and file storage is very expensive if acquired through Heroku Marketplace.
-
-Free tier has two limitations that can both be removed for $16 per month.
-
-* Your instance goes to sleep after a while. When you access it, it takes 20-30 seconds
-  to spin up.
-* Your database is limited to 10.000 rows.
-
-Valid e-mail address is required for registration, but no payment information.
-
-The whole process takes under 5 minutes, and other than entering the data
-about the publisher and initial password, it is all menus and next-next-next when using the
-`wizard <https://dmp.matijakolaric.com/install/>`_.
-
-Upgrading
--------------------
-
-While installation to Heroku is really simple, updating requires some technical knowledge. The simplest way to update is to install `Heroku CLI (command line interface) <https://devcenter.heroku.com/articles/heroku-cli>`_. It can be installed on Windows, Mac and Linux.
-
-Then you log in, clone the repository, enter the folder, add a new remote and push:
-
-.. code-block:: bash
-
-   $ heroku login
-   $ git clone https://github.com/matijakolaric-com/django-music-publisher.git
-   $ cd django-music-publisher/
-   django-music-publisher$ heroku git:remote --app yourapp 
-   django-music-publisher$ git push heroku master
-   
-If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
-
-Custom installation
-++++++++++++++++++++++++++++++++++++++++++++++++++++++
+..
+    `This wizard <https://dmp.matijakolaric.com/install/>`_ will help you in deploying
+    DMP.
+    
+    .. figure:: /images/pre_wizard.png
+       :width: 100%
+    
+    In the last step, you will be asked where you want to deploy it. Below are the options.
+    
+    Heroku
+    ======================================================
+    
+    Deployment
+    --------------------
+    
+    This is the simplest option, and hosting starts from $16 per month (enough for most small publishers).
+    The whole process takes under 5 minutes, and other than entering the data about the publisher and initial 
+    password, it is all menus and next-next-next when using the
+    `wizard <https://dmp.matijakolaric.com/install/>`_.
+    
+    Upgrading
+    -------------------
+    
+    While installation to Heroku is really simple, updating requires some technical knowledge. The simplest way to update is to install `Heroku CLI (command line interface) <https://devcenter.heroku.com/articles/heroku-cli>`_. It can be installed on Windows, Mac and Linux.
+    
+    Then you log in, clone the repository, enter the folder, add a new remote and push:
+    
+    .. code-block:: bash
+    
+       $ heroku login
+       $ git clone https://github.com/matijakolaric-com/django-music-publisher.git
+       $ cd django-music-publisher/
+       django-music-publisher$ heroku git:remote --app yourapp 
+       django-music-publisher$ git push heroku master
+       
+    If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
+    
+    Custom installation
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 DMP - Django-Music-Publisher is based on Django, which can be installed on Windows,
 Mac and Linux PCs and servers. For more information, consult the official
@@ -144,5 +149,5 @@ Other options
   to Title Case, respectively.
 
 * ``OPTION_FILES`` - enables support for file uploads (audio files and images), using 
-  local file storage
+  local file storage (PC & VPS)
 
