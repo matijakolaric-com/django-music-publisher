@@ -731,7 +731,7 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
 
     ordering = ("release_title", "cd_identifier", "-id")
     inlines = [TrackInline]
-    autocomplete_fields = ("release_label",)
+    autocomplete_fields = ("release_label", "artist")
 
     formfield_overrides = {
         models.ImageField: {"widget": ImageWidget},
@@ -770,7 +770,8 @@ class CommercialReleaseAdmin(MusicPublisherAdmin):
                     "Release (album) metadata",
                     {
                         "fields": (
-                            ("release_title", "release_label"),
+                            "release_title",
+                            ("artist", "release_label"),
                             ("ean", "release_date"),
                         )
                     },
@@ -2357,9 +2358,6 @@ class DataImportAdmin(AdminWithReport):
     ordering = ("-id",)
 
     def add_view(self, request, form_url="", extra_context=None):
-        """If template is requested, generate and return it, otherwise
-        return normal add view.
-        """
         if "download_template" in request.GET:
             fieldnames = WorkAdmin.get_labels_for_csv(None, [], 6, simple=True)
             response = HttpResponse(
