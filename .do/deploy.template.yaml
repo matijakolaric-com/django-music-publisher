@@ -2,8 +2,12 @@ spec:
   name: dmp
   databases:
     - name: default-db
+      engine: PG
+      production: false
   services:
     - name: web
+      instance_size_slug: basic-xxs
+      instance_count: 1
       git:
         branch: master
         repo_clone_url: https://github.com/matijakolaric-com/django-music-publisher.git

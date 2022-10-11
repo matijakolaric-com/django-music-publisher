@@ -3,6 +3,7 @@
 from django.apps import AppConfig
 
 from .validators import validate_settings
+import os
 
 
 class MusicPublisherConfig(AppConfig):
@@ -21,4 +22,5 @@ class MusicPublisherConfig(AppConfig):
     def ready(self):
         """Validate settings when ready to prevent deployments with invalid
         settings."""
-        validate_settings()
+        if os.getenv('DATABASE_URL') != '':
+            validate_settings()
