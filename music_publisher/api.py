@@ -89,7 +89,6 @@ class ReleaseListSerializer(serializers.HyperlinkedModelSerializer):
 
 class ArtistField(serializers.RelatedField):
     def to_representation(self, artist):
-        print(dir(self))
         if artist.description or artist.image:
             yield ArtistNestedSerializer(artist, context=self.context).data
         else:
