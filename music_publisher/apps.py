@@ -22,5 +22,5 @@ class MusicPublisherConfig(AppConfig):
     def ready(self):
         """Validate settings when ready to prevent deployments with invalid
         settings."""
-        if os.getenv('DATABASE_URL') != '':
+        if os.getenv("DATABASE_URL") != "":
             validate_settings()
