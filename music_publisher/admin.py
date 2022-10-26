@@ -1972,7 +1972,15 @@ class CWRExportAdmin(admin.ModelAdmin):
         Parameters:
             preview: that returns the preview of CWR file,
             download: that downloads the CWR file."""
-        obj = get_object_or_404(CWRExport, pk=object_id)
+        try:
+            obj = get_object_or_404(CWRExport, pk=object_id)
+        except ValueError:
+            return super().change_view(
+                request,
+                object_id,
+                form_url=form_url, 
+                extra_context=extra_context
+            )
         if "preview" in request.GET:
             cwr = self.get_preview(obj)
             return render(
@@ -2304,7 +2312,10 @@ class ACKImportAdmin(AdminWithReport):
             obj = get_object_or_404(ACKImport, pk=int(object_id))
         except ValueError:
             return super().change_view(
-                request, object_id, form_url="", extra_context=extra_context
+                request,
+                object_id,
+                form_url=form_url,
+                extra_context=extra_context
             )
         if "preview" in request.GET:
             cwr = self.get_preview(obj)
