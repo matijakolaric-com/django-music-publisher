@@ -155,7 +155,7 @@ using secret URLs.
 
 Full metadata backup can be download using REST API endpoint.
 
-22.9 Rubicon
+23.4 Rubicon
 -------------------------------
 
 ``Account #`` field was added to the ``Writer`` model. This field can
