@@ -158,6 +158,11 @@ Full metadata backup can be download using REST API endpoint.
 23.4 Rubicon
 -------------------------------
 
+In the last 2 years, we have seen an increasing number of projects built
+on top of DMP. On the other hand, there was almost no feedback on features
+intended for labels. Therefore, it was decided not to add any more
+new features, but instead consolidate and improve existing features.
+
 ``Account #`` field was added to the ``Writer`` model. This field can
 be used for linking data from outgoing royalty statements with 
 accounting.
@@ -166,8 +171,7 @@ Introduction chapter of this documentation was extended with graphs,
 and split into two separate documents. Several external articles were 
 linked to improve clarity.
 
-Most improvements in this release are under the bonnet. The 
-source code has been reviewed and partly cleaned up, with average 
+Source code has been reviewed and partly cleaned up, with average 
 complexity reduced to ``A (3.0)`` and no block more complex than 
 ``C``. Code style is now validated with 
 `Black <https://black.readthedocs.io/en/stable/>`_.
@@ -175,19 +179,5 @@ complexity reduced to ``A (3.0)`` and no block more complex than
 Future open-source features
 ===========================
 
-Rules
----------------------------
-
-In order for a feature to be released as open-source code, all of 
-the following must apply:
-
-* Code must be global, or near-global. Features that apply to one 
-  or a couple of countries will not be included.
-
-* Code must be applicable to startup music companies. The goal is 
-  to help them grow. If a feature is required only by established 
-  companies, it will not be included. 
-
-* A feature must not require complex customisations or deployments.
-  Open-source solutions for end-users must be deployable by 
-  end-users.
+Nothing is planned for the foreseeable future. Unless there is a significant change in the industry,
+the next major release will be out in 2024. Bugfix and security releases will be coming out when required.

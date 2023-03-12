@@ -33,9 +33,9 @@ DMP will work for most *small* publishers world-wide, but it does not try to sol
    features
    support
    qa
+   releases
    videos
    installation
-   releases
    LICENSE
    manual
    restapi
