@@ -49,6 +49,7 @@ publishers affiliated with multiple PROs.
   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *fully supports multiple controlled
   publishers, administration, global sub-publishing, etc.*
 
+
 No other publishers
 ------------------------
 
@@ -86,6 +87,8 @@ synchronisation rights.
    performance, mechanical and sync shares for both writers and original publishers.
    Manuscript shares are calculated back if required.*
 
+
+
 Original publishing agreement data
 -----------------------------------------
 
@@ -106,6 +109,8 @@ Default is *London rule* (50% performance, 100% mechanical), but this can be rec
   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *uses explicitly entered 
   shares *after* original agreements. By default, they remain the same in case of sub-publishing,
   but this can be overridden on per-work basis.*
+
+
 
 Publisher fees
 -------------------------
@@ -159,6 +164,8 @@ This process can be fully automated by using scripts.
   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *can be configured with
   templates, so that outgoing statements come in any format you desire.*
 
+
+
 Data imports and exports
 ------------------------
 
@@ -170,6 +177,8 @@ Data for selected works can be exported as *JSON* (complete) or *CSV* (partial).
 
   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *can import multiple formats,
   including EBR and CWR.*
+
+
 
 Audio files and images
 ------------------------
