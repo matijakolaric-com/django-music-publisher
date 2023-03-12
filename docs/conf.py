@@ -23,7 +23,7 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = "DMP - Free Music Publishing Software -"
+project = "DMP - Free Music Publishing Catalogue"
 copyright = "2018-2023, Matija Kolarić"
 author = "Matija Kolarić"
 
@@ -105,7 +105,7 @@ html_logo = "images/dmp.png"
 html_theme_options = {
     "style_nav_header_background": "#fcfcfc",
     "logo_only": True,
-    "display_version": False,
+    "display_version": True,
 }
 
 html_favicon = "favicon.ico"
