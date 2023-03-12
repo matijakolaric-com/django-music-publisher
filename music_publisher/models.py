@@ -1552,7 +1552,6 @@ class CWRExport(models.Model):
         """Yield lines for an ISR (ISWC request) in CWR 3.x"""
 
         for work in works:
-
             # ISR
             self.record_sequence = 0
             if work["iswc"]:
@@ -1641,7 +1640,6 @@ class CWRExport(models.Model):
             str: CWR record (row/line)
         """
         for work in works:
-
             # WRK
             self.record_sequence = 0
             if self.version == "22":
@@ -1729,7 +1727,6 @@ class CWRExport(models.Model):
         copublished_writer_ids,
         other_publisher_share,
     ):
-
         for wiw in work["writers"]:
             if not wiw["controlled"]:
                 continue  # goes to OWR

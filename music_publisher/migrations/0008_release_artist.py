@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("music_publisher", "0007_auto_20220724_1028"),
     ]

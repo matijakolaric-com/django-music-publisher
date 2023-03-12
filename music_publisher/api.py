@@ -191,7 +191,6 @@ class RecordingInArtistSerializer(serializers.HyperlinkedModelSerializer):
 
 class ArtistDetailSerializer(serializers.ModelSerializer):
     class Meta:
-
         model = Release
         fields = ["name", "image", "description", "recordings"]
 
@@ -201,7 +200,6 @@ class ArtistDetailSerializer(serializers.ModelSerializer):
 
 class ArtistPlaylistSerializer(serializers.ModelSerializer):
     class Meta:
-
         model = Release
         fields = ["name", "image", "description"]
 
@@ -253,7 +251,6 @@ class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
-
         model = Playlist
         fields = [
             "release_title",

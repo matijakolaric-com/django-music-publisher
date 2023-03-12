@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("music_publisher", "0006_alter_cwrexport_nwr_rev"),
     ]

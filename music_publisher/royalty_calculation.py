@@ -338,7 +338,6 @@ class RoyaltyCalculation(object):
 
         # Prepare output lines, one per controlled writer in work
         for line in work:
-
             # Common fields for all algorithms
             out_row = row.copy()
             writer = self.writers[line.get("writer_id")]
@@ -363,7 +362,6 @@ class RoyaltyCalculation(object):
                 out_row.append("{}".format(net_amount))
 
             elif self.algo == "share":
-
                 # do not show lines when writers get nothing
                 if share_split == Decimal(1):
                     continue
@@ -378,7 +376,6 @@ class RoyaltyCalculation(object):
             yield out_row
 
         else:
-
             # "Share" algorithm has one additional row with the publisher
             if self.algo == "share":
                 out_row = row.copy()

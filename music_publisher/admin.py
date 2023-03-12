@@ -1978,8 +1978,8 @@ class CWRExportAdmin(admin.ModelAdmin):
             return super().change_view(
                 request,
                 object_id,
-                form_url=form_url, 
-                extra_context=extra_context
+                form_url=form_url,
+                extra_context=extra_context,
             )
         if "preview" in request.GET:
             cwr = self.get_preview(obj)
@@ -2315,7 +2315,7 @@ class ACKImportAdmin(AdminWithReport):
                 request,
                 object_id,
                 form_url=form_url,
-                extra_context=extra_context
+                extra_context=extra_context,
             )
         if "preview" in request.GET:
             cwr = self.get_preview(obj)

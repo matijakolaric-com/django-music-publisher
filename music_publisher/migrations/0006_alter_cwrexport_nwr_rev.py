@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("music_publisher", "0005_auto_20220206_1720"),
     ]

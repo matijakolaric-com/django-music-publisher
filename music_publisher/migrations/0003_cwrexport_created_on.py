@@ -19,7 +19,6 @@ def set_created_on(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("music_publisher", "0002_mayday"),
     ]

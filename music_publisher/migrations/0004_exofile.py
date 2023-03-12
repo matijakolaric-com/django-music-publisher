@@ -7,7 +7,6 @@ import music_publisher.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("music_publisher", "0003_cwrexport_created_on"),
     ]

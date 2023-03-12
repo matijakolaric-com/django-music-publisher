@@ -14,7 +14,6 @@ import music_publisher.validators
 
 
 class Migration(migrations.Migration):
-
     replaces = [
         ("music_publisher", "0001_initial"),
         ("music_publisher", "0002_mayday"),
