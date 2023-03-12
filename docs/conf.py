@@ -24,13 +24,13 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = "DMP - Free Music Publishing Software -"
-copyright = "2018-2022, Matija Kolarić"
+copyright = "2018-2023, Matija Kolarić"
 author = "Matija Kolarić"
 
 # The short X.Y version
-version = "22.9 Rubicon"
+version = "23.4 Rubicon"
 # The full version, including alpha/beta/rc tags
-release = "22.9"
+release = "23.4"
 
 rst_epilog = """
 .. |version| replace:: {}
