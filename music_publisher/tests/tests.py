@@ -2152,7 +2152,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW220001DMP_000.V21")
+        self.assertEqual(cwr.filename, "CW230001DMP_000.V21")
         self.assertEqual(cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
         self.assertEqual(cwr.cwr.encode()[86:], TEST_CONTENT[86:])
 
@@ -2162,7 +2162,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW220002DMP_0000_V3-0-0.SUB")
+        self.assertEqual(cwr.filename, "CW230002DMP_0000_V3-0-0.SUB")
         self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
         # should just return when once created
@@ -2176,7 +2176,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW220003DMP_0000_V3-0-0.ISR")
+        self.assertEqual(cwr.filename, "CW230003DMP_0000_V3-0-0.ISR")
         self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
 
@@ -2193,21 +2193,21 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW220004DMP_000.V22")
+        self.assertEqual(cwr.filename, "CW230004DMP_000.V22")
 
         # test CWR 2.2 REV
         cwr = music_publisher.models.CWRExport(nwr_rev="RE2")
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW220005DMP_000.V22")
+        self.assertEqual(cwr.filename, "CW230005DMP_000.V22")
 
         # test CWR 3.1 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev="WR1")
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW220006DMP_0000_V3-1-0.SUB")
+        self.assertEqual(cwr.filename, "CW230006DMP_0000_V3-1-0.SUB")
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
