@@ -65,7 +65,7 @@ class RoyaltyCalculationForm(forms.Form):
         fields = ("in_file",)
 
     class Media:
-        css = {"all": ("admin/css/forms.css",)}
+        css = {"all": ("admin/_static/forms._static",)}
         js = ("admin/js/vendor/jquery/jquery.js", "admin/js/jquery.init.js")
 
     def __init__(self, *args, **kwargs):

@@ -95,6 +95,7 @@ pygments_style = "friendly"
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+html_static_path = ['_static']
 html_css_files = [
     'custom.css',
 ]
@@ -115,7 +116,7 @@ html_favicon = "favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
+# so a file named "default._static" will overwrite the builtin "default._static".
 html_extra_path = ["googleb5723862796807b2.html", "work_import_template.csv"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
