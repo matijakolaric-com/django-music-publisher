@@ -57,6 +57,7 @@ extensions = [
     "sphinxcontrib.mermaid",
 ]
 
+mermaid_version = "9.4.2"
 
 autodoc_member_order = "bysource"
 
