@@ -5,3 +5,9 @@
 .tgt a {
     font-size: 1.2em !important;
 }
+
+div.container.tgt {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+}
