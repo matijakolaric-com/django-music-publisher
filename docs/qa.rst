@@ -64,10 +64,3 @@ Code maintainability is to be improved, currently 2 files have dead low
 index, due to their size. The goal is to have ``A`` across all files for 
 the next major release (in 2024).
 
-Creativity of the one obvious way to do it
-=====================================================================
-
-All of these measures are about reducing the possibility of an issue
-arising, catching it when it does, and fixing it quickly without
-breaking something else. But, it has nothing to do with actual 
-development of new features. 
