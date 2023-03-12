@@ -1,7 +1,7 @@
-.tgt a, .tgt em, .tgt bold {
+.tgt a, .tgt em {
     color: #00563B !important;
 }
 
-.tgt a, .tgt em, .tgt bold {
+.tgt a {
     font-size: 1.2em !important;
 }

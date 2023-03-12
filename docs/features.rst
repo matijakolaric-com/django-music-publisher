@@ -15,12 +15,14 @@ suit your needs. But this may require serious development.
     but don't have the knowledge or time or money to go into custom 
     development, 
     `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
-    affordable Software-as-a-Service, is the recommended solution.
+    Software-as-a-Service, is the recommended solution. Notes about 
+    differences between DMP and *That Green Thing* are in *green*.
+    
 
 Music metadata management
 -------------------------
 
-The database can store detailed metadata for musical works and recordings, 
+DMP can store detailed metadata for musical works and recordings, 
 data about writers, recording and performing artists, releases (albums), 
 labels and music libraries, as well as CWR exports and acknowledgements.
 
@@ -33,12 +35,43 @@ and transaction-level.
 The flip side of the coin is that you can not enter incomplete data into 
 DMP and hope to fix it later. The authors do not believe in fixing in post.
 
-Single controlled publisher
+Single controlled original publisher
 -------------------------------------
 
-DMP supports only a single controlled publisher (single publishing entity),
-entered through settings. It will **not work** for publishers with multiple
-entities, most notably US publishers affiliated with multiple PROs. 
+DMP supports only a single original controlled publisher (single publishing entity),
+entered through settings. 
+
+It will **not work** for publishers with multiple entities, most notably US 
+publishers affiliated with multiple PROs.
+
+.. container:: tgt
+
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ fully supports multiple controlled
+  publishers, administration, global sub-publishing, etc.
+
+No other publishers
+------------------------
+
+DMP holds **no data** about **other/uncontrolled publishers**. 
+Uncontrolled writers appear as unpublished in CWR files. 
+
+.. container:: tgt
+
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ holds data
+  about uncontrolled original publishers and administrators.
+
+
+Co-publishing
+------------------------
+
+With DMP, **co-publishing deals** are possible, with each publisher registering their own 
+shares. In this case, the other publisher appears as unknown in CWR files.
+
+.. container:: tgt
+
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has full support
+   for co-publishing deals.
+
 
 Manuscript shares
 ------------------------
@@ -46,6 +79,12 @@ Manuscript shares
 DMP uses a **single manuscript share** model, splits between writers 
 (prior to publishing) are same for performance, mechanical and 
 synchronisation rights.
+
+.. container:: tgt
+
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has share fields for 
+   performance, mechanical and sync shares for both writers and original publishers.
+   Manuscript shares are calculated back if required.
 
 Original publishing agreement data
 -----------------------------------------
@@ -60,24 +99,18 @@ Share transfer from a controlled writer to the publisher can be configured,
 in accordance with national regulations and customs. There is only a **single 
 setting for all controlled writers**.
 
-Default is *London rule* (50% performance, 100% mechanical).
+Default is *London rule* (50% performance, 100% mechanical), but this can be reconfigured.
+
+.. container:: tgt
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ uses explicitly entered 
+  shares *after* original agreements. By default, they remain the same in case of sub-publishing,
+  but this can be overridden on per-work basis.
 
 Publisher fees
 -------------------------
 
 Publisher fees are customisable per-writer, or even per-writer-per-work.
 
-No other publishers
-------------------------
-
-It does **not** manage data for **other publishers**. Non-controlled writers 
-appear as unpublished in CWR files. 
-
-Co-publishing
-------------------------
-
-**Co-publishing deals** are possible, with each publisher registering their own 
-shares. In this case, the other publisher appears as unknown in CWR files.
 
 No support for composite works
 --------------------------------
@@ -120,12 +153,22 @@ experienced Excel user, this takes about 10 minutes for the first statement and
 then about 30 seconds per statement for all others. 
 This process can be fully automated by using scripts.
 
+.. container:: tgt
+
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ can be configured with
+  templates, so that outgoing statements come in any format you desire.
+
 Data imports and exports
 ------------------------
 
 Data about works can be imported from *CSV* files.
 
 Data for selected works can be exported as *JSON* (complete) or *CSV* (partial).
+
+.. container:: tgt
+
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ can import multiple formats,
+  including EBR and CWR.
 
 Audio files and images
 ------------------------
