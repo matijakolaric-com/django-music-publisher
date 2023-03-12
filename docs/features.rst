@@ -9,11 +9,13 @@ By reading this section, you may save a lot of your time.
 Remember, DMP is open-source, you are free to modify it to 
 suit your needs. But this may require serious development.
 
-If you need more than vanilla DMP, 
-but don't have the knowledge or time or money to go into custom 
-development, 
-`That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
-affordable Software-as-a-Service, is the recommended solution.
+.. container:: tgt
+
+    If you need more than vanilla DMP, 
+    but don't have the knowledge or time or money to go into custom 
+    development, 
+    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
+    affordable Software-as-a-Service, is the recommended solution.
 
 Music metadata management
 -------------------------
