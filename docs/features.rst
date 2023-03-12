@@ -69,7 +69,7 @@ shares. In this case, the other publisher appears as unknown in CWR files.
 
 .. container:: tgt
 
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has full support
+   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has full support
    for co-publishing deals.
 
 
@@ -82,7 +82,7 @@ synchronisation rights.
 
 .. container:: tgt
 
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has share fields for 
+   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has share fields for 
    performance, mechanical and sync shares for both writers and original publishers.
    Manuscript shares are calculated back if required.
 
