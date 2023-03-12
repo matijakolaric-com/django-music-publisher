@@ -23,7 +23,7 @@ Based on Django web framework, it can be installed locally to a computer, or dep
 service using `this wizard <https://dmp.matijakolaric.com>`_.
 
 Please **read the documentation** as soon as possible, most notably :doc:`Features and Limitations <features>`. 
-DMP will work for most publishers world-wide, but it does not try to solve first-world problems 
+DMP will work for most *small* publishers world-wide, but it does not try to solve first-world problems 
 (e.g. US PRO rules) for free.
 
 .. toctree::
