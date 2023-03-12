@@ -86,7 +86,7 @@ Upgrade to Commercial
 
 .. container:: tgt
 
-    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ is 
+    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *is 
     the commercial upgrade to DMP. It has many more features and comes 
-    with professional support. Migration from an **unmodified** DMP 
-    instance is included in the price.
+    with professional support. Migration from an unmodified DMP 
+    instance is included in the price.*

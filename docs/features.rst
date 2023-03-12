@@ -46,8 +46,8 @@ publishers affiliated with multiple PROs.
 
 .. container:: tgt
 
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ fully supports multiple controlled
-  publishers, administration, global sub-publishing, etc.
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *fully supports multiple controlled
+  publishers, administration, global sub-publishing, etc.*
 
 No other publishers
 ------------------------
@@ -57,8 +57,8 @@ Uncontrolled writers appear as unpublished in CWR files.
 
 .. container:: tgt
 
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ holds data
-  about uncontrolled original publishers and administrators.
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *holds data
+  about uncontrolled original publishers and administrators.*
 
 
 Co-publishing
@@ -69,8 +69,8 @@ shares. In this case, the other publisher appears as unknown in CWR files.
 
 .. container:: tgt
 
-   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has full support
-   for co-publishing deals.
+   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *has full support
+   for co-publishing deals.*  
 
 
 Manuscript shares
@@ -82,9 +82,9 @@ synchronisation rights.
 
 .. container:: tgt
 
-   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ has share fields for 
+   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *has share fields for 
    performance, mechanical and sync shares for both writers and original publishers.
-   Manuscript shares are calculated back if required.
+   Manuscript shares are calculated back if required.*
 
 Original publishing agreement data
 -----------------------------------------
@@ -102,9 +102,10 @@ setting for all controlled writers**.
 Default is *London rule* (50% performance, 100% mechanical), but this can be reconfigured.
 
 .. container:: tgt
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ uses explicitly entered 
+  
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *uses explicitly entered 
   shares *after* original agreements. By default, they remain the same in case of sub-publishing,
-  but this can be overridden on per-work basis.
+  but this can be overridden on per-work basis.*
 
 Publisher fees
 -------------------------
@@ -155,8 +156,8 @@ This process can be fully automated by using scripts.
 
 .. container:: tgt
 
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ can be configured with
-  templates, so that outgoing statements come in any format you desire.
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *can be configured with
+  templates, so that outgoing statements come in any format you desire.*
 
 Data imports and exports
 ------------------------
@@ -167,8 +168,8 @@ Data for selected works can be exported as *JSON* (complete) or *CSV* (partial).
 
 .. container:: tgt
 
-  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ can import multiple formats,
-  including EBR and CWR.
+  `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *can import multiple formats,
+  including EBR and CWR.*
 
 Audio files and images
 ------------------------

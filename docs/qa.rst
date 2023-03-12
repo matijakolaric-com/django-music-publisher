@@ -1,7 +1,7 @@
 Quality Assurance
 #####################
 
-This project is now over four years old and, as any continuously
+This project is now close to five years old and, as any continuously
 developed project, has legacy issues. If anyone tells you that their
 project has no legacy issues, they are either ignorant or lying. 
 Probably both.
@@ -61,8 +61,8 @@ Code Maintainability
 +++++++++++++++++++++++++
 
 Code maintainability is to be improved, currently 2 files have dead low 
-index, due to their size. The goal is to have ``A`` across all files by
-the 23.4 release.
+index, due to their size. The goal is to have ``A`` across all files for 
+the next major release (in 2024).
 
 Creativity of the one obvious way to do it
 =====================================================================
@@ -71,38 +71,3 @@ All of these measures are about reducing the possibility of an issue
 arising, catching it when it does, and fixing it quickly without
 breaking something else. But, it has nothing to do with actual 
 development of new features. 
-
-Breaking the presumptions
-++++++++++++++++++++++++++++++++++++++++++++++++
-
-Until 2018, CWR was seen as something that only large
-publishers can use, due to it's complexity and expensive tools.
-Then DMP came out and shattered this, making CWR free and available
-to small publishers. In 2022, the mainstream belief in music
-publishing is that CWR is for everyone.
-
-Until 2020, most of the industry has believed that royalty management
-for music publishers is ... well, you know, only available to large 
-publishers, due to complexity and price.
-
-Until 2022 ... data exchange between publishers and labels ... 
-complex and expensive.
-
-QA without standards
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-The question is how to assure quality if there are no standards and no 
-expectations that actually apply to your project? 
-(Except that it is impossible. Again.)
-
-Well, DMP fulfills all those that do apply (like CWR or DDEX EBR specs),
-validate everything can be validated (IPI, ISWC, DPID), except when
-breaking the rules is advantageous. (There is a reason why nearly everyone 
-believed something was impossible, until someone broke some rule.) 
-
-But, most of the rules are great, choosing which ones to break
-is a long process, in the three examples above, this choice took 
-many years.
-
-And, if you break a rule, you must make a new one and document it really
-well.
