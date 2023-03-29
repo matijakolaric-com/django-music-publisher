@@ -23,17 +23,10 @@ Continuous Integration
 These tests are run on every push to the code repository, 
 (together with code style validation).
 
-Continuous Deployment
-++++++++++++++++++++++++++++++
-
-If tests pass, the code is automatically deployed. 
-
 Manual Testing
 ++++++++++++++++++++++++++++++++
 
-CD instance is used for creating screenshots for documentation 
-and videos. Before each major release, all functionality is
-manually tested.
+Before each major release, all functionality is manually tested.
 
 Of course, there is a small chance that some edge case is not covered,
 and that someone will hit a bug in production, but it is reduced to the
@@ -63,4 +56,3 @@ Code Maintainability
 Code maintainability is to be improved, currently 2 files have dead low 
 index, due to their size. The goal is to have ``A`` across all files for 
 the next major release (in 2024).
-
