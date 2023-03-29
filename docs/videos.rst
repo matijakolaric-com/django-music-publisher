@@ -5,7 +5,7 @@ Related Videos
 .. note::
 
   All videos listed here were released before Heroku cancelled their free tier. Any information about
-  installation (deployment) is outdated and probably wrong. Otherwise, all videos are still completely accurate.
+  DMP installation (deployment) is outdated and probably wrong. Otherwise, all videos are still completely accurate.
 
 DMP
 +++++++++++++++++++++++++++++++++++
@@ -43,18 +43,4 @@ Music Royalty Management
 
 Total playlist duration is around 20 minutes.
 
-
-That Green Thing - Commercial SaaS
-+++++++++++++++++++++++++++++++++++
-
-Recommended solution for music publisher's who need more, 
-`That Green Thing <https://thatgreenthing.eu>`_ is a *commercial software-as-a-service*
-for music publishers, with professional support, featuring multiple controlled publishers, individual writer and publisher shares, administration,
-sub-publishing, improved royalty management, etc.
-
-.. raw:: html
-
-   <iframe width="704" height="396" src="https://www.youtube-nocookie.com/embed?listType=playlist&list=PLQ3e-DuNTFt9EiB-xHEwWK73heLadz4u8" frameborder="0" allowfullscreen="1">&nbsp;</iframe>
-
-Total playlist duration is over 1 hour.
 
