@@ -195,3 +195,4 @@ Future open-source features
 
 Nothing is planned for the foreseeable future. Unless there is a significant change in the industry,
 the next major release will be out in 2024. Bugfix and security releases will be coming out when required.
+

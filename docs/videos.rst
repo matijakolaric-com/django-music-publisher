@@ -1,6 +1,12 @@
 Related Videos
 ##############
 
+
+.. note::
+
+  All videos listed here were released before Heroku cancelled their free tier. Any information about
+  installation (deployment) is outdated and probably wrong. Otherwise, all videos are still completely accurate.
+
 DMP
 +++++++++++++++++++++++++++++++++++
 
