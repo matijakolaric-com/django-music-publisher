@@ -31,7 +31,7 @@ All entered data is validated for CWR and DDEX compatibility on field-, record-,
 and transaction-level.
 
 The flip side of the coin is that you can not enter incomplete data into 
-DMP and hope to fix it later. The authors do not believe in fixing in post.
+DMP and hope to fix it later. The author does not believe in fixing in post.
 
 Single controlled original publisher
 -------------------------------------
@@ -105,7 +105,7 @@ Default is *London rule* (50% performance, 100% mechanical), but this can be rec
 .. container:: tgt
   
   `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *uses explicitly entered 
-  shares *after* original agreements. By default, they remain the same in case of sub-publishing,
+  shares after original agreements. By default, they remain the same in case of sub-publishing,
   but this can be overridden on per-work basis.*
 
 
