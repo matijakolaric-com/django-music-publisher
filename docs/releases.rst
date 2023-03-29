@@ -53,7 +53,10 @@ version, CWR files are zipped.
 
 Twenty-twenty was primarily about simplified deployment. Since 
 this version, DMP can be deployed to the Free Heroku dyno
-(container) by non-techies.
+(container) by non-techies. 
+
+.. note::
+    This free service was cancelled in late 2022. See "Rubicon" below.
 
 Support for custom global share splits was added. MR/SR 
 affiliations for writers were also added. Syntax highlighting for 
@@ -158,23 +161,34 @@ Full metadata backup can be download using REST API endpoint.
 23.4 Rubicon
 -------------------------------
 
-In the last 2 years, we have seen an increasing number of projects built
-on top of DMP. On the other hand, there was almost no feedback on features
-intended for labels. Therefore, it was decided not to add any more
-new features, but instead consolidate and improve existing features.
+As the release name suggests, this release is a game changer. Not necessarily 
+in a good way for small music publishers without development/IT skills.
+
+Since version *20 Twenty*, it was possible for anyone to deploy DMP to a free cloud 
+account using a wizard. The free cloud service no longer exists, so the wizard 
+was removed. 
+
+Deploying to Heroku and Digital Ocean is still possible for those
+who can read and follow installation instructions. 
 
 ``Account #`` field was added to the ``Writer`` model. This field can
-be used for linking data from outgoing royalty statements with 
-accounting.
+be used for linking royalty statement data with 
+accounting. This is the only visible change to an end user within DMP.
 
-Introduction chapter of this documentation was extended with graphs, 
-and split into two separate documents. Several external articles were 
-linked to improve clarity.
+Several important projects based on TGT were released in the previous 3 years,
+not only targeting music publishers, but also CMOs (societies). That is
+what open source projects are really about, and DMP will in the future
+be more focused on providing the core for such projects. Optionally combined
+with consulting by the author and the team.
 
 Source code has been reviewed and partly cleaned up, with average 
 complexity reduced to ``A (3.0)`` and no block more complex than 
 ``C``. Code style is now validated with 
 `Black <https://black.readthedocs.io/en/stable/>`_.
+
+Introduction chapter of this documentation was extended with graphs, 
+and split into two separate documents. Several external articles were 
+linked to improve clarity.
 
 Future open-source features
 ===========================
