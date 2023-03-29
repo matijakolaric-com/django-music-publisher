@@ -11,20 +11,22 @@ DMP
 * **royalty statement processing**, and
 * **basic data distribution**.
 
+DMP will work for most *small* publishers world-wide, but it does not try to solve first-world problems 
+(e.g. US PRO rules) for free. See :doc:`Features and Limitations <features>`. 
+
+
+Based on Django web framework, DMP is primarily designed to be deployed to a cloud, but it can be installed to a personal computer.
+(Linux, Mac OS or Windows). See :doc:`Installation <installation>` for details.
+
+
 .. raw:: html
 
-    Community support is available through a
+    Author of this software does NOT provide individual support of any kind.
+    Community support MAY be available through a
     <a href="https://facebook.com/groups/musicpublishersupport" target="_blank">Facebook group</a> 
     and <a href="https://github.com/matijakolaric-com/django-music-publisher" target="_blank">code repository</a>.
     No email support is available.
 
-
-Based on Django web framework, it can be installed locally to a computer, or deployed to a cloud 
-service using `this wizard <https://dmp.matijakolaric.com>`_.
-
-Please **read the documentation** as soon as possible, most notably :doc:`Features and Limitations <features>`. 
-DMP will work for most *small* publishers world-wide, but it does not try to solve first-world problems 
-(e.g. US PRO rules) for free.
 
 .. toctree::
    :maxdepth: 1

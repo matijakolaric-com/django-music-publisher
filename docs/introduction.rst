@@ -95,7 +95,7 @@ for **batch registration of musical works** with Collective Management Organizat
 Royalty Management
 +++++++++++++++++++++++++++++++++
 
-Simple **royalty management** calculations can split received royalties among controlled 
+Simple **royalty processing** calculations can split received royalties among controlled 
 writers and calculate publisher fees. 
 
 Incoming data is accepted
