@@ -11,9 +11,9 @@ suit your needs. This may require serious software development skills.
 
 .. container:: tgt
 
-    *If you need additional features, 
-    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
-    Software-as-a-Service, is the recommended solution. Notes about 
+    *If you need additional features,*
+    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *(available as 
+    Software-as-a-Service) is the recommended solution. Notes about 
     differences between it and DMP are in green.*
     
 
