@@ -25,7 +25,8 @@ Based on Django web framework, DMP is primarily designed to be deployed to a clo
     Community support MAY be available through a
     <a href="https://facebook.com/groups/musicpublishersupport" target="_blank">Facebook group</a> 
     and <a href="https://github.com/matijakolaric-com/django-music-publisher" target="_blank">code repository</a>.
-    No email support is available.
+    No email support is available.<br>
+
 
 
 .. toctree::
