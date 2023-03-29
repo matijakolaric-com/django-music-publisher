@@ -182,7 +182,7 @@ be more focused on providing the core for such projects. Optionally combined
 with consulting by the author and the team.
 
 Source code has been reviewed and partly cleaned up, with average 
-complexity reduced to ``A (3.0)`` and no block more complex than 
+complexity reduced to ``A`` and no block more complex than 
 ``C``. Code style is now validated with 
 `Black <https://black.readthedocs.io/en/stable/>`_.
 
