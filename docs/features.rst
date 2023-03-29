@@ -6,17 +6,15 @@ DMP works for most publishers world-wide, but not nearly for all.
 
 By reading this section, you may save a lot of your time.
 
-Remember, DMP is open-source, you are free to modify it to 
-suit your needs. But this may require serious development.
+DMP is open-source, you are free to modify it to 
+suit your needs. This may require serious software development skills.
 
 .. container:: tgt
 
-    If you need more than vanilla DMP, 
-    but don't have the knowledge or time or money to go into custom 
-    development, 
+    *If you need additional features, 
     `That Green Thing <https://matijakolaric.com/thatgreenthing>`_, available as 
     Software-as-a-Service, is the recommended solution. Notes about 
-    differences between DMP and *That Green Thing* are in *green*.
+    differences between it and DMP are in green.*
     
 
 Music metadata management
