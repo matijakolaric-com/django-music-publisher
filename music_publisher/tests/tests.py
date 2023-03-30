@@ -1686,37 +1686,6 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
-@override_settings(
-    SECURE_SSL_REDIRECT=False,
-    PUBLISHER_NAME="TEST PUBLISHER",
-    PUBLISHER_CODE="MK",
-    PUBLISHER_IPI_NAME="0000000199",
-    PUBLISHER_SOCIETY_PR="52",
-    PUBLISHER_SOCIETY_MR="44",
-    PUBLISHER_SOCIETY_SR="44",
-    PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal("0.333333"),
-    PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal("0.5"),
-    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
-    OPTION_FILES=True,
-)
-class AdminWithFilesTest(AdminTest):
-    """Functional tests on the interface, and several related unit tests.
-
-    Same as previous, but with file support"""
-
-    fixtures = ["publishing_staff.json"]
-    testing_admins = [
-        "artist",
-        "label",
-        "library",
-        "work",
-        "commercialrelease",
-        "writer",
-        "recording",
-        # "cwrexport",
-    ]
-
-
 class CWRTemplatesTest(SimpleTestCase):
     """A test related to CWR Templates."""
 
@@ -2260,10 +2229,11 @@ class OtherFunctionalTest(SimpleTestCase):
 
     def test_upload_to(self):
         from music_publisher.base import upload_to
+
         artist = Artist()
-        path = upload_to(artist, 'artist.ext')
-        self.assertEqual(path[0:7], 'artist/')
-        self.assertEqual(path[-4:], '.ext')
+        path = upload_to(artist, "artist.ext")
+        self.assertEqual(path[0:7], "artist/")
+        self.assertEqual(path[-4:], ".ext")
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
