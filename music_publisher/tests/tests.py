@@ -1692,6 +1692,19 @@ class AdminTest(TestCase):
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
 
+    def test_endpoints(self):
+        from rest_framework.test import APIRequestFactory, force_authenticate
+        from music_publisher.api import BackupViewSet
+
+        factory = APIRequestFactory()
+        url = reverse("api-root")
+        request = factory.get(url)
+        force_authenticate(request, self.superuser)
+        response = BackupViewSet.as_view({'get': 'list'})(request)
+
+        self.assertEqual(response.status_code, 200)
+
+
 
 class CWRTemplatesTest(SimpleTestCase):
     """A test related to CWR Templates."""
