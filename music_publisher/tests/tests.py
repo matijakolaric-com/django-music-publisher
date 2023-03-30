@@ -652,7 +652,7 @@ class AdminTest(TestCase):
             )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            if testing_admin == 'playlist':
+            if testing_admin == "playlist":
                 url = reverse(
                     "admin:music_publisher_{}_change".format(testing_admin),
                     args=(self.playlist.id,),
@@ -1967,11 +1967,11 @@ class ModelsSimpleTest(TransactionTestCase):
             generally_controlled=True,
             saan="J44va",
             publisher_fee=50,
-            account_number='ABC123 '
+            account_number="ABC123 ",
         )
         self.assertIsNone(writer.clean_fields())
         self.assertIsNone(writer.clean())
-        self.assertEqual(writer.account_number, 'ABC123')
+        self.assertEqual(writer.account_number, "ABC123")
         writer.save()
         self.assertEqual(str(writer), "MATIJA KOLARIC (*)")
 
