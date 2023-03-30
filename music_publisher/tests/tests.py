@@ -783,6 +783,7 @@ class AdminTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(OPTION_FILES=False)
     def test_label_change(self):
         """Test that :class:`.models.Label` objects can be edited."""
         self.client.force_login(self.staffuser)
@@ -791,6 +792,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Label.objects.get(pk=1).name, "NEW LABEL")
 
+    @override_settings(OPTION_FILES=False)
     def test_library_change(self):
         """Test that :class:`.models.Library` objects can be edited."""
         self.client.force_login(self.staffuser)
@@ -810,6 +812,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Artist.objects.get(pk=1).last_name, "DOVE")
 
+    @override_settings(OPTION_FILES=False)
     def test_commercialrelease_change(self):
         """Test that :class:`.models.CommercialRelease` can be edited."""
         self.client.force_login(self.staffuser)
@@ -1956,6 +1959,7 @@ class ModelsSimpleTest(TransactionTestCase):
         response = self.client.get(release.secret_api_url, follow=True)
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(OPTION_FILES=False)
     def test_writer(self):
         writer = music_publisher.models.Writer(
             first_name="Matija", last_name="Kolarić"
