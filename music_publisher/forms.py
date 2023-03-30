@@ -130,10 +130,10 @@ class ACKImportForm(ModelForm):
         if not ack:
             return
         filename = ack.name
-        if not (
-            len(filename) in [18, 19]
-            and filename[-4:].upper() in [".V21", ".V22"]
-        ):
+        correct_fn_format = len(filename) in [18, 19] and filename[
+            -4:
+        ].upper() in [".V21", ".V22"]
+        if not correct_fn_format:
             raise ValidationError("Wrong file name format.")
         self.cleaned_data["filename"] = filename
         content = ack.file.read().decode("latin1")
@@ -186,19 +186,21 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                     controlled = True
                 if form.cleaned_data["capacity"] in ["C ", "CA"]:
                     has_composer = True
-                if (
+                bad_capacity_for_original = (
                     not is_modification
                     and form.cleaned_data["capacity"]
                     and form.cleaned_data["capacity"] not in self.orig_cap
-                ):
+                )
+                if bad_capacity_for_original:
                     form.add_error(
                         "capacity", "Not allowed in original works."
                     )
-                if (
+                bad_capacity_for_modification = (
                     is_modification
                     and form.cleaned_data["capacity"]
                     and form.cleaned_data["capacity"] not in self.orig_cap
-                ):
+                )
+                if bad_capacity_for_modification:
                     needs_extended_capacity = False
         self.check_extended_capacity(needs_extended_capacity)
         self.check_controlled(controlled)
