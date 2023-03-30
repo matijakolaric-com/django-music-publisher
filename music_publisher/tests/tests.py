@@ -1699,8 +1699,6 @@ class AdminTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
     OPTION_FILES=True,
 )
-
-
 class AdminWithFilesTest(AdminTest):
     """Functional tests on the interface, and several related unit tests.
 
@@ -2249,11 +2247,13 @@ class OtherFunctionalTest(SimpleTestCase):
 
     def test_templatetags(self):
         from music_publisher.templatetags.cwr_filters import perc, ie
-        self.assertEqual(perc('X'), 'Not convertible to percents.')
-        self.assertEqual(ie('E'), 'excluding ')
+
+        self.assertEqual(perc("X"), "Not convertible to percents.")
+        self.assertEqual(ie("E"), "excluding ")
 
     def test_dpids(self):
         from django.core.exceptions import ValidationError
+
         validators.check_dpid("PADPIDA2013020802I")
         with self.assertRaises(ValidationError):
             validators.check_dpid("PADPIDA2013020801I")
