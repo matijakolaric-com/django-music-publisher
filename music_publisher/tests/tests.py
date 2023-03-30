@@ -701,7 +701,7 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
         cwr_export = CWRExport.objects.first()
-        cwr_export.cwr = open(TEST_CWR3_FILENAME, "r").read()
+        cwr_export.cwr = open(TEST_DATA_IMPORT_FILENAME, "r").read()
         cwr_export.save()
         url = (
             reverse(
