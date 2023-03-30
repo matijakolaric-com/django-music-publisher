@@ -16,7 +16,7 @@ from .validators import CWRFieldValidator
 def upload_to(instance, filename):
     ext = filename.rsplit(".", 1)[-1]
     folder = instance._meta.model_name
-    fn = base64.urlsafe_b64encode(uuid4().bytes).rstrip(b"=")
+    fn = (base64.urlsafe_b64encode(uuid4().bytes).rstrip(b"=")).decode()
     return f"{folder}/{fn}.{ext}"
 
 

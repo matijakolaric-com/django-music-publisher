@@ -2258,6 +2258,13 @@ class OtherFunctionalTest(SimpleTestCase):
         with self.assertRaises(ValidationError):
             validators.check_dpid("PADPIDA2013020801I")
 
+    def test_upload_to(self):
+        from music_publisher.base import upload_to
+        artist = Artist()
+        path = upload_to(artist, 'artist.ext')
+        self.assertEqual(path[0:7], 'artist/')
+        self.assertEqual(path[-4:], '.ext')
+
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
