@@ -113,26 +113,7 @@ html_theme_options = {
 }
 
 html_favicon = "favicon.ico"
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default._static" will overwrite the builtin "default._static".
 html_extra_path = ["googleb5723862796807b2.html", "work_import_template.csv"]
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
-
-
-# -- Options for HTMLHelp output ---------------------------------------------
-
-# Output file base name for HTML help builder.
 htmlhelp_basename = "DjangoMusicPublisherdoc"
 
 
