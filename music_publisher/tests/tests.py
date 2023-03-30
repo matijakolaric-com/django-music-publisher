@@ -1700,10 +1700,9 @@ class AdminTest(TestCase):
         url = reverse("api-root")
         request = factory.get(url)
         force_authenticate(request, self.superuser)
-        response = BackupViewSet.as_view({'get': 'list'})(request)
+        response = BackupViewSet.as_view({"get": "list"})(request)
 
         self.assertEqual(response.status_code, 200)
-
 
 
 class CWRTemplatesTest(SimpleTestCase):
