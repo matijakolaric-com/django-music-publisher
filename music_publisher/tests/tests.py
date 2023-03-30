@@ -2346,8 +2346,8 @@ class OtherFunctionalTest(SimpleTestCase):
     def test_playlist_admin_is_not_valid(self):
         from music_publisher.admin import PlaylistAdmin, Playlist
         from django.utils.timezone import now
-
-        pl = Playlist(release_date=now())
+        from datetime import timedelta
+        pl = Playlist(release_date=now()-timedelta(days=1), id=1)
         self.assertFalse(PlaylistAdmin.valid(None, pl))
 
 
