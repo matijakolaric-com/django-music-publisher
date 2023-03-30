@@ -2351,6 +2351,27 @@ class OtherFunctionalTest(SimpleTestCase):
         pl = Playlist(release_date=(now() - timedelta(days=1)).date(), id=1)
         self.assertFalse(PlaylistAdmin.valid(None, pl))
 
+    def test_serializers(self):
+        from music_publisher.api import (
+            ArtistViewSet,
+            ReleaseViewSet,
+        )
+        from rest_framework.serializers import ListSerializer, ModelSerializer
+        ws = ArtistViewSet()
+        ws.request = None
+        ws.format_kwarg = None
+        ser = ws.get_serializer(many=True)
+        self.assertIsInstance(ser, ListSerializer)
+        ser = ws.get_serializer()
+        self.assertIsInstance(ser, ModelSerializer)
+        ws = ReleaseViewSet()
+        ws.request = None
+        ws.format_kwarg = None
+        ser = ws.get_serializer(many=True)
+        self.assertIsInstance(ser, ListSerializer)
+        ser = ws.get_serializer()
+        self.assertIsInstance(ser, ModelSerializer)
+
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
