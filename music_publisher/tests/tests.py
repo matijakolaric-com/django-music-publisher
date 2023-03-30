@@ -2197,7 +2197,7 @@ class ModelsSimpleTest(TransactionTestCase):
         track.clean_fields()
         track.clean()
 
-        self.assertEqual(str(track), " Work Recording feat. Testing")
+        self.assertEqual(str(track), "Work Recording feat. Testing")
 
         music_publisher.models.Track.objects.create(
             release=release2, recording=rec2, cut_number=2
