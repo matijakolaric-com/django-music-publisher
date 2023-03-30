@@ -1686,6 +1686,39 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
+@override_settings(
+    SECURE_SSL_REDIRECT=False,
+    PUBLISHER_NAME="TEST PUBLISHER",
+    PUBLISHER_CODE="MK",
+    PUBLISHER_IPI_NAME="0000000199",
+    PUBLISHER_SOCIETY_PR="52",
+    PUBLISHER_SOCIETY_MR="44",
+    PUBLISHER_SOCIETY_SR="44",
+    PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal("0.333333"),
+    PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal("0.5"),
+    PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
+    OPTION_FILES=True,
+)
+
+
+class AdminWithFilesTest(AdminTest):
+    """Functional tests on the interface, and several related unit tests.
+
+    Same as previous, but with file support"""
+
+    fixtures = ["publishing_staff.json"]
+    testing_admins = [
+        "artist",
+        "label",
+        "library",
+        "work",
+        "commercialrelease",
+        "writer",
+        "recording",
+        # "cwrexport",
+    ]
+
+
 class CWRTemplatesTest(SimpleTestCase):
     """A test related to CWR Templates."""
 
@@ -2209,6 +2242,15 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.works.add(work)
         cwr.create_cwr()
         self.assertEqual(cwr.filename, "CW230006DMP_0000_V3-1-0.SUB")
+
+
+class OtherFunctionalTest(SimpleTestCase):
+    """These tests are testing things not tested otherwise."""
+
+    def test_templatetags(self):
+        from music_publisher.templatetags.cwr_filters import perc, ie
+        self.assertEqual(perc('X'), 'Not convertible to percents.')
+        self.assertEqual(ie('E'), 'excluding ')
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
