@@ -175,7 +175,7 @@ Following list contains official CWR codes for CMOs, to be entered in ``PUBLISHE
 ``PUBLISHER_SOCIETY_MR`` and rarely ``PUBLISHER_SOCIETY_SR`` environment variables.
 
 
-.. csv-table:: CMOs
+.. csv-table::
    :file: societies.csv
    :widths: 10, 50, 40
    :header-rows: 0
