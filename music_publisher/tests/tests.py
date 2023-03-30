@@ -836,6 +836,7 @@ class AdminTest(TestCase):
         with self.assertRaises(LibraryRelease.DoesNotExist):
             LibraryRelease.objects.get(pk=1)
 
+    @override_settings(OPTION_FILES=False)
     def test_libraryrelease_change(self):
         """Test that :class:`.models.LibraryRelease` can be edited."""
         self.client.force_login(self.staffuser)
@@ -2005,6 +2006,7 @@ class ModelsSimpleTest(TransactionTestCase):
         writer.save()
         self.assertEqual(str(writer), "MATIJA KOLARIC (*)")
 
+    @override_settings(OPTION_FILES=False)
     def test_work(self):
         """A complex test where a complete Work objects with all related
         objects is created.
