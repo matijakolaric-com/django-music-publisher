@@ -287,6 +287,7 @@ class AdminTest(TestCase):
         "artist",
         "label",
         "library",
+        "playlist",
         "work",
         "commercialrelease",
         "writer",
@@ -651,10 +652,16 @@ class AdminTest(TestCase):
             )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
-            url = reverse(
-                "admin:music_publisher_{}_change".format(testing_admin),
-                args=(1,),
-            )
+            if testing_admin == 'playlist':
+                url = reverse(
+                    "admin:music_publisher_{}_change".format(testing_admin),
+                    args=(self.playlist.id,),
+                )
+            else:
+                url = reverse(
+                    "admin:music_publisher_{}_change".format(testing_admin),
+                    args=(1,),
+                )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             data = get_data_from_response(response)
@@ -1960,9 +1967,11 @@ class ModelsSimpleTest(TransactionTestCase):
             generally_controlled=True,
             saan="J44va",
             publisher_fee=50,
+            account_number='ABC123 '
         )
         self.assertIsNone(writer.clean_fields())
         self.assertIsNone(writer.clean())
+        self.assertEqual(writer.account_number, 'ABC123')
         writer.save()
         self.assertEqual(str(writer), "MATIJA KOLARIC (*)")
 
