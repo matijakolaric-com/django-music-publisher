@@ -1850,6 +1850,14 @@ class ValidatorsTest(TestCase):
         with self.assertRaises(exceptions.ValidationError):
             validator("|Invalid")
 
+    def test_dpid(self):
+        validator = validators.CWRFieldValidator("dpid")
+        self.assertIsNone(validator("PADPIDA2013020802I"))
+        with self.assertRaises(exceptions.ValidationError):
+            validator("PADPIDA201803I")
+        with self.assertRaises(exceptions.ValidationError):
+            validator("PADPIDA2013020803I")
+
     def test_isni(self):
         validator = validators.CWRFieldValidator("isni")
         self.assertIsNone(validator("000000000000001X"))
