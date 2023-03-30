@@ -129,9 +129,14 @@ folder of the code repository.
 Agreement-related settings
 -----------------------------------
 
+These settings define the percentage of the manuscript share transferred to the publisher. 
+The default is "London Split", where 50% of performance and 100% of mechanical and sync rights are transferred.
+
 * ``PUBLISHING_AGREEMENT_PUBLISHER_PR`` - Performance share transferred to the publisher, default is '0.5' (50%)
 * ``PUBLISHING_AGREEMENT_PUBLISHER_MR`` - Mechanical share transferred to the publisher, default is '1.0' (100%)
 * ``PUBLISHING_AGREEMENT_PUBLISHER_SR`` - Synchronization share transferred to the publisher, default is '1.0' (100%)
+
+Enter ``1.0`` for 100%, ``0.5`` for 50%, ``0.3333`` for 33.33%, etc.
 
 S3 storage
 ------------------------------------

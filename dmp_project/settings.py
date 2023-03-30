@@ -8,7 +8,7 @@ import dj_database_url
 from decimal import Decimal
 
 SOFTWARE = "DMP.MATIJAKOLARIC.COM"
-SOFTWARE_VERSION = "22.1 EXOFILE (OPEN SOURCE)"
+SOFTWARE_VERSION = "23.4 RUBICON (OPEN SOURCE)"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -128,7 +128,7 @@ SECURE_SSL_REDIRECT = not DEBUG
 PUBLISHER_NAME = os.getenv("PUBLISHER", "DMP - FREE MUSIC CATALOGUE SOFTWARE")
 
 # CWR Delivery code, issued by collecting societies
-PUBLISHER_CODE = os.getenv("PUBLISHER_CODE", "")
+PUBLISHER_CODE = os.getenv("PUBLISHER_CODE", "000")
 
 # IPI Name # is required, issued by collecting societies
 PUBLISHER_IPI_NAME = os.getenv("PUBLISHER_IPI_NAME", "")

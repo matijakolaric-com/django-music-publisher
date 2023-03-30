@@ -2357,6 +2357,7 @@ class OtherFunctionalTest(SimpleTestCase):
             ReleaseViewSet,
         )
         from rest_framework.serializers import ListSerializer, ModelSerializer
+
         ws = ArtistViewSet()
         ws.request = None
         ws.format_kwarg = None
