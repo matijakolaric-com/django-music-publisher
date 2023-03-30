@@ -626,6 +626,10 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     @override_settings(OPTION_FILES=False)
+    def test_super_user_with_files(self):
+        """Testing index for superuser covers all the cases."""
+        self.test_super_user()
+
     def test_staff_user(self):
         """Test that a staff user can access some urls.
 
@@ -677,6 +681,11 @@ class AdminTest(TestCase):
         url = reverse("royalty_calculation")
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(OPTION_FILES=False)
+    def test_staff_user_with_files(self):
+        """Testing index for superuser covers all the cases."""
+        self.test_staff_user()
 
     def test_cwr_previews(self):
         """Test that CWR preview works."""
