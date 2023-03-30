@@ -57,6 +57,7 @@ jobs:
       env:
           SECRET_KEY: 't569yezjg#_c^4(3_ly=pp+qehy3g$mnu6u4*nkjhvy3bqq356'
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
+          OPTION_FILES: 1
       run: |
         coverage run  --omit=manage.py manage.py test 
 
