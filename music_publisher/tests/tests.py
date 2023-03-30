@@ -799,6 +799,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Library.objects.get(pk=1).name, "NEW LIBRARY")
 
+    @override_settings(OPTION_FILES=True)
     def test_artist_change(self):
         """Test that :class:`.models.Artist` objects can be edited."""
         self.client.force_login(self.staffuser)
