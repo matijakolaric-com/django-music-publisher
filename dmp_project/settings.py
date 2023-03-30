@@ -195,7 +195,7 @@ S3_ENABLED = all(
     ]
 )
 
-OPTION_FILES = os.getenv("OPTION_FILES", S3_ENABLED)
+OPTION_FILES =  True #os.getenv("OPTION_FILES", S3_ENABLED)
 
 if OPTION_FILES:
     if S3_ENABLED:

@@ -2252,6 +2252,12 @@ class OtherFunctionalTest(SimpleTestCase):
         self.assertEqual(perc('X'), 'Not convertible to percents.')
         self.assertEqual(ie('E'), 'excluding ')
 
+    def test_dpids(self):
+        from django.core.exceptions import ValidationError
+        validators.check_dpid("PADPIDA2013020802I")
+        with self.assertRaises(ValidationError):
+            validators.check_dpid("PADPIDA2013020801I")
+
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
