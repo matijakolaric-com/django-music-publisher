@@ -1958,6 +1958,8 @@ class ModelsSimpleTest(TransactionTestCase):
         )
 
     def test_playlist(self):
+        from music_publisher.models import Playlist
+
         label = music_publisher.models.Label(name="Playlist Label")
         label.save()
         release = music_publisher.models.Playlist(
@@ -1974,6 +1976,7 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertIn(b"Playlist: Playlist", response.content)
         response = self.client.get(release.secret_api_url, follow=True)
         self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(Playlist.objects.get_dict([release]), dict)
 
     @override_settings(OPTION_FILES=False)
     def test_writer(self):
@@ -2194,6 +2197,8 @@ class ModelsSimpleTest(TransactionTestCase):
         track.clean_fields()
         track.clean()
 
+        self.assertEqual(str(track), " Work Recording feat. Testing")
+
         music_publisher.models.Track.objects.create(
             release=release2, recording=rec2, cut_number=2
         )
@@ -2290,6 +2295,32 @@ class OtherFunctionalTest(SimpleTestCase):
         path = upload_to(artist, "artist.ext")
         self.assertEqual(path[0:7], "artist/")
         self.assertEqual(path[-4:], ".ext")
+
+    def test_royalty_no_work_id(self):
+        from music_publisher.royalty_calculation import RoyaltyCalculation
+
+        wiw = WriterInWork()
+        with self.assertRaises(NotImplementedError):
+            RoyaltyCalculation.generate_works_dict(None, [wiw])
+
+    def test_work_id_resetting(self):
+        work = Work()
+        work.work_id = "X"
+        with self.assertRaises(NotImplementedError):
+            work.work_id = "Y"
+
+    def test_empty_recording(self):
+        from django.core.exceptions import ValidationError
+
+        rec = Recording()
+        with self.assertRaises(ValidationError):
+            rec.clean_fields()
+
+    def test_recording_id_resetting(self):
+        rec = Recording()
+        rec.recording_id = "X"
+        with self.assertRaises(NotImplementedError):
+            rec.recording_id = "Y"
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
