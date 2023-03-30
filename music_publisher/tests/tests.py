@@ -663,6 +663,7 @@ class AdminTest(TestCase):
             if "first_name" in data:
                 data["first_name"] += " JR."
             data.pop("image", None)
+            data.pop("audio_file", None)
             response = self.client.post(url, data=data, follow=False)
             self.assertEqual(response.status_code, 302)
         url = reverse("royalty_calculation")
