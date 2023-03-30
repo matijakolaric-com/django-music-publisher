@@ -211,18 +211,19 @@ class Release(ReleaseBase):
             dict: internal dict format
 
         """
-
+        title = self.release_title or None
+        date = (
+            self.release_date.strftime("%Y%m%d") if self.release_date else None
+        )
+        label = self.release_label.get_dict() if self.release_label else None
+        artist = self.artist.get_dict() if self.artist else None
         d = {
             "id": self.id,
             "code": self.release_id,
-            "title": self.release_title or None,
-            "date": self.release_date.strftime("%Y%m%d")
-            if self.release_date
-            else None,
-            "label": self.release_label.get_dict()
-            if self.release_label
-            else None,
-            "artist": self.artist.get_dict() if self.artist else None,
+            "title": title,
+            "date": date,
+            "label": label,
+            "artist": artist,
             "ean": self.ean,
         }
         if with_tracks:
@@ -281,9 +282,8 @@ class LibraryRelease(Release):
         Raises:
             ValidationError: If not compliant.
         """
-        if (
-            self.ean or self.release_date or self.release_label
-        ) and not self.release_title:
+        title_required = self.ean or self.release_date or self.release_label
+        if title_required and not self.release_title:
             raise ValidationError(
                 {"release_title": "Required if other release data is set."}
             )
@@ -1001,11 +1001,8 @@ class WriterInWork(models.Model):
         Also check that writers that are not controlled do not have data
         that can not apply to them."""
 
-        if (
-            self.writer
-            and self.writer.generally_controlled
-            and not self.controlled
-        ):
+        generally_controlled = self.writer and self.writer.generally_controlled
+        if generally_controlled and not self.controlled:
             raise ValidationError(
                 {
                     "controlled": (
@@ -1074,18 +1071,18 @@ class WriterInWork(models.Model):
         Returns:
             dict: JSON-serializable data structure
         """
-
-        j = {
-            "writer": self.writer.get_dict() if self.writer else None,
-            "controlled": self.controlled,
-            "relative_share": str(self.relative_share / 100),
-            "writer_role": {
+        writer = self.writer.get_dict() if self.writer else None
+        relative_share = str(self.relative_share / 100)
+        role = (
+            {
                 "code": self.capacity.strip(),
                 "name": self.get_capacity_display(),
             }
             if self.capacity
-            else None,
-            "original_publishers": [
+            else None
+        )
+        if self.controlled:
+            ops = [
                 {
                     "publisher": self.work.get_publisher_dict(),
                     "publisher_role": {
@@ -1095,8 +1092,14 @@ class WriterInWork(models.Model):
                     "agreement": self.get_agreement_dict(),
                 }
             ]
-            if self.controlled
-            else [],
+        else:
+            ops = []
+        j = {
+            "writer": writer,
+            "controlled": self.controlled,
+            "relative_share": relative_share,
+            "writer_role": role,
+            "original_publishers": ops,
         }
         return j
 
@@ -1185,7 +1188,7 @@ class Recording(models.Model):
             return from :meth:`django.db.models.Model.clean_fields`
 
         """
-        if not any(
+        empty = not any(
             [
                 self.recording_title,
                 self.version_title,
@@ -1196,7 +1199,8 @@ class Recording(models.Model):
                 self.artist,
                 self.audio_file,
             ]
-        ):
+        )
+        if empty:
             raise ValidationError("No data left, please delete instead.")
         if self.isrc:
             # Removing all characters added for readability
@@ -1286,25 +1290,23 @@ class Recording(models.Model):
             dict: JSON-serializable data structure
 
         """
+        recording_title = self.complete_recording_title or self.work.title
+        date = (
+            self.release_date.strftime("%Y%m%d") if self.release_date else None
+        )
+        duration = duration_string(self.duration) if self.duration else None
+        artist = self.artist.get_dict() if self.artist else None
+        label = self.record_label.get_dict() if self.record_label else None
         j = {
             "id": self.id,
             "code": self.recording_id,
-            "recording_title": self.complete_recording_title
-            or self.work.title,
+            "recording_title": recording_title,
             "version_title": self.complete_version_title,
-            "release_date": self.release_date.strftime("%Y%m%d")
-            if self.release_date
-            else None,
-            "duration": duration_string(self.duration)
-            if self.duration
-            else None,
+            "release_date": date,
+            "duration": duration,
             "isrc": self.isrc,
-            "recording_artist": self.artist.get_dict()
-            if self.artist
-            else None,
-            "record_label": self.record_label.get_dict()
-            if self.record_label
-            else None,
+            "recording_artist": artist,
+            "record_label": label,
         }
         if with_releases:
             j["tracks"] = []
@@ -1649,18 +1651,19 @@ class CWRExport(models.Model):
                     record_type = "REV"
             else:
                 record_type = self.nwr_rev
-
+            indicator = "Y" if work["recordings"] else "U"
+            version_type = (
+                "MOD   UNSUNS"
+                if work["version_type"]["code"] == "MOD"
+                else "ORI         "
+            )
             d = {
                 "record_type": record_type,
                 "code": work["code"],
                 "work_title": work["work_title"],
                 "iswc": work["iswc"],
-                "recorded_indicator": "Y" if work["recordings"] else "U",
-                "version_type": (
-                    "MOD   UNSUNS"
-                    if work["version_type"]["code"] == "MOD"
-                    else "ORI         "
-                ),
+                "recorded_indicator": indicator,
+                "version_type": version_type,
             }
             yield self.get_transaction_record("WRK", d)
             yield from self.get_party_lines(work)
@@ -1765,12 +1768,13 @@ class CWRExport(models.Model):
             w["publisher_code"] = "P000001"
             w["publisher_name"] = publisher["name"]
             yield self.get_transaction_record("PWR", w)
-            if (
+            copublished = (
                 self.version in ["30", "31"]
                 and other_publisher_share
                 and w
                 and w["code"] in copublished_writer_ids
-            ):
+            )
+            if copublished:
                 w["publisher_sequence"] = 2
                 yield self.get_transaction_record(
                     "PWR", {"code": w["code"], "publisher_sequence": 2}
@@ -1900,13 +1904,14 @@ class CWRExport(models.Model):
                 rec["isrc_validity"] = "Y"
             if rec["duration"]:
                 rec["duration"] = rec["duration"].replace(":", "")[0:6]
-            if self.version in ["21", "22"] and not any(
+            empty = not any(
                 [
                     rec["release_date"],
                     rec["duration"],
                     rec["isrc"],
                 ]
-            ):
+            )
+            if self.version in ["21", "22"] and empty:
                 continue
             yield self.get_transaction_record("REC", rec)
 
@@ -2164,11 +2169,12 @@ def change_case(sender, instance, **kwargs):
     for field in instance._meta.get_fields():
         if isinstance(field, models.CharField):
             value = getattr(instance, field.name)
-            if (
+            convertible = (
                 isinstance(value, str)
                 and field.editable
                 and field.choices is None
                 and ("name" in field.name or "title" in field.name)
-            ):
+            )
+            if convertible:
                 value = force_case(value)
                 setattr(instance, field.name, value)
