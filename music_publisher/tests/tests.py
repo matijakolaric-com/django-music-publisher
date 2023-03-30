@@ -854,7 +854,6 @@ class AdminTest(TestCase):
         with self.assertRaises(LibraryRelease.DoesNotExist):
             LibraryRelease.objects.get(pk=1)
 
-    @override_settings(OPTION_FILES=False)
     def test_libraryrelease_change(self):
         """Test that :class:`.models.LibraryRelease` can be edited."""
         self.client.force_login(self.staffuser)
@@ -895,6 +894,10 @@ class AdminTest(TestCase):
         )
         with self.assertRaises(CommercialRelease.DoesNotExist):
             CommercialRelease.objects.get(pk=2)
+
+    @override_settings(OPTION_FILES=False)
+    def test_libraryrelease_change_2(self):
+        self.test_libraryrelease_change()
 
     def test_template_download(self):
         self.client.force_login(self.audituser)
