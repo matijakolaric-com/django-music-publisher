@@ -1854,7 +1854,7 @@ class ValidatorsTest(TestCase):
         validator = validators.CWRFieldValidator("dpid")
         self.assertIsNone(validator("PADPIDA2013020802I"))
         with self.assertRaises(exceptions.ValidationError):
-            validator("PADPIDA201803I")
+            validator("WRONGFORMAT")
         with self.assertRaises(exceptions.ValidationError):
             validator("PADPIDA2013020803I")
 
