@@ -701,7 +701,7 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
         cwr_export = CWRExport.objects.first()
-        cwr_export.cwr = open(TEST_BAD_CWR2_FILENAME, "r").read()
+        cwr_export.cwr = open(TEST_CWR3_FILENAME, "r").read()
         cwr_export.save()
         url = (
             reverse(
@@ -2347,7 +2347,7 @@ class OtherFunctionalTest(SimpleTestCase):
         from music_publisher.admin import PlaylistAdmin, Playlist
         from django.utils.timezone import now
         from datetime import timedelta
-        pl = Playlist(release_date=now()-timedelta(days=1), id=1)
+        pl = Playlist(release_date=(now()-timedelta(days=1)).date(), id=1)
         self.assertFalse(PlaylistAdmin.valid(None, pl))
 
 
