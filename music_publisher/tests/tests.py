@@ -792,8 +792,16 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Label.objects.get(pk=1).name, "NEW LABEL")
 
-    @override_settings(OPTION_FILES=False)
     def test_library_change(self):
+        """Test that :class:`.models.Library` objects can be edited."""
+        self.client.force_login(self.staffuser)
+        url = reverse("admin:music_publisher_library_change", args=(1,))
+        response = self.client.post(url, {"name": "NEW LIBRARY"}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Library.objects.get(pk=1).name, "NEW LIBRARY")
+
+    @override_settings(OPTION_FILES=False)
+    def test_library_change_2(self):
         """Test that :class:`.models.Library` objects can be edited."""
         self.client.force_login(self.staffuser)
         url = reverse("admin:music_publisher_library_change", args=(1,))
