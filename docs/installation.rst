@@ -9,11 +9,18 @@ Installation
 DMP (Django-Music-Publisher) is based on Django Web Framework (https://djangoproject.org), and requires
 Python 3 (https://python.org). It can be installed to a PC, but installing int into a cloud is highly recommended.
 
-There are two providers where installation is semi-automated:
+Digital Ocean is the recommended provider.
 
 Digital Ocean
 ----------------------
 
+Minimal monthly cost is $5 for the application, $7 for the database, so $12 in total.
+Optional $5 for file storage is only required for experimental features.
+
+They usually give free credits that must be used within 60 days.
+
+
+1. Click on the button below. (This is an affiliate link, providing you with free credits.)
 
 .. raw:: html
 
@@ -21,49 +28,53 @@ Digital Ocean
         <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
     </a>
 
-..
-    `This wizard <https://dmp.matijakolaric.com/install/>`_ will help you in deploying
-    DMP.
-    
-    .. figure:: /images/pre_wizard.png
+2. Wizard
+
+    2.1. Once you have registered, follow the wizard on Digital Ocean. In the first step, edit the plan and select Basic, then the cheapest plan, this is enough for publishers with up to several thousand works.
+
+    .. figure:: /images/installation_do_1.png
        :width: 100%
-    
-    In the last step, you will be asked where you want to deploy it. Below are the options.
-    
-    Heroku
-    ======================================================
-    
-    Deployment
-    --------------------
-    
-    This is the simplest option, and hosting starts from $16 per month (enough for most small publishers).
-    The whole process takes under 5 minutes, and other than entering the data about the publisher and initial 
-    password, it is all menus and next-next-next when using the
-    `wizard <https://dmp.matijakolaric.com/install/>`_.
-    
-    Upgrading
-    -------------------
-    
-    While installation to Heroku is really simple, updating requires some technical knowledge. The simplest way to update is to install `Heroku CLI (command line interface) <https://devcenter.heroku.com/articles/heroku-cli>`_. It can be installed on Windows, Mac and Linux.
-    
-    Then you log in, clone the repository, enter the folder, add a new remote and push:
-    
+
+    2.2 Edit ``web`` environment variables. See `settings`_ for details. Click on **SAVE**!!
+
+    2.3 Select region closest to you.
+
+    2.4 Review and click on "create resources".
+
+    3. Installation takes several minutes. Once it is done, click on the ``console`` tab and enter: 
+
+    .. code-block:: bash
+         
+        python manage.py createsuperuser
+
+    Then enter your user name and password (twice). You can leave e-mail empty, it is not used.
+
+    If you forget your login/password, you can use the console for adding a new superuser or change the password
+    with:
+
     .. code-block:: bash
     
-       $ heroku login
-       $ git clone https://github.com/matijakolaric-com/django-music-publisher.git
-       $ cd django-music-publisher/
-       django-music-publisher$ heroku git:remote --app yourapp 
-       django-music-publisher$ git push heroku master
-       
-    If you are upgrading from a version older than 20.7, you may need to delete an old buildpack, which can be found in Heroku dashboard in the ``Settings`` tab.
-    
-    Custom installation
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        python manage.py createsuperuser
 
-DMP - Django-Music-Publisher is based on Django, which can be installed on Windows,
-Mac and Linux PCs and servers. For more information, consult the official
-`Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
+Heroku
+-----------------------
+
+This is another provider with semi-automated deployment. The deployment to Heroku using the button below is NOT tested,
+and issues with deployment will not be tested nor fixed.
+
+.. raw:: html
+
+    <a href="https://heroku.com/deploy?template=https%3A%2F%2Fgithub.com%2Fmatijakolaric-com%2Fdjango-music-publisher">
+      <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
+    </a>
+
+    
+Custom installation
+-------------------------------------------------------------------------
+
+For everything else, basic programming and/or system administration skills are required.
+
+Start with `Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
 
 If you plan to use Django-Music-Publisher as one of the apps in your 
 Django project, there is nothing special about it::
@@ -83,26 +94,32 @@ through the Django Admin. The only exception is royalty calculation, which has t
         path('royalty_calculation/', RoyaltyCalculationView.as_view(), name='royalty_calculation'),
     ]
 
-There are several required `settings`_.
+Experimental features (involving file system) may require additional work.
 
-.. _settings:
+Good luck!
+
 
 Settings
 ===================================
 
+There are several environment variables that need to be set, and several optional ones. Note that if invalid data is
+entered or required data is not entered, deployment may fail and/or application may break down.
+
 Secret key
 -----------------------------------
 
-Django requires ``SECRET_KEY`` to be set.
+Django requires ``SECRET_KEY`` to be set. It can be any random string. You can use https://miniwebtool.com/django-secret-key-generator/
+to generate one, but do change it somewhat after pasting for complete security.
 
 Publisher-related settings
 -----------------------------------
 
-* ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, required
-* ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
-* ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, required
+* ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, **required**
+* ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, **required**
 * ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, defaults to ``000``, which is not accepted by CMOs, but may be accepted by (sub-)publishers.
-* ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO) numeric code, required
+* ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO) numeric code, required. See `Collective management organisations`_.
+
+* ``PUBLISHER_IPI_BASE`` - Publisher's IPI *Base* Number, rarely used
 * ``PUBLISHER_SOCIETY_MR`` - Publisher's mechanical collecting society (MRO) numeric code
 * ``PUBLISHER_SOCIETY_SR`` - Publisher's synchronization collecting society numeric code, rarely used
 
@@ -119,10 +136,8 @@ Agreement-related settings
 S3 storage
 ------------------------------------
 
-Recommended S3 provider is `Digital Ocean <https://m.do.co/c/b05ea0e8ec84>`_, it is simpler to set up and more affordable 
-than AWS. They call S3 *Spaces*. 
-
-For Digital Ocean, you need to set up only four config (environment) variables.
+For Digital Ocean Spaces, you need to set up only four config (environment) variables. AWS and other S3 providers will
+also work.
 
 .. figure:: /images/installation_do_f1.png
    :width: 100%
@@ -148,8 +163,20 @@ Other options
 
 * ``OPTION_FORCE_CASE`` - available options are ``upper``, ``title`` and ``smart``, 
   converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields 
-  to Title Case, respectively.
+  to Title Case, respectively. If unset, everything is left as entered.
 
 * ``OPTION_FILES`` - enables support for file uploads (audio files and images), using 
   local file storage (PC & VPS)
+
+Collective management organisations
+------------------------------------
+
+Following list contains official CWR codes for CMOs, to be entered in ``PUBLISHER_SOCIETY_PR``,
+``PUBLISHER_SOCIETY_MR`` and rarely ``PUBLISHER_SOCIETY_SR`` environment variables.
+
+
+.. csv-table:: CMOs
+   :file: societies.csv
+   :widths: 10, 50, 40
+   :header-rows: 0
 
