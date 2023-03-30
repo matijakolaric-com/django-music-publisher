@@ -10,3 +10,4 @@ Pillow
 psycopg2-binary
 waitress
 whitenoise
+
