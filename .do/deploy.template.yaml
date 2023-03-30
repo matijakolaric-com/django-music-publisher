@@ -6,7 +6,6 @@ spec:
       production: false
   services:
     - name: web
-      instance_size_slug: basic-xxs
       instance_count: 1
       git:
         branch: master

@@ -1,23 +1,25 @@
 Installation and Upgrading
 ****************************************
 
-.. note::
-
-    Heroku announced that they are discontinuing all free services on 28th of November 2022, and
-    deleting all existing free databases. (https://devcenter.heroku.com/changelog-items/2461)
-
-.. note::
-
-    Due to the situation, Matija Kolarić temporarily removed the pre-installation wizard. 
-    (https://dmp.matijakolaric.com/install)
+Code repository for DMP can be found at https://github.com/matijakolaric-com/django-music-publisher.
 
 Installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Code repository for DMP can be found at https://github.com/matijakolaric-com/django-music-publisher.
+DMP (Django-Music-Publisher) is based on Django Web Framework (https://djangoproject.org), and requires
+Python 3 (https://python.org). It can be installed to a PC, but installing int into a cloud is highly recommended.
 
-Without the pre-installation wizard, which is not available for the time being, installation of DMP requires 
-significant technical skills.
+There are two providers where installation is semi-automated:
+
+Digital Ocean
+----------------------
+
+
+.. raw:: html
+
+    <a href="https://cloud.digitalocean.com/apps/new?repo=https%3A%2F%2Fgithub.com%2Fmatijakolaric-com%2Fdjango-music-publisher%2Ftree%2Fmaster&refcode=b05ea0e8ec84" target="_blank">
+        <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
+    </a>
 
 ..
     `This wizard <https://dmp.matijakolaric.com/install/>`_ will help you in deploying
