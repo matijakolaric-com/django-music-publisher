@@ -1628,6 +1628,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"errornote", response.content)
 
+    @override_settings(OPTION_FILES=False)
     def test_recording_filters(self):
         """Test Work changelist filters."""
 
@@ -1637,6 +1638,12 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
         url = base_url + "?has_isrc=N"
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = base_url + "?has_audio_file=Y"
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        url = base_url + "?has_audio_file=N"
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
