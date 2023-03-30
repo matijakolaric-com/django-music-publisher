@@ -625,6 +625,7 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(OPTION_FILES=False)
     def test_staff_user(self):
         """Test that a staff user can access some urls.
 
