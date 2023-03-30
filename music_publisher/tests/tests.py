@@ -2343,6 +2343,12 @@ class OtherFunctionalTest(SimpleTestCase):
         with self.assertRaises(NotImplementedError):
             rec.recording_id = "Y"
 
+    def test_playlist_admin_is_not_valid(self):
+        from music_publisher.admin import PlaylistAdmin, Playlist
+        from django.utils.timezone import now
+        pl = Playlist(release_date=now())
+        self.assertFalse(PlaylistAdmin.valid(None, pl))
+
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607
 GRHACK0000102.100020180607
