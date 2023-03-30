@@ -1694,14 +1694,27 @@ class AdminTest(TestCase):
 
     def test_endpoints(self):
         from rest_framework.test import APIRequestFactory, force_authenticate
-        from music_publisher.api import BackupViewSet
+        from music_publisher.api import (
+            BackupViewSet,
+            ArtistViewSet,
+            ReleaseViewSet,
+        )
+        from rest_framework.reverse import reverse as api_reverse
 
         factory = APIRequestFactory()
         url = reverse("api-root")
         request = factory.get(url)
         force_authenticate(request, self.superuser)
         response = BackupViewSet.as_view({"get": "list"})(request)
+        response.render()
+        self.assertEqual(response.status_code, 200)
 
+        response = ArtistViewSet.as_view({"get": "list"})(request)
+        response.render()
+        self.assertEqual(response.status_code, 200)
+
+        response = ReleaseViewSet.as_view({"get": "list"})(request)
+        response.render()
         self.assertEqual(response.status_code, 200)
 
 
