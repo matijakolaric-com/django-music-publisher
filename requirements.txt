@@ -1,4 +1,4 @@
-Django>=4.1,<5.0
+Django>=4.1.8,<4.2
 boto3
 dj_database_url
 django-cleanup

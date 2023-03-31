@@ -26,7 +26,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=["dmp_project", "docs"]),
     install_requires=(
-        "Django>=4.1,<5.0",
+        "Django>=4.1.8,<4.2",
         "requests>=2.28.1",
     ),
     include_package_data=True,
@@ -34,7 +34,7 @@ setuptools.setup(
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Django",
-        "Framework :: Django :: 4.2",
+        "Framework :: Django :: 4.1",
         "Intended Audience :: Developers",
         "Intended Audience :: Other Audience",
         "License :: OSI Approved :: MIT License",
