@@ -39,8 +39,10 @@ Once you have registered, click on the next button to start the installation wiz
 
     2.1. Once you have registered, follow the wizard on Digital Ocean. In the first step, edit the plan and select Basic, then the cheapest plan, this is enough for publishers with up to several thousand works.
 
-    .. figure:: /images/installation_do_1.png
+    .. image:: /images/installation_do_1.png
        :width: 100%
+
+
 
     2.2 Edit ``web`` environment variables. See `settings`_ for details. Click on **SAVE**!!
 
@@ -151,14 +153,14 @@ S3 storage
 For Digital Ocean Spaces, you need to set up only four config (environment) variables. AWS and other S3 providers will
 also work.
 
-.. figure:: /images/installation_do_f1.png
+.. image:: /images/installation_do_f1.png
    :width: 100%
 
 * ``S3_REGION`` (alias for ``AWS_S3_REGION_NAME``) and ``S3_BUCKET`` 
   (alias for ``AWS_STORAGE_BUCKET_NAME``), you get them when you set up your *Spaces*,
   and
 
-.. figure:: /images/installation_do_f2.png
+.. image:: /images/installation_do_f2.png
    :width: 100%
 
 * ``S3_ID`` (alias for ``AWS_ACCESS_KEY_ID``) and
