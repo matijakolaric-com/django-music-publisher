@@ -1,4 +1,4 @@
-Installation and Upgrading
+Installation
 ****************************************
 
 Code repository for DMP can be found at https://github.com/matijakolaric-com/django-music-publisher.
@@ -37,18 +37,17 @@ Once you have registered, click on the next button to start the installation wiz
     </a>
 
 
-    2.1. Once you have registered, follow the wizard on Digital Ocean. In the first step, edit the plan and select Basic, then the cheapest plan, this is enough for publishers with up to several thousand works.
+2.1. In the first step, edit the plan and select Basic, then the cheapest plan, this is enough for publishers with up to several thousand works.
 
-    .. image:: /images/installation_do_1.png
-       :width: 100%
+.. image:: /images/installation_do_1.png
+   :width: 100%
 
 
+2.2 Edit ``web`` environment variables. See `settings`_ for details. Click on **SAVE**!!
 
-    2.2 Edit ``web`` environment variables. See `settings`_ for details. Click on **SAVE**!!
+2.3 Select region closest to you.
 
-    2.3 Select region closest to you.
-
-    2.4 Review and click on "create resources".
+2.4 Review and click on "create resources".
 
 3. Installation takes several minutes. Once it is done, click on the ``console`` tab and enter: 
 
