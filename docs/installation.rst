@@ -53,6 +53,7 @@ Once you have registered, click on the next button to start the installation wiz
 
 .. code-block:: bash
          
+    python manage.py migrate
     python manage.py createsuperuser
 
 Then enter your user name and password (twice). You can leave e-mail empty, it is not used.
