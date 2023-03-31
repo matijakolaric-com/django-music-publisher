@@ -3,11 +3,11 @@ Installation
 
 Code repository for DMP can be found at https://github.com/matijakolaric-com/django-music-publisher.
 
-Installation
+Installation to a cloud
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 DMP (Django-Music-Publisher) is based on Django Web Framework (https://djangoproject.org), and requires
-Python 3 (https://python.org). It can be installed to a PC, but installing int into a cloud is highly recommended.
+Python 3 (https://python.org). It can be installed to a PC, but installing it into a cloud is highly recommended.
 
 Digital Ocean is the recommended provider.
 
@@ -53,7 +53,7 @@ Once you have registered, click on the next button to start the installation wiz
 
 .. code-block:: bash
          
-python manage.py createsuperuser
+    python manage.py createsuperuser
 
 Then enter your user name and password (twice). You can leave e-mail empty, it is not used.
 
@@ -62,7 +62,7 @@ with:
 
 .. code-block:: bash
     
-python manage.py changepassword
+    python manage.py changepassword
 
 Heroku
 -----------------------
@@ -78,7 +78,7 @@ and issues with deployment will not be tested nor fixed.
 
     
 Custom installation
--------------------------------------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++
 
 For everything else, basic programming and/or system administration skills are required.
 
@@ -108,7 +108,7 @@ Good luck!
 
 
 Settings
-===================================
++++++++++++++++++++++++++++++++++++++++++++++
 
 There are several environment variables that need to be set, and several optional ones. Note that if invalid data is
 entered or required data is not entered, deployment may fail and/or application may break down.
@@ -182,7 +182,7 @@ Other options
   local file storage (PC & VPS)
 
 Collective management organisations
-------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++++++
 
 Following list contains official CWR codes for CMOs, to be entered in ``PUBLISHER_SOCIETY_PR``,
 ``PUBLISHER_SOCIETY_MR`` and rarely ``PUBLISHER_SOCIETY_SR`` environment variables.
