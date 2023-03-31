@@ -24,11 +24,17 @@ They usually give free credits that must be used within 60 days.
 
 .. raw:: html
 
+    <a href="https://www.digitalocean.com/?refcode=b05ea0e8ec84&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge" target="_blank"><img src="https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg" alt="DigitalOcean Referral Badge" /></a>
+
+2. Wizard
+
+Once you have registered, click on the next button to start the installation wizard.
+
+.. raw:: html
+
     <a href="https://cloud.digitalocean.com/apps/new?repo=https%3A%2F%2Fgithub.com%2Fmatijakolaric-com%2Fdjango-music-publisher%2Ftree%2Fmaster&refcode=b05ea0e8ec84" target="_blank">
         <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
     </a>
-
-2. Wizard
 
     2.1. Once you have registered, follow the wizard on Digital Ocean. In the first step, edit the plan and select Basic, then the cheapest plan, this is enough for publishers with up to several thousand works.
 
@@ -41,20 +47,20 @@ They usually give free credits that must be used within 60 days.
 
     2.4 Review and click on "create resources".
 
-    3. Installation takes several minutes. Once it is done, click on the ``console`` tab and enter: 
+3. Installation takes several minutes. Once it is done, click on the ``console`` tab and enter: 
 
-    .. code-block:: bash
+.. code-block:: bash
          
-        python manage.py createsuperuser
+python manage.py createsuperuser
 
-    Then enter your user name and password (twice). You can leave e-mail empty, it is not used.
+Then enter your user name and password (twice). You can leave e-mail empty, it is not used.
 
-    If you forget your login/password, you can use the console for adding a new superuser or change the password
-    with:
+If you forget your login/password, you can use the console for adding a new superuser or change the password
+with:
 
-    .. code-block:: bash
+.. code-block:: bash
     
-        python manage.py createsuperuser
+python manage.py changepassword
 
 Heroku
 -----------------------
