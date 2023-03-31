@@ -36,6 +36,7 @@ Once you have registered, click on the next button to start the installation wiz
         <img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DO">
     </a>
 
+
     2.1. Once you have registered, follow the wizard on Digital Ocean. In the first step, edit the plan and select Basic, then the cheapest plan, this is enough for publishers with up to several thousand works.
 
     .. figure:: /images/installation_do_1.png
