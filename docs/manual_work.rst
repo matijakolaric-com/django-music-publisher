@@ -156,9 +156,6 @@ used.
 .. note::
     This field is required for controlled writers in some collecting societies,
     while not used in most.
-    You can make it a required field by setting ``REQUIRE_SAAN`` to ``True``.
-    With guided deployment, this value is automatically set to the correct
-    value for your collecting society (or societies).
 
 
 Publisher fee
@@ -170,10 +167,7 @@ This is the fee kept by the publisher when royalties are paid and distributed.
     This field is not used in registrations. It is used only for
     :doc:`royalty statement processing <manual_royaltycalculations>`.
     Details are explained in that section.
-
-.. note::
-    This field may be set as required for controlled writers, by setting ``REQUIRE_PUBLISHER_FEE`` to ``True``.
-    
+ 
 
 Recordings (With Recording Artists and Record Labels)
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
