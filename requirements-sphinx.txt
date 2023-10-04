@@ -6,7 +6,7 @@ djangorestframework==3.13.1
 django-storages==1.12.3
 music-metadata-territories==22.6
 Markdown==3.4.1
-Pillow==9.2.0
+Pillow==10.0.1
 psycopg2-binary==2.9.3
 sphinxcontrib-mermaid==0.7.1
 waitress==2.1.2
