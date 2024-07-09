@@ -1202,6 +1202,10 @@ class AdminTest(TestCase):
             "(SMITH): T3221234234 (old) vs T1234567893 (new).",
             music_publisher.models.ACKImport.objects.first().report,
         )
+        self.assertIn(
+            "One ISWC can not be used for two works: T3221234234 ",
+            music_publisher.models.ACKImport.objects.first().report,
+        )
 
         """This file has also ISWC codes."""
         mock = StringIO()
@@ -2235,7 +2239,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW230001DMP_000.V21")
+        self.assertEqual(cwr.filename, "CW240001DMP_000.V21")
         self.assertEqual(cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
         self.assertEqual(cwr.cwr.encode()[86:], TEST_CONTENT[86:])
 
@@ -2245,7 +2249,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW230002DMP_0000_V3-0-0.SUB")
+        self.assertEqual(cwr.filename, "CW240002DMP_0000_V3-0-0.SUB")
         self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
         # should just return when once created
@@ -2259,7 +2263,7 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW230003DMP_0000_V3-0-0.ISR")
+        self.assertEqual(cwr.filename, "CW240003DMP_0000_V3-0-0.ISR")
         self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
         self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
 
@@ -2276,21 +2280,21 @@ class ModelsSimpleTest(TransactionTestCase):
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW230004DMP_000.V22")
+        self.assertEqual(cwr.filename, "CW240004DMP_000.V22")
 
         # test CWR 2.2 REV
         cwr = music_publisher.models.CWRExport(nwr_rev="RE2")
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW230005DMP_000.V22")
+        self.assertEqual(cwr.filename, "CW240005DMP_000.V22")
 
         # test CWR 3.1 WRK
         cwr = music_publisher.models.CWRExport(nwr_rev="WR1")
         cwr.save()
         cwr.works.add(work)
         cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW230006DMP_0000_V3-1-0.SUB")
+        self.assertEqual(cwr.filename, "CW240006DMP_0000_V3-1-0.SUB")
 
 
 class OtherFunctionalTest(SimpleTestCase):
@@ -2386,8 +2390,9 @@ GRHISW0000202.100020180607
 ISW0000000000000000MUSIC PUB CARTOONS                                            MK000001      T322123423400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
 ISW0000000100000000MUSIC PUB CARTOONS                                            MK000001      T123456789300000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
 ISW0000000200000000MUSIC PUB CARTOONS                                            XX000001      T123456789400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
-GRT000020000003000000003
-TRL000010000008000000014"""
+ISW0000000400000000MUSIC PUB CARTOONS                                            MK000003      T322123423400000000            UNC000000Y      MOD   UNSUNS                                          N00000000000                                                   N
+GRT000020000004000000004
+TRL000010000008000000015"""
 
 
 ACK_CONTENT_21_EXT = """HDRSO000000052PRS for Music                                01.102018060715153220180607

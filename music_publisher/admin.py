@@ -2228,18 +2228,34 @@ class ACKImportAdmin(AdminWithReport):
                                 level=messages.ERROR,
                             )
                     else:
-                        work.iswc = iswc
-                        work.last_change = now()
-                        s = f"ISWC imported from ISW file: {ack_import_link}."
-                        LogEntry.objects.log_action(
-                            request.user.id,
-                            admin.options.get_content_type_for_model(work).id,
-                            work.id,
-                            str(work),
-                            CHANGE,
-                            s,
-                        )
-                        work.save()
+                        duplicate = Work.objects.exclude(id=work.id)
+                        duplicate = duplicate.filter(iswc__iexact=iswc).first()
+                        if duplicate:
+                            report += (
+                                    "One ISWC can not be used for two works: "
+                                    + "{} {} {}.<br/>\n".format(iswc, duplicate, work)
+                                    + "This usually happens if one work is entered "
+                                      "twice. "
+                                    + "ISWC not imported for {}.<br/>\n".format(work)
+                            )
+                            self.message_user(
+                                request,
+                                "Duplicate works found for ISWC {}!".format(iswc),
+                                level=messages.ERROR,
+                            )
+                        else:
+                            work.iswc = iswc
+                            work.last_change = now()
+                            s = f"ISWC imported from ISW file: {ack_import_link}."
+                            LogEntry.objects.log_action(
+                                request.user.id,
+                                admin.options.get_content_type_for_model(work).id,
+                                work.id,
+                                str(work),
+                                CHANGE,
+                                s,
+                            )
+                            work.save()
         if unknown_work_ids:
             messages.add_message(
                 request,
