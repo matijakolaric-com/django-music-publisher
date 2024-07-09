@@ -4,6 +4,7 @@ Main interface for :mod:`music_publisher`.
 All views are here, except for :mod:`.royalty_calculation`.
 
 """
+
 import re
 import zipfile
 from csv import DictWriter
@@ -1474,9 +1475,9 @@ class WorkAdmin(MusicPublisherAdmin):
                 for aff in w.get("affiliations", []):
                     code = aff["affiliation_type"]["code"]
                     cmo = aff["organization"]
-                    row[
-                        "Writer {} {}O".format(i + 1, code)
-                    ] = "{} - {}".format(cmo["code"], cmo["name"])
+                    row["Writer {} {}O".format(i + 1, code)] = (
+                        "{} - {}".format(cmo["code"], cmo["name"])
+                    )
                 ops = wiw.get("original_publishers")
 
                 row["Writer {} Manuscript Share".format(i + 1)] = Decimal(
@@ -2231,16 +2232,16 @@ class ACKImportAdmin(AdminWithReport):
                         duplicate = Work.objects.exclude(id=work.id)
                         duplicate = duplicate.filter(iswc__iexact=iswc).first()
                         if duplicate:
-                            report += (
-                                    "One ISWC can not be used for two works: "
-                                    + "{} {} {}.<br/>\n".format(iswc, duplicate, work)
-                                    + "This usually happens if one work is entered "
-                                      "twice. "
-                                    + "ISWC not imported for {}.<br/>\n".format(work)
+                            report += "One ISWC can not be used for two works: " + "{} {} {}.<br/>\n".format(
+                                iswc, duplicate, work
+                            ) + "This usually happens if one work is entered " "twice. " + "ISWC not imported for {}.<br/>\n".format(
+                                work
                             )
                             self.message_user(
                                 request,
-                                "Duplicate works found for ISWC {}!".format(iswc),
+                                "Duplicate works found for ISWC {}!".format(
+                                    iswc
+                                ),
                                 level=messages.ERROR,
                             )
                         else:
@@ -2249,7 +2250,9 @@ class ACKImportAdmin(AdminWithReport):
                             s = f"ISWC imported from ISW file: {ack_import_link}."
                             LogEntry.objects.log_action(
                                 request.user.id,
-                                admin.options.get_content_type_for_model(work).id,
+                                admin.options.get_content_type_for_model(
+                                    work
+                                ).id,
                                 work.id,
                                 str(work),
                                 CHANGE,

@@ -775,15 +775,17 @@ class Work(TitleBase):
             "code": self.work_id,
             "work_title": self.title,
             "last_change": self.last_change,
-            "version_type": {
-                "code": "MOD",
-                "name": "Modified Version of a musical work",
-            }
-            if self.original_title
-            else {
-                "code": "ORI",
-                "name": "Original Work",
-            },
+            "version_type": (
+                {
+                    "code": "MOD",
+                    "name": "Modified Version of a musical work",
+                }
+                if self.original_title
+                else {
+                    "code": "ORI",
+                    "name": "Original Work",
+                }
+            ),
             "iswc": self.iswc,
             "other_titles": [
                 at.get_dict() for at in self.alternatetitle_set.all()
@@ -1026,9 +1028,9 @@ class WriterInWork(models.Model):
             if self.saan:
                 d["saan"] = "Must be empty if writer is not controlled."
             if self.publisher_fee:
-                d[
-                    "publisher_fee"
-                ] = "Must be empty if writer is not controlled."
+                d["publisher_fee"] = (
+                    "Must be empty if writer is not controlled."
+                )
         if d:
             raise ValidationError(d)
 
@@ -1242,9 +1244,11 @@ class Recording(models.Model):
         return (
             self.complete_version_title
             if self.version_title
-            else self.complete_recording_title
-            if self.recording_title
-            else self.work.title
+            else (
+                self.complete_recording_title
+                if self.recording_title
+                else self.work.title
+            )
         )
 
     @property
