@@ -3,7 +3,7 @@
   "description": "When you fill out the following form and submit, the software will be installed and deployed from the repository. By doing so, you accept the license from: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE",
   "repository": "https://github.com/matijakolaric-com/django-music-publisher/",
   "logo": "https://avatars2.githubusercontent.com/u/57564555",
-  "website": "https://matijakolaric.com/",
+  "website": "https://django-music-publisher.readthedocs.io/en/latest/",
   "stack": "heroku-22",
   "addons": ["heroku-postgresql"],
   "scripts": {
