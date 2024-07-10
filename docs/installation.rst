@@ -73,7 +73,7 @@ and issues with deployment will not be tested nor fixed.
 
 .. raw:: html
 
-    <a href="https://heroku.com/new?template=https://github.com/matijakolaric-com/django-music-publisher">
+    <a href="https://heroku.com/deploy?template=https://github.com/matijakolaric-com/django-music-publisher">
       <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
     </a>
 
