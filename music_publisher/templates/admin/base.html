@@ -38,11 +38,11 @@
     html[data-theme="dark"] {
         --primary: #a31212;
         --secondary: var(--primary);
-        --link-fg: var(--primary);
+        --link-fg: #ff2222;
         --header-bg: var(--body-bg);
         --header-color: var(--body-fg);
         --header-link-color: var(--primary);
-        --accent: var(--primary);
+        --accent: #ff2222;
         --link-selected-fg: var(--link-fg);
         --link-hover-color: var(--body-fg);
         --object-tools-bg: var(--primary);
@@ -140,7 +140,7 @@
 
     {% if not is_popup %}
         <div>
-            <a href="https://dmp.matijakolaric.com"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" class="logo"></a>
+            <a href="https://django-music-publisher.readthedocs.io/" target="_blank"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" class="logo"></a>
             <!-- Header -->
             {% block header %}
             <div id="header">
@@ -150,11 +150,12 @@
                 {% block usertools %}
                 {% if has_permission %}
                 <div id="user-tools">
-                    {% block welcome-msg %}
-                        {% translate 'Welcome,' %}
-                        <strong>{% firstof user.get_short_name user.get_username %}</strong>.
-                    {% endblock %}
                     {% block userlinks %}
+                        {% if opts.app_label == 'music_publisher' %}
+                            <a href="https://django-music-publisher.readthedocs.io/en/latest/manual_{{ opts.model_name }}.html" target="_blank">User Manual</a> /
+                        {% else %}
+                            <a href="https://django-music-publisher.readthedocs.io/en/latest/manual.html" target="_blank">User Manual</a> /
+                        {% endif %}
                         {% if site_url %}
                             <a href="{{ site_url }}">{% translate 'View site' %}</a> /
                         {% endif %}

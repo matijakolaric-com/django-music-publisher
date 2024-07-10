@@ -24,13 +24,13 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = "DMP - Free Music Publishing Catalogue"
-copyright = "2018-2023, Matija Kolarić"
+copyright = "2018-2024, Matija Kolarić"
 author = "Matija Kolarić"
 
 # The short X.Y version
-version = "23.4 Rubicon"
+version = "24.7 Holiday"
 # The full version, including alpha/beta/rc tags
-release = "23.4"
+release = "24.7"
 
 rst_epilog = """
 .. |version| replace:: {}
@@ -57,7 +57,7 @@ extensions = [
     "sphinxcontrib.mermaid",
 ]
 
-mermaid_version = "9.4.2"
+mermaid_version = "10.9.1"
 
 autodoc_member_order = "bysource"
 
