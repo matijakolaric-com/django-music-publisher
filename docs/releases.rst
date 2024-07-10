@@ -190,6 +190,22 @@ Introduction chapter of this documentation was extended with graphs,
 and split into two separate documents. Several external articles were 
 linked to improve clarity.
 
+24.7 Holiday
+-------------------------------
+
+It has been over a year since the last major version came out, in the
+meantime, a new LTS version of Django Web Framework was released,
+and several minor improvements were added. Whether it warrants to
+be called a major release is questionable.
+
+Import of ISW transactions (sent only by BMI as far the author of
+DMP knows), now deals with ambiguous and/or not unique ISWCs more
+gracefully.
+
+Both light and dark skins have been updated.
+
+
+
 Future open-source features
 ===========================
 

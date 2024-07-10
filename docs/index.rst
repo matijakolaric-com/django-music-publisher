@@ -27,6 +27,11 @@ Based on Django web framework, DMP is primarily designed to be deployed to a clo
     and <a href="https://github.com/matijakolaric-com/django-music-publisher" target="_blank">code repository</a>.
     No email support is available.</p>
 
+.. container:: tgt
+
+    *If you need professional support or additional features,*
+    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *(available as
+    Software-as-a-Service) is the recommended solution.*
 
 .. toctree::
    :maxdepth: 1
