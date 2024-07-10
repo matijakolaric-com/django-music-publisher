@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="django-music-publisher",
-    version="23.4",
+    version="24.7a1",
     author="Matija Kolarić",
     author_email="matijakolaric@users.noreply.github.com",
     license="MIT License",
@@ -41,8 +41,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     zip_safe=False,
 )

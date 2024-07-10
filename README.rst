@@ -1,7 +1,7 @@
 Django-Music-Publisher - Free music publishing software
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. image:: https://github.com/matijakolaric-com/django-music-publisher/workflows/build/badge.svg?branch=master&logo=pypi&logoColor=white
+.. image:: https://img.shields.io/github/actions/workflow/status/matijakolaric-com/django-music-publisher/build.yml
     :target: https://github.com/matijakolaric-com/django-music-publisher/actions/workflows/build.yml
     :alt: Build Status
 .. image:: https://img.shields.io/github/issues/matijakolaric-com/django-music-publisher/bug?logo=github&logoColor=white
