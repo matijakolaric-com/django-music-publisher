@@ -1849,7 +1849,7 @@ class ValidatorsTest(TestCase):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
 
-    @override_settings(PUBLISHER_SOCIETY_MR="27")
+    @override_settings(PUBLISHER_SOCIETY_MR="100")
     def test_setting_publisher_society(self):
         with self.assertRaises(validators.ImproperlyConfigured):
             validators.validate_settings()
