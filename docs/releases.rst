@@ -190,13 +190,12 @@ Introduction chapter of this documentation was extended with graphs,
 and split into two separate documents. Several external articles were 
 linked to improve clarity.
 
-24.7 Holiday
+24.12 Holiday Special
 -------------------------------
 
 It has been over a year since the last major version came out, in the
 meantime, a new LTS version of Django Web Framework was released,
-and several minor improvements were added. Whether it warrants to
-be called a major release is questionable.
+and several minor improvements were added.
 
 Import of ISW transactions (sent only by BMI as far the author of
 DMP knows), now deals with ambiguous and/or not unique ISWCs more
@@ -205,10 +204,9 @@ gracefully.
 Both light and dark skins have been updated.
 
 
-
 Future open-source features
 ===========================
 
 Nothing is planned for the foreseeable future. Unless there is a significant change in the industry,
-the next major release will be out in 2024. Bugfix and security releases will be coming out when required.
+the next major release will be out in 2025. Bugfix and security releases will be coming out when required.
 
