@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="django-music-publisher",
-    version="24.12b1",
+    version="24.12rc1",
     author="Matija Kolarić",
     author_email="matijakolaric@users.noreply.github.com",
     license="MIT License",
@@ -26,8 +26,8 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=["dmp_project", "docs"]),
     install_requires=(
-        "Django>=4.2,<5.0",
-        "requests>=2.28.1",
+        "Django>=4.2.13,<5.0",
+        "requests>=2.32.3",
     ),
     include_package_data=True,
     classifiers=[
@@ -43,6 +43,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
     zip_safe=False,
 )

@@ -1,13 +1,13 @@
 Django>=4.2.13,<5.0
-boto3==1.34.141
-dj_database_url==2.2.0
-django-cleanup==8.1.0
+boto3==1.35.76
+dj_database_url==2.3.0
+django-cleanup==9.0.0
 django-storages==1.14.4
 djangorestframework==3.15.2
 music-metadata-territories==22.6
-Markdown==3.6
-Pillow==10.4.0
-psycopg2-binary==2.9.9
-waitress==3.0.0
-whitenoise==6.7
+Markdown==3.7
+Pillow==11.0.0
+psycopg2-binary==2.9.10
+waitress==3.0.2
+whitenoise==6.8.2
 

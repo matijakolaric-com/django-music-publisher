@@ -28,7 +28,7 @@ jobs:
         ports: ['5432:5432']
     strategy:
       matrix:
-        python: ['3.11', '3.12']
+        python: ['3.11', '3.12', '3.13']
     
     steps:
     - name: Checkout
