@@ -6,7 +6,7 @@ for the rest of 2018, development was very rapid, with major
 improvements being released in August, September and November.
 
 From January 2019 to January 2022, major versions were released 
-twice per year.
+twice per year, then only once per year.
 
 Minor versions, with bug fixes and security updates, are
 released when required. They are not mentioned in this document.
