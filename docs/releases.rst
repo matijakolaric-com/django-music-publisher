@@ -193,14 +193,14 @@ linked to improve clarity.
 24.12 Holiday Special
 -------------------------------
 
-It has been well over a year since the last major version came out,
-in the meantime, a new LTS version of Django Web Framework was released,
-and several minor improvements were added.
+It has been well over a year since the last major version came out.
+In the meantime, a new LTS version of Django Web Framework was released, so
+DMP had to be updated accordingly. 
 
-Import of ISW transactions (sent only by BMI as far the author of DMP knows),
-now deals with ambiguous and/or not unique ISWCs more gracefully.
+Both light and dark skins have been updated. Several minor improvements were added 
+and the code was improved in several places.
 
-Both light and dark skins have been updated.
+All dependencies were bumped to the latest stable versions.
 
 
 Future open-source features
