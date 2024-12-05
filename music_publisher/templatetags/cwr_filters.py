@@ -112,3 +112,12 @@ def role(value):
         "AM": "Administrator",
         "SE": "Sub-publisher",
     }.get(value, "Unknown publisher role")
+
+
+@register.filter(name="title_type")
+def title_type(value):
+    """Display alternative title type"""
+
+    value = value.strip()
+    obj = models.AlternateTitle(title_type=value)
+    return obj.get_title_type_display()

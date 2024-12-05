@@ -74,6 +74,17 @@ class TitleBase(models.Model):
     class Meta:
         abstract = True
 
+    TITLE_TYPES = (
+        ("AT", "Alternative Title"),
+        ("TE", "First Line of Text"),
+        ("FT", "Formal Title"),
+        ("IT", "Incorrect Title"),
+        ("OT", "Original Title"),
+        ("TT", "Original Title Translated"),
+        ("ET", "Extra Search Title"),
+    )
+
+    title_type = models.CharField(max_length=2, choices=TITLE_TYPES, default="AT")
     title = models.CharField(
         max_length=60, db_index=True, validators=(CWRFieldValidator("title"),)
     )

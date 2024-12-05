@@ -126,7 +126,7 @@ TEMPLATES_21 = {
     "ALT": Template(
         "{% load cwr_generators %}{% autoescape off %}"
         "ALT{{ transaction_sequence|rjust:8 }}"
-        "{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}AT  "
+        "{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}{{ title_type|ljust:2 }}  "
         "\r\n{% endautoescape %}"
     ),
     "OWK": Template(
@@ -365,7 +365,7 @@ TEMPLATES_30 = {
     "ALT": Template(
         "{% load cwr_generators %}{% autoescape off %}"
         "ALT{{ transaction_sequence|rjust:8 }}"
-        "{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}AT  "
+        "{{ record_sequence|rjust:8 }}{{ alternate_title|ljust:60 }}{{ title_type|ljust:2 }}  "
         "\r\n{% endautoescape %}"
     ),
     "OWK": Template(

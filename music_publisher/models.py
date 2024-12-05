@@ -851,9 +851,11 @@ class AlternateTitle(TitleBase):
     )
 
     class Meta:
-        unique_together = (("work", "title"),)
-        ordering = ("-suffix", "title")
-        verbose_name = "Alternative Title"
+        indexes = [
+            models.Index(fields=["work_id", "title_type", "title"]),
+        ]
+        ordering = ("-suffix", "title_type", "title")
+        verbose_name = "Alternate Title"
 
     def get_dict(self):
         """Create a data structure that can be serialized as JSON.
@@ -864,8 +866,8 @@ class AlternateTitle(TitleBase):
         return {
             "title": str(self),
             "title_type": {
-                "code": "AT",
-                "name": "Alternative Title",
+                "code": self.title_type,
+                "name": self.get_title_type_display(),
             },
         }
 
@@ -891,7 +893,9 @@ class ArtistInWork(models.Model):
         verbose_name_plural = (
             "Artists performing (not mentioned in recordings section)"
         )
-        unique_together = (("work", "artist"),)
+        indexes = [
+            models.Index(fields=["work", "artist"]),
+        ]
         ordering = ("artist__last_name", "artist__first_name")
 
     def __str__(self):
@@ -931,7 +935,10 @@ class WriterInWork(models.Model):
     class Meta:
         verbose_name = "Writer in Work"
         verbose_name_plural = "Writers in Work"
-        unique_together = (("work", "writer", "controlled"),)
+        indexes = [
+            models.Index(fields=["work", "writer", "controlled"]),
+        ]
+
         ordering = (
             "-controlled",
             "writer__last_name",
@@ -1339,7 +1346,10 @@ class Track(models.Model):
 
     class Meta:
         verbose_name = "Track"
-        unique_together = (("recording", "release"), ("release", "cut_number"))
+        indexes = [
+            models.Index(fields=["recording", "release"]),
+            models.Index(fields=["release", "cut_number"]),
+        ]
         ordering = (
             "release",
             "cut_number",
@@ -1871,17 +1881,17 @@ class CWRExport(models.Model):
     def get_alt_lines(self, work):
         alt_titles = set()
         for at in work["other_titles"]:
-            alt_titles.add(at["title"])
+            alt_titles.add((at["title"], at["title_type"]["code"]))
         for rec in work["recordings"]:
             if rec["recording_title"]:
-                alt_titles.add(rec["recording_title"])
+                alt_titles.add((rec["recording_title"], "AT"))
             if rec["version_title"]:
-                alt_titles.add(rec["version_title"])
-        for alt_title in sorted(alt_titles):
+                alt_titles.add((rec["version_title"], "AT"))
+        for alt_title, title_type in sorted(alt_titles, key=lambda x: x[0]):
             if alt_title == work["work_title"]:
                 continue
             yield self.get_transaction_record(
-                "ALT", {"alternate_title": alt_title}
+                "ALT", {"alternate_title": alt_title, "title_type": title_type}
             )
 
     def get_per_lines(self, work):
@@ -2055,7 +2065,9 @@ class WorkAcknowledgement(models.Model):
     class Meta:
         verbose_name = "Registration Acknowledgement"
         ordering = ("-date", "-id")
-        index_together = (("society_code", "remote_work_id"),)
+        indexes = [
+            models.Index(fields=["society_code", "remote_work_id"]),
+        ]
 
     TRANSACTION_STATUS_CHOICES = (
         ("CO", "Conflict"),

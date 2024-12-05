@@ -328,7 +328,7 @@ class AdminTest(TestCase):
         )
         assert wiw.get_agreement_dict() is None
         AlternateTitle.objects.create(
-            work=cls.original_work, suffix=True, title="Behind the Work"
+            work=cls.original_work, suffix=True, title="Behind the Work", title_type="TE"
         )
         AlternateTitle.objects.create(work=cls.original_work, title="Work")
         recording = Recording.objects.create(
@@ -701,7 +701,8 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
         cwr_export = CWRExport.objects.first()
-        cwr_export.cwr = open(TEST_DATA_IMPORT_FILENAME, "r").read()
+        with open(TEST_DATA_IMPORT_FILENAME, "r") as f:
+            cwr_export.cwr = f.read()
         cwr_export.save()
         url = (
             reverse(
@@ -1138,264 +1139,265 @@ class AdminTest(TestCase):
         """
 
         self.client.force_login(self.staffuser)
-        mock = StringIO()
-        mock.write(ACK_CONTENT_21)
+        with StringIO() as mock:
+            mock.write(ACK_CONTENT_21)
 
-        """Upload the file that works, but with a wrong filename."""
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CX180001000_FOO.V23",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 200)
+            """Upload the file that works, but with a wrong filename."""
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CX180001000_FOO.V23",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 200)
 
-        ackimport = music_publisher.models.ACKImport.objects.first()
-        self.assertIsNone(ackimport)
+            ackimport = music_publisher.models.ACKImport.objects.first()
+            self.assertIsNone(ackimport)
 
-        """Upload the file that works."""
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        ackimport = music_publisher.models.ACKImport.objects.first()
-        self.assertIsNotNone(ackimport)
+            """Upload the file that works."""
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 302)
+            ackimport = music_publisher.models.ACKImport.objects.first()
+            self.assertIsNotNone(ackimport)
 
-        """And repeat the previous step, as duplicates are processed 
-        differently."""
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        self.assertIn(
-            "A different ISWC exists for work MK000001: THE MODIFIED WORK "
-            "(SMITH): T3221234234 (old) vs T1234567893 (new).",
-            music_publisher.models.ACKImport.objects.first().report,
-        )
-        self.assertIn(
-            "One ISWC can not be used for two works: T3221234234 ",
-            music_publisher.models.ACKImport.objects.first().report,
-        )
+            """And repeat the previous step, as duplicates are processed 
+            differently."""
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn(
+                "A different ISWC exists for work MK000001: THE MODIFIED WORK "
+                "(SMITH): T3221234234 (old) vs T1234567893 (new).",
+                music_publisher.models.ACKImport.objects.first().report,
+            )
+            self.assertIn(
+                "One ISWC can not be used for two works: T3221234234 ",
+                music_publisher.models.ACKImport.objects.first().report,
+            )
 
         """This file has also ISWC codes."""
-        mock = StringIO()
-        mock.write(ACK_CONTENT_21_EXT)
+        with StringIO() as mock:
+            mock.write(ACK_CONTENT_21_EXT)
 
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
-        # At this point, there is a different ISWC in one of the works
-        response = self.client.post(url, data, follow=False)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages), 3)
-        self.assertIn(
-            "Conflicting ISWCs found for work",
-            str(messages[0]),
-        )
-        # Let's delete the one in the database and try again!
-        mock.seek(0)
-        self.original_work = Work.objects.get(id=self.original_work.id)
-        self.original_work.iswc = None
-        self.original_work.save()
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        self.original_work = Work.objects.get(id=self.original_work.id)
-        self.assertEqual(self.original_work.iswc, "T9270264761")
-        url = reverse(
-            "admin:music_publisher_work_history", args=(self.original_work.id,)
-        )
-        response = self.client.get(url)
-        self.assertIn("staffuser".encode(), response.content)
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
+            # At this point, there is a different ISWC in one of the works
+            response = self.client.post(url, data, follow=False)
+            messages = list(get_messages(response.wsgi_request))
+            self.assertEqual(len(messages), 3)
+            self.assertIn(
+                "Conflicting ISWCs found for work",
+                str(messages[0]),
+            )
+            # Let's delete the one in the database and try again!
+            mock.seek(0)
+            self.original_work = Work.objects.get(id=self.original_work.id)
+            self.original_work.iswc = None
+            self.original_work.save()
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 302)
+            self.original_work = Work.objects.get(id=self.original_work.id)
+            self.assertEqual(self.original_work.iswc, "T9270264761")
+            url = reverse(
+                "admin:music_publisher_work_history", args=(self.original_work.id,)
+            )
+            response = self.client.get(url)
+            self.assertIn("staffuser".encode(), response.content)
 
         """This file has bad ISWC codes."""
-        mock = StringIO()
-        mock.write(ACK_CONTENT_21_ERR)
+        with StringIO() as mock:
+            mock.write(ACK_CONTENT_21_ERR)
 
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 302)
 
-        """This file has duplicate ISWC codes."""
-        mockfile = InMemoryUploadedFile(
-            open(TEST_ACK_DUPLICATE_ISWCS, "r"),
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
-        response = self.client.post(url, data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Duplicate works found for ISWC", response.content)
+            """This file has duplicate ISWC codes."""
+            with open(TEST_ACK_DUPLICATE_ISWCS, "r") as f:
+                mockfile = InMemoryUploadedFile(
+                    f,
+                    "acknowledgement_file",
+                    "CW180001000_FOO.V21",
+                    "text",
+                    0,
+                    None,
+                )
+                url = reverse("admin:music_publisher_ackimport_add")
+                response = self.client.get(url)
+                data = get_data_from_response(response)
+                data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
+                response = self.client.post(url, data, follow=True)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(b"Duplicate works found for ISWC", response.content)
 
-        """Test with a badly formatted file."""
-        mock.seek(1)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Incorrect CWR header", response.content)
+            """Test with a badly formatted file."""
+            mock.seek(1)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b"Incorrect CWR header", response.content)
 
-        """Test the change view and the CWR preview."""
-        url = reverse(
-            "admin:music_publisher_ackimport_change", args=("GARBAGE",)
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        url = reverse(
-            "admin:music_publisher_ackimport_change", args=(ackimport.id,)
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            "admin:music_publisher_ackimport_change", args=(ackimport.id,)
-        )
-        response = self.client.get(url + "?preview=1")
-        self.assertEqual(response.status_code, 200)
+            """Test the change view and the CWR preview."""
+            url = reverse(
+                "admin:music_publisher_ackimport_change", args=("GARBAGE",)
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 302)
+            url = reverse(
+                "admin:music_publisher_ackimport_change", args=(ackimport.id,)
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            url = reverse(
+                "admin:music_publisher_ackimport_change", args=(ackimport.id,)
+            )
+            response = self.client.get(url + "?preview=1")
+            self.assertEqual(response.status_code, 200)
 
-        """Test Work changelist filters."""
-        self.client.force_login(self.audituser)
-        base_url = reverse("admin:music_publisher_work_changelist")
-        url = base_url + "?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y"
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = (
-            base_url
-            + "?in_cwr=N&ack_society=21&ack_status=RA&has_iswc=N&has_rec=N"
-        )
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        url = base_url + "?ack_status=RA&has_iswc=N&has_rec=N"
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
+            """Test Work changelist filters."""
+            self.client.force_login(self.audituser)
+            base_url = reverse("admin:music_publisher_work_changelist")
+            url = base_url + "?in_cwr=Y&ack_society=21&has_iswc=Y&has_rec=Y"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = (
+                base_url
+                + "?in_cwr=N&ack_society=21&ack_status=RA&has_iswc=N&has_rec=N"
+            )
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?ack_status=RA&has_iswc=N&has_rec=N"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
 
         """Test dummy CWR ACK 3.0"""
         self.client.force_login(self.staffuser)
-        mock = StringIO()
-        mock.write(ACK_CONTENT_30)
+        with StringIO() as mock:
+            mock.write(ACK_CONTENT_30)
 
-        """Upload the file that works."""
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        ackimport = music_publisher.models.ACKImport.objects.first()
-        self.assertIsNotNone(ackimport)
+            """Upload the file that works."""
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 302)
+            ackimport = music_publisher.models.ACKImport.objects.first()
+            self.assertIsNotNone(ackimport)
 
-        """Test the change view and the CWR preview."""
-        url = reverse(
-            "admin:music_publisher_ackimport_change", args=(ackimport.id,)
-        )
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        url = reverse(
-            "admin:music_publisher_ackimport_change", args=(ackimport.id,)
-        )
-        response = self.client.get(url + "?preview=1")
-        self.assertEqual(response.status_code, 200)
+            """Test the change view and the CWR preview."""
+            url = reverse(
+                "admin:music_publisher_ackimport_change", args=(ackimport.id,)
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            url = reverse(
+                "admin:music_publisher_ackimport_change", args=(ackimport.id,)
+            )
+            response = self.client.get(url + "?preview=1")
+            self.assertEqual(response.status_code, 200)
 
-        """Upload the file that works."""
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        ackimport = music_publisher.models.ACKImport.objects.first()
-        self.assertIsNotNone(ackimport)
+            """Upload the file that works."""
+            mock.seek(0)
+            mockfile = InMemoryUploadedFile(
+                mock,
+                "acknowledgement_file",
+                "CW180001000_FOO.V21",
+                "text",
+                0,
+                None,
+            )
+            url = reverse("admin:music_publisher_ackimport_add")
+            response = self.client.get(url)
+            data = get_data_from_response(response)
+            data.update({"acknowledgement_file": mockfile})
+            response = self.client.post(url, data, follow=False)
+            self.assertEqual(response.status_code, 302)
+            ackimport = music_publisher.models.ACKImport.objects.first()
+            self.assertIsNotNone(ackimport)
 
-        # required after acknowledgement imports because it lists
-        # ack sources
-        url = reverse("royalty_calculation")
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
-        data = get_data_from_response(response)
+            # required after acknowledgement imports because it lists
+            # ack sources
+            url = reverse("royalty_calculation")
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            data = get_data_from_response(response)
 
     @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("1.0"))
     def test_data_import_and_royalty_calculations(self):
@@ -1408,130 +1410,130 @@ class AdminTest(TestCase):
         in under 10-15 seconds, performed 4 times with different algos and
         ID types.
         """
+
         self.client.force_login(self.superuser)
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
-            mock = StringIO()
-            mock.write(csvfile.read())
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock, "acknowledgement_file", "dataimport.csv", "text", 0, None
-        )
-        url = reverse("admin:music_publisher_dataimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update(
-            {
-                "data_file": mockfile,
-            }
-        )
-        response = self.client.post(url, data, follow=False)
+            with StringIO() as mock:
+                mock.write(csvfile.read())
+                mock.seek(0)
+                mockfile = InMemoryUploadedFile(
+                    mock, "acknowledgement_file", "dataimport.csv", "text", 0, None
+                )
+                url = reverse("admin:music_publisher_dataimport_add")
+                response = self.client.get(url)
+                data = get_data_from_response(response)
+                data.update(
+                    {
+                        "data_file": mockfile,
+                    }
+                )
+                response = self.client.post(url, data, follow=False)
 
-        mock.seek(0)
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"data_file": mockfile, "ignore_unknown_columns": True})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
-        data_import = music_publisher.models.DataImport.objects.first()
-        self.assertIsNotNone(data_import)
-        self.assertIsNot(data_import.report, "")
+                mock.seek(0)
+                response = self.client.get(url)
+                data = get_data_from_response(response)
+                data.update({"data_file": mockfile, "ignore_unknown_columns": True})
+                response = self.client.post(url, data, follow=False)
+                self.assertEqual(response.status_code, 302)
+                data_import = music_publisher.models.DataImport.objects.first()
+                self.assertIsNotNone(data_import)
+                self.assertIsNot(data_import.report, "")
 
-        url = reverse(
-            "admin:music_publisher_dataimport_change", args=(data_import.id,)
-        )
-        response = self.client.get(url, follow=False)
-        self.assertEqual(response.status_code, 200)
+                url = reverse(
+                    "admin:music_publisher_dataimport_change", args=(data_import.id,)
+                )
+                response = self.client.get(url, follow=False)
+                self.assertEqual(response.status_code, 200)
 
-        self.client.force_login(self.staffuser)
-
-        mock = StringIO()
-        mock.write(ACK_CONTENT_21_EXT)
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock,
-            "acknowledgement_file",
-            "CW180001000_FOO.V21",
-            "text",
-            0,
-            None,
-        )
-        url = reverse("admin:music_publisher_ackimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"acknowledgement_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 302)
+                self.client.force_login(self.staffuser)
+            with StringIO() as mock:
+                mock.write(ACK_CONTENT_21_EXT)
+                mock.seek(0)
+                mockfile = InMemoryUploadedFile(
+                    mock,
+                    "acknowledgement_file",
+                    "CW180001000_FOO.V21",
+                    "text",
+                    0,
+                    None,
+                )
+                url = reverse("admin:music_publisher_ackimport_add")
+                response = self.client.get(url)
+                data = get_data_from_response(response)
+                data.update({"acknowledgement_file": mockfile})
+                response = self.client.post(url, data, follow=False)
+                self.assertEqual(response.status_code, 302)
 
         with open(TEST_ROYALTY_PROCESSING_FILENAME) as csvfile:
-            mock = StringIO()
-            mock.write(csvfile.read())
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock, "statement_file", "statement.csv", "text", 0, None
-        )
-        url = reverse("royalty_calculation")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"in_file": mockfile})
-        # Not enough data
-        response = self.client.post(url, data, follow=False)
-        self.assertFalse(hasattr(response, "streaming_content"))
+            with StringIO() as mock:
+                mock.write(csvfile.read())
+                mock.seek(0)
+                with InMemoryUploadedFile(
+                    mock, "statement_file", "statement.csv", "text", 0, None
+                ) as mockfile:
+                    url = reverse("royalty_calculation")
+                    response = self.client.get(url)
+                    data = get_data_from_response(response)
+                    data.update({"in_file": mockfile})
+                    # Not enough data
+                    response = self.client.post(url, data, follow=False)
+                    self.assertFalse(hasattr(response, "streaming_content"))
 
-        # Enough data, fee, p
-        mock.seek(0)
-        data.update(
-            {
-                "work_id_column": "1",
-                "work_id_source": "52",
-                "amount_column": "5",
-            }
-        )
-        response = self.client.post(url, data, follow=False)
-        self.assertTrue(hasattr(response, "streaming_content"))
+                    # Enough data, fee, p
+                    mock.seek(0)
+                    data.update(
+                        {
+                            "work_id_column": "1",
+                            "work_id_source": "52",
+                            "amount_column": "5",
+                        }
+                    )
+                    response = self.client.post(url, data, follow=False)
+                    self.assertTrue(hasattr(response, "streaming_content"))
 
-        # Enough data, share, with rights column, ISWC
-        mock.seek(0)
-        data.update(
-            {
-                "algo": "share",
-                "right_type_column": "3",
-                "work_id_source": "ISWC",
-            }
-        )
-        response = self.client.post(url, data, follow=False)
-        self.assertTrue(hasattr(response, "streaming_content"))
+                    # Enough data, share, with rights column, ISWC
+                    mock.seek(0)
+                    data.update(
+                        {
+                            "algo": "share",
+                            "right_type_column": "3",
+                            "work_id_source": "ISWC",
+                        }
+                    )
+                    response = self.client.post(url, data, follow=False)
+                    self.assertTrue(hasattr(response, "streaming_content"))
+                    # Enough data, share, with rights column, ISRC
+                    mock.seek(0)
+                    data.update(
+                        {
+                            "work_id_source": "ISRC",
+                        }
+                    )
+                    response = self.client.post(url, data, follow=False)
+                    self.assertTrue(hasattr(response, "streaming_content"))
 
-        # Enough data, share, with rights column, ISRC
-        mock.seek(0)
-        data.update(
-            {
-                "work_id_source": "ISRC",
-            }
-        )
-        response = self.client.post(url, data, follow=False)
-        self.assertTrue(hasattr(response, "streaming_content"))
+                    # Enough data, fee, sync
+                    mock.seek(0)
+                    data.update(
+                        {
+                            "right_type_column": "s",
+                            "work_id_source": "MK",
+                        }
+                    )
+                    response = self.client.post(url, data, follow=False)
+                    self.assertTrue(hasattr(response, "streaming_content"))
 
-        # Enough data, fee, sync
-        mock.seek(0)
-        data.update(
-            {
-                "right_type_column": "s",
-                "work_id_source": "MK",
-            }
-        )
-        response = self.client.post(url, data, follow=False)
-        self.assertTrue(hasattr(response, "streaming_content"))
-
-        # Enough data, fee, sync
-        mock.seek(0)
-        data.update(
-            {
-                "right_type_column": "m",
-                "work_id_source": "MK",
-            }
-        )
-        response = self.client.post(url, data, follow=False)
-        self.assertTrue(hasattr(response, "streaming_content"))
+                    # Enough data, fee, sync
+                    mock.seek(0)
+                    data.update(
+                        {
+                            "right_type_column": "m",
+                            "work_id_source": "MK",
+                        }
+                    )
+                    response = self.client.post(url, data, follow=False)
+                    self.assertTrue(hasattr(response, "streaming_content"))
+                    
 
         # lets do one more thing here, copy work IDs to foreign work IDs.
         # to test the slowest use case, and fix work._work_id
@@ -1549,89 +1551,90 @@ class AdminTest(TestCase):
                 date=datetime.now(),
             ).save()
         # 200K rows
+
         with open(TEST_ROYALTY_PROCESSING_LARGE_FILENAME) as csvfile:
-            mock = StringIO()
-            mock.write(csvfile.read())
-        mockfile = InMemoryUploadedFile(
-            mock, "statement_file", "statement.csv", "text", 0, None
-        )
-        url = reverse("royalty_calculation")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
+            with StringIO() as mock:
+                mock.write(csvfile.read())
+                mockfile = InMemoryUploadedFile(
+                    mock, "statement_file", "statement.csv", "text", 0, None
+                )
+                url = reverse("royalty_calculation")
+                response = self.client.get(url)
+                data = get_data_from_response(response)
 
-        # our ID
-        mock.seek(0)
-        data.update(
-            {
-                "in_file": mockfile,
-                "algo": "share",
-                "work_id_column": "0",
-                "work_id_source": "MK",
-                "right_type_column": "4",
-                "amount_column": "5",
-            }
-        )
-        time_before = datetime.now()
-        response = self.client.post(url, data, follow=False)
-        time_after = datetime.now()
-        self.assertTrue(hasattr(response, "streaming_content"))
-        # The file must be processed in under 15 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 15)
+                # our ID
+                mock.seek(0)
+                data.update(
+                    {
+                        "in_file": mockfile,
+                        "algo": "share",
+                        "work_id_column": "0",
+                        "work_id_source": "MK",
+                        "right_type_column": "4",
+                        "amount_column": "5",
+                    }
+                )
+                time_before = datetime.now()
+                response = self.client.post(url, data, follow=False)
+                time_after = datetime.now()
+                self.assertTrue(hasattr(response, "streaming_content"))
+                # The file must be processed in under 15 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 15)
 
-        mock.seek(0)
-        data.update(
-            {
-                "algo": "fee",
-            }
-        )
-        time_before = datetime.now()
-        response = self.client.post(url, data, follow=False)
-        time_after = datetime.now()
-        self.assertTrue(hasattr(response, "streaming_content"))
-        # The file must be processed in under 15 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 15)
+                mock.seek(0)
+                data.update(
+                    {
+                        "algo": "fee",
+                    }
+                )
+                time_before = datetime.now()
+                response = self.client.post(url, data, follow=False)
+                time_after = datetime.now()
+                self.assertTrue(hasattr(response, "streaming_content"))
+                # The file must be processed in under 15 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 15)
 
-        mock.seek(0)
-        data.update(
-            {
-                "work_id_source": "52",
-                "default_fee": "10.00",
-            }
-        )
-        time_before = datetime.now()
-        response = self.client.post(url, data, follow=False)
-        time_after = datetime.now()
-        self.assertTrue(hasattr(response, "streaming_content"))
-        # The file must be processed in under 15 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 15)
+                mock.seek(0)
+                data.update(
+                    {
+                        "work_id_source": "52",
+                        "default_fee": "10.00",
+                    }
+                )
+                time_before = datetime.now()
+                response = self.client.post(url, data, follow=False)
+                time_after = datetime.now()
+                self.assertTrue(hasattr(response, "streaming_content"))
+                # The file must be processed in under 15 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 15)
 
-        mock.seek(0)
-        data.update(
-            {
-                "algo": "share",
-                "work_id_column": "6",
-                "work_id_source": "ISRC",
-            }
-        )
-        time_before = datetime.now()
-        response = self.client.post(url, data, follow=False)
-        time_after = datetime.now()
-        self.assertTrue(hasattr(response, "streaming_content"))
-        # The file must be processed in under 15 seconds
-        self.assertLess((time_after - time_before).total_seconds(), 15)
+                mock.seek(0)
+                data.update(
+                    {
+                        "algo": "share",
+                        "work_id_column": "6",
+                        "work_id_source": "ISRC",
+                    }
+                )
+                time_before = datetime.now()
+                response = self.client.post(url, data, follow=False)
+                time_after = datetime.now()
+                self.assertTrue(hasattr(response, "streaming_content"))
+                # The file must be processed in under 15 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 15)
 
-        # TEST BAD
+                # TEST BAD
         with open(TEST_CWR2_FILENAME) as csvfile:
-            mock = StringIO()
-            mock.write(csvfile.read())
-        mockfile = InMemoryUploadedFile(
-            mock, "statement_file", "statement.csv", "text", 0, None
-        )
-        url = reverse("royalty_calculation")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"in_file": mockfile})
-        response = self.client.post(url, data, follow=False)
+            with StringIO() as mock:
+                mock.write(csvfile.read())
+                mockfile = InMemoryUploadedFile(
+                    mock, "statement_file", "statement.csv", "text", 0, None
+                )
+                url = reverse("royalty_calculation")
+                response = self.client.get(url)
+                data = get_data_from_response(response)
+                data.update({"in_file": mockfile})
+                response = self.client.post(url, data, follow=False)
 
     def test_bad_data_import(self):
         """Test bad data import."""
@@ -1639,19 +1642,19 @@ class AdminTest(TestCase):
         """Upload the completely bad file (CWR file in this case)."""
         self.client.force_login(self.superuser)
         with open(TEST_CWR2_FILENAME) as csvfile:
-            mock = StringIO()
-            mock.write(csvfile.read())
-        mock.seek(0)
-        mockfile = InMemoryUploadedFile(
-            mock, "dataimport_file", "dataimport.csv", "text", 0, None
-        )
-        url = reverse("admin:music_publisher_dataimport_add")
-        response = self.client.get(url)
-        data = get_data_from_response(response)
-        data.update({"data_file": mockfile})
-        response = self.client.post(url, data, follow=False)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"errornote", response.content)
+            with StringIO() as mock:
+                mock.write(csvfile.read())
+                mock.seek(0)
+                mockfile = InMemoryUploadedFile(
+                    mock, "dataimport_file", "dataimport.csv", "text", 0, None
+                )
+                url = reverse("admin:music_publisher_dataimport_add")
+                response = self.client.get(url)
+                data = get_data_from_response(response)
+                data.update({"data_file": mockfile})
+                response = self.client.post(url, data, follow=False)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(b"errornote", response.content)
 
     @override_settings(OPTION_FILES=False)
     def test_recording_filters(self):
@@ -2170,7 +2173,7 @@ class ModelsSimpleTest(TransactionTestCase):
             str(work), "DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)"
         )
 
-        alt = work.alternatetitle_set.create(title="MPC Academy")
+        alt = work.alternatetitle_set.create(title="MPC Academy", title_type="TE")
         self.assertEqual(str(alt), "MPC Academy")
 
         self.assertEqual(
@@ -2234,38 +2237,41 @@ class ModelsSimpleTest(TransactionTestCase):
         )
 
         # test CWR 2.1 NWR
-        TEST_CONTENT = open(TEST_CWR2_FILENAME, "rb").read()
-        cwr = music_publisher.models.CWRExport(nwr_rev="NWR")
-        cwr.save()
-        cwr.works.add(work)
-        cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW240001DMP_000.V21")
-        self.assertEqual(cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
-        self.assertEqual(cwr.cwr.encode()[86:], TEST_CONTENT[86:])
+        with open(TEST_CWR2_FILENAME, "rb") as f:
+            TEST_CONTENT = f.read()
+            cwr = music_publisher.models.CWRExport(nwr_rev="NWR")
+            cwr.save()
+            cwr.works.add(work)
+            cwr.create_cwr()
+            self.assertEqual(cwr.filename, "CW240001DMP_000.V21")
+            self.assertEqual(cwr.cwr.encode()[0:64], TEST_CONTENT[0:64])
+            self.assertEqual(cwr.cwr.encode()[86:], TEST_CONTENT[86:])
 
         # test also CWR 3.0 WRK
-        TEST_CONTENT = open(TEST_CWR3_FILENAME, "rb").read()
-        cwr = music_publisher.models.CWRExport(nwr_rev="WRK")
-        cwr.save()
-        cwr.works.add(work)
-        cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW240002DMP_0000_V3-0-0.SUB")
-        self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
-        self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
-        # should just return when once created
-        num = cwr.num_in_year
-        cwr.create_cwr()
-        self.assertEqual(cwr.num_in_year, num)
+        with open(TEST_CWR3_FILENAME, "rb") as f:
+            TEST_CONTENT = f.read()
+            cwr = music_publisher.models.CWRExport(nwr_rev="WRK")
+            cwr.save()
+            cwr.works.add(work)
+            cwr.create_cwr()
+            self.assertEqual(cwr.filename, "CW240002DMP_0000_V3-0-0.SUB")
+            self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
+            self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
+            # should just return when once created
+            num = cwr.num_in_year
+            cwr.create_cwr()
+            self.assertEqual(cwr.num_in_year, num)
 
         # test also CWR 3.0 ISR
-        TEST_CONTENT = open(TEST_ISR_FILENAME, "rb").read()
-        cwr = music_publisher.models.CWRExport(nwr_rev="ISR")
-        cwr.save()
-        cwr.works.add(work)
-        cwr.create_cwr()
-        self.assertEqual(cwr.filename, "CW240003DMP_0000_V3-0-0.ISR")
-        self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
-        self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
+        with open(TEST_ISR_FILENAME, "rb") as f:
+            TEST_CONTENT = f.read()
+            cwr = music_publisher.models.CWRExport(nwr_rev="ISR")
+            cwr.save()
+            cwr.works.add(work)
+            cwr.create_cwr()
+            self.assertEqual(cwr.filename, "CW240003DMP_0000_V3-0-0.ISR")
+            self.assertEqual(cwr.cwr.encode()[0:65], TEST_CONTENT[0:65])
+            self.assertEqual(cwr.cwr.encode()[167:], TEST_CONTENT[167:])
 
         # raises error because this writer is controlled in a work
         writer.pr_society = None

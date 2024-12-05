@@ -985,7 +985,7 @@ class AlternateTitleInline(admin.TabularInline):
     verbose_name_plural = (
         'Alternative titles (not mentioned in "recordings" section)'
     )
-    fields = ("title", "suffix", "complete_alt_title")
+    fields = ("title", "title_type", "suffix", "complete_alt_title")
     ordering = (
         "suffix",
         "title",

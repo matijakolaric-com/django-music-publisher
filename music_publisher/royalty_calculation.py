@@ -449,4 +449,5 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
         try:
             return FileResponse(f, filename=rc.filename, as_attachment=False)
         finally:
+            f.close()
             os.remove(path)
