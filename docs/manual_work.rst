@@ -186,7 +186,8 @@ to enter the recording or version titles already entered in the recordings secti
 Field ``alternative title`` is where you enter the title, or it's suffix,
 based on the field ``suffix``. If the latter is checked, then the suffix
 will be appended to the work ``title``. The actual alternative title is always
-shown in the read-only field ``complete alt title``.
+shown in the read-only field ``complete alt title``. Use ``title type`` for selecting
+the closest type. If unsure, use the default. 
 
 
 Artists Performing Works
