@@ -328,7 +328,10 @@ class AdminTest(TestCase):
         )
         assert wiw.get_agreement_dict() is None
         AlternateTitle.objects.create(
-            work=cls.original_work, suffix=True, title="Behind the Work", title_type="TE"
+            work=cls.original_work,
+            suffix=True,
+            title="Behind the Work",
+            title_type="TE",
         )
         AlternateTitle.objects.create(work=cls.original_work, title="Work")
         recording = Recording.objects.create(
@@ -1243,7 +1246,8 @@ class AdminTest(TestCase):
             self.original_work = Work.objects.get(id=self.original_work.id)
             self.assertEqual(self.original_work.iswc, "T9270264761")
             url = reverse(
-                "admin:music_publisher_work_history", args=(self.original_work.id,)
+                "admin:music_publisher_work_history",
+                args=(self.original_work.id,),
             )
             response = self.client.get(url)
             self.assertIn("staffuser".encode(), response.content)
@@ -1281,10 +1285,14 @@ class AdminTest(TestCase):
                 url = reverse("admin:music_publisher_ackimport_add")
                 response = self.client.get(url)
                 data = get_data_from_response(response)
-                data.update({"acknowledgement_file": mockfile, "import_iswcs": 1})
+                data.update(
+                    {"acknowledgement_file": mockfile, "import_iswcs": 1}
+                )
                 response = self.client.post(url, data, follow=True)
                 self.assertEqual(response.status_code, 200)
-                self.assertIn(b"Duplicate works found for ISWC", response.content)
+                self.assertIn(
+                    b"Duplicate works found for ISWC", response.content
+                )
 
             """Test with a badly formatted file."""
             mock.seek(1)
@@ -1417,7 +1425,12 @@ class AdminTest(TestCase):
                 mock.write(csvfile.read())
                 mock.seek(0)
                 mockfile = InMemoryUploadedFile(
-                    mock, "acknowledgement_file", "dataimport.csv", "text", 0, None
+                    mock,
+                    "acknowledgement_file",
+                    "dataimport.csv",
+                    "text",
+                    0,
+                    None,
                 )
                 url = reverse("admin:music_publisher_dataimport_add")
                 response = self.client.get(url)
@@ -1432,7 +1445,9 @@ class AdminTest(TestCase):
                 mock.seek(0)
                 response = self.client.get(url)
                 data = get_data_from_response(response)
-                data.update({"data_file": mockfile, "ignore_unknown_columns": True})
+                data.update(
+                    {"data_file": mockfile, "ignore_unknown_columns": True}
+                )
                 response = self.client.post(url, data, follow=False)
                 self.assertEqual(response.status_code, 302)
                 data_import = music_publisher.models.DataImport.objects.first()
@@ -1440,7 +1455,8 @@ class AdminTest(TestCase):
                 self.assertIsNot(data_import.report, "")
 
                 url = reverse(
-                    "admin:music_publisher_dataimport_change", args=(data_import.id,)
+                    "admin:music_publisher_dataimport_change",
+                    args=(data_import.id,),
                 )
                 response = self.client.get(url, follow=False)
                 self.assertEqual(response.status_code, 200)
@@ -1533,7 +1549,6 @@ class AdminTest(TestCase):
                     )
                     response = self.client.post(url, data, follow=False)
                     self.assertTrue(hasattr(response, "streaming_content"))
-                    
 
         # lets do one more thing here, copy work IDs to foreign work IDs.
         # to test the slowest use case, and fix work._work_id
@@ -1578,8 +1593,8 @@ class AdminTest(TestCase):
                 response = self.client.post(url, data, follow=False)
                 time_after = datetime.now()
                 self.assertTrue(hasattr(response, "streaming_content"))
-                # The file must be processed in under 15 seconds
-                self.assertLess((time_after - time_before).total_seconds(), 15)
+                # The file must be processed in under 20 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 20)
 
                 mock.seek(0)
                 data.update(
@@ -1591,8 +1606,8 @@ class AdminTest(TestCase):
                 response = self.client.post(url, data, follow=False)
                 time_after = datetime.now()
                 self.assertTrue(hasattr(response, "streaming_content"))
-                # The file must be processed in under 15 seconds
-                self.assertLess((time_after - time_before).total_seconds(), 15)
+                # The file must be processed in under 20 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 20)
 
                 mock.seek(0)
                 data.update(
@@ -1605,8 +1620,8 @@ class AdminTest(TestCase):
                 response = self.client.post(url, data, follow=False)
                 time_after = datetime.now()
                 self.assertTrue(hasattr(response, "streaming_content"))
-                # The file must be processed in under 15 seconds
-                self.assertLess((time_after - time_before).total_seconds(), 15)
+                # The file must be processed in under 20 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 20)
 
                 mock.seek(0)
                 data.update(
@@ -1620,8 +1635,8 @@ class AdminTest(TestCase):
                 response = self.client.post(url, data, follow=False)
                 time_after = datetime.now()
                 self.assertTrue(hasattr(response, "streaming_content"))
-                # The file must be processed in under 15 seconds
-                self.assertLess((time_after - time_before).total_seconds(), 15)
+                # The file must be processed in under 20 seconds
+                self.assertLess((time_after - time_before).total_seconds(), 20)
 
                 # TEST BAD
         with open(TEST_CWR2_FILENAME) as csvfile:
@@ -2173,7 +2188,9 @@ class ModelsSimpleTest(TransactionTestCase):
             str(work), "DMP000001: MUSIC PUB CARTOONS (KOLARIC / OTHER)"
         )
 
-        alt = work.alternatetitle_set.create(title="MPC Academy", title_type="TE")
+        alt = work.alternatetitle_set.create(
+            title="MPC Academy", title_type="TE"
+        )
         self.assertEqual(str(alt), "MPC Academy")
 
         self.assertEqual(

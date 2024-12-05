@@ -84,7 +84,9 @@ class TitleBase(models.Model):
         ("ET", "Extra Search Title"),
     )
 
-    title_type = models.CharField(max_length=2, choices=TITLE_TYPES, default="AT")
+    title_type = models.CharField(
+        max_length=2, choices=TITLE_TYPES, default="AT"
+    )
     title = models.CharField(
         max_length=60, db_index=True, validators=(CWRFieldValidator("title"),)
     )
