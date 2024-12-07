@@ -36,7 +36,7 @@ DMP and hope to fix it later. The author does not believe in fixing in post.
 Single controlled original publisher
 -------------------------------------
 
-DMP supports only a single original controlled publisher (single publishing entity),
+DMP supports only a single controlled original publisher (single publishing entity),
 entered through settings. 
 
 It will **not work** for publishers with multiple entities, most notably US 
@@ -52,7 +52,7 @@ No other publishers
 ------------------------
 
 DMP holds **no data** about **other/uncontrolled publishers**. 
-Uncontrolled writers appear as unpublished in CWR files. 
+Other (uncontrolled) writers appear as unpublished in CWR files. 
 
 .. container:: tgt
 
@@ -69,7 +69,7 @@ shares. In this case, the other publisher appears as unknown in CWR files.
 .. container:: tgt
 
    `That Green Thing <https://matijakolaric.com/thatgreenthing>`_ *has full support
-   for co-publishing deals.*  
+   for co-publishing deals, including one publisher administering for the other(s).*
 
 
 Manuscript shares
@@ -140,8 +140,8 @@ When creating CWR, many fields are left with blank/zero values. When the fields 
 required in CWR, it uses reasonable defaults, e.g.:
 
 * *Musical Work Distribution* is set to *Unclassified*,
-* *Recorded indicator* is set to *Yes* or *Unknown*, depending if recording 
-  metadatawas entered, and
+* *Recorded indicator* is set to *Yes* or *Unknown*, depending whether recording 
+  metadata was entered, and
 * *Work for Hire*, *Grand Rights Indicator*, *Reversionary Indicator*, and *First 
   Recording Refusal Indicator* are set to No.
 
