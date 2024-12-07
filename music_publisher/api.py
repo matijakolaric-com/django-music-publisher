@@ -1,3 +1,5 @@
+from rest_framework.renderers import JSONRenderer
+
 from .models import (
     Writer,
     Work,
@@ -13,7 +15,7 @@ from .models import (
 from rest_framework import viewsets, serializers, permissions, renderers
 from rest_framework.response import Response
 from django.utils.timezone import now
-from django.http import Http404
+from django.http import Http404, StreamingHttpResponse
 
 
 class DjangoModelPermissionsIncludingView(permissions.DjangoModelPermissions):
@@ -305,8 +307,27 @@ class BackupViewSet(viewsets.ViewSet):
     permission_classes = [IsSuperuser]
     renderer_classes = [renderers.JSONRenderer]
 
-    def list(self, request, *args, **kwargs):
-        d = {}
-        d.update(Work.objects.get_dict(Work.objects.all()))
-        d.update(CommercialRelease.objects.get_dict(Release.objects.all()))
-        return Response(d)
+    # def list(self, request, *args, **kwargs):
+    #     d = {}
+    #     d.update(Work.objects.get_dict(Work.objects.all()))
+    #     d.update(CommercialRelease.objects.get_dict(Release.objects.all()))
+    #     return Response(d)
+    
+    def json(self, request, *args, **kwargs):
+        yield """{"works":["""
+        renderer = JSONRenderer()
+        for i, work_item in enumerate(Work.objects.get_dict_items(Work.objects.all())):
+            if i > 0:
+                yield ","
+            yield renderer.render(work_item)
+        yield """],"releases":["""
+        for i, release in enumerate(Release.objects.all()):
+            if i > 0:
+                yield ","
+            yield renderer.render(release.get_dict(with_tracks=True))
+        yield """]}"""
+
+    def list(self,request, *args, **kwargs): 
+        response =  StreamingHttpResponse(self.json(request, *args, **kwargs),status=200, content_type='application/json')
+        response['Cache-Control']= 'no-cache',
+        return response
