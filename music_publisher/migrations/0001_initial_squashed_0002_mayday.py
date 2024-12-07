@@ -9,7 +9,7 @@ import music_publisher.validators
 
 # Functions from the following migrations need manual copying.
 # Move them and any dependencies into this file, then update the
-# RunPython operations to refer to the local versions:
+# RunPython operations to refer to the local versions:_0002_mayday
 # music_publisher.migrations.0002_mayday
 
 

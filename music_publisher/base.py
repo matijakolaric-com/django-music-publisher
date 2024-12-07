@@ -79,8 +79,8 @@ class TitleBase(models.Model):
         ("TE", "First Line of Text"),
         ("FT", "Formal Title"),
         ("IT", "Incorrect Title"),
-        ("OT", "Original Title"),
-        ("TT", "Original Title Translated"),
+        # ("OT", "Original Title"),
+        # ("TT", "Original Title Translated"),
         ("ET", "Extra Search Title"),
     )
 
