@@ -75,7 +75,9 @@ class DataImporter(object):
     RECORDING_FIELDS = [
         "id",
         "recording_title",
+        "recording_title_suffix",
         "version_title",
+        "version_title_suffix",
         "release_date",
         "duration",
         "isrc",
@@ -492,6 +494,10 @@ class DataImporter(object):
                 isrc=recording.get("isrc"),
                 duration=recording.get("duration"),
                 release_date=recording.get("release_date"),
+                recording_title=recording.get("recording_title", ""),
+                recording_title_suffix=str(recording.get("recording_title_suffix"))[0] in [True, 'Y'],
+                version_title=recording.get("version_title", ""),
+                version_title_suffix=str(recording.get("version_title_suffix"))[0] in [True, 'Y'],
             )
             recording.clean_fields()
             recording.clean()
