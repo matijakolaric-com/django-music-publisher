@@ -573,6 +573,7 @@ class WorkManager(models.Manager):
             "works": works,
         }
 
+
 class Work(TitleBase):
     """Concrete class, with references to foreign objects.
 

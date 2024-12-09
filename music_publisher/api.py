@@ -307,16 +307,12 @@ class BackupViewSet(viewsets.ViewSet):
     permission_classes = [IsSuperuser]
     renderer_classes = [renderers.JSONRenderer]
 
-    # def list(self, request, *args, **kwargs):
-    #     d = {}
-    #     d.update(Work.objects.get_dict(Work.objects.all()))
-    #     d.update(CommercialRelease.objects.get_dict(Release.objects.all()))
-    #     return Response(d)
-    
     def json(self, request, *args, **kwargs):
         yield """{"works":["""
         renderer = JSONRenderer()
-        for i, work_item in enumerate(Work.objects.get_dict_items(Work.objects.all())):
+        for i, work_item in enumerate(
+            Work.objects.get_dict_items(Work.objects.all())
+        ):
             if i > 0:
                 yield ","
             yield renderer.render(work_item)
@@ -327,7 +323,11 @@ class BackupViewSet(viewsets.ViewSet):
             yield renderer.render(release.get_dict(with_tracks=True))
         yield """]}"""
 
-    def list(self,request, *args, **kwargs): 
-        response =  StreamingHttpResponse(self.json(request, *args, **kwargs),status=200, content_type='application/json')
-        response['Cache-Control']= 'no-cache',
+    def list(self, request, *args, **kwargs):
+        response = StreamingHttpResponse(
+            self.json(request, *args, **kwargs),
+            status=200,
+            content_type="application/json",
+        )
+        response["Cache-Control"] = ("no-cache",)
         return response
