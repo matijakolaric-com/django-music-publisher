@@ -829,7 +829,7 @@ class Work(TitleBase):
 
         if with_recordings:
             j["recordings"] = [
-                recording.get_dict(with_releases=True)
+                recording.get_dict(with_releases=True, with_work=False)
                 for recording in self.recordings.all()
             ]
 
