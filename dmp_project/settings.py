@@ -8,7 +8,7 @@ import dj_database_url
 from decimal import Decimal
 
 SOFTWARE = "DMP.MATIJAKOLARIC.COM"
-SOFTWARE_VERSION = "24.7 HOLIDAY (OPEN SOURCE)"
+SOFTWARE_VERSION = "24.12 HOLIDAY SPECIAL"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
