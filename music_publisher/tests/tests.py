@@ -18,6 +18,7 @@ More precise tests would be better.
 from datetime import datetime
 from decimal import Decimal
 from io import StringIO
+import json
 
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
@@ -1761,7 +1762,10 @@ class AdminTest(TestCase):
         request = factory.get(url)
         force_authenticate(request, self.superuser)
         response = BackupViewSet.as_view({"get": "list"})(request)
-        response.render()
+        d = json.loads(response.getvalue())
+        self.assertIn("works", d)
+        self.assertIn("releases", d)
+        self.assertEqual(len(d["releases"]), 4)
         self.assertEqual(response.status_code, 200)
 
         response = ArtistViewSet.as_view({"get": "list"})(request)

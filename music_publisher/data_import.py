@@ -79,9 +79,9 @@ class DataImporter(object):
         "release_date",
         "duration",
         "isrc",
-        "artist_last",
-        "artist_first",
-        "artist_isni",
+        # "artist_last",
+        # "artist_first",
+        # "artist_isni",
         "record_label",
     ]
     REFERENCE_FIELDS = ["id", "cmo"]
@@ -492,6 +492,8 @@ class DataImporter(object):
                 isrc=recording.get("isrc"),
                 duration=recording.get("duration"),
                 release_date=recording.get("release_date"),
+                recording_title=recording.get("recording_title", ""),
+                version_title=recording.get("version_title", ""),
             )
             recording.clean_fields()
             recording.clean()

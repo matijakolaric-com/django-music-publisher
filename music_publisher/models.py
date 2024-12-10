@@ -530,9 +530,9 @@ class WorkManager(models.Manager):
         """
         return super().get_queryset().prefetch_related("writers")
 
-    def get_dict(self, qs):
+    def get_dict_items(self, qs):
         """
-        Return a dictionary with works from the queryset
+        Yield dictionary items for works from the queryset
 
         Args:
             qs(django.db.models.query import QuerySet)
@@ -551,11 +551,23 @@ class WorkManager(models.Manager):
         qs = qs.prefetch_related("recordings__tracks__release__release_label")
         qs = qs.prefetch_related("workacknowledgement_set")
 
-        works = []
-
         for work in qs:
             j = work.get_dict()
-            works.append(j)
+            yield j
+
+    def get_dict(self, qs):
+        """
+        Return a dictionary with works from the queryset
+
+        Args:
+            qs(django.db.models.query import QuerySet)
+
+        Returns:
+            dict: dictionary with works
+
+        """
+
+        works = list(self.get_dict_items(qs))
 
         return {
             "works": works,
@@ -817,7 +829,7 @@ class Work(TitleBase):
 
         if with_recordings:
             j["recordings"] = [
-                recording.get_dict(with_releases=True)
+                recording.get_dict(with_releases=True, with_work=False)
                 for recording in self.recordings.all()
             ]
 

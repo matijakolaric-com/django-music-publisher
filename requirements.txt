@@ -10,4 +10,3 @@ Pillow==11.0.0
 psycopg2-binary==2.9.10
 waitress==3.0.2
 whitenoise==6.8.2
-
