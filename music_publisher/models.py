@@ -1471,7 +1471,7 @@ class CWRExport(models.Model):
         """Return CWR version."""
         if self.nwr_rev in ["WRK", "ISR"]:
             return "30"
-        elif self.nwr_rev == ["WR1", "IS1"]:
+        elif self.nwr_rev in ["WR1", "IS1"]:
             return "31"
         elif self.nwr_rev in ["NW2", "RE2"]:
             return "22"
