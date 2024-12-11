@@ -28,8 +28,13 @@ jobs:
         ports: ['5432:5432']
     strategy:
       matrix:
-        python: ['3.11', '3.12', '3.13']
-        postgresql-version: [16, 17]
+        include:
+          - python: '3.11'
+            postgresql-version: 15
+          - python: '3.12'
+            postgresql-version: 16
+          - python: '3.13'
+            postgresql-version: 17
     
     steps:
     - name: Checkout
