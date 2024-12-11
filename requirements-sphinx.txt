@@ -1,4 +1,4 @@
-Django>=4.2.13,<5.0
+Django>=4.2.17,<5.0
 boto3==1.35.76
 dj_database_url==2.3.0
 django-cleanup==9.0.0
