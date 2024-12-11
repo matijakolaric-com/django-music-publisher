@@ -7,7 +7,7 @@ import os
 import dj_database_url
 from decimal import Decimal
 
-SOFTWARE = "DMP.MATIJAKOLARIC.COM"
+SOFTWARE = "DJANGO MUSIC PUBLISHER"
 SOFTWARE_VERSION = "24.12 HOLIDAY SPECIAL"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

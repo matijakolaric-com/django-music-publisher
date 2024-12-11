@@ -1447,8 +1447,9 @@ class CWRExport(models.Model):
             ("NW2", "CWR 2.2: New work registrations"),
             ("RE2", "CWR 2.2: Revisions of registered works"),
             ("WRK", "CWR 3.0: Work registration"),
-            ("ISR", "CWR 3.0: ISWC request (EDI)"),
-            ("WR1", "CWR 3.1 DRAFT: Work registration"),
+            ("ISR", "CWR 3.0: ISWC request"),
+            ("WR1", "CWR 3.1: Work registration"),
+            ("IS1", "CWR 3.1: ISWC request"),
         ),
     )
     cwr = models.TextField(blank=True, editable=False)
@@ -1470,7 +1471,7 @@ class CWRExport(models.Model):
         """Return CWR version."""
         if self.nwr_rev in ["WRK", "ISR"]:
             return "30"
-        elif self.nwr_rev == "WR1":
+        elif self.nwr_rev == ["WR1", "IS1"]:
             return "31"
         elif self.nwr_rev in ["NW2", "RE2"]:
             return "22"
