@@ -12,7 +12,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: psf/black@stable
         with:
           options: "--check --verbose --line-length 79 --exclude music_publisher/migrations"
@@ -29,6 +29,7 @@ jobs:
     strategy:
       matrix:
         python: ['3.11', '3.12', '3.13']
+        postgresql-version: [15, 16]
     
     steps:
     - name: Checkout
