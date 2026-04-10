@@ -1,11 +1,11 @@
 import setuptools
 
-with open("README.rst", "r") as fh:
+with open("README.rst", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="django-music-publisher",
-    version="24.12.1",
+    version="26.4a1",
     author="Matija Kolarić",
     author_email="matijakolaric@users.noreply.github.com",
     license="MIT License",
@@ -26,7 +26,18 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=["dmp_project", "docs"]),
     install_requires=(
-        "Django>=4.2.13,<5.0",
+        "Django>=5.2,<5.3",
+        "boto3==1.38.0",
+        "dj-database-url==3.1.2",
+        "django-cleanup==9.0.0",
+        "django-storages==1.14.6",
+        "djangorestframework==3.16.0",
+        "music-metadata-territories==24.12",
+        "Markdown==3.7",
+        "Pillow==11.2.1",
+        "psycopg2-binary==2.9.10",
+        "waitress==3.0.2",
+        "whitenoise==6.9.0",
         "requests>=2.32.3",
     ),
     include_package_data=True,
@@ -34,14 +45,13 @@ setuptools.setup(
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Django",
-        "Framework :: Django :: 4.2",
+        "Framework :: Django :: 5.2",
         "Intended Audience :: Developers",
         "Intended Audience :: Other Audience",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
     ],

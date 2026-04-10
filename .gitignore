@@ -66,6 +66,16 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Node / JavaScript / frontend stuff
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+**/package-lock.json
+
 # PyBuilder
 target/
 
