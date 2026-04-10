@@ -1,6 +1,6 @@
 Django>=5.2,<5.3
 boto3==1.38.0
-dj_database_url==2.3.1
+dj-database-url==3.1.2
 django-cleanup==9.0.0
 django-storages==1.14.6
 djangorestframework==3.16.0
