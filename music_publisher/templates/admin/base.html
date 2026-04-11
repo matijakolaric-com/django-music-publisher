@@ -6,130 +6,80 @@
 <link rel="stylesheet" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}">
 {% block dark-mode-vars %}
   <link rel="stylesheet" href="{% static "admin/css/dark_mode.css" %}">
-  <script src="{% static "admin/js/theme.js" %}" defer></script>
+  <script src="{% static "admin/js/theme.js" %}"></script>
 {% endblock %}
 {% if not is_popup and is_nav_sidebar_enabled %}
   <link rel="stylesheet" href="{% static "admin/css/nav_sidebar.css" %}">
   <script src="{% static 'admin/js/nav_sidebar.js' %}" defer></script>
 {% endif %}
-{% block extrastyle %}<style>
-    html[data-theme="light"], :root {
-        --primary: #d50000;
-        --secondary: var(--primary);
-        --link-fg: var(--primary);
-        --header-bg: var(--body-bg);
-        --header-color: var(--body-fg);
-        --header-link-color: var(--primary);
-        --accent: var(--primary);
-        --link-selected-fg: var(--link-fg);
-        --link-hover-color: var(--body-fg);
-        --object-tools-bg: var(--primary);
-        --object-tools-hover-bg: var(--body-fg);
-        --breadcrumbs-fg: var(--body-fg);
-        --breadcrumbs-link-fg: var(--link-fg);
-        --breadcrumbs-link-selected-fg: var(--link-selected-fg);
-        --breadcrumbs-bg: var(--body-bg);
-        --button-bg: var(--primary);
-        --button-hover-bg: var(--body-fg);
-        --delete-button-bg: var(--button-bg);
-        --delete-button-hover-bg: var(--button-hover-bg);
-        --default-button-hover-bg: var(--button-hover-bg);
-    }
-    html[data-theme="dark"] {
-        --primary: #a31212;
-        --secondary: var(--primary);
-        --link-fg: #ff2222;
-        --header-bg: var(--body-bg);
-        --header-color: var(--body-fg);
-        --header-link-color: var(--primary);
-        --accent: #ff2222;
-        --link-selected-fg: var(--link-fg);
-        --link-hover-color: var(--body-fg);
-        --object-tools-bg: var(--primary);
-        --object-tools-hover-bg: var(--body-fg);
-        --breadcrumbs-fg: var(--body-fg);
-        --breadcrumbs-link-fg: var(--link-fg);
-        --breadcrumbs-link-selected-fg: var(--link-selected-fg);
-        --breadcrumbs-bg: var(--body-bg);
-        --button-bg: var(--primary);
-        --button-hover-bg: var(--body-fg);
-        --delete-button-bg: var(--button-bg);
-        --delete-button-hover-bg: var(--button-hover-bg);
-        --default-button-hover-bg: var(--button-hover-bg);
-    }
+{% block extrastyle %}
+    <style>
+        * {font-weight: 300 !important;}
+        #user-tools {font-size: 1em}
+        html[data-theme="light"], :root {
+            font-size: 1.2em;
+            --red: #d50000;
+            --white: #fff;
+            --black: #000;
+            --body-fg: #333;
+            --body-bg: #fff;
+            --body-quiet-color: #666;
+            --body-medium-color: #444;
+            --body-loud-color: #000;
 
-    * {font-weight: 300 !important;}
-    html {font-size: 1.2rem !important;}
-    #header {padding: 20px 40px 5px 0;}
-    .login #header {
-        justify-content: left;
-        min-height: 60px;
-    }
-    #branding * {font-weight: 200 !important;}
-    #changelist-filter select {
-        width: 100%;
-    }
-    img.logo {
-        float:left; padding: 5px 24px 24px 60px; max-height: 64px;
-    }
-    .login #header h1 {
-        font-size: 30px;
-        line-height: 1em;
-    }
-    .login img.logo {
-        padding: 12px 0 0 20px;
-    }
-
-    #content {
-        padding: 0 40px;
-    }
-
-        .module caption, .inline-group h2, .module h2 {
-        font-size: 18px;
-    }
-
-    .module caption {
-        color: var(--header-color);
-        background-color: var(--darkened-bg);
-        border-bottom: 1px solid var(--hairline-color);
-        border-top: 1px solid var(--hairline-color);
-    }
-
-    .module h2, .inline-group h2 {
-        color: var(--body-bg);
-        background-color: var(--primary);
-        text-transform: uppercase;
-    }
-    html[data-theme="dark"] .module h2, html[data-theme="dark"] .inline-group h2 {
-        background-color: #a31212;
-    }
-
-    #user-tools, #logout-form button {
-        font-size: 0.8rem;
-    }
-
-    input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], input[type=tel], textarea, select, .vTextField {
-        font-size: 0.8rem;
-        height: 1rem;
-        box-sizing: content-box;
-    }
+            --primary: var(--body-quiet-color);
+            --secondary: var(--red);
+            --accent: var(--body-loud-color);
+            --primary-fg: var(--white);
     
-    .login input[type=text], .login input[type=password] {
-        height: 1.8rem;
-    }
+
+            --header-color: var(--body-quiet-color);
+            --header-branding-color: var(--red);
+            --header-bg: var(--white);
+            --header-link-color: var(--red);
     
-    #content h1 {color: var(--body-fg); padding: 8px}
-
-    h2 {padding: 8px}
-
-    form .aligned p.help, form .aligned div.help {
-        margin: 0 24px 0 24px !important;
-    }
-</style>{% endblock %}
+            --breadcrumbs-fg: var(--body-fg);
+            --breadcrumbs-link-fg: var(--red);
+            --breadcrumbs-bg: var(--body-bg);
+    
+            --link-fg: var(--red);
+            --link-hover-color: var(--red);
+            --link-selected-fg: var(--red);
+    
+            --hairline-color: #e8e8e8;
+            --border-color: #ccc;
+    
+            --error-fg: #ba2121;
+    
+            --message-success-bg: #dfd;
+            --message-warning-bg: #ffc;
+            --message-error-bg: #ffefef;
+    
+            --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
+            --selected-bg: #e4e4e4; /* E.g. selected table cells */
+            --selected-row: #ffc;
+    
+            --button-fg: var(--white);
+            --button-bg: var(--body-quiet-color);
+            --button-hover-bg: var(--red);
+            --default-button-bg: var(--body-fg);
+            --default-button-hover-bg: var(--red);
+            --close-button-bg: var(--red);
+            --close-button-hover-bg: var(--red);
+            --delete-button-bg: var(--body-fg);
+            --delete-button-hover-bg: var(--black);
+    
+            --object-tools-fg: var(--button-fg);
+            --object-tools-bg: var(--close-button-bg);
+            --object-tools-hover-bg: var(--close-button-hover-bg);
+        }
+        .module caption, .calendar caption {color: var(--body-fg) !important; background-color: var(--body-bg) !important;}
+    </style>
+{% endblock %}
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
 {% block extrahead %}{% endblock %}
 {% block responsive %}
-    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static "admin/css/responsive.css" %}">
     {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% static "admin/css/responsive_rtl.css" %}">{% endif %}
 {% endblock %}
@@ -143,59 +93,59 @@
 <div id="container">
 
     {% if not is_popup %}
-        <div>
-            <a href="https://django-music-publisher.readthedocs.io/" target="_blank"><img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" class="logo"></a>
-            <!-- Header -->
-            {% block header %}
-            <div id="header">
-                <div id="branding">
-                {% block branding %}{% endblock %}
-                </div>
-                {% block usertools %}
-                {% if has_permission %}
-                <div id="user-tools">
-                    {% block userlinks %}
-                        {% if opts.app_label == 'music_publisher' %}
-                            <a href="https://django-music-publisher.readthedocs.io/en/latest/manual_{{ opts.model_name }}.html" target="_blank">User Manual</a> /
-                        {% else %}
-                            <a href="https://django-music-publisher.readthedocs.io/en/latest/manual.html" target="_blank">User Manual</a> /
-                        {% endif %}
-                        {% if site_url %}
-                            <a href="{{ site_url }}">{% translate 'View site' %}</a> /
-                        {% endif %}
-                        {% if user.is_active and user.is_staff %}
-                            {% url 'django-admindocs-docroot' as docsroot %}
-                            {% if docsroot %}
-                                <a href="{{ docsroot }}">{% translate 'Documentation' %}</a> /
-                            {% endif %}
-                        {% endif %}
-                        {% if user.has_usable_password %}
-                        <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
-                        {% endif %}
-                        <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
-                            {% csrf_token %}
-                            <button type="submit">{% translate 'Log out' %}</button>
-                        </form>
-                        {% include "admin/color_theme_toggle.html" %}
-                    {% endblock %}
-                </div>
-                {% endif %}
-                {% endblock %}
-                {% block nav-global %}{% endblock %}
-            </div>
+    <!-- Header -->
+    {% block header %}
+      <header id="header">
+        <div id="branding">
+        <img src="{% static 'android-chrome-192x192.png' %}" alt="DMP" class="logo" style="max-height: 2em; margin: 0 1em 0 0">
+        {% block branding %}{% endblock %}
+        </div>
+        {% block usertools %}
+        {% if has_permission %}
+        <div id="user-tools">
+            {% block welcome-msg %}
             {% endblock %}
-            <!-- END Header -->
-            {% block nav-breadcrumbs %}
-              <nav aria-label="{% translate 'Breadcrumbs' %}">
-                {% block breadcrumbs %}
-                  <div class="breadcrumbs">
-                    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
-                    {% if title %} &rsaquo; {{ title }}{% endif %}
-                  </div>
-                {% endblock %}
-              </nav>
+            {% block userlinks %}
+                {% if opts.app_label == 'music_publisher' %}
+                    <a href="https://django-music-publisher.readthedocs.io/en/latest/manual_{{ opts.model_name }}.html" target="_blank">User Manual</a> /
+                {% else %}
+                    <a href="https://django-music-publisher.readthedocs.io/en/latest/manual.html" target="_blank">User Manual</a> /
+                {% endif %}
+                {% if site_url %}
+                    <a href="{{ site_url }}">{% translate 'View site' %}</a> /
+                {% endif %}
+                {% if user.is_active and user.is_staff %}
+                    {% url 'django-admindocs-docroot' as docsroot %}
+                    {% if docsroot %}
+                        <a href="{{ docsroot }}">{% translate 'Documentation' %}</a> /
+                    {% endif %}
+                {% endif %}
+                {% if user.has_usable_password %}
+                <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
+                {% endif %}
+                <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">{% translate 'Log out' %}</button>
+                </form>
+                {% include "admin/color_theme_toggle.html" %}
             {% endblock %}
         </div>
+        {% endif %}
+        {% endblock %}
+        {% block nav-global %}{% endblock %}
+      </header>
+    {% endblock %}
+    <!-- END Header -->
+    {% block nav-breadcrumbs %}
+      <nav aria-label="{% translate 'Breadcrumbs' %}">
+        {% block breadcrumbs %}
+          <div class="breadcrumbs">
+            <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+            {% if title %} &rsaquo; {{ title }}{% endif %}
+          </div>
+        {% endblock %}
+      </nav>
+    {% endblock %}
     {% endif %}
 
     <div class="main" id="main">
@@ -204,7 +154,7 @@
           {% include "admin/nav_sidebar.html" %}
         {% endblock %}
       {% endif %}
-      <div id="content-start" class="content" tabindex="-1">
+      <main id="content-start" class="content" tabindex="-1">
         {% block messages %}
           {% if messages %}
             <ul class="messagelist">{% for message in messages %}
@@ -225,18 +175,19 @@
           <br class="clear">
         </div>
         <!-- END Content -->
-        {% block footer %}<div id="footer"></div>{% endblock %}
-      </div>
+      </main>
     </div>
+    <footer id="footer">{% block footer %}{% endblock %}</footer>
 </div>
 <!-- END Container -->
 
 <!-- SVGs -->
 <svg xmlns="http://www.w3.org/2000/svg" class="base-svgs">
-  <symbol viewBox="0 0 24 24" width="1rem" height="1rem" id="icon-auto"><path d="M0 0h24v24H0z" fill="currentColor"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2V4a8 8 0 1 0 0 16z"/></symbol>
-  <symbol viewBox="0 0 24 24" width="1rem" height="1rem" id="icon-moon"><path d="M0 0h24v24H0z" fill="currentColor"/><path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/></symbol>
-  <symbol viewBox="0 0 24 24" width="1rem" height="1rem" id="icon-sun"><path d="M0 0h24v24H0z" fill="currentColor"/><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></symbol>
+  <symbol viewBox="0 0 24 24" width="1.5rem" height="1.5rem" id="icon-auto"><path d="M0 0h24v24H0z" fill="currentColor"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2V4a8 8 0 1 0 0 16z"/></symbol>
+  <symbol viewBox="0 0 24 24" width="1.5rem" height="1.5rem" id="icon-moon"><path d="M0 0h24v24H0z" fill="currentColor"/><path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/></symbol>
+  <symbol viewBox="0 0 24 24" width="1.5rem" height="1.5rem" id="icon-sun"><path d="M0 0h24v24H0z" fill="currentColor"/><path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></symbol>
 </svg>
 <!-- END SVGs -->
+{% block extrabody %}{% endblock extrabody %}
 </body>
 </html>
