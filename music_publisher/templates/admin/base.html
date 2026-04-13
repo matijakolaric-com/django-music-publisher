@@ -12,69 +12,8 @@
   <link rel="stylesheet" href="{% static "admin/css/nav_sidebar.css" %}">
   <script src="{% static 'admin/js/nav_sidebar.js' %}" defer></script>
 {% endif %}
+<link rel="stylesheet" href="{% static "admin/css/dmp.css" %}">
 {% block extrastyle %}
-    <style>
-        * {font-weight: 300 !important;}
-        #user-tools {font-size: 1em}
-        html[data-theme="light"], :root {
-            font-size: 1.2em;
-            --red: #d50000;
-            --white: #fff;
-            --black: #000;
-            --body-fg: #333;
-            --body-bg: #fff;
-            --body-quiet-color: #666;
-            --body-medium-color: #444;
-            --body-loud-color: #000;
-
-            --primary: var(--body-quiet-color);
-            --secondary: var(--red);
-            --accent: var(--body-loud-color);
-            --primary-fg: var(--white);
-    
-
-            --header-color: var(--body-quiet-color);
-            --header-branding-color: var(--red);
-            --header-bg: var(--white);
-            --header-link-color: var(--red);
-    
-            --breadcrumbs-fg: var(--body-fg);
-            --breadcrumbs-link-fg: var(--red);
-            --breadcrumbs-bg: var(--body-bg);
-    
-            --link-fg: var(--red);
-            --link-hover-color: var(--red);
-            --link-selected-fg: var(--red);
-    
-            --hairline-color: #e8e8e8;
-            --border-color: #ccc;
-    
-            --error-fg: #ba2121;
-    
-            --message-success-bg: #dfd;
-            --message-warning-bg: #ffc;
-            --message-error-bg: #ffefef;
-    
-            --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
-            --selected-bg: #e4e4e4; /* E.g. selected table cells */
-            --selected-row: #ffc;
-    
-            --button-fg: var(--white);
-            --button-bg: var(--body-quiet-color);
-            --button-hover-bg: var(--red);
-            --default-button-bg: var(--body-fg);
-            --default-button-hover-bg: var(--red);
-            --close-button-bg: var(--red);
-            --close-button-hover-bg: var(--red);
-            --delete-button-bg: var(--body-fg);
-            --delete-button-hover-bg: var(--black);
-    
-            --object-tools-fg: var(--button-fg);
-            --object-tools-bg: var(--close-button-bg);
-            --object-tools-hover-bg: var(--close-button-hover-bg);
-        }
-        .module caption, .calendar caption {color: var(--body-fg) !important; background-color: var(--body-bg) !important;}
-    </style>
 {% endblock %}
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
 {% block extrahead %}{% endblock %}

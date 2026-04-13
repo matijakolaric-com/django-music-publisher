@@ -1,0 +1,26 @@
+{% load i18n %}
+<details data-filter-title="{{ title }}" open>
+  <summary>
+    {% blocktranslate with filter_title=title %} {{ filter_title }} {% endblocktranslate %}
+  </summary>
+  <ul class="admin-filter-{{ title|cut:' ' }}">
+  {% if choices|slice:"3:" %}
+    <li>
+        <label>
+            <select class="form-control"
+                onchange="window.location = window.location.pathname + this.options[this.selectedIndex].value">
+            {% for choice in choices %}
+                <option{% if choice.selected %} selected="selected"{% endif %}
+                 value="{{ choice.query_string|iriencode }}">{{ choice.display }}</option>
+            {% endfor %}
+            </select>
+        </label>
+    </li>
+  {% else %}
+    {% for choice in choices %}
+      <li{% if choice.selected %} class="selected"{% endif %}>
+      <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
+    {% endfor %}
+  {% endif %}
+  </ul>
+</details>

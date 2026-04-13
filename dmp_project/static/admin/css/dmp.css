@@ -1,0 +1,153 @@
+* {font-weight: 300 !important;}
+#user-tools {font-size: 1em}
+html[data-theme="light"], :root {
+    font-size: 1.2em;
+    --red: #d50000;
+    --white: #fff;
+    --black: #000;
+    --body-fg: #333;
+    --body-bg: #fff;
+    --body-quiet-color: #666;
+    --body-medium-color: #444;
+    --body-loud-color: #000;
+
+    --primary: var(--body-quiet-color);
+    --secondary: var(--red);
+    --accent: var(--body-loud-color);
+    --primary-fg: var(--white);
+
+
+    --header-color: var(--body-quiet-color);
+    --header-branding-color: var(--red);
+    --header-bg: var(--white);
+    --header-link-color: var(--red);
+
+    --breadcrumbs-fg: var(--body-fg);
+    --breadcrumbs-link-fg: var(--red);
+    --breadcrumbs-bg: var(--body-bg);
+
+    --link-fg: var(--red);
+    --link-hover-color: var(--red);
+    --link-selected-fg: var(--red);
+
+    --hairline-color: #e8e8e8;
+    --border-color: #ccc;
+
+    --error-fg: #ba2121;
+
+    --message-success-bg: #dfd;
+    --message-warning-bg: #ffc;
+    --message-error-bg: #ffefef;
+
+    --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
+    --selected-bg: #e4e4e4; /* E.g. selected table cells */
+    --selected-row: #ffc;
+
+    --button-fg: var(--white);
+    --button-bg: var(--body-quiet-color);
+    --button-hover-bg: var(--red);
+    --default-button-bg: var(--body-fg);
+    --default-button-hover-bg: var(--red);
+    --close-button-bg: var(--red);
+    --close-button-hover-bg: var(--red);
+    --delete-button-bg: var(--body-fg);
+    --delete-button-hover-bg: var(--black);
+
+    --object-tools-fg: var(--button-fg);
+    --object-tools-bg: var(--close-button-bg);
+    --object-tools-hover-bg: var(--close-button-hover-bg);
+}
+.module caption, .calendar caption {color: var(--body-fg) !important; background-color: var(--body-bg) !important;}
+
+
+.cwr {overflow-x:scroll; font-family: monospace; background-color: white}
+.cwr pre {padding: 1px 0; margin: 0; color: #999; overflow-x: visible}
+
+.cwr div.HDR span.record_type,
+.cwr div.TRL span.record_type {color: #609;}
+.cwr div.GRH span.record_type,
+.cwr div.GRT span.record_type {color: #606;}
+.cwr div.ACK span.record_type,
+.cwr div.WRK span.record_type,
+.cwr div.ISR span.record_type,
+.cwr div.ISA span.record_type,
+.cwr div.ISW span.record_type,
+.cwr div.NWR span.record_type,
+.cwr div.REV span.record_type,
+.cwr div.XRF span.record_type {color: #B00;}
+.cwr div.ALT span.record_type,
+.cwr div.VER span.record_type {color: #B00;}
+.cwr div.SPU span.record_type,
+.cwr div.OPU span.record_type {color: #060;}
+.cwr div.WRI span.record_type,
+.cwr div.SWR span.record_type,
+.cwr div.OWR span.record_type {color: #00A;}
+.cwr div.SPT span.record_type,
+.cwr div.OPT span.record_type {color: #060;}
+.cwr div.SWT span.record_type,
+.cwr div.MAN span.record_type,
+.cwr div.PWR span.record_type,
+.cwr div.OWT span.record_type {color: #00A;}
+.cwr div.PER span.record_type,
+.cwr div.REC span.record_type {color: #069;}
+.cwr div.ORN span.record_type {color: #930;}
+.cwr div.OWK span.record_type {color: #060;}
+.cwr div.MSG span.record_type {color: #000;}
+.cwr div span.record_type {color: #666;}
+.cwr div span.counters {color: #aaa !important;}
+.cwr div span.prshare {color: #069;}
+.cwr div span.mrshare {color: #609;}
+.cwr div span.srshare {color: #906;}
+.cwr span.title,
+.cwr span.iswc,
+.cwr span.saan,
+.cwr span.flag {color: #B00}
+.cwr div.HDR span.ipnumber,
+.cwr div.ALT span.titletype,
+.cwr span.workid {color: #609;}
+.cwr div.WRI span.ipnumber,
+.cwr div.SWR span.ipnumber,
+.cwr div.SWT span.ipnumber,
+.cwr div.MAN span.ipnumber,
+.cwr div.OWR span.ipnumber,
+.cwr div.OWT span.ipnumber,
+.cwr div.PWR span.ipnumber:last-of-type,
+.cwr div span.writer {color: #00A;}
+.cwr div.ACK span.type,
+.cwr div.SPU span.ipnumber,
+.cwr div.SPT span.ipnumber,
+.cwr div.OPU span.ipnumber,
+.cwr div.OPT span.ipnumber,
+.cwr div.PWR span.ipnumber,
+.cwr div span.publisher {color: #060;}
+.cwr div.ORN span {color: #930;}
+.cwr div span.chain,
+.cwr div span.message,
+.cwr div span.status {color: #B00;}
+.cwr div span.artist,
+.cwr div span.duration {color: #069;}
+.cwr div span.capacity {color: #B00;}
+.cwr div.ACK,
+.cwr div.ISR,
+.cwr div.ISA,
+.cwr div.ISW,
+.cwr div.WRK,
+.cwr div.NWR,
+.cwr div.REV,
+.cwr div.GRT {margin-top:0.5em}
+.ACK + div.ISR,
+.ACK + div.WRK,
+.ACK + div.NWR,
+.ACK + div.REV {margin-top:0.1em}
+.MSG + div.ISR,
+.MSG + div.WRK,
+.MSG + div.NWR,
+.MSG + div.REV {margin-top:0}
+.cwr div.ACK.CO,
+.cwr div.ACK.DU,
+.cwr div.ACK.RJ,
+.cwr div.ACK.NP,
+.cwr div.ACK.RC,
+.cwr div.ACK.NA,
+.cwr div.ACK.WA {background-color: #fcc}
+.cwr div.MSG {background-color: #fcc}

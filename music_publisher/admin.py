@@ -1987,7 +1987,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             cwr = self.get_preview(obj)
             return render(
                 request,
-                "raw_cwr.html",
+                "music_publisher/raw_cwr.html",
                 {
                     **self.admin_site.each_context(request),
                     "version": obj.version,
@@ -2346,7 +2346,7 @@ class ACKImportAdmin(AdminWithReport):
             try:
                 return render(
                     request,
-                    "raw_cwr.html",
+                    "music_publisher/raw_cwr.html",
                     {
                         **self.admin_site.each_context(request),
                         "version": version,
@@ -2357,7 +2357,7 @@ class ACKImportAdmin(AdminWithReport):
             except Exception:  # Parsing user garbage, could be anything
                 return render(
                     request,
-                    "raw_cwr.html",
+                    "music_publisher/raw_cwr.html",
                     {
                         **self.admin_site.each_context(request),
                         "version": "",
