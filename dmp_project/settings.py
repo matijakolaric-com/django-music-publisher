@@ -2,7 +2,6 @@
 Django settings for dmp_project project.
 """
 
-import csv
 import os
 import dj_database_url
 from decimal import Decimal

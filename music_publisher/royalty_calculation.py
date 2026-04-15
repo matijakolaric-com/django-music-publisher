@@ -332,7 +332,7 @@ class RoyaltyCalculation(object):
                 amount = Decimal(row[self.ac])
             except TypeError:
                 amount = None
-        except IndexError as e:
+        except IndexError:
             work = None
 
         # Add data to all output rows

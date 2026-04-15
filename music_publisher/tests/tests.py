@@ -36,7 +36,6 @@ from django.urls import reverse
 from django.contrib.messages import get_messages
 
 import music_publisher.models
-from music_publisher.admin import CWRExportAdmin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (
     AlternateTitle,
@@ -244,6 +243,7 @@ class DataImportTest(TestCase):
                 },
             }
             writers = list(di.get_writers(d))
+            del writers
         self.assertEqual(
             str(ve.exception),
             (
@@ -1755,7 +1755,6 @@ class AdminTest(TestCase):
             ArtistViewSet,
             ReleaseViewSet,
         )
-        from rest_framework.reverse import reverse as api_reverse
 
         factory = APIRequestFactory()
         url = reverse("api-root")

@@ -3,10 +3,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from django import template
-from django.conf import settings
 
-from music_publisher import models
-from music_metadata.territories.territory import Territory
 
 register = template.Library()
 

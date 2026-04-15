@@ -12,7 +12,7 @@ from collections import defaultdict, OrderedDict
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.forms import inlineformset_factory
 from django.utils.text import slugify
 

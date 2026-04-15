@@ -23,10 +23,8 @@ from django.utils.duration import duration_string
 
 from .base import (
     ArtistBase,
-    IPIBase,
     LabelBase,
     LibraryBase,
-    PersonBase,
     ReleaseBase,
     TitleBase,
     WriterBase,

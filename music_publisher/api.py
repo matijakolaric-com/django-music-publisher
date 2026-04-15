@@ -6,8 +6,6 @@ from .models import (
     Recording,
     Artist,
     Release,
-    CommercialRelease,
-    LibraryRelease,
     Label,
     Track,
     Playlist,

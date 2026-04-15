@@ -18,7 +18,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
