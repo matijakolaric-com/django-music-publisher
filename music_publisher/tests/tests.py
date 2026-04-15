@@ -1052,7 +1052,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Not allowed in original works.", response.content)
 
-    def test_missing_capacity(self):
+    def test_extended_capacity(self):
         """At least one of the additional capacieties must be set for
         modifications."""
         self.client.force_login(self.staffuser)
