@@ -31,7 +31,7 @@ jobs:
         include:
           - python: '3.12'
             postgresql-version: 16
-          - python: '3.13'
+          - python: '3.12'
             postgresql-version: 17
           - python: '3.13'
             postgresql-version: 18
