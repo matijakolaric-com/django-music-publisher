@@ -1030,9 +1030,9 @@ class WriterInWork(models.Model):
                 }
             )
         d = {}
+        if not self.capacity:
+            d["capacity"] = "Must be set for all writers."
         if self.controlled:
-            if not self.capacity:
-                d["capacity"] = "Must be set for a controlled writer."
             if not self.writer:
                 d["writer"] = "Must be set for a controlled writer."
             else:

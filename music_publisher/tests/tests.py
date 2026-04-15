@@ -939,7 +939,7 @@ class AdminTest(TestCase):
             b"Must be set for a generally controlled writer.", response.content
         )
 
-    def test_generally_controlled_missing_capacity(self):
+    def test_missing_capacity(self):
         """Test that if `controlled` flag is set, the `capacity` must be set
         as well."""
         self.client.force_login(self.staffuser)
@@ -947,12 +947,9 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data["writerinwork_set-0-capacity"] = ""
-        data["writerinwork_set-0-capacity"] = ""
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b"Must be set for a controlled writer.", response.content
-        )
+        self.assertIn(b"Must be set for all writers.", response.content)
 
     def test_controlled_but_no_writer(self):
         """Test that a line without a writer can not have `controlled` set."""
@@ -1101,22 +1098,6 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             b"Sum of manuscript shares must be 100%.", response.content
-        )
-
-    def test_wrong_capacity_in_copublishing_modification(self):
-        """Test the situation where one writer appears in two rows,
-        once as controlled, once as not with different capacities."""
-        self.client.force_login(self.staffuser)
-        url = reverse("admin:music_publisher_work_change", args=(1,))
-        response = self.client.get(url, follow=False)
-        data = get_data_from_response(response)
-        data["writerinwork_set-1-writer"] = self.controllable_writer.id
-        data["writerinwork_set-0-writer"] = self.controllable_writer.id
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b"Must be same as in controlled line for this writer.",
-            response.content,
         )
 
     def test_altitle_sufix_too_long(self):

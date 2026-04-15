@@ -161,6 +161,8 @@ class WriterInWorkFormSet(BaseInlineFormSet):
             at least one writer must be controlled,
             at least one writer music be Composer or Composer&Lyricist
             sum of relative shares must be ~100%
+            for original works, only allowed capacities may be used
+            for modified works, at least one writer must have an extended capacity
 
         Returns:
             None
@@ -173,72 +175,66 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         total = 0
         controlled = False
         has_composer = False
-        writers = []
         needs_extended_capacity = is_modification
         for form in self.forms:
             if not form.is_valid():
                 return
-            if form.cleaned_data and not form.cleaned_data.get("DELETE"):
-                writer = form.cleaned_data["writer"]
-                writers.append(writer)
-                total += form.cleaned_data["relative_share"]
-                if form.cleaned_data["controlled"]:
-                    controlled = True
-                if form.cleaned_data["capacity"] in ["C ", "CA"]:
-                    has_composer = True
-                bad_capacity_for_original = (
-                    not is_modification
-                    and form.cleaned_data["capacity"]
-                    and form.cleaned_data["capacity"] not in self.orig_cap
-                )
-                if bad_capacity_for_original:
+
+        for form in self.forms:
+            if not form.cleaned_data:
+                continue
+            if form.cleaned_data.get("DELETE"):
+                continue
+            total += form.cleaned_data.get("relative_share", 0)
+            controlled |= form.cleaned_data.get("controlled", False)
+            has_composer |= form.cleaned_data["capacity"] in [
+                "C ",
+                "CA",
+            ]
+            if form.cleaned_data.get("capacity") not in self.orig_cap:
+                if is_modification:
+                    needs_extended_capacity = False
+                else:
                     form.add_error(
                         "capacity", "Not allowed in original works."
                     )
-                bad_capacity_for_modification = (
-                    is_modification
-                    and form.cleaned_data["capacity"]
-                    and form.cleaned_data["capacity"] not in self.orig_cap
-                )
-                if bad_capacity_for_modification:
-                    needs_extended_capacity = False
-        self.check_extended_capacity(needs_extended_capacity)
-        self.check_controlled(controlled)
-        self.check_has_composer(has_composer)
-        self.check_total(total)
-        self.check_modification(is_modification)
 
-    def check_extended_capacity(self, needs_extended_capacity):
         if needs_extended_capacity:
-            for form in self.forms:
-                form.add_error(
-                    "capacity",
-                    "At least one must be Arranger, Adaptor or Translator.",
-                )
-            raise ValidationError(
-                "In a modified work, "
-                "at least one writer must be Arranger, Adaptor or Translator."
-            )
-
-    def check_controlled(self, controlled):
+            self.check_extended_capacity()
         if not controlled:
-            for form in self.forms:
-                form.add_error(
-                    "controlled", "At least one writer must be controlled."
-                )
-            raise ValidationError("At least one writer must be controlled.")
-
-    def check_has_composer(self, has_composer):
+            self.check_controlled()
         if not has_composer:
-            for form in self.forms:
-                form.add_error(
-                    "capacity",
-                    "At least one writer must be Composer or "
-                    "Composer&Lyricist.",
-                )
-            raise ValidationError(
-                "At least one writer must be Composer or Composer&Lyricist."
+            self.check_has_composer()
+        self.check_total(total)
+
+    def check_extended_capacity(self):
+        for form in self.forms:
+            form.add_error(
+                "capacity",
+                "At least one must be Arranger, Adaptor or Translator.",
             )
+        raise ValidationError(
+            "In a modified work, "
+            "at least one writer must be Arranger, Adaptor or Translator."
+        )
+
+    def check_controlled(self):
+        for form in self.forms:
+            form.add_error(
+                "controlled", "At least one writer must be controlled."
+            )
+        raise ValidationError("At least one writer must be controlled.")
+
+    def check_has_composer(self):
+        for form in self.forms:
+            form.add_error(
+                "capacity",
+                "At least one writer must be Composer or "
+                "Composer&Lyricist.",
+            )
+        raise ValidationError(
+            "At least one writer must be Composer or Composer&Lyricist."
+        )
 
     def check_total(self, total):
         if not (Decimal(99.98) <= total <= Decimal(100.02)):
@@ -247,29 +243,6 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                     "relative_share", "Sum of manuscript shares must be 100%."
                 )
             raise ValidationError("Sum of manuscript shares must be 100%.")
-
-    def check_modification(self, is_modification):
-        if is_modification:
-            writer_capacities = {}
-            for form in self.forms:
-                cd = form.cleaned_data
-                if cd["controlled"]:
-                    writer_capacities[cd["writer"].id] = cd["capacity"]
-            for form in self.forms:
-                cd = form.cleaned_data
-                if cd["writer"] and not cd["controlled"]:
-                    controlled_capacity = writer_capacities.get(
-                        cd["writer"].id
-                    )
-                    if (
-                        controlled_capacity
-                        and cd["capacity"] != controlled_capacity
-                    ):
-                        form.add_error(
-                            "capacity",
-                            "Must be same as in controlled line for this "
-                            "writer.",
-                        )
 
 
 class DataImportForm(ModelForm):
