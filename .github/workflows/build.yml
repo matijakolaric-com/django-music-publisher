@@ -35,7 +35,8 @@ jobs:
             postgresql-version: 17
           - python: '3.13'
             postgresql-version: 18
-    
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
     - name: Checkout
       uses: actions/checkout@v4
