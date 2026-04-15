@@ -4,7 +4,6 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from django import template
 
-
 register = template.Library()
 
 
