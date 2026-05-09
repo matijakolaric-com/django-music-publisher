@@ -2036,13 +2036,62 @@ class CWRExport(models.Model):
             },
         )
 
-    def create_cwr(self, publisher_code=None):
+    @staticmethod
+    def chunked(items, size):
+        """Yield chunks from ``items`` with at most ``size`` items."""
+        for index in range(0, len(items), size):
+            yield items[index : index + size]
+
+    def should_create_synchronously(self):
+        """Return whether this export should be generated on save."""
+        return self.works.count() < settings.OPTION_CWR_SYNC_WORK_LIMIT
+
+    def create_cwr_files(self, publisher_code=None):
+        """Create one or more CWR files from this export request.
+
+        Large requests are split into multiple CWRExport objects, each with
+        at most ``OPTION_CWR_WORKS_PER_FILE`` works. If this export already
+        fits into one file, it is generated directly and returned as the only
+        item.
+
+        Args:
+            publisher_code (str): override publisher code for generation
+
+        Returns:
+            list[CWRExport]: generated CWR exports
+        """
+        work_ids = list(self.works.order_by("id").values_list("id", flat=True))
+        if len(work_ids) <= settings.OPTION_CWR_WORKS_PER_FILE:
+            self.create_cwr(publisher_code=publisher_code, generate=True)
+            return [self]
+
+        created = []
+        for number, chunk in enumerate(
+            self.chunked(work_ids, settings.OPTION_CWR_WORKS_PER_FILE),
+            start=1,
+        ):
+            cwr_export = type(self).objects.create(
+                nwr_rev=self.nwr_rev,
+                description=(
+                    "{} ({})".format(self.description, number)
+                    if self.description
+                    else ""
+                ),
+            )
+            cwr_export.works.add(*chunk)
+            cwr_export.create_cwr(
+                publisher_code=publisher_code, generate=False
+            )
+            created.append(cwr_export)
+        return created
+
+    def create_cwr(self, publisher_code=None, generate=True):
         """Create CWR and save."""
         now = timezone.now()
         if publisher_code is None:
             publisher_code = settings.PUBLISHER_CODE
         self.publisher_code = publisher_code
-        if self.cwr:
+        if self.cwr or not generate:
             return
         self.created_on = now
         self.year = now.strftime("%y")

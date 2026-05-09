@@ -19,6 +19,7 @@ from datetime import datetime
 from decimal import Decimal
 from io import StringIO
 import json
+from unittest.mock import patch
 
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
@@ -527,6 +528,22 @@ class AdminTest(TestCase):
         ).save()
 
     @classmethod
+    def create_10000_works(cls):
+        for i in range(10000):
+            work = Work.objects.create(
+                title="One of 10000 works",
+                library_release=cls.library_release,
+            )
+            work.save()
+            WriterInWork.objects.create(
+                work=work,
+                writer=cls.generally_controlled_writer,
+                capacity="C ",
+                relative_share=Decimal("100"),
+                controlled=True,
+            ).save()
+
+    @classmethod
     def setUpClass(cls):
         """Class setup.
 
@@ -581,6 +598,7 @@ class AdminTest(TestCase):
         cls.create_cwr2_export()
         cls.create_cwr3_export()
         cls.create_work_acknowledgements()
+        cls.create_10000_works()
 
     def test_strings(self):
         """Test __str__ methods for created objects."""
@@ -765,7 +783,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_cwr_nwr(self):
-        """Test that CWR export works."""
+        """Test that small CWR export is generated synchronously."""
         self.client.force_login(self.staffuser)
         response = self.client.post(
             reverse("admin:music_publisher_cwrexport_add"),
@@ -779,9 +797,122 @@ class AdminTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        cwr = CWRExport.objects.first().cwr
+        cwr = CWRExport.objects.latest("id").cwr
         self.assertIn("NWR0000000000000000THE MODIFIED WORK", cwr)
         self.assertIn("THE MODIFIED WORK BEHIND THE MODIFIED WORK", cwr)
+
+    def test_large_cwr_is_not_generated_synchronously(self):
+        """CWR exports with 5,000 or more works are saved without CWR text."""
+        self.client.force_login(self.staffuser)
+        work_ids = list(
+            Work.objects.order_by("id").values_list("id", flat=True)
+        )
+
+        with patch.object(CWRExport.works, "__get__") as works_mock:
+            manager = works_mock.return_value
+            manager.count.return_value = len(work_ids)
+            manager.order_by.return_value = Work.objects.filter(
+                id__in=work_ids
+            )
+
+            response = self.client.post(
+                reverse("admin:music_publisher_cwrexport_add"),
+                data={
+                    "nwr_rev": "NWR",
+                    "works": work_ids,
+                },
+            )
+
+        self.assertEqual(response.status_code, 302)
+        cwr_export = CWRExport.objects.latest("id")
+        self.assertFalse(cwr_export.cwr)
+        self.assertIsNone(cwr_export.created_on)
+
+    def test_pending_cwr_export_shows_create_cwr_link(self):
+        """Pending CWR exports show Create CWR instead of Download."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Create CWR", response.content)
+        self.assertNotIn(
+            (
+                reverse(
+                    "admin:music_publisher_cwrexport_change",
+                    args=(cwr_export.id,),
+                )
+                + "?download=true"
+            ).encode(),
+            response.content,
+        )
+
+    def test_create_cwr_link_generates_pending_export(self):
+        """Create CWR link generates CWR for a pending export."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work, self.modified_work)
+
+        url = reverse(
+            "admin:music_publisher_cwrexport_change", args=(cwr_export.id,)
+        )
+        response = self.client.get(url + "?create_cwr=true", follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        cwr_export.refresh_from_db()
+        self.assertTrue(cwr_export.cwr)
+        self.assertIsNotNone(cwr_export.created_on)
+
+    def test_large_cwr_is_split_into_multiple_exports(self):
+        """Large CWR requests are split into files of up to 10,000 works."""
+        cwr_export = CWRExport.objects.create(
+            description="Large CWR", nwr_rev="NWR"
+        )
+
+        work_ids = list(range(1, settings.OPTION_CWR_WORKS_PER_FILE + 1))
+        with patch.object(cwr_export.works, "order_by") as order_by:
+            order_by.return_value.values_list.return_value = work_ids
+
+            with patch.object(CWRExport, "create_cwr") as create_cwr:
+                created = cwr_export.create_cwr_files()
+
+        self.assertEqual(len(created), 3)
+        self.assertEqual(create_cwr.call_count, 3)
+        self.assertEqual(
+            created[0].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
+        self.assertEqual(
+            created[1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
+        self.assertEqual(created[2].works.count(), 1)
+
+    def test_large_cwr_split_keeps_single_file_for_10000_works(self):
+        """Exactly 10,000 works still produce one CWR file."""
+        cwr_export = CWRExport.objects.create(
+            description="Large CWR", nwr_rev="NWR"
+        )
+
+        work_ids = list(range(1, settings.OPTION_CWR_WORKS_PER_FILE + 1))
+        with patch.object(cwr_export.works, "order_by") as order_by:
+            order_by.return_value.values_list.return_value = work_ids
+
+            with patch.object(CWRExport, "create_cwr") as create_cwr:
+                created = cwr_export.create_cwr_files()
+
+        self.assertEqual(len(created), 1)
+        self.assertEqual(create_cwr.call_count, 1)
+        self.assertEqual(
+            created[0].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
 
     def test_csv(self):
         """Test that CSV export works."""

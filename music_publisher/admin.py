@@ -16,7 +16,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import mark_safe
@@ -1858,7 +1858,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def view_link(self, obj):
         """Link to the CWR preview."""
-        if obj.created_on:
+        if obj.cwr:
             url = reverse(
                 "admin:music_publisher_cwrexport_change", args=(obj.id,)
             )
@@ -1868,13 +1868,13 @@ class CWRExportAdmin(admin.ModelAdmin):
             )
 
     def download_link(self, obj):
-        """Link for downloading CWR file."""
-        if obj.created_on:
-            url = reverse(
-                "admin:music_publisher_cwrexport_change", args=(obj.id,)
-            )
+        """Link for downloading or creating CWR file."""
+        url = reverse("admin:music_publisher_cwrexport_change", args=(obj.id,))
+        if obj.cwr:
             url += "?download=true"
             return mark_safe('<a href="{}">Download</a>'.format(url))
+        url += "?create_cwr=true"
+        return mark_safe('<a href="{}">Create CWR</a>'.format(url))
 
     def get_queryset(self, request):
         """Optimized query with count of works in the export."""
@@ -1965,14 +1965,25 @@ class CWRExportAdmin(admin.ModelAdmin):
         if work_ids:
             self.work_ids = work_ids
             request.method = "GET"
+        extra_context = extra_context or {}
+        extra_context.update(
+            {
+                "show_save": True,
+                "show_save_and_continue": False,
+                "show_save_and_add_another": False,
+                "show_save_as_new": False,
+            }
+        )
         return super().add_view(request, form_url, extra_context)
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
-        """Normal change view with two sub-views defined by GET parameters:
+        """Normal change view with sub-views defined by GET parameters:
 
         Parameters:
             preview: that returns the preview of CWR file,
-            download: that downloads the CWR file."""
+            download: that downloads the CWR file,
+            create_cwr: that creates the CWR file.
+        """
         try:
             obj = get_object_or_404(CWRExport, pk=object_id)
         except ValueError:
@@ -2010,6 +2021,10 @@ class CWRExportAdmin(admin.ModelAdmin):
                 )
             response["Content-Disposition"] = cd
             return response
+        elif "create_cwr" in request.GET:
+            obj.create_cwr()
+            url = reverse("admin:music_publisher_cwrexport_changelist")
+            return HttpResponseRedirect(url)
 
         extra_context = {
             "show_save": False,
@@ -2032,7 +2047,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         saved.
         """
         super().save_related(request, form, formsets, change)
-        form.instance.create_cwr()
+        form.instance.create_cwr_files()
 
 
 class AdminWithReport(admin.ModelAdmin):
