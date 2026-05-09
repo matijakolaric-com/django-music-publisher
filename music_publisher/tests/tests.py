@@ -242,8 +242,7 @@ class DataImportTest(TestCase):
                     "pro": "52",
                 },
             }
-            writers = list(di.get_writers(d))
-            del writers
+            list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception),
             (
