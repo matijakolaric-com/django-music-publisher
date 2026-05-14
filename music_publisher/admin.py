@@ -22,6 +22,10 @@ from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
 
+from taggit_ui.filters import TagFilter
+from taggit_ui.actions import tag_manager
+
+
 from .forms import (
     ACKImportForm,
     AlternateTitleFormSet,
@@ -1133,6 +1137,7 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related("library_release__library")
         qs = qs.prefetch_related("writerinwork_set__writer")
+        qs = qs.prefetch_related("tags")
         qs = qs.annotate(models.Count("cwr_exports", distinct=True))
         qs = qs.annotate(models.Count("recordings", distinct=True))
         return qs
@@ -1247,6 +1252,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 return queryset.filter(recordings__count=0)
 
     list_filter = (
+        TagFilter,
         HasISWCListFilter,
         HasRecordingListFilter,
         ("library_release__library", admin.RelatedOnlyFieldListFilter),
@@ -1277,6 +1283,25 @@ class WorkAdmin(MusicPublisherAdmin):
         return super().get_search_results(request, queryset, search_term)
 
     fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "work_id",
+                    ("title", "iswc"),
+                    ("original_title", "version_type"),
+                )
+            },
+        ),
+        (
+            "Tags",
+            {"fields": (("tags",),)},
+        ),
+        (
+            "Library (Production music only)",
+            {"fields": (("library_release",),)},
+        ),
+    ) if settings.OPTION_TAG_WORK else (
         (
             None,
             {
@@ -1609,7 +1634,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_csv.short_description = "Export selected works (CSV)."
 
-    actions = (create_cwr, create_json, create_csv)
+    actions = (create_cwr, create_json, create_csv, tag_manager)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
@@ -1873,6 +1898,8 @@ class CWRExportAdmin(admin.ModelAdmin):
         if obj.cwr:
             url += "?download=true"
             return mark_safe('<a href="{}">Download</a>'.format(url))
+        elif obj.options.get("stop"):
+            return mark_safe('Generating CWR'.format(url))
         url += "?create_cwr=true"
         return mark_safe('<a href="{}">Create CWR</a>'.format(url))
 
@@ -1894,7 +1921,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         "work_count",
         "view_link",
         "download_link",
-        "description",
+        "description"
     )
     list_editable = ("description",)
 
@@ -2048,6 +2075,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         """
         super().save_related(request, form, formsets, change)
         form.instance.create_cwr_files()
+        self.delete_model(request, form.instance)
 
 
 class AdminWithReport(admin.ModelAdmin):

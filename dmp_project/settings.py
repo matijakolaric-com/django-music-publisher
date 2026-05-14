@@ -29,6 +29,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_cleanup",
     "rest_framework",
+    "taggit",
+    "taggit_api",
+    "taggit_ui",
 ]
 
 MIDDLEWARE = [
@@ -161,13 +164,19 @@ OPTION_FORCE_CASE = os.getenv("OPTION_FORCE_CASE")
 # CWR generation options
 # Exports below this number of works are generated immediately on save.
 OPTION_CWR_SYNC_WORK_LIMIT = int(
-    os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "5000")
+    os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "5")
 )
 
 # Larger CWR requests are split into files with at most this many works.
 OPTION_CWR_WORKS_PER_FILE = int(
-    os.getenv("OPTION_CWR_WORKS_PER_FILE", "10000")
+    os.getenv("OPTION_CWR_WORKS_PER_FILE", "10")
 )
+
+# Classes to be used with TAGGIT and TAGGIT settings
+
+OPTION_TAG_WORK = os.getenv("OPTION_TAG_WORKS", True)
+TAGGIT_STRIP_UNICODE_WHEN_SLUGIFYING = True
+TAGGIT_CASE_INSENSITIVE = True
 
 # REMOTE FILES
 # The default is Digital Ocean Spaces, but any S3 should work with AWS

@@ -21,6 +21,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.duration import duration_string
 
+from taggit.managers import TaggableManager
+
 from .base import (
     ArtistBase,
     LabelBase,
@@ -652,6 +654,7 @@ class Work(TitleBase):
     )
 
     objects = WorkManager()
+    tags = TaggableManager()
 
     @property
     def work_id(self):
@@ -1424,6 +1427,8 @@ class CWRExport(models.Model):
         CWR sequential number in a year
         works (django.db.models.ManyToManyField): included works
         description (django.db.models.CharField): internal note
+        options (django.db.models.JSONField): options for CWR \
+        async generation
 
     """
 
@@ -1458,6 +1463,8 @@ class CWRExport(models.Model):
     num_in_year = models.PositiveSmallIntegerField(default=0)
     works = models.ManyToManyField(Work, related_name="cwr_exports")
     description = models.CharField("Internal Note", blank=True, max_length=60)
+
+    options = models.JSONField(default=dict, editable=False)
 
     publisher_code = None
     agreement_pr = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
@@ -2085,30 +2092,57 @@ class CWRExport(models.Model):
             created.append(cwr_export)
         return created
 
-    def create_cwr(self, publisher_code=None, generate=True):
-        """Create CWR and save."""
-        now = timezone.now()
-        if publisher_code is None:
-            publisher_code = settings.PUBLISHER_CODE
-        self.publisher_code = publisher_code
+    def create_cwr(self, publisher_code=None, generate=True, force=False):
+        """Create CWR and save.
+
+        Args:
+            publisher_code (str): override publisher code for generation
+            generate (bool): if False, only create a pending export
+            force (bool): ignore the "stop" marker if generation is already
+                marked as running
+        """
         if self.cwr or not generate:
             return
-        self.created_on = now
-        self.year = now.strftime("%y")
-        nr = type(self).objects.filter(year=self.year)
-        nr = nr.order_by("-num_in_year").first()
-        if nr:
-            self.num_in_year = nr.num_in_year + 1
-        else:
-            self.num_in_year = 1
-        qs = self.works.order_by(
-            "id",
-        )
-        works = Work.objects.get_dict(qs)["works"]
-        self.cwr = "".join(self.yield_lines(works))
-        self.save()
-        Work.persist_work_ids(self.works)
 
+        if self.options is None:
+            self.options = {}
+
+        if self.options.get("stop") and not force:
+            return
+
+        self.options["stop"] = True
+        self.options.pop("error", None)
+        self.save(update_fields=["options"])
+
+        try:
+            now = timezone.now()
+            if publisher_code is None:
+                publisher_code = settings.PUBLISHER_CODE
+            self.publisher_code = publisher_code
+
+            self.created_on = now
+            self.year = now.strftime("%y")
+            nr = type(self).objects.filter(year=self.year)
+            nr = nr.order_by("-num_in_year").first()
+            if nr:
+                self.num_in_year = nr.num_in_year + 1
+            else:
+                self.num_in_year = 1
+
+            qs = self.works.order_by(
+                "id",
+            )
+            works = Work.objects.get_dict(qs)["works"]
+            self.cwr = "".join(self.yield_lines(works))
+
+            self.options.pop("stop", None)
+            self.options.pop("error", None)
+            self.save()
+            Work.persist_work_ids(self.works)
+        except Exception as e:
+            self.options["error"] = str(e)
+            self.save(update_fields=["options"])
+            raise
 
 class WorkAcknowledgement(models.Model):
     """Acknowledgement of work registration.

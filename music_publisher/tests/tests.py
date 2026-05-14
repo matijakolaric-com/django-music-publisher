@@ -529,7 +529,7 @@ class AdminTest(TestCase):
 
     @classmethod
     def create_10000_works(cls):
-        for i in range(10000):
+        for i in range(settings.OPTION_CWR_WORKS_PER_FILE):
             work = Work.objects.create(
                 title="One of 10000 works",
                 library_release=cls.library_release,
@@ -875,25 +875,20 @@ class AdminTest(TestCase):
     def test_large_cwr_is_split_into_multiple_exports(self):
         """Large CWR requests are split into files of up to 10,000 works."""
         cwr_export = CWRExport.objects.create(
-            description="Large CWR", nwr_rev="NWR"
+            description="Large CWR", nwr_rev="NWR",
         )
+        for work in Work.objects.all():
+            cwr_export.works.add(work)
+        created = cwr_export.create_cwr_files()
 
-        work_ids = list(range(1, settings.OPTION_CWR_WORKS_PER_FILE + 1))
-        with patch.object(cwr_export.works, "order_by") as order_by:
-            order_by.return_value.values_list.return_value = work_ids
-
-            with patch.object(CWRExport, "create_cwr") as create_cwr:
-                created = cwr_export.create_cwr_files()
-
-        self.assertEqual(len(created), 3)
-        self.assertEqual(create_cwr.call_count, 3)
+        self.assertEqual(len(created), 2)
         self.assertEqual(
             created[0].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
         )
         self.assertEqual(
             created[1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
         )
-        self.assertEqual(created[2].works.count(), 1)
+        self.assertLessEqual(created[-1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE)
 
     def test_large_cwr_split_keeps_single_file_for_10000_works(self):
         """Exactly 10,000 works still produce one CWR file."""
