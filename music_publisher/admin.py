@@ -1284,38 +1284,42 @@ class WorkAdmin(MusicPublisherAdmin):
 
     fieldsets = (
         (
-            None,
-            {
-                "fields": (
-                    "work_id",
-                    ("title", "iswc"),
-                    ("original_title", "version_type"),
-                )
-            },
-        ),
-        (
-            "Tags",
-            {"fields": (("tags",),)},
-        ),
-        (
-            "Library (Production music only)",
-            {"fields": (("library_release",),)},
-        ),
-    ) if settings.OPTION_TAG_WORK else (
-        (
-            None,
-            {
-                "fields": (
-                    "work_id",
-                    ("title", "iswc"),
-                    ("original_title", "version_type"),
-                )
-            },
-        ),
-        (
-            "Library (Production music only)",
-            {"fields": (("library_release",),)},
-        ),
+            (
+                None,
+                {
+                    "fields": (
+                        "work_id",
+                        ("title", "iswc"),
+                        ("original_title", "version_type"),
+                    )
+                },
+            ),
+            (
+                "Tags",
+                {"fields": (("tags",),)},
+            ),
+            (
+                "Library (Production music only)",
+                {"fields": (("library_release",),)},
+            ),
+        )
+        if settings.OPTION_TAG_WORK
+        else (
+            (
+                None,
+                {
+                    "fields": (
+                        "work_id",
+                        ("title", "iswc"),
+                        ("original_title", "version_type"),
+                    )
+                },
+            ),
+            (
+                "Library (Production music only)",
+                {"fields": (("library_release",),)},
+            ),
+        )
     )
 
     autocomplete_fields = ("library_release",)
@@ -1899,7 +1903,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             url += "?download=true"
             return mark_safe('<a href="{}">Download</a>'.format(url))
         elif obj.options.get("stop"):
-            return mark_safe('Generating CWR'.format(url))
+            return mark_safe("Generating CWR".format(url))
         url += "?create_cwr=true"
         return mark_safe('<a href="{}">Create CWR</a>'.format(url))
 
@@ -1921,7 +1925,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         "work_count",
         "view_link",
         "download_link",
-        "description"
+        "description",
     )
     list_editable = ("description",)
 

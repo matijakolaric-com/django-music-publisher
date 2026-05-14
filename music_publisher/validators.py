@@ -212,7 +212,9 @@ def validate_publisher_settings():
             raise ImproperlyConfigured("PUBLISHER_IPI_BASE: " + str(e))
     if settings.PUBLISHER_IPI_NAME:
         try:
-            CWRFieldValidator("ipi_name")(settings.PUBLISHER_IPI_NAME.rjust(11, "0"))
+            CWRFieldValidator("ipi_name")(
+                settings.PUBLISHER_IPI_NAME.rjust(11, "0")
+            )
         except ValidationError as e:
             raise ImproperlyConfigured("PUBLISHER_IPI_NAME: " + str(e))
 

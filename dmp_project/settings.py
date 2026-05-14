@@ -163,14 +163,10 @@ OPTION_FORCE_CASE = os.getenv("OPTION_FORCE_CASE")
 
 # CWR generation options
 # Exports below this number of works are generated immediately on save.
-OPTION_CWR_SYNC_WORK_LIMIT = int(
-    os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "5")
-)
+OPTION_CWR_SYNC_WORK_LIMIT = int(os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "5"))
 
 # Larger CWR requests are split into files with at most this many works.
-OPTION_CWR_WORKS_PER_FILE = int(
-    os.getenv("OPTION_CWR_WORKS_PER_FILE", "10")
-)
+OPTION_CWR_WORKS_PER_FILE = int(os.getenv("OPTION_CWR_WORKS_PER_FILE", "10"))
 
 # Classes to be used with TAGGIT and TAGGIT settings
 

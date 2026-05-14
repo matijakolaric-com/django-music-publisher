@@ -59,8 +59,6 @@ class Command(BaseCommand):
                     "Failed CWR generation #{id}: {error}".format(
                         id=cwr_export.id,
                         error=cwr_export.options.get("error", "unknown error"),
-                        )
                     )
                 )
             )
-            

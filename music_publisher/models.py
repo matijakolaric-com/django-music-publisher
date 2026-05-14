@@ -2144,6 +2144,7 @@ class CWRExport(models.Model):
             self.save(update_fields=["options"])
             raise
 
+
 class WorkAcknowledgement(models.Model):
     """Acknowledgement of work registration.
 

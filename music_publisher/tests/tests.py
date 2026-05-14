@@ -875,7 +875,8 @@ class AdminTest(TestCase):
     def test_large_cwr_is_split_into_multiple_exports(self):
         """Large CWR requests are split into files of up to 10,000 works."""
         cwr_export = CWRExport.objects.create(
-            description="Large CWR", nwr_rev="NWR",
+            description="Large CWR",
+            nwr_rev="NWR",
         )
         for work in Work.objects.all():
             cwr_export.works.add(work)
@@ -888,7 +889,9 @@ class AdminTest(TestCase):
         self.assertEqual(
             created[1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
         )
-        self.assertLessEqual(created[-1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE)
+        self.assertLessEqual(
+            created[-1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
 
     def test_large_cwr_split_keeps_single_file_for_10000_works(self):
         """Exactly 10,000 works still produce one CWR file."""
