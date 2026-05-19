@@ -21,6 +21,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.duration import duration_string
 
+from io import StringIO
 from taggit.managers import TaggableManager
 
 from .base import (
@@ -530,7 +531,7 @@ class WorkManager(models.Manager):
         """
         return super().get_queryset().prefetch_related("writers")
 
-    def get_dict_items(self, qs):
+    def get_dict_items(self, full_qs):
         """
         Yield dictionary items for works from the queryset
 
@@ -541,19 +542,30 @@ class WorkManager(models.Manager):
             dict: dictionary with works
 
         """
-        qs = qs.prefetch_related("alternatetitle_set")
-        qs = qs.prefetch_related("writerinwork_set__writer")
-        qs = qs.prefetch_related("artistinwork_set__artist")
-        qs = qs.prefetch_related("library_release__library")
-        qs = qs.prefetch_related("recordings__record_label")
-        qs = qs.prefetch_related("recordings__artist")
-        qs = qs.prefetch_related("recordings__tracks__release__library")
-        qs = qs.prefetch_related("recordings__tracks__release__release_label")
-        qs = qs.prefetch_related("workacknowledgement_set")
 
-        for work in qs:
-            j = work.get_dict()
-            yield j
+        last_id = 0
+
+        while True:
+            qs = full_qs.filter(id__gt=last_id).order_by("id")[:100]
+            qs = qs.prefetch_related("alternatetitle_set")
+            qs = qs.prefetch_related("writerinwork_set__writer")
+            qs = qs.prefetch_related("artistinwork_set__artist")
+            qs = qs.prefetch_related("library_release__library")
+            qs = qs.prefetch_related("recordings__record_label")
+            qs = qs.prefetch_related("recordings__artist")
+            qs = qs.prefetch_related("recordings__tracks__release__library")
+            qs = qs.prefetch_related(
+                "recordings__tracks__release__release_label"
+            )
+            qs = qs.prefetch_related("workacknowledgement_set")
+            items = list(qs)
+
+            if not items:
+                break
+
+            for work in items:
+                last_id = work.id
+                yield work.get_dict()
 
     def get_dict(self, qs):
         """
@@ -2123,7 +2135,6 @@ class CWRExport(models.Model):
             if publisher_code is None:
                 publisher_code = settings.PUBLISHER_CODE
             self.publisher_code = publisher_code
-
             self.created_on = now
             self.year = now.strftime("%y")
             nr = type(self).objects.filter(year=self.year)
@@ -2132,13 +2143,12 @@ class CWRExport(models.Model):
                 self.num_in_year = nr.num_in_year + 1
             else:
                 self.num_in_year = 1
-
-            qs = self.works.order_by(
-                "id",
-            )
-            works = Work.objects.get_dict(qs)["works"]
-            self.cwr = "".join(self.yield_lines(works))
-
+            works = self.works.order_by("id")
+            works = Work.objects.get_dict_items(works)
+            buffer = StringIO()
+            for line in self.yield_lines(works):
+                buffer.write(line)
+            self.cwr = buffer.getvalue()
             self.options.pop("stop", None)
             self.options.pop("error", None)
             self.save()
