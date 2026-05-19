@@ -430,11 +430,7 @@ class DataImporter(object):
         tags = row_dict.get("tags")
         if tags:
             work.tags.add(
-                *[
-                    tag.strip()
-                    for tag in tags.split(",")
-                    if tag.strip()
-                ]
+                *[tag.strip() for tag in tags.split(",") if tag.strip()]
             )
 
         self.log(work, "Added during import.")

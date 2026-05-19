@@ -654,7 +654,7 @@ class Work(TitleBase):
     )
 
     objects = WorkManager()
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
 
     @property
     def work_id(self):
@@ -2101,14 +2101,18 @@ class CWRExport(models.Model):
             force (bool): ignore the "stop" marker if generation is already
                 marked as running
         """
-        if self.cwr or not generate:
-            return
+        if self.cwr:
+            return  # because there is nothing to do
 
         if self.options is None:
             self.options = {}
+            self.save(update_fields=["options"])
+
+        if not generate:
+            return  # we can't define the name before generation
 
         if self.options.get("stop") and not force:
-            return
+            return  # already being generated
 
         self.options["stop"] = True
         self.options.pop("error", None)

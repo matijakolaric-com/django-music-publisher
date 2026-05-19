@@ -25,7 +25,6 @@ from django.utils.timezone import now
 from taggit_ui.filters import TagFilter
 from taggit_ui.actions import tag_manager
 
-
 from .forms import (
     ACKImportForm,
     AlternateTitleFormSet,
@@ -1886,7 +1885,7 @@ class CWRExportAdmin(admin.ModelAdmin):
         elif obj.options.get("stop"):
             return mark_safe("Generating CWR".format(url))
         url += "?create_cwr=true"
-        return mark_safe('<a href="{}">Create CWR</a>'.format(url))
+        return mark_safe('<a href="{}">Generate CWR</a>'.format(url))
 
     def get_queryset(self, request):
         """Optimized query with count of works in the export."""
@@ -2035,6 +2034,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             return response
         elif "create_cwr" in request.GET:
             obj.create_cwr()
+            self.log_change(request, obj, "CWR generated")
             url = reverse("admin:music_publisher_cwrexport_changelist")
             return HttpResponseRedirect(url)
 
@@ -2059,8 +2059,11 @@ class CWRExportAdmin(admin.ModelAdmin):
         saved.
         """
         super().save_related(request, form, formsets, change)
-        form.instance.create_cwr_files()
-        self.delete_model(request, form.instance)
+        created = form.instance.create_cwr_files()
+        if form.instance not in created:
+            for obj in created:
+                self.log_addition(request, obj, "Added as part of a batch.")
+            self.delete_model(request, form.instance)
 
 
 class AdminWithReport(admin.ModelAdmin):

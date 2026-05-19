@@ -14,51 +14,57 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        cwr_export = CWRExport.objects.filter(cwr="").order_by("id").first()
+        cwr_exports = CWRExport.objects.filter(cwr="").order_by("id")
 
-        if not cwr_export:
+        if not cwr_exports:
             self.stdout.write(self.style.SUCCESS("No pending CWR exports."))
             return
 
-        self.stdout.write(
-            "Generating CWR #{id} ({description})...".format(
-                id=cwr_export.id,
-                description=cwr_export.description or "no description",
-            )
-        )
+        for cwr_export in cwr_exports:
 
-        cwr_export.create_cwr(generate=True, force=options["force"])
-
-        if cwr_export.cwr:
             self.stdout.write(
-                self.style.SUCCESS(
-                    "Generated CWR export #{id}: {filename}".format(
-                        id=cwr_export.id,
-                        filename=cwr_export.filename,
-                    )
+                "Generating CWR #{id} ({description})...".format(
+                    id=cwr_export.id,
+                    description=cwr_export.description or "no description",
                 )
             )
-        elif cwr_export.options.get("stop"):
-            if cwr_export.options.get("error"):
-                self.stderr.write(
-                    self.style.WARNING(
-                        "CWR generation #{id} stopped: {error}".format()
-                    )
-                )
-            else:
-                self.stderr.write(
+
+            cwr_export.create_cwr(generate=True, force=options["force"])
+
+            if cwr_export.cwr:
+                self.stdout.write(
                     self.style.SUCCESS(
-                        "Another CWR generation running for #{id}.".format(
+                        "Generated CWR export #{id}: {filename}".format(
                             id=cwr_export.id,
+                            filename=cwr_export.filename,
                         )
                     )
                 )
-        else:
-            self.stderr.write(
-                self.style.SUCCESS(
-                    "Failed CWR generation #{id}: {error}".format(
-                        id=cwr_export.id,
-                        error=cwr_export.options.get("error", "unknown error"),
+                return
+
+            elif cwr_export.options.get("stop"):
+                if cwr_export.options.get("error"):
+                    self.stderr.write(
+                        self.style.WARNING(
+                            "CWR generation #{id} stopped: {error}".format()
+                        )
+                    )
+                else:
+                    self.stderr.write(
+                        self.style.SUCCESS(
+                            "Another CWR generation running for #{id}.".format(
+                                id=cwr_export.id,
+                            )
+                        )
+                    )
+            else:
+                self.stderr.write(
+                    self.style.SUCCESS(
+                        "Failed CWR generation #{id}: {error}".format(
+                            id=cwr_export.id,
+                            error=cwr_export.options.get(
+                                "error", "unknown error"
+                            ),
+                        )
                     )
                 )
-            )
