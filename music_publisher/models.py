@@ -1464,7 +1464,7 @@ class CWRExport(models.Model):
     works = models.ManyToManyField(Work, related_name="cwr_exports")
     description = models.CharField("Internal Note", blank=True, max_length=60)
 
-    options = models.JSONField(default=dict, editable=False)
+    options = models.JSONField(default=dict, editable=False, null=True)
 
     publisher_code = None
     agreement_pr = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
