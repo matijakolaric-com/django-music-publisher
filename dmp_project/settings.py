@@ -170,10 +170,6 @@ OPTION_CWR_WORKS_PER_FILE = int(os.getenv("OPTION_CWR_WORKS_PER_FILE", "10"))
 
 # Classes to be used with TAGGIT and TAGGIT settings
 
-OPTION_TAG_WORK = os.getenv("OPTION_TAG_WORK", True)
-TAGGIT_STRIP_UNICODE_WHEN_SLUGIFYING = True
-TAGGIT_CASE_INSENSITIVE = True
-
 # REMOTE FILES
 # The default is Digital Ocean Spaces, but any S3 should work with AWS
 # and any other S3. Support DMP by using the affiliation links below.
@@ -223,3 +219,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ]
 }
+
+TAGGIT_STRIP_UNICODE_WHEN_SLUGIFYING = True
+TAGGIT_CASE_INSENSITIVE = True

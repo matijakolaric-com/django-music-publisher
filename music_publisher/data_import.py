@@ -43,6 +43,7 @@ class DataImporter(object):
         "original_title",
         "library",
         "cd_identifier",
+        "tags",
     ]
     ARTIST_FIELDS = ["last", "first", "isni"]
     SHARE_FIELDS = [
@@ -426,6 +427,16 @@ class DataImporter(object):
                 + "clashes with an existing work. "
                 "Data imports can only be used for adding new works."
             )
+        tags = row_dict.get("tags")
+        if tags:
+            work.tags.add(
+                *[
+                    tag.strip()
+                    for tag in tags.split(",")
+                    if tag.strip()
+                ]
+            )
+
         self.log(work, "Added during import.")
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()

@@ -1135,11 +1135,11 @@ class WorkAdmin(MusicPublisherAdmin):
     def get_queryset(self, request):
         """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
+        qs = qs.annotate(models.Count("cwr_exports", distinct=True))
+        qs = qs.annotate(models.Count("recordings", distinct=True))
         qs = qs.prefetch_related("library_release__library")
         qs = qs.prefetch_related("writerinwork_set__writer")
         qs = qs.prefetch_related("tags")
-        qs = qs.annotate(models.Count("cwr_exports", distinct=True))
-        qs = qs.annotate(models.Count("recordings", distinct=True))
         return qs
 
     class InCWRListFilter(admin.SimpleListFilter):
@@ -1284,42 +1284,23 @@ class WorkAdmin(MusicPublisherAdmin):
 
     fieldsets = (
         (
-            (
-                None,
-                {
-                    "fields": (
-                        "work_id",
-                        ("title", "iswc"),
-                        ("original_title", "version_type"),
-                    )
-                },
-            ),
-            (
-                "Tags",
-                {"fields": (("tags",),)},
-            ),
-            (
-                "Library (Production music only)",
-                {"fields": (("library_release",),)},
-            ),
-        )
-        if settings.OPTION_TAG_WORK
-        else (
-            (
-                None,
-                {
-                    "fields": (
-                        "work_id",
-                        ("title", "iswc"),
-                        ("original_title", "version_type"),
-                    )
-                },
-            ),
-            (
-                "Library (Production music only)",
-                {"fields": (("library_release",),)},
-            ),
-        )
+            None,
+            {
+                "fields": (
+                    "work_id",
+                    ("title", "iswc"),
+                    ("original_title", "version_type"),
+                )
+            },
+        ),
+        (
+            "Tags",
+            {"fields": (("tags",),)},
+        ),
+        (
+            "Library (Production music only)",
+            {"fields": (("library_release",),)},
+        ),
     )
 
     autocomplete_fields = ("library_release",)
