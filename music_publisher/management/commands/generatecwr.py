@@ -1,3 +1,5 @@
+import time
+
 from django.core.management.base import BaseCommand
 
 from music_publisher.models import CWRExport
@@ -29,14 +31,17 @@ class Command(BaseCommand):
                 )
             )
 
+            started_at = time.monotonic()
             cwr_export.create_cwr(generate=True, force=options["force"])
+            duration = time.monotonic() - started_at
 
             if cwr_export.cwr:
                 self.stdout.write(
                     self.style.SUCCESS(
-                        "Generated CWR export #{id}: {filename}".format(
+                        "Generated CWR export #{id}: {filename} ({duration:.2f}s)".format(
                             id=cwr_export.id,
                             filename=cwr_export.filename,
+                            duration=duration,
                         )
                     )
                 )
@@ -46,25 +51,31 @@ class Command(BaseCommand):
                 if cwr_export.options.get("error"):
                     self.stderr.write(
                         self.style.WARNING(
-                            "CWR generation #{id} stopped: {error}".format()
+                            "CWR generation #{id} stopped: {error} ({duration:.2f}s)".format(
+                                id=cwr_export.id,
+                                error=cwr_export.options.get("error"),
+                                duration=duration,
+                            )
                         )
                     )
                 else:
                     self.stderr.write(
                         self.style.SUCCESS(
-                            "Another CWR generation running for #{id}.".format(
+                            "Another CWR generation running for #{id}. ({duration:.2f}s)".format(
                                 id=cwr_export.id,
+                                duration=duration,
                             )
                         )
                     )
             else:
                 self.stderr.write(
                     self.style.SUCCESS(
-                        "Failed CWR generation #{id}: {error}".format(
+                        "Failed CWR generation #{id}: {error} ({duration:.2f}s)".format(
                             id=cwr_export.id,
                             error=cwr_export.options.get(
                                 "error", "unknown error"
                             ),
+                            duration=duration,
                         )
                     )
                 )

@@ -26,6 +26,7 @@ from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.auth.models import User
 from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.management import call_command
 from django.template import Context
 from django.test import (
     override_settings,
@@ -1876,6 +1877,136 @@ class AdminTest(TestCase):
         response = ReleaseViewSet.as_view({"get": "list"})(request)
         response.render()
         self.assertEqual(response.status_code, 200)
+
+
+class GenerateCWRCommandTest(TestCase):
+    """Tests for the generatecwr management command."""
+
+    def call_generatecwr(self):
+        stdout = StringIO()
+        stderr = StringIO()
+        call_command("generatecwr", stdout=stdout, stderr=stderr)
+        return stdout.getvalue(), stderr.getvalue()
+
+    def test_no_pending_cwr_exports(self):
+        """Command reports when there are no pending CWR exports."""
+        stdout, stderr = self.call_generatecwr()
+
+        self.assertIn("No pending CWR exports.", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_success_message_includes_generation_duration(self):
+        """Successful generation message includes elapsed CWR generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.cwr = "CWR"
+            export.year = "26"
+            export.num_in_year = 1
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 12.5],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "Generated CWR export #{}: ".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn("(2.50s)", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_stopped_with_error_message_includes_generation_duration(self):
+        """Stopped generation with an error includes elapsed generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.options = {
+                "stop": True,
+                "error": "test error",
+            }
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 11.25],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "CWR generation #{} stopped: test error (1.25s)".format(
+                cwr_export.id
+            ),
+            stderr,
+        )
+
+    def test_running_message_includes_generation_duration(self):
+        """Already-running generation message includes elapsed generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.options = {"stop": True}
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 10.5],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "Another CWR generation running for #{}. (0.50s)".format(
+                cwr_export.id
+            ),
+            stderr,
+        )
+
+    def test_failed_message_includes_generation_duration(self):
+        """Failed generation message includes elapsed CWR generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.options = {"error": "test failure"}
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 13.75],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "Failed CWR generation #{}: test failure (3.75s)".format(
+                cwr_export.id
+            ),
+            stderr,
+        )
 
 
 class CWRTemplatesTest(SimpleTestCase):
