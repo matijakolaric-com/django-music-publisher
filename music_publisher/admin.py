@@ -1157,9 +1157,13 @@ class WorkAdmin(MusicPublisherAdmin):
         def queryset(self, request, queryset):
             """Filter if in any of CWR files."""
             if self.value() == "Y":
-                return queryset.exclude(cwr_exports__count=0)
+                return queryset.annotate(
+                    models.Count("cwr_exports", distinct=True)
+                ).exclude(cwr_exports__count=0)
             elif self.value() == "N":
-                return queryset.filter(cwr_exports__count=0)
+                return queryset.annotate(
+                    models.Count("cwr_exports", distinct=True)
+                ).filter(cwr_exports__count=0)
 
     class ACKSocietyListFilter(admin.SimpleListFilter):
         """Custom list filter of societies from ACK files."""
