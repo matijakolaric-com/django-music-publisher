@@ -17,6 +17,10 @@ SECRET_KEY = os.getenv("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", False)
 
+# INTERNAL_IPS = [
+#     "127.0.0.1",
+# ]
+
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 INSTALLED_APPS = [
@@ -32,9 +36,11 @@ INSTALLED_APPS = [
     "taggit",
     "taggit_api",
     "taggit_ui",
+    # "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -163,10 +169,10 @@ OPTION_FORCE_CASE = os.getenv("OPTION_FORCE_CASE")
 
 # CWR generation options
 # Exports below this number of works are generated immediately on save.
-OPTION_CWR_SYNC_WORK_LIMIT = int(os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "5"))
+OPTION_CWR_SYNC_WORK_LIMIT = int(os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "1000"))
 
 # Larger CWR requests are split into files with at most this many works.
-OPTION_CWR_WORKS_PER_FILE = int(os.getenv("OPTION_CWR_WORKS_PER_FILE", "10"))
+OPTION_CWR_WORKS_PER_FILE = int(os.getenv("OPTION_CWR_WORKS_PER_FILE", "10000"))
 
 # Classes to be used with TAGGIT and TAGGIT settings
 

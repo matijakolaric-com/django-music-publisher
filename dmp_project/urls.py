@@ -18,12 +18,17 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 
-urlpatterns = [
-    path("", include("music_publisher.urls")),
-    re_path(r"^", include("taggit_ui.urls")),
-    re_path(r"^", include("taggit_api.urls")),
-    path("", admin.site.urls),
-]
+# from debug_toolbar.toolbar import debug_toolbar_urls
+
+urlpatterns = (
+    # debug_toolbar_urls() +
+    [
+        path("", include("music_publisher.urls")),
+        re_path(r"^", include("taggit_ui.urls")),
+        re_path(r"^", include("taggit_api.urls")),
+        path("", admin.site.urls),
+    ]
+)
 
 admin.site.site_header = settings.PUBLISHER_NAME
 admin.site.site_title = admin.site.site_header
