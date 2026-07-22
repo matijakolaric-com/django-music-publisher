@@ -558,12 +558,11 @@ class WorkManager(models.Manager):
                 "recordings__tracks__release__release_label"
             )
             qs = qs.prefetch_related("workacknowledgement_set")
-            items = list(qs)
 
-            if not items:
+            if not qs:
                 break
 
-            for work in items:
+            for work in qs:
                 last_id = work.id
                 yield work.get_dict()
 
@@ -616,13 +615,36 @@ class Work(TitleBase):
 
     @staticmethod
     def persist_work_ids(qs):
-        qs = qs.prefetch_related("recordings")
-        for work in qs.filter(_work_id__isnull=True):
-            work.work_id = work.work_id
-            work.save()
-            for rec in work.recordings.all():
-                if rec._recording_id is None:
-                    rec.recording_id = rec.recording_id
+        work_ids = list(
+            qs.filter(_work_id__isnull=True)
+            .order_by("id")
+            .values_list("id", flat=True)
+        )
+        chunk_size = settings.OPTION_CWR_SYNC_WORK_LIMIT
+
+        for index in range(0, len(work_ids), chunk_size):
+            chunk = work_ids[index : index + chunk_size]
+            works = Work.objects.filter(id__in=chunk).order_by("id")
+            works = works.prefetch_related("recordings")
+
+            for work in works:
+                work.work_id = work.work_id
+                work.save()
+                for rec in work.recordings.all():
+                    if rec._recording_id is None:
+                        rec.recording_id = rec.recording_id
+
+        for index in range(0, len(work_ids), 1000):
+            chunk = work_ids[index : index + 1000]
+            works = Work.objects.filter(id__in=chunk).order_by("id")
+            works = works.prefetch_related("recordings")
+
+            for work in works:
+                work.work_id = work.work_id
+                work.save()
+                for rec in work.recordings.all():
+                    if rec._recording_id is None:
+                        rec.recording_id = rec.recording_id
 
     _work_id = models.CharField(
         "Work ID",
@@ -2058,8 +2080,14 @@ class CWRExport(models.Model):
     @staticmethod
     def chunked(items, size):
         """Yield chunks from ``items`` with at most ``size`` items."""
-        for index in range(0, len(items), size):
-            yield items[index : index + size]
+        chunk = []
+        for item in items:
+            chunk.append(item)
+            if len(chunk) == size:
+                yield chunk
+                chunk = []
+        if chunk:
+            yield chunk
 
     def should_create_synchronously(self):
         """Return whether this export should be generated on save."""

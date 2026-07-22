@@ -82,5 +82,29 @@ View CWR
 
    CWR 2.1 NWR (work registration) file with basic syntax highlighting
 
-The example shown above shows the CWR file with basic syntax highlighting. When you hover over the 
-fields with your cursor, additional information is shown.
+Generating pending CWR exports
+++++++++++++++++++++++++++++++
+
+Large CWR exports may be saved as pending exports and generated later by running the
+``generatecwr`` Django management command::
+
+    python manage.py generatecwr
+
+The command processes pending CWR exports in database order and attempts to generate the
+oldest one first. If generation succeeds, the command prints the generated file name and
+the time spent generating the CWR file.
+
+If another process is already generating an export, or if a previous generation attempt
+failed, the export is marked with a ``stop`` marker. The command will not retry such an
+export automatically. This prevents the same large export from being generated repeatedly.
+
+If a previous problem has been reviewed and you explicitly want to retry generation, use::
+
+    python manage.py generatecwr --force
+
+.. warning::
+    Use ``--force`` only after checking that no other CWR generation process is still
+    running. It also retries exports that previously stopped with an error.
+
+When generation fails, the error is stored on the export and the export remains stopped
+until it is retried with ``--force``.

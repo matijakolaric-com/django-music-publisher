@@ -6,13 +6,20 @@ from music_publisher.models import CWRExport
 
 
 class Command(BaseCommand):
-    help = "Generate the oldest pending CWR export."
+    help = (
+        "Generate the oldest pending CWR export. "
+        "Exports marked as stopped are skipped unless --force is used."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--force",
             action="store_true",
-            help='Ignore "stop" marker and force CWR generation.',
+            help=(
+                'Ignore the "stop" marker and retry CWR generation. '
+                "Use this only after checking the previous error or making sure "
+                "no other generation process is still running."
+            ),
         )
 
     def handle(self, *args, **options):
