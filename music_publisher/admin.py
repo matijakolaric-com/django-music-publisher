@@ -1365,6 +1365,7 @@ class WorkAdmin(MusicPublisherAdmin):
         labels = [
             "Work ID",
             "Work Title",
+            "Tags",
             "ISWC",
             "Original Title",
             "Library",
@@ -1464,6 +1465,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 "Work ID": work["code"],
                 "Work Title": work["work_title"],
                 "ISWC": work.get("iswc", ""),
+                "Tags": ",".join(work.get("tags", [])),
             }
             if ows:
                 row["Original Title"] = ows[0]["work_title"]

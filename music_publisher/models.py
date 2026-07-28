@@ -558,6 +558,7 @@ class WorkManager(models.Manager):
                 "recordings__tracks__release__release_label"
             )
             qs = qs.prefetch_related("workacknowledgement_set")
+            qs = qs.prefetch_related("tags")
 
             if not qs:
                 break
@@ -624,18 +625,6 @@ class Work(TitleBase):
 
         for index in range(0, len(work_ids), chunk_size):
             chunk = work_ids[index : index + chunk_size]
-            works = Work.objects.filter(id__in=chunk).order_by("id")
-            works = works.prefetch_related("recordings")
-
-            for work in works:
-                work.work_id = work.work_id
-                work.save()
-                for rec in work.recordings.all():
-                    if rec._recording_id is None:
-                        rec.recording_id = rec.recording_id
-
-        for index in range(0, len(work_ids), 1000):
-            chunk = work_ids[index : index + 1000]
             works = Work.objects.filter(id__in=chunk).order_by("id")
             works = works.prefetch_related("recordings")
 
@@ -821,6 +810,7 @@ class Work(TitleBase):
             "id": self.id,
             "code": self.work_id,
             "work_title": self.title,
+            "tags": [tag.name for tag in self.tags.all()],
             "last_change": self.last_change,
             "version_type": (
                 {
