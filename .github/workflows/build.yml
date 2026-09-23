@@ -41,10 +41,8 @@ jobs:
 
     - name: Start MinIO
       run: |
-        docker run -d -p 9000:9000 --name minio \
-          -e MINIO_ROOT_USER=minioadmin \
-          -e MINIO_ROOT_PASSWORD=minioadmin \
-          minio/minio server /data
+        docker run -d -p 9000:9000 --name minio -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin minio/minio server /data
+        timeout 10 bash -c 'until nc -z localhost 9000; do sleep 0.5; done' || sleep 2
 
     - name: Setup Python
       uses: actions/setup-python@v5
