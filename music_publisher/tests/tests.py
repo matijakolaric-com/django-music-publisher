@@ -15,7 +15,7 @@ Python standard library).
 More precise tests would be better.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 import json
@@ -1124,6 +1124,61 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertGreater(Work.objects.filter(pk=1).first().last_change, lc)
 
+    def test_writer_in_work_formset_delete_and_empty(self):
+        """Test WriterInWorkFormSet with DELETE and empty cleaned_data forms."""
+        from django.forms import inlineformset_factory
+        from music_publisher.forms import WriterInWorkFormSet
+
+        factory_fields = [
+            "work",
+            "writer",
+            "capacity",
+            "relative_share",
+            "controlled",
+            "saan",
+        ]
+        factory = inlineformset_factory(
+            Work,
+            WriterInWork,
+            formset=WriterInWorkFormSet,
+            fields=factory_fields,
+            extra=3,
+        )
+        formset = factory(instance=self.original_work)
+
+        form0 = formset.forms[0]
+        form0._errors = {}
+        form0.is_bound = True
+        form0.cleaned_data = {
+            "writer": self.generally_controlled_writer,
+            "work": self.original_work,
+            "capacity": "CA",
+            "relative_share": Decimal("100.00"),
+            "controlled": True,
+            "saan": None,
+        }
+
+        form1 = formset.forms[1]
+        form1._errors = {}
+        form1.is_bound = True
+        form1.cleaned_data = {
+            "writer": self.other_writer,
+            "work": self.original_work,
+            "capacity": "CA",
+            "relative_share": Decimal("0.00"),
+            "controlled": False,
+            "saan": None,
+            "DELETE": True,
+        }
+
+        form2 = formset.forms[2]
+        form2._errors = {}
+        form2.is_bound = True
+        form2.cleaned_data = {}
+
+        formset.forms = [form0, form1, form2]
+        formset.clean()
+
     def test_not_controlled_extra_saan(self):
         """SAAN can not be set if a writer is not controlled."""
         self.client.force_login(self.staffuser)
@@ -1450,6 +1505,15 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             url = base_url + "?ack_status=RA&has_iswc=N&has_rec=N"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?writers=1&artists=1&library_release=1"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?controlled=F"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?controlled=P"
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
 
@@ -1797,6 +1861,9 @@ class AdminTest(TestCase):
         url = base_url + "?has_audio_file=N"
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+        url = base_url + "?artist=1&record_label=1"
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_search(self):
         """Test Work search."""
@@ -1892,6 +1959,14 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Publicly visible commercial release", response.content)
 
+        self.artist.description = "Artist with description"
+        self.artist.save()
+        response = ReleaseViewSet.as_view({"get": "retrieve"})(
+            request, pk=self.commercial_release.pk
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+
         self.playlist.description = "Visible API artist"
         self.playlist.save()
         response = PlaylistViewSet.as_view({"get": "retrieve"})(
@@ -1900,6 +1975,11 @@ class AdminTest(TestCase):
         response.render()
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Visible API artist", response.content)
+
+        response = PlaylistViewSet.as_view({"get": "retrieve"})(
+            request, cd_identifier="NONEXISTENT"
+        )
+        self.assertEqual(response.status_code, 404)
 
 
 class GenerateCWRCommandTest(TestCase):
@@ -2587,6 +2667,44 @@ class ModelsSimpleTest(TransactionTestCase):
             cwr.filename, f"CW{current_year}0006DMP_0000_V3-1-0.SUB"
         )
 
+        from unittest.mock import patch
+
+        cwr_test = music_publisher.models.CWRExport.objects.create(
+            nwr_rev="NW2"
+        )
+        cwr_test.works.add(work)
+
+        self.assertTrue(cwr_test.should_create_synchronously())
+
+        cwr_test.options = None
+        cwr_test.create_cwr(generate=False)
+        self.assertEqual(cwr_test.options, {})
+
+        cwr_test.options = {"stop": True}
+        cwr_test.create_cwr(generate=True, force=False)
+        self.assertTrue(cwr_test.options.get("stop"))
+
+        cwr_test.options = {}
+        with patch.object(
+            cwr_test,
+            "yield_lines",
+            side_effect=RuntimeError("Simulated CWR failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                cwr_test.create_cwr(generate=True, force=True)
+            self.assertIn(
+                "Simulated CWR failure", cwr_test.options.get("error", "")
+            )
+
+        # test CWR generation with recording duration
+        rec.duration = timedelta(minutes=3, seconds=30)
+        rec.save()
+        cwr_with_dur = music_publisher.models.CWRExport(nwr_rev="NW2")
+        cwr_with_dur.save()
+        cwr_with_dur.works.add(work)
+        cwr_with_dur.create_cwr()
+        self.assertTrue(cwr_with_dur.cwr)
+
 
 class OtherFunctionalTest(SimpleTestCase):
     """These tests are testing things not tested otherwise."""
@@ -2667,6 +2785,13 @@ class OtherFunctionalTest(SimpleTestCase):
         self.assertIsInstance(ser, ListSerializer)
         ser = ws.get_serializer()
         self.assertIsInstance(ser, ModelSerializer)
+
+    def test_ack_import_form_empty(self):
+        """Test ACKImportForm.clean() when no file is uploaded."""
+        from music_publisher.forms import ACKImportForm
+
+        form = ACKImportForm(data={})
+        self.assertFalse(form.is_valid())
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607

@@ -7,6 +7,7 @@ All views are here, except for :mod:`.royalty_calculation`.
 
 import re
 import zipfile
+from admin_auto_filters.filters import AutocompleteFilter
 from csv import DictWriter
 from datetime import datetime
 from decimal import Decimal
@@ -1099,25 +1100,23 @@ class WorkAdmin(MusicPublisherAdmin):
         """Return the count of CWR exports with the link to the filtered
         changelist view for :class:`CWRExportAdmin`."""
 
-        count = obj.cwr_exports__count
+        count = obj.cwr_exports.count()
         url = reverse("admin:music_publisher_cwrexport_changelist")
         url += "?works__id__exact={}".format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     cwr_export_count.short_description = "CWRs"
-    cwr_export_count.admin_order_field = "cwr_exports__count"
 
     def recording_count(self, obj):
-        """Return the count of CWR exports with the link to the filtered
-        changelist view for :class:`CWRExportAdmin`."""
+        """Return the count of recordings with the link to the filtered
+        changelist view for :class:`RecordingAdmin`."""
 
-        count = obj.recordings__count
+        count = obj.recordings.count()
         url = reverse("admin:music_publisher_recording_changelist")
         url += "?work__id__exact={}".format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     recording_count.short_description = "Recordings"
-    recording_count.admin_order_field = "recordings__count"
 
     readonly_fields = ("writer_last_names", "work_id", "cwr_export_count")
     list_display = (
@@ -1134,12 +1133,44 @@ class WorkAdmin(MusicPublisherAdmin):
     def get_queryset(self, request):
         """Optimized queryset for changelist view."""
         qs = super().get_queryset(request)
-        qs = qs.annotate(models.Count("cwr_exports", distinct=True))
-        qs = qs.annotate(models.Count("recordings", distinct=True))
         qs = qs.prefetch_related("library_release__library")
         qs = qs.prefetch_related("writerinwork_set__writer")
         qs = qs.prefetch_related("tags")
         return qs
+
+    class ControlledListFilter(admin.SimpleListFilter):
+        """Custom list filter on controlled status."""
+
+        title = "% controlled"
+        parameter_name = "controlled"
+
+        def lookups(self, request, model_admin):
+            """Options for fully vs partially controlled works."""
+            return (
+                ("F", "Fully"),
+                ("P", "Partially"),
+            )
+
+        def queryset(self, request, queryset):
+            """Filter based on the presence of uncontrolled writers."""
+            if self.value() == "F":
+                return queryset.exclude(writerinwork__controlled=False)
+            elif self.value() == "P":
+                return queryset.filter(
+                    writerinwork__controlled=False
+                ).distinct()
+
+    class WriterFilter(AutocompleteFilter):
+        title = "Writer"
+        field_name = "writers"
+
+    class ArtistFilter(AutocompleteFilter):
+        title = "Artist"
+        field_name = "artists"
+
+    class LibraryReleaseFilter(AutocompleteFilter):
+        title = "Library Release"
+        field_name = "library_release"
 
     class InCWRListFilter(admin.SimpleListFilter):
         """Custom list filter if work is included in any of CWR files."""
@@ -1157,13 +1188,9 @@ class WorkAdmin(MusicPublisherAdmin):
         def queryset(self, request, queryset):
             """Filter if in any of CWR files."""
             if self.value() == "Y":
-                return queryset.annotate(
-                    models.Count("cwr_exports", distinct=True)
-                ).exclude(cwr_exports__count=0)
+                return queryset.filter(cwr_exports__isnull=False).distinct()
             elif self.value() == "N":
-                return queryset.annotate(
-                    models.Count("cwr_exports", distinct=True)
-                ).filter(cwr_exports__count=0)
+                return queryset.filter(cwr_exports__isnull=True)
 
     class ACKSocietyListFilter(admin.SimpleListFilter):
         """Custom list filter of societies from ACK files."""
@@ -1228,9 +1255,8 @@ class WorkAdmin(MusicPublisherAdmin):
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`."""
             if self.value() == "Y":
-                return queryset.exclude(iswc__isnull=True)
+                return queryset.filter(iswc__isnull=False)
             elif self.value() == "N":
                 return queryset.filter(iswc__isnull=True)
 
@@ -1250,21 +1276,23 @@ class WorkAdmin(MusicPublisherAdmin):
         def queryset(self, request, queryset):
             """Filter on presence of :class:`.models.Recording`."""
             if self.value() == "Y":
-                return queryset.exclude(recordings__count=0)
+                return queryset.filter(recordings__isnull=False).distinct()
             elif self.value() == "N":
-                return queryset.filter(recordings__count=0)
+                return queryset.filter(recordings__isnull=True)
 
     list_filter = (
         TagFilter,
         HasISWCListFilter,
+        ControlledListFilter,
+        WriterFilter,
+        ArtistFilter,
         HasRecordingListFilter,
         ("library_release__library", admin.RelatedOnlyFieldListFilter),
-        ("library_release", admin.RelatedOnlyFieldListFilter),
-        ("writers", admin.RelatedOnlyFieldListFilter),
-        "last_change",
+        LibraryReleaseFilter,
         InCWRListFilter,
         ACKSocietyListFilter,
         ACKStatusListFilter,
+        "last_change",
     )
 
     search_fields = (
@@ -1713,7 +1741,20 @@ class RecordingAdmin(MusicPublisherAdmin):
             elif self.value() == "N":
                 return queryset.filter(audio_file="")
 
-    list_filter = (HasISRCListFilter, HasAudioFilter, "artist", "record_label")
+    class ArtistFilter(AutocompleteFilter):
+        title = "Artist"
+        field_name = "artist"
+
+    class RecordLabelFilter(AutocompleteFilter):
+        title = "Record Label"
+        field_name = "record_label"
+
+    list_filter = (
+        HasISRCListFilter,
+        HasAudioFilter,
+        ArtistFilter,
+        RecordLabelFilter,
+    )
 
     def lookup_allowed(self, lookup, value):
         allowed = super().lookup_allowed(lookup, value)
