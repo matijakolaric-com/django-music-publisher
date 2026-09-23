@@ -39,11 +39,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v6
 
-    - name: Start MinIO
-      run: |
-        docker run -d -p 9000:9000 --name minio -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin minio/minio server /data
-        timeout 10 bash -c 'until nc -z localhost 9000; do sleep 0.5; done' || sleep 2
-
     - name: Setup Python
       uses: actions/setup-python@v6
       with:
@@ -63,38 +58,13 @@ jobs:
         pip install -r requirements.txt coverage coveralls moto
       if: steps.cache.outputs.cache-hit != 'true'
 
-    - name: Create MinIO bucket
-      run: |
-        python -c "
-        import boto3
-        s3 = boto3.client('s3',
-            endpoint_url='http://127.0.0.1:9000',
-            aws_access_key_id='minioadmin',
-            aws_secret_access_key='minioadmin',
-            region_name='us-east-1'
-        )
-        try:
-            s3.create_bucket(Bucket='dmp-test-bucket')
-        except Exception as e:
-            print(e)
-        "
-
     - name: Test
       env:
           SECRET_KEY: 't569yezjg#_c^4(3_ly=pp+qehy3g$mnu6u4*nkjhvy3bqq356'
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
           OPTION_FILES: 1
-          AWS_ACCESS_KEY_ID: 'minioadmin'
-          AWS_SECRET_ACCESS_KEY: 'minioadmin'
-          AWS_STORAGE_BUCKET_NAME: 'dmp-test-bucket'
-          AWS_S3_REGION_NAME: 'us-east-1'
-          AWS_S3_ENDPOINT_URL: 'http://127.0.0.1:9000'
-          S3_ID: 'minioadmin'
-          S3_SECRET: 'minioadmin'
-          S3_BUCKET: 'dmp-test-bucket'
-          S3_REGION: 'us-east-1'
       run: |
-        coverage run  --omit=manage.py manage.py test 
+        coverage run --omit=manage.py manage.py test
 
     - name: Coveralls
       env:
