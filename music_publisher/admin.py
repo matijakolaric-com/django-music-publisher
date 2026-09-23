@@ -689,7 +689,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
     def secret_url(self, obj):
         if self.valid(obj):
             url = self.request.build_absolute_uri(obj.secret_url)
-            return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+            return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
         return ""
 
     secret_url.short_description = "Secret URL"
@@ -697,7 +697,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
     def secret_api_url(self, obj):
         if self.valid(obj):
             url = self.request.build_absolute_uri(obj.secret_api_url)
-            return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+            return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
         return ""
 
     secret_api_url.short_description = "Secret API URL"
@@ -1937,7 +1937,7 @@ class CWRExportAdmin(admin.ModelAdmin):
                     )
                 )
             else:
-                return mark_safe("Generating CWR".format(url))
+                return mark_safe("Generating CWR")
         if getattr(settings, "OPTION_CWR_NO_GENERATE_LINK", False):
             return "Pending"
         url += "?create_cwr=true"

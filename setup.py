@@ -5,7 +5,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="django-music-publisher",
-    version="26.4a1",
+    version="26.9",
     author="Matija Kolarić",
     author_email="matijakolaric@users.noreply.github.com",
     license="MIT License",
@@ -29,6 +29,8 @@ setuptools.setup(
         "Django>=5.2,<5.3",
         "boto3==1.38.0",
         "dj-database-url==3.1.2",
+        "django-admin-autocomplete-filter==0.7.1",
+        "django-admin-taggit-ui==1.3",
         "django-cleanup==9.0.0",
         "django-storages==1.14.6",
         "djangorestframework==3.16.0",
@@ -38,7 +40,6 @@ setuptools.setup(
         "psycopg2-binary==2.9.10",
         "waitress==3.0.2",
         "whitenoise==6.9.0",
-        "requests>=2.32.3",
     ),
     include_package_data=True,
     classifiers=[

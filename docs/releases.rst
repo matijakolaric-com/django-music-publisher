@@ -203,11 +203,19 @@ and the code was improved in several places.
 All dependencies were bumped to the latest stable versions.
 
 
+26.9 Michaelmas
+-------------------------------
+
+This release updates Django Music Publisher to the latest modern Django framework, dependencies, and environment standards:
+
+* Upgraded dependency stack and updated Python/Django compatibility.
+* Added Django Debug Toolbar integration and refined test coverage.
+* Streamlined CI workflows and deployment configurations.
+* Refined documentation structure and references for Read the Docs.
+
+
 Future open-source features
 ===========================
 
-Nothing is planned for the foreseeable future. Unless there is a significant
-change in the industry, the next major release will be out in 2026.
-
-Bugfix and security releases will be coming out when required.
+Nothing is planned for the foreseeable future. Bugfix and security releases will be coming out when required.
 

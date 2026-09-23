@@ -201,7 +201,7 @@ class DataImportTest(TestCase):
                     "saan": "B",
                 },
             }
-            writers = list(di.get_writers(d))
+            list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception),
             'Two different general agreement numbers for: "X Y (*)".',
@@ -223,7 +223,7 @@ class DataImportTest(TestCase):
                     "pro": "52",
                 },
             }
-            writers = list(di.get_writers(d))
+            list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception), 'Writer exists with different PRO: "X Y (*)".'
         )
@@ -1404,7 +1404,7 @@ class AdminTest(TestCase):
             ackimport = music_publisher.models.ACKImport.objects.first()
             self.assertIsNotNone(ackimport)
 
-            """And repeat the previous step, as duplicates are processed 
+            """And repeat the previous step, as duplicates are processed
             differently."""
             mock.seek(0)
             mockfile = InMemoryUploadedFile(

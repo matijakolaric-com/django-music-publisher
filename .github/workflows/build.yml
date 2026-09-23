@@ -15,10 +15,27 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-      - uses: psf/black@stable
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
-          options: "--check --verbose --line-length 79 --exclude music_publisher/migrations"
+          python-version: '3.12'
+
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black xenon
+
+      - name: Check code formatting (Black)
+        run: black --check --verbose --line-length 79 --exclude music_publisher/migrations .
+
+      - name: Check static analysis (Ruff)
+        run: ruff check
+
+      - name: Check cyclomatic complexity (Xenon)
+        run: xenon --max-absolute D --max-modules B --max-average A music_publisher
   build:
     runs-on: ubuntu-24.04
     services:

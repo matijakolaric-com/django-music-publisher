@@ -7,7 +7,7 @@ import dj_database_url
 from decimal import Decimal
 
 SOFTWARE = "DJANGO MUSIC PUBLISHER"
-SOFTWARE_VERSION = "26.4 "
+SOFTWARE_VERSION = "26.9 MICHAELMAS"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
