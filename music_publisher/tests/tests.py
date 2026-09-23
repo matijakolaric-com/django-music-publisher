@@ -278,6 +278,8 @@ class DataImportTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal("0.333333"),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal("0.5"),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
+    OPTION_CWR_SYNC_WORK_LIMIT=101,
+    OPTION_CWR_WORKS_PER_FILE=100,
 )
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests.
@@ -1982,6 +1984,10 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+@override_settings(
+    OPTION_CWR_SYNC_WORK_LIMIT=101,
+    OPTION_CWR_WORKS_PER_FILE=100,
+)
 class GenerateCWRCommandTest(TestCase):
     """Tests for the generatecwr management command."""
 
@@ -2306,6 +2312,8 @@ class ValidatorsTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal("0.5"),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
     OPTION_FORCE_CASE="smart",
+    OPTION_CWR_SYNC_WORK_LIMIT=101,
+    OPTION_CWR_WORKS_PER_FILE=100,
 )
 class ModelsSimpleTest(TransactionTestCase):
     """These tests are modifying objects directly."""

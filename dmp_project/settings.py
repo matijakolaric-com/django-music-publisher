@@ -17,10 +17,6 @@ SECRET_KEY = os.getenv("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", False)
 
-# INTERNAL_IPS = [
-#     "127.0.0.1",
-# ]
-
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 INSTALLED_APPS = [
@@ -37,11 +33,9 @@ INSTALLED_APPS = [
     "taggit",
     "taggit_api",
     "taggit_ui",
-    # "debug_toolbar",
 ]
 
 MIDDLEWARE = [
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -231,3 +225,13 @@ REST_FRAMEWORK = {
 
 TAGGIT_STRIP_UNICODE_WHEN_SLUGIFYING = True
 TAGGIT_CASE_INSENSITIVE = True
+
+if DEBUG:
+    try:
+        import debug_toolbar
+
+        INSTALLED_APPS.append("debug_toolbar")
+        MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+        INTERNAL_IPS = os.getenv("INTERNAL_IPS", "127.0.0.1").split(",")
+    except ImportError:
+        pass
