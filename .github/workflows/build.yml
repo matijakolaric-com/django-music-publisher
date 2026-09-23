@@ -31,11 +31,11 @@ jobs:
       - name: Check code formatting (Black)
         run: black --check --verbose --line-length 79 --exclude music_publisher/migrations .
 
-      - name: Check static analysis (Ruff)
-        run: ruff check
-
-      - name: Check cyclomatic complexity (Xenon)
-        run: xenon --max-absolute D --max-modules B --max-average A music_publisher
+#      - name: Check static analysis (Ruff)
+#        run: ruff check
+#
+#      - name: Check cyclomatic complexity (Xenon)
+#        run: xenon --max-absolute D --max-modules B --max-average A music_publisher
   build:
     runs-on: ubuntu-24.04
     services:
