@@ -582,10 +582,14 @@ class AdminTest(TestCase):
         )
         cls.release = Release.objects.create(release_title="ALBUM")
         cls.library_release = Release.objects.create(
-            release_title="LIBRELEASE", library_id=1, cd_identifier="XZY"
+            release_title="LIBRELEASE",
+            library_id=1,
+            cd_identifier="XZY",
+            description="Publicly visible Library release",
         )
         cls.commercial_release = Release.objects.create(
-            release_title="COMRELEASE"
+            release_title="COMRELEASE",
+            description="Publicly visible commercial release",
         )
         cls.playlist = Release.objects.create(
             release_title="PLAYLIST", cd_identifier="PL1"
@@ -1857,6 +1861,7 @@ class AdminTest(TestCase):
             BackupViewSet,
             ArtistViewSet,
             ReleaseViewSet,
+            PlaylistViewSet,
         )
 
         factory = APIRequestFactory()
@@ -1869,6 +1874,7 @@ class AdminTest(TestCase):
         self.assertIn("releases", d)
         self.assertEqual(len(d["releases"]), 4)
         self.assertEqual(response.status_code, 200)
+        self.assertIn("no-cache", response["Cache-Control"])
 
         response = ArtistViewSet.as_view({"get": "list"})(request)
         response.render()
@@ -1877,6 +1883,23 @@ class AdminTest(TestCase):
         response = ReleaseViewSet.as_view({"get": "list"})(request)
         response.render()
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Publicly visible commercial release", response.content)
+
+        response = ReleaseViewSet.as_view({"get": "retrieve"})(
+            request, pk=self.commercial_release.pk
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Publicly visible commercial release", response.content)
+
+        self.playlist.description = "Visible API artist"
+        self.playlist.save()
+        response = PlaylistViewSet.as_view({"get": "retrieve"})(
+            request, cd_identifier=self.playlist.cd_identifier
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Visible API artist", response.content)
 
 
 class GenerateCWRCommandTest(TestCase):
@@ -2451,8 +2474,8 @@ class ModelsSimpleTest(TransactionTestCase):
             version_title="Co-suffix",
             version_title_suffix=True,
         )
-        rec.clean_fields()
-        rec.clean()
+        rec2.clean_fields()
+        rec2.clean()
 
         music_publisher.models.WorkAcknowledgement.objects.create(
             work=work, society_code="10", date=datetime.now(), status="RA"
