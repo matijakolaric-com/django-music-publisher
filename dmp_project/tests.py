@@ -39,7 +39,8 @@ class DMPTestCase(TestCase):
         self.assertTrue(hasattr(settings, "PUBLISHING_AGREEMENT_PUBLISHER_SR"))
 
     @override_settings(
-        DEBUG=True, INSTALLED_APPS=list(settings.INSTALLED_APPS) + ["debug_toolbar"]
+        DEBUG=True,
+        INSTALLED_APPS=list(settings.INSTALLED_APPS) + ["debug_toolbar"],
     )
     def test_urls_debug_toolbar(self):
         """Test URL configuration when DEBUG is True."""
@@ -51,7 +52,8 @@ class DMPTestCase(TestCase):
             importlib.reload(dmp_project.urls)
 
     @override_settings(
-        DEBUG=True, INSTALLED_APPS=list(settings.INSTALLED_APPS) + ["debug_toolbar"]
+        DEBUG=True,
+        INSTALLED_APPS=list(settings.INSTALLED_APPS) + ["debug_toolbar"],
     )
     def test_urls_debug_toolbar_import_error(self):
         """Test URL configuration when DEBUG is True and debug_toolbar is missing."""
