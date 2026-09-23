@@ -1929,8 +1929,17 @@ class CWRExportAdmin(admin.ModelAdmin):
         if obj.cwr:
             url += "?download=true"
             return mark_safe('<a href="{}">Download</a>'.format(url))
-        elif obj.options.get("stop"):
-            return mark_safe("Generating CWR".format(url))
+        if obj.options.get("stop"):
+            if obj.options.get("error"):
+                return mark_safe(
+                    "<span title='{}'>ERROR</span>".format(
+                        obj.options.get("error")
+                    )
+                )
+            else:
+                return mark_safe("Generating CWR".format(url))
+        if getattr(settings, "OPTION_CWR_NO_GENERATE_LINK", False):
+            return "Pending"
         url += "?create_cwr=true"
         return mark_safe('<a href="{}">Generate CWR</a>'.format(url))
 

@@ -861,6 +861,61 @@ class AdminTest(TestCase):
             response.content,
         )
 
+    @override_settings(OPTION_CWR_NO_GENERATE_LINK=True)
+    def test_cwr_export_no_generate_link(self):
+        """When OPTION_CWR_NO_GENERATE_LINK is True, show Pending instead of Generate CWR."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR No Link", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Pending", response.content)
+        self.assertNotIn(b"Generate CWR", response.content)
+
+    def test_cwr_export_stop_with_error(self):
+        """When stop and error are set in options, display ERROR with title."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Failed CWR",
+            nwr_rev="NWR",
+            options={"stop": True, "error": "Export processing error"},
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"ERROR", response.content)
+        self.assertIn(b"Export processing error", response.content)
+
+    def test_cwr_export_stop_without_error(self):
+        """When stop is set in options without error, display Generating CWR."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Generating CWR",
+            nwr_rev="NWR",
+            options={"stop": True},
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Generating CWR", response.content)
+
     def test_create_cwr_link_generates_pending_export(self):
         """Create CWR link generates CWR for a pending export."""
         self.client.force_login(self.staffuser)
