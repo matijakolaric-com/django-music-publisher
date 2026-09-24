@@ -129,41 +129,40 @@ class DataImporter(object):
             )
 
     def process_writer_value(self, key, key_elements, value):
-        """Clean a value for a writer and return it.
-
-        If it is a 'controlled', then also calculate general agreement.
-        Always return a tuple."""
-
-        general_agreement = False
-        if len(key_elements) < 3 or key_elements[2] not in self.WRITER_FIELDS:
+        field = key_elements[2] if len(key_elements) >= 3 else None
+        if field not in self.WRITER_FIELDS:
             raise AttributeError('Unknown column: "{}".'.format(key))
-        if key_elements[2] == "role":
-            value = self.get_clean_key(
-                value.ljust(2), WriterInWork.ROLES, "writer role"
+        if field == "role":
+            return (
+                self.get_clean_key(
+                    value.ljust(2), WriterInWork.ROLES, "writer role"
+                ).ljust(2),
+                False,
             )
-            value = value.ljust(2)
-        elif key_elements[2] == "pro":
-            value = self.get_clean_key(
-                value, SOCIETIES + [("99", "NO SOCIETY")], "society"
+        if field == "pro":
+            return (
+                self.get_clean_key(
+                    value, SOCIETIES + [("99", "NO SOCIETY")], "society"
+                ),
+                False,
             )
-        elif key_elements[2] in self.SHARE_FIELDS:
-            if isinstance(value, str) and value[-1] == "%":
-                value = Decimal(value[0:-1])
-            else:
-                value = Decimal(value) * 100
-            value = value.quantize(Decimal("0.01"))
-        elif key_elements[2] == "controlled":
-            if isinstance(value, str):
-                value = value[0].upper()
-                if not value or value in ["N", "F"]:  # F for False
-                    value = False
-                else:
-                    if value == "G":
-                        general_agreement = True
-                    value = True
-            else:
-                value = bool(value)
-        return value, general_agreement
+        if field in self.SHARE_FIELDS:
+            amount = (
+                Decimal(value[:-1])
+                if isinstance(value, str) and value[-1:] == "%"
+                else Decimal(value) * 100
+            )
+            return amount.quantize(Decimal("0.01")), False
+        if field == "controlled":
+            return self._clean_controlled(value)
+        return value, False
+
+    @staticmethod
+    def _clean_controlled(value):
+        if not isinstance(value, str):
+            return bool(value), False
+        value = value[0].upper() if value else ""
+        return value not in ["N", "F"], value == "G"
 
     def unflatten_writer_record(self, out_dict, clean_key, key, value):
         key_elements = clean_key.split("_", 2)
@@ -188,45 +187,32 @@ class DataImporter(object):
             return
         if clean_key in self.FLAT_FIELDS:
             out_dict[clean_key] = value
-        elif prefix == "alt":
-            key_elements = clean_key.rsplit("_", 1)
-            if len(key_elements) < 2 or key_elements[0] != "alt_title":
-                self.unknown_keys.add(key)
-                return
-            out_dict["alt_titles"].append(value)
-        elif prefix == "writer":
-            return self.unflatten_writer_record(
-                out_dict, clean_key, key, value
-            )
-        elif prefix == "artist":
-            key_elements = clean_key.split("_", 2)
-            if (
-                len(key_elements) < 3
-                or key_elements[2] not in self.ARTIST_FIELDS
-            ):
-                self.unknown_keys.add(key)
-                return
-            out_dict["artists"][key_elements[1]][key_elements[2]] = value
-        elif prefix == "recording":
-            key_elements = clean_key.split("_", 2)
-            if (
-                len(key_elements) < 3
-                or key_elements[2] not in self.RECORDING_FIELDS
-            ):
-                self.unknown_keys.add(key)
-                return
-            out_dict["recordings"][key_elements[1]][key_elements[2]] = value
-        elif prefix == "reference":
-            key_elements = clean_key.split("_", 2)
-            if (
-                len(key_elements) < 3
-                or key_elements[2] not in self.REFERENCE_FIELDS
-            ):
-                self.unknown_keys.add(key)
-                return
-            out_dict["references"][key_elements[1]][key_elements[2]] = value
-        else:
+            return
+        if prefix == "alt":
+            self._unflatten_alt_title(out_dict, clean_key, key, value)
+            return
+        if prefix == "writer":
+            self.unflatten_writer_record(out_dict, clean_key, key, value)
+            return
+        if prefix in ("artist", "recording", "reference"):
+            self._unflatten_related(out_dict, clean_key, key, value, prefix)
+            return
+        self.unknown_keys.add(key)
+
+    def _unflatten_alt_title(self, out_dict, clean_key, key, value):
+        elements = clean_key.rsplit("_", 1)
+        if len(elements) < 2 or elements[0] != "alt_title":
             self.unknown_keys.add(key)
+        else:
+            out_dict["alt_titles"].append(value)
+
+    def _unflatten_related(self, out_dict, clean_key, key, value, prefix):
+        elements = clean_key.split("_", 2)
+        fields = getattr(self, prefix.upper() + "_FIELDS")
+        if len(elements) < 3 or elements[2] not in fields:
+            self.unknown_keys.add(key)
+            return
+        out_dict[prefix + "s"][elements[1]][elements[2]] = value
 
     def unflatten(self, in_dict):
         """Create a well-structured dictionary with cleaner values."""
@@ -244,94 +230,90 @@ class DataImporter(object):
     def get_writers(self, writer_dict):
         """Yield Writer objects, create if needed."""
         for value in writer_dict.values():
-            ipi_name_unset = False
-            # variables used more than once or too complex
-            general_agreement = value.get("general_agreement", False)
-            saan = value.get("saan") if general_agreement else None
-            pr_society = value.get("pro")
-            last_name = value.get("last", "")
-            first_name = value.get("first", "")
-            ipi_name = value.get("ipi", None)
-            account_number = value.get("account_number", None)
-            if ipi_name == "00000000000":
-                ipi_name_unset = True
-            # maybe writer is unknown
-            if not any(
-                [
-                    last_name,
-                    first_name,
-                    ipi_name,
-                    pr_society,
-                    saan,
-                    general_agreement,
-                    account_number,
-                ]
-            ):
+            details = self._writer_details(value)
+            if not details["present"]:
                 yield None
                 continue
-            # find this writer
-            lookup_writer = Writer(
-                last_name=last_name,
-                first_name=first_name,
-                ipi_name=ipi_name,
-                pr_society=pr_society,
-                generally_controlled=general_agreement,
-                saan=saan,
-                account_number=account_number,
-            )
-            lookup_writer.clean_fields()
-            lookup_writer.clean()
-            writer = Writer.objects.filter(
-                last_name__iexact=lookup_writer.last_name,
-                first_name__iexact=lookup_writer.first_name,
-                ipi_name=None if ipi_name_unset else lookup_writer.ipi_name,
-            ).first()
-            if writer:
-                # No existing general agreement for this writer
-                if (
-                    lookup_writer.generally_controlled
-                    and not writer.generally_controlled
-                ):
-                    writer.saan = saan
-                    writer.generally_controlled = True
-                    writer.save()
-                    self.log(
-                        writer,
-                        "General agreement set during import.",
-                        change=True,
-                    )
+            yield self._get_or_create_writer(details)
 
-                # Writer must be exactly same, except if marked "generally
-                # controlled" in the database, and not in the file
-                if (
-                    lookup_writer.generally_controlled
-                    and writer.generally_controlled
-                    and writer.saan != lookup_writer.saan
-                ):
-                    raise ValueError(
-                        "Two different general agreement numbers for: "
-                        '"{}".'.format(writer)
+    @staticmethod
+    def _writer_details(value):
+        general = value.get("general_agreement", False)
+        ipi = value.get("ipi")
+        return {
+            "present": any(
+                [
+                    value.get("last", ""),
+                    value.get("first", ""),
+                    ipi,
+                    value.get("pro"),
+                    value.get("saan") if general else None,
+                    general,
+                    value.get("account_number"),
+                ]
+            ),
+            "last": value.get("last", ""),
+            "first": value.get("first", ""),
+            "ipi": ipi,
+            "ipi_unset": ipi == "00000000000",
+            "pro": value.get("pro"),
+            "general": general,
+            "saan": value.get("saan") if general else None,
+            "account_number": value.get("account_number"),
+        }
+
+    def _get_or_create_writer(self, details):
+        lookup = Writer(
+            last_name=details["last"],
+            first_name=details["first"],
+            ipi_name=details["ipi"],
+            pr_society=details["pro"],
+            generally_controlled=details["general"],
+            saan=details["saan"],
+            account_number=details["account_number"],
+        )
+        lookup.clean_fields()
+        lookup.clean()
+        writer = Writer.objects.filter(
+            last_name__iexact=lookup.last_name,
+            first_name__iexact=lookup.first_name,
+            ipi_name=None if details["ipi_unset"] else lookup.ipi_name,
+        ).first()
+        if writer:
+            return self._validate_existing_writer(
+                writer, lookup, details["saan"]
+            )
+        try:
+            lookup.save()
+            self.log(lookup, "Added during import.")
+        except IntegrityError:
+            raise ValueError(
+                "A writer with this IPI already exists in the database, but is "
+                "not exactly the same as one provided in the importing data: "
+                "{}".format(lookup)
+            )
+        return lookup
+
+    def _validate_existing_writer(self, writer, lookup, saan):
+        if lookup.generally_controlled and not writer.generally_controlled:
+            writer.saan = saan
+            writer.generally_controlled = True
+            writer.save()
+            self.log(
+                writer, "General agreement set during import.", change=True
+            )
+        if lookup.generally_controlled and writer.generally_controlled:
+            if writer.saan != lookup.saan:
+                raise ValueError(
+                    'Two different general agreement numbers for: "{}".'.format(
+                        writer
                     )
-                if writer.pr_society != lookup_writer.pr_society:
-                    raise ValueError(
-                        'Writer exists with different PRO: "{}".'.format(
-                            writer
-                        )
-                    )
-            else:
-                writer = lookup_writer
-                try:
-                    writer.save()
-                    self.log(writer, "Added during import.")
-                except IntegrityError:
-                    raise ValueError(
-                        "A writer with this IPI already "
-                        "exists in the database, but is not exactly the same "
-                        "as one provided in the importing data: {}".format(
-                            writer
-                        )
-                    )
-            yield writer
+                )
+        if writer.pr_society != lookup.pr_society:
+            raise ValueError(
+                'Writer exists with different PRO: "{}".'.format(writer)
+            )
+        return writer
 
     def get_artists(self, artist_dict):
         """Yield Artist objects, create if needed."""
@@ -389,27 +371,33 @@ class DataImporter(object):
 
     def process_row(self, row):
         """Process one row from the incoming data."""
-        for value in row.values():
-            if value.strip():
-                break
-        else:
+        if not any(value.strip() for value in row.values()):
             return
         row_dict = self.unflatten(row)
         writers = self.get_writers(row_dict["writers"])
         artists = self.get_artists(row_dict["artists"])
+        work = self._create_work(row_dict)
+        self.log(work, "Added during import.")
+        self._save_artists(work, artists)
+        wiws = self._save_writers(work, row_dict["writers"], writers)
+        self._validate_writers(work, wiws)
+        self._save_related_records(work, row_dict)
+        yield work
+
+    def _create_work(self, row_dict):
         library = row_dict.get("library")
         cd_identifier = row_dict.get("cd_identifier")
         if bool(library) != bool(cd_identifier):
             raise ValueError(
-                "Library and CD Identifier fields must both be either "
-                "present or empty."
+                "Library and CD Identifier fields must both be either present or empty."
             )
-        elif library:
-            library_release = self.get_library_release(library, cd_identifier)
-        else:
-            library_release = None
+        library_release = (
+            self.get_library_release(library, cd_identifier)
+            if library
+            else None
+        )
         work = Work(
-            work_id=row_dict.get("work_id", None),
+            work_id=row_dict.get("work_id"),
             title=row_dict.get("work_title", ""),
             iswc=row_dict.get("iswc"),
             original_title=row_dict.get("original_title", ""),
@@ -421,44 +409,50 @@ class DataImporter(object):
             work.save()
         except IntegrityError:
             raise ValidationError(
-                f'Work "{ work.title }", '
-                + (f'ID "{ work.work_id }", ' if work.work_id else "")
-                + (f'ISWC "{ work.iswc }", ' if work.iswc else "")
-                + "clashes with an existing work. "
-                "Data imports can only be used for adding new works."
+                f'Work "{work.title}", '
+                + (f'ID "{work.work_id}", ' if work.work_id else "")
+                + (f'ISWC "{work.iswc}", ' if work.iswc else "")
+                + "clashes with an existing work. Data imports can only be used "
+                "for adding new works."
             )
         tags = row_dict.get("tags")
         if tags:
             work.tags.add(
                 *[tag.strip() for tag in tags.split(",") if tag.strip()]
             )
+        return work
 
-        self.log(work, "Added during import.")
+    def _save_artists(self, work, artists):
         for artist in set(artists):
             ArtistInWork(artist=artist, work=work).save()
+
+    def _save_writers(self, work, writer_dict, writers):
         wiws = []
-        for w_dict in row_dict["writers"].values():
+        for values in writer_dict.values():
             writer = next(writers)
-            saan = w_dict.get("saan")
+            saan = values.get("saan")
             if writer and saan == writer.saan:
                 saan = None
-            share = w_dict.get("manuscript_share") or w_dict.get("share")
+            share = values.get("manuscript_share") or values.get("share")
             if not share:
-                share = w_dict.get("pr_share", 0) + w_dict.get(
+                share = values.get("pr_share", 0) + values.get(
                     "publisher_pr_share", 0
                 )
             wiw = WriterInWork(
                 writer=writer,
                 work=work,
                 relative_share=share,
-                capacity=w_dict.get("role", ""),
-                controlled=w_dict.get("controlled", False),
+                capacity=values.get("role", ""),
+                controlled=values.get("controlled", False),
                 saan=saan,
             )
             wiw.clean_fields()
             wiw.clean()
             wiw.save()
             wiws.append(wiw)
+        return wiws
+
+    def _validate_writers(self, work, wiws):
         factory_fields = [
             "work",
             "writer",
@@ -477,17 +471,20 @@ class DataImporter(object):
         formset = factory()
         for i, form in enumerate(formset.forms):
             wiw = wiws[i]
-            data = {}
-            data["writer"] = wiw.writer_id
-            data["work"] = wiw.work_id
-            data["capacity"] = wiw.capacity
-            data["relative_share"] = wiw.relative_share
-            data["controlled"] = wiw.controlled
-            data["saan"] = wiw.saan
+            data = {
+                "writer": wiw.writer_id,
+                "work": wiw.work_id,
+                "capacity": wiw.capacity,
+                "relative_share": wiw.relative_share,
+                "controlled": wiw.controlled,
+                "saan": wiw.saan,
+            }
             form.initial = form.cleaned_data = data
             form.full_clean()
             form.is_bound = True
         formset.clean()
+
+    def _save_related_records(self, work, row_dict):
         for alt_title in row_dict["alt_titles"]:
             at = AlternateTitle(work=work, title=alt_title)
             at.clean_fields()
@@ -521,7 +518,6 @@ class DataImporter(object):
             workack.clean()
             workack.save()
             self.log(workack, "Added during import.")
-        yield work
 
     def run(self):
         """Run the import."""

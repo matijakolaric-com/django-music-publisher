@@ -172,33 +172,12 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         """
         is_modification = self.instance.is_modification()
         super().clean()
-        total = 0
-        controlled = False
-        has_composer = False
-        needs_extended_capacity = is_modification
         for form in self.forms:
             if not form.is_valid():
                 return
-
-        for form in self.forms:
-            if not form.cleaned_data:
-                continue
-            if form.cleaned_data.get("DELETE"):
-                continue
-            total += form.cleaned_data.get("relative_share", 0)
-            controlled |= form.cleaned_data.get("controlled", False)
-            has_composer |= form.cleaned_data["capacity"] in [
-                "C ",
-                "CA",
-            ]
-            if form.cleaned_data.get("capacity") not in self.orig_cap:
-                if is_modification:
-                    needs_extended_capacity = False
-                else:
-                    form.add_error(
-                        "capacity", "Not allowed in original works."
-                    )
-
+        total, controlled, has_composer, needs_extended_capacity = (
+            self._collect_writer_checks(is_modification)
+        )
         if needs_extended_capacity:
             self.check_extended_capacity()
         if not controlled:
@@ -206,6 +185,27 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         if not has_composer:
             self.check_has_composer()
         self.check_total(total)
+
+    def _collect_writer_checks(self, is_modification):
+        total = 0
+        controlled = False
+        has_composer = False
+        needs_extended_capacity = is_modification
+        for form in self.forms:
+            if not form.cleaned_data or form.cleaned_data.get("DELETE"):
+                continue
+            data = form.cleaned_data
+            total += data.get("relative_share", 0)
+            controlled |= data.get("controlled", False)
+            has_composer |= data["capacity"] in ("C ", "CA")
+            if data.get("capacity") not in self.orig_cap:
+                if is_modification:
+                    needs_extended_capacity = False
+                else:
+                    form.add_error(
+                        "capacity", "Not allowed in original works."
+                    )
+        return total, controlled, has_composer, needs_extended_capacity
 
     def check_extended_capacity(self):
         for form in self.forms:

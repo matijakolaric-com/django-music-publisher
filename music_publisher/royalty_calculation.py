@@ -311,15 +311,29 @@ class RoyaltyCalculation(object):
 
     def process_row(self, row):
         """Process one incoming row, yield multiple output rows."""
-        # get the identifier and clean
+        work, share_split, amount = self._prepare_row(row)
+        if not work:
+            row.append("")
+            row.append("ERROR: Work not found")
+            yield row
+            return
+        controlled = sum([line["relative_share"] for line in work]) / 100
+        row.append("{0:.4f}".format(controlled))
+        for line in work:
+            output = self._writer_output(
+                row, line, controlled, share_split, amount
+            )
+            if output is not None:
+                yield output
+        if self.algo == "share":
+            yield self._publisher_output(row, controlled, share_split, amount)
+
+    def _prepare_row(self, row):
         try:
             given_id = row[self.wc]
             if self.work_id_source in ["ISWC", "ISRC"]:
                 given_id = given_id.replace(".", "").replace("-", "")
-
-            # get the work, if not found yield error
             work = self.works.get(given_id)
-
             right = (self.right or row[self.rc][0]).lower()
             share_split = {
                 "p": settings.PUBLISHING_AGREEMENT_PUBLISHER_PR,
@@ -332,83 +346,68 @@ class RoyaltyCalculation(object):
                 amount = Decimal(row[self.ac])
             except TypeError:
                 amount = None
+            return work, share_split, amount
         except IndexError:
-            work = None
+            return None, None, None
 
-        # Add data to all output rows
-        if not work:
-            row.append("")
-            row.append("ERROR: Work not found")
-            yield row
-            return
+    def _writer_output(self, row, line, controlled, share_split, amount):
+        writer = self.writers[line.get("writer_id")]
+        output = row.copy()
+        output.extend([writer["name"], writer["account_number"], line["role"]])
+        relative_share = line["relative_share"] / 100
+        if self.algo == "fee":
+            return self._fee_output(
+                output, line, writer, relative_share, controlled, amount
+            )
+        if share_split == Decimal(1):
+            return None
+        owned_share = relative_share * (1 - share_split)
+        output.append("{0:.6f}".format(owned_share))
+        share = (owned_share / controlled).quantize(Decimal(".000001"))
+        output.extend(["{0:.6f}".format(share), "{}".format(amount * share)])
+        return output
 
-        controlled = sum([line["relative_share"] for line in work]) / 100
-        row.append("{0:.4f}".format(controlled))
+    def _fee_output(
+        self, output, line, writer, relative_share, controlled, amount
+    ):
+        output.append("{0:.4f}".format(relative_share))
+        share = (relative_share / controlled).quantize(Decimal(".000001"))
+        amount_before_fee = amount * share if amount is not None else None
+        output.extend(
+            ["{0:.6f}".format(share), "{}".format(amount_before_fee)]
+        )
+        fee = (line["fee"] or writer["fee"] or self.default_fee) / 100
+        fee_amount = (
+            amount_before_fee * fee if amount_before_fee is not None else None
+        )
+        net_amount = (
+            amount_before_fee - fee_amount
+            if amount_before_fee is not None
+            else None
+        )
+        output.extend(
+            [
+                "{}".format(fee),
+                "{}".format(fee_amount or "0"),
+                "{}".format(net_amount),
+            ]
+        )
+        return output
 
-        # Prepare output lines, one per controlled writer in work
-        for line in work:
-            # Common fields for all algorithms
-            out_row = row.copy()
-            writer = self.writers[line.get("writer_id")]
-            out_row.append(writer["name"])
-            out_row.append(writer["account_number"])
-            out_row.append(line["role"])
-            relative_share = line["relative_share"] / 100
-
-            if self.algo == "fee":
-                out_row.append("{0:.4f}".format(relative_share))
-                share = (relative_share / controlled).quantize(
-                    Decimal(".000001")
-                )
-                if amount is not None:
-                    amount_before_fee = amount * share
-                else:
-                    amount_before_fee = None
-                out_row.append("{0:.6f}".format(share))
-                out_row.append("{}".format(amount_before_fee))
-                fee = (line["fee"] or writer["fee"] or self.default_fee) / 100
-                out_row.append("{}".format(fee))
-                if amount_before_fee is not None:
-                    fee_amount = amount_before_fee * fee
-                else:
-                    fee_amount = None
-                out_row.append("{}".format(fee_amount or "0"))
-                if amount_before_fee is not None:
-                    net_amount = amount_before_fee - fee_amount
-                else:
-                    net_amount = None
-                out_row.append("{}".format(net_amount))
-
-            elif self.algo == "share":
-                # do not show lines when writers get nothing
-                if share_split == Decimal(1):
-                    continue
-
-                owned_share = relative_share * (1 - share_split)
-                out_row.append("{0:.6f}".format(owned_share))
-                share = (owned_share / controlled).quantize(Decimal(".000001"))
-                net_amount = amount * share
-                out_row.append("{0:.6f}".format(share))
-                out_row.append("{}".format(net_amount))
-
-            yield out_row
-
-        else:
-            # "Share" algorithm has one additional row with the publisher
-            if self.algo == "share":
-                out_row = row.copy()
-                out_row.append(
-                    "{}, [{}]".format(
-                        settings.PUBLISHER_NAME, settings.PUBLISHER_IPI_NAME
-                    )
-                )
-                out_row.append("Original Publisher")
-                out_row.append("{0:.6f}".format(share_split * controlled))
-                out_row.append("{0:.6f}".format(share_split))
-                net_amount = amount * share_split
-                out_row.append("{}".format(net_amount))
-
-                yield out_row
+    def _publisher_output(self, row, controlled, share_split, amount):
+        output = row.copy()
+        output.extend(
+            [
+                "{}, [{}]".format(
+                    settings.PUBLISHER_NAME, settings.PUBLISHER_IPI_NAME
+                ),
+                "Original Publisher",
+                "{0:.6f}".format(share_split * controlled),
+                "{0:.6f}".format(share_split),
+                "{}".format(amount * share_split),
+            ]
+        )
+        return output
 
     @property
     def out_file_path(self):

@@ -140,53 +140,73 @@ class CWRFieldValidator:
         self.field = field
 
     def __call__(self, value):
-        """Use custom validation, based on the name of the field.
-
-        Args:
-            value (): Input value
-
-        Raises:
-            ValidationError: If the value does not pass the validation.
-        """
-
-        name = self.field
-        if name == "title":
-            if not re.match(RE_TITLE, value.upper()):
-                raise ValidationError("Title contains invalid characters.")
-        elif name == "isni":
-            if not re.match(RE_ISNI, value):
-                raise ValidationError("Value does not match ISNI format.")
-            check_isni_digit(value)
-        elif name == "ean":
-            if not value.isnumeric() or len(value) != 13:
-                raise ValidationError("Value does not match EAN13 format.")
-            check_ean_digit(value)
-        elif name == "iswc":
-            if not re.match(RE_ISWC, value):
-                raise ValidationError(
-                    "Value does not match TNNNNNNNNNC format."
-                )
-            check_iswc_digit(value, weight=1)
-        elif name == "isrc":
-            if not re.match(RE_ISRC, value):
-                raise ValidationError("Value does not match ISRC format.")
-        elif name == "dpid":
-            if not re.match(RE_DPID, value):
-                raise ValidationError("Value does not match DPID format.")
-            check_dpid(value)
-        elif "ipi_name" in name:
-            if not value.isnumeric():
-                raise ValidationError("Value must be numeric.")
-            check_ipi_digit(value)
-        elif "ipi_base" in name:
-            if not re.match(RE_IPI_BASE, value):
-                raise ValidationError(
-                    "Value does not match I-NNNNNNNNN-C format."
-                )
-            check_iswc_digit(value, weight=2)
+        validators = {
+            "title": self._validate_title,
+            "isni": self._validate_isni,
+            "ean": self._validate_ean,
+            "iswc": self._validate_iswc,
+            "isrc": self._validate_isrc,
+            "dpid": self._validate_dpid,
+        }
+        if self.field in validators:
+            validators[self.field](value)
+        elif "ipi_name" in self.field:
+            self._validate_ipi_name(value)
+        elif "ipi_base" in self.field:
+            self._validate_ipi_base(value)
         else:
-            if not re.match(RE_NAME, value.upper()):
-                raise ValidationError("Name contains invalid characters.")
+            self._validate_name(value)
+
+    @staticmethod
+    def _validate_title(value):
+        if not re.match(RE_TITLE, value.upper()):
+            raise ValidationError("Title contains invalid characters.")
+
+    @staticmethod
+    def _validate_isni(value):
+        if not re.match(RE_ISNI, value):
+            raise ValidationError("Value does not match ISNI format.")
+        check_isni_digit(value)
+
+    @staticmethod
+    def _validate_ean(value):
+        if not value.isnumeric() or len(value) != 13:
+            raise ValidationError("Value does not match EAN13 format.")
+        check_ean_digit(value)
+
+    @staticmethod
+    def _validate_iswc(value):
+        if not re.match(RE_ISWC, value):
+            raise ValidationError("Value does not match TNNNNNNNNNC format.")
+        check_iswc_digit(value, weight=1)
+
+    @staticmethod
+    def _validate_isrc(value):
+        if not re.match(RE_ISRC, value):
+            raise ValidationError("Value does not match ISRC format.")
+
+    @staticmethod
+    def _validate_dpid(value):
+        if not re.match(RE_DPID, value):
+            raise ValidationError("Value does not match DPID format.")
+        check_dpid(value)
+
+    @staticmethod
+    def _validate_ipi_name(value):
+        if not value.isnumeric():
+            raise ValidationError("Value must be numeric.")
+        check_ipi_digit(value)
+
+    @staticmethod
+    def _validate_ipi_base(value):
+        if not re.match(RE_IPI_BASE, value):
+            raise ValidationError("Value does not match I-NNNNNNNNN-C format.")
+        check_iswc_digit(value, weight=2)
+
+    @staticmethod
+    def _validate_name(value):
+        if not re.match(RE_NAME, value.upper()):
+            raise ValidationError("Name contains invalid characters.")
 
 
 def validate_publisher_settings():
@@ -219,14 +239,7 @@ def validate_publisher_settings():
             raise ImproperlyConfigured("PUBLISHER_IPI_NAME: " + str(e))
 
 
-def validate_settings():
-    """CWR-compliance validation for settings.
-
-    This is used to prevent deployment with invalid settings.
-    """
-
-    validate_publisher_settings()
-
+def _validate_societies():
     keys = [s[0] for s in SOCIETIES]
     for t in ["PR", "MR", "SR"]:
         attr = getattr(settings, "PUBLISHER_SOCIETY_" + t)
@@ -237,23 +250,22 @@ def validate_settings():
                 )
             )
 
-    if hasattr(settings, "PUBLISHING_AGREEMENT_PUBLISHER_PR"):
-        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_PR <= 0.5):
+
+def _validate_agreements():
+    limits = {"PR": 0.5, "MR": 1.0, "SR": 1.0}
+    for code, maximum in limits.items():
+        name = "PUBLISHING_AGREEMENT_PUBLISHER_" + code
+        if (
+            hasattr(settings, name)
+            and not 0 <= getattr(settings, name) <= maximum
+        ):
             raise ImproperlyConfigured(
-                "PUBLISHING_AGREEMENT_PUBLISHER_PR: "
-                "Must be between 0.0 and 0.5"
+                name + ": Must be between 0.0 and " + str(maximum)
             )
 
-    if hasattr(settings, "PUBLISHING_AGREEMENT_PUBLISHER_MR"):
-        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_MR <= 1.0):
-            raise ImproperlyConfigured(
-                "PUBLISHING_AGREEMENT_PUBLISHER_MR: "
-                "Must be between 0.0 and 1.0"
-            )
 
-    if hasattr(settings, "PUBLISHING_AGREEMENT_PUBLISHER_PR"):
-        if not (0 <= settings.PUBLISHING_AGREEMENT_PUBLISHER_SR <= 1.0):
-            raise ImproperlyConfigured(
-                "PUBLISHING_AGREEMENT_PUBLISHER_SR: "
-                "Must be between 0.0 and 1.0"
-            )
+def validate_settings():
+    """CWR-compliance validation for settings."""
+    validate_publisher_settings()
+    _validate_societies()
+    _validate_agreements()

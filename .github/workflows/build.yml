@@ -34,8 +34,8 @@ jobs:
 #      - name: Check static analysis (Ruff)
 #        run: ruff check
 #
-#      - name: Check cyclomatic complexity (Xenon)
-#        run: xenon --max-absolute D --max-modules B --max-average A music_publisher
+      - name: Check cyclomatic complexity (Xenon)
+        run: xenon --max-absolute B --max-modules A --max-average A music_publisher
   build:
     runs-on: ubuntu-24.04
     services:

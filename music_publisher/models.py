@@ -838,38 +838,43 @@ class Work(TitleBase):
             "cross_references": [],
         }
 
+        self._add_original_work(j)
+        self._add_artists(j)
+        self._add_writers(j)
+        self._add_recordings(j, with_recordings)
+        self._add_cross_references(j)
+        return j
+
+    def _add_original_work(self, data):
         if self.original_title:
-            d = {"work_title": self.original_title}
-            j["original_works"].append(d)
+            data["original_works"].append({"work_title": self.original_title})
 
-        # add data for (live) artists in work, normalize of required
-        for aiw in self.artistinwork_set.all():
-            d = aiw.get_dict()
-            j["performing_artists"].append(d)
+    def _add_artists(self, data):
+        data["performing_artists"].extend(
+            aiw.get_dict() for aiw in self.artistinwork_set.all()
+        )
 
-        # add data for writers in work, normalize of required
-        for wiw in self.writerinwork_set.all():
-            d = wiw.get_dict()
-            j["writers"].append(d)
+    def _add_writers(self, data):
+        data["writers"].extend(
+            wiw.get_dict() for wiw in self.writerinwork_set.all()
+        )
 
+    def _add_recordings(self, data, with_recordings):
         if with_recordings:
-            j["recordings"] = [
+            data["recordings"] = [
                 recording.get_dict(with_releases=True, with_work=False)
                 for recording in self.recordings.all()
             ]
 
-        # add cross references, currently only society work ids from ACKs
-        used_society_codes = []
-        for wa in self.workacknowledgement_set.all():
-            if not wa.remote_work_id:
-                continue
-            if wa.society_code in used_society_codes:
-                continue
-            used_society_codes.append(wa.society_code)
-            d = wa.get_dict()
-            j["cross_references"].append(d)
-
-        return j
+    def _add_cross_references(self, data):
+        used_society_codes = set()
+        for acknowledgement in self.workacknowledgement_set.all():
+            if (
+                acknowledgement.remote_work_id
+                and acknowledgement.society_code not in used_society_codes
+            ):
+                used_society_codes.add(acknowledgement.society_code)
+                data["cross_references"].append(acknowledgement.get_dict())
 
 
 class AlternateTitle(TitleBase):
@@ -1049,34 +1054,47 @@ class WriterInWork(models.Model):
 
         generally_controlled = self.writer and self.writer.generally_controlled
         if generally_controlled and not self.controlled:
-            raise ValidationError(
-                {
-                    "controlled": (
-                        "Must be set for a generally controlled writer."
-                    )
-                }
-            )
-        d = {}
+            self._raise_general_controlled_error()
+        errors = self._get_controlled_errors()
+        if errors:
+            raise ValidationError(errors)
+
+    def _raise_general_controlled_error(self):
+        raise ValidationError(
+            {"controlled": "Must be set for a generally controlled writer."}
+        )
+
+    def _get_controlled_errors(self):
+        errors = {}
         if not self.capacity:
-            d["capacity"] = "Must be set for all writers."
+            errors["capacity"] = "Must be set for all writers."
         if self.controlled:
-            if not self.writer:
-                d["writer"] = "Must be set for a controlled writer."
-            else:
-                if not self.writer._can_be_controlled:
-                    d["writer"] = (
-                        "IPI name and PR society must be set. "
-                        'See "Writers" in the user manual'
-                    )
+            errors.update(self._controlled_writer_errors())
         else:
-            if self.saan:
-                d["saan"] = "Must be empty if writer is not controlled."
-            if self.publisher_fee:
-                d["publisher_fee"] = (
-                    "Must be empty if writer is not controlled."
+            errors.update(self._uncontrolled_writer_errors())
+        return errors
+
+    def _controlled_writer_errors(self):
+        if not self.writer:
+            return {"writer": "Must be set for a controlled writer."}
+        if not self.writer._can_be_controlled:
+            return {
+                "writer": (
+                    "IPI name and PR society must be set. "
+                    'See "Writers" in the user manual'
                 )
-        if d:
-            raise ValidationError(d)
+            }
+        return {}
+
+    def _uncontrolled_writer_errors(self):
+        errors = {}
+        if self.saan:
+            errors["saan"] = "Must be empty if writer is not controlled."
+        if self.publisher_fee:
+            errors["publisher_fee"] = (
+                "Must be empty if writer is not controlled."
+            )
+        return errors
 
     def get_agreement_dict(self):
         """Get agreement dictionary for this writer in work."""
@@ -1792,14 +1810,7 @@ class CWRExport(models.Model):
             w = wiw["writer"]
             agr = wiw["original_publishers"][0]["agreement"]
             saan = agr["recipient_agreement_number"] if agr else None
-            affiliations = w.get("affiliations", [])
-            for aff in affiliations:
-                if aff["affiliation_type"]["code"] == "PR":
-                    w["pr_society"] = aff["organization"]["code"]
-                elif aff["affiliation_type"]["code"] == "MR":
-                    w["mr_society"] = aff["organization"]["code"]
-                elif aff["affiliation_type"]["code"] == "SR":
-                    w["sr_society"] = aff["organization"]["code"]
+            self._add_societies(w)
             share = controlled_shares[w["code"]]
             pr_share = share * (1 - self.agreement_pr)
             mr_share = share * (1 - self.agreement_mr)
@@ -1815,26 +1826,39 @@ class CWRExport(models.Model):
                     "original_publishers": wiw["original_publishers"],
                 }
             )
-            yield self.get_transaction_record("SWR", w)
-            if share:
-                yield self.get_transaction_record("SWT", w)
-            if share:
-                yield self.get_transaction_record("MAN", w)
+            yield from self._yield_controlled_records(w, share)
             w["publisher_sequence"] = 1
             w["publisher_code"] = "P000001"
             w["publisher_name"] = publisher["name"]
             yield self.get_transaction_record("PWR", w)
-            copublished = (
-                self.version in ["30", "31"]
-                and other_publisher_share
-                and w
-                and w["code"] in copublished_writer_ids
-            )
-            if copublished:
+            if self._is_copublished(
+                w, copublished_writer_ids, other_publisher_share
+            ):
                 w["publisher_sequence"] = 2
                 yield self.get_transaction_record(
                     "PWR", {"code": w["code"], "publisher_sequence": 2}
                 )
+
+    def _add_societies(self, writer):
+        for affiliation in writer.get("affiliations", []):
+            code = affiliation["affiliation_type"]["code"]
+            if code in ("PR", "MR", "SR"):
+                writer[code.lower() + "_society"] = affiliation[
+                    "organization"
+                ]["code"]
+
+    def _yield_controlled_records(self, writer, share):
+        yield self.get_transaction_record("SWR", writer)
+        if share:
+            yield self.get_transaction_record("SWT", writer)
+            yield self.get_transaction_record("MAN", writer)
+
+    def _is_copublished(self, writer, copublished_ids, other_share):
+        return (
+            self.version in ["30", "31"]
+            and other_share
+            and writer["code"] in copublished_ids
+        )
 
     def yield_other_writer_lines(
         self, work, controlled_writer_ids, other_publisher_share
@@ -1847,14 +1871,7 @@ class CWRExport(models.Model):
                 continue  # co-publishing, already solved
             if writer:
                 w = wiw["writer"]
-                affiliations = w.get("affiliations", [])
-                for aff in affiliations:
-                    if aff["affiliation_type"]["code"] == "PR":
-                        w["pr_society"] = aff["organization"]["code"]
-                    elif aff["affiliation_type"]["code"] == "MR":
-                        w["mr_society"] = aff["organization"]["code"]
-                    elif aff["affiliation_type"]["code"] == "SR":
-                        w["sr_society"] = aff["organization"]["code"]
+                self._add_societies(w)
             else:
                 w = {"writer_unknown_indicator": "Y"}
             share = Decimal(wiw["relative_share"])
@@ -1873,12 +1890,14 @@ class CWRExport(models.Model):
             )
             yield self.get_transaction_record("OWR", w)
             if w["share"]:
-                yield self.get_transaction_record("OWT", w)
-            if w["share"]:
-                yield self.get_transaction_record("MAN", w)
+                yield from self._yield_other_records(w)
             if self.version in ["30", "31"] and other_publisher_share:
                 w["publisher_sequence"] = 2
                 yield self.get_transaction_record("PWR", w)
+
+    def _yield_other_records(self, writer):
+        yield self.get_transaction_record("OWT", writer)
+        yield self.get_transaction_record("MAN", writer)
 
     def get_party_lines(self, work):
         """Yield SPU, SPT, OPU, SWR, SWT, OPT and PWR lines

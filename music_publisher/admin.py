@@ -1399,65 +1399,15 @@ class WorkAdmin(MusicPublisherAdmin):
             "Library",
             "CD Identifier",
         ]
-        alt_title_max = repeating_column_nr
-        writer_max = repeating_column_nr
-        writer_with_publisher_max = repeating_column_nr
-        artist_max = repeating_column_nr
-        xrf_max = repeating_column_nr
-        recording_max = repeating_column_nr
-        for work in works:
-            alt_title_max = max(alt_title_max, len(work.get("other_titles")))
-            writer_max = max(writer_max, len(work.get("writers")))
-            ops = 0
-            for w in work.get("writers"):
-                if w.get("original_publishers"):
-                    ops += 1
-            writer_with_publisher_max = max(writer_with_publisher_max, ops)
-            recording_max = max(recording_max, len(work.get("recordings")))
-            artist_max = max(artist_max, len(work.get("performing_artists")))
-            xrf_max = max(xrf_max, len(work.get("cross_references")))
+        dimensions = WorkAdmin._csv_dimensions(works, repeating_column_nr)
+        alt_title_max, writer_max, writer_with_publisher_max = dimensions[:3]
+        recording_max, artist_max, xrf_max = dimensions[3:]
         for i in range(alt_title_max):
             labels.append("Alt Title {}".format(i + 1))
-        for i in range(writer_max):
-            labels.append("Writer {} Last".format(i + 1))
-            labels.append("Writer {} First".format(i + 1))
-            labels.append("Writer {} IPI".format(i + 1))
-            labels.append("Writer {} PRO".format(i + 1))
-            if not simple:
-                labels.append("Writer {} MRO".format(i + 1))
-                labels.append("Writer {} SRO".format(i + 1))
-            labels.append("Writer {} Role".format(i + 1))
-            labels.append("Writer {} Manuscript Share".format(i + 1))
-            if not simple:
-                labels.append("Writer {} PR Share".format(i + 1))
-                labels.append("Writer {} MR Share".format(i + 1))
-                labels.append("Writer {} SR Share".format(i + 1))
-            labels.append("Writer {} Controlled".format(i + 1))
-            if i < writer_with_publisher_max:
-                labels.append("Writer {} SAAN".format(i + 1))
-            labels.append("Writer {} Account Number".format(i + 1))
-            if not simple and i < writer_with_publisher_max:
-                labels.append("Writer {} Publisher Name".format(i + 1))
-                labels.append("Writer {} Publisher IPI".format(i + 1))
-                labels.append("Writer {} Publisher PRO".format(i + 1))
-                labels.append("Writer {} Publisher MRO".format(i + 1))
-                labels.append("Writer {} Publisher SRO".format(i + 1))
-                labels.append("Writer {} Publisher PR Share".format(i + 1))
-                labels.append("Writer {} Publisher MR Share".format(i + 1))
-                labels.append("Writer {} Publisher SR Share".format(i + 1))
-        for i in range(recording_max):
-            if not simple:
-                labels.append("Recording {} ID".format(i + 1))
-                labels.append("Recording {} Recording Title".format(i + 1))
-                labels.append("Recording {} Version Title".format(i + 1))
-            labels.append("Recording {} Release Date".format(i + 1))
-            labels.append("Recording {} Duration".format(i + 1))
-            labels.append("Recording {} ISRC".format(i + 1))
-            if not simple:
-                labels.append("Recording {} Artist Last".format(i + 1))
-                labels.append("Recording {} Artist First".format(i + 1))
-                labels.append("Recording {} Artist ISNI".format(i + 1))
-                labels.append("Recording {} Record Label".format(i + 1))
+        WorkAdmin._append_writer_labels(
+            labels, writer_max, writer_with_publisher_max, simple
+        )
+        WorkAdmin._append_recording_labels(labels, recording_max, simple)
         for i in range(artist_max):
             labels.append("Artist {} Last".format(i + 1))
             labels.append("Artist {} First".format(i + 1))
@@ -1468,6 +1418,107 @@ class WorkAdmin(MusicPublisherAdmin):
                 labels.append("Reference {} ID".format(i + 1))
         return labels
 
+    @staticmethod
+    def _csv_dimensions(works, repeating):
+        dimensions = [repeating] * 6
+        for work in works:
+            dimensions[0] = max(dimensions[0], len(work.get("other_titles")))
+            writers = work.get("writers")
+            dimensions[1] = max(dimensions[1], len(writers))
+            dimensions[2] = max(
+                dimensions[2],
+                sum(
+                    bool(writer.get("original_publishers"))
+                    for writer in writers
+                ),
+            )
+            dimensions[3] = max(dimensions[3], len(work.get("recordings")))
+            dimensions[4] = max(
+                dimensions[4], len(work.get("performing_artists"))
+            )
+            dimensions[5] = max(
+                dimensions[5], len(work.get("cross_references"))
+            )
+        return dimensions
+
+    @staticmethod
+    def _append_writer_labels(labels, maximum, publisher_max, simple):
+        for i in range(maximum):
+            labels.extend(
+                [
+                    "Writer {} Last".format(i + 1),
+                    "Writer {} First".format(i + 1),
+                    "Writer {} IPI".format(i + 1),
+                    "Writer {} PRO".format(i + 1),
+                ]
+            )
+            if not simple:
+                labels.extend(
+                    [
+                        "Writer {} MRO".format(i + 1),
+                        "Writer {} SRO".format(i + 1),
+                    ]
+                )
+            labels.extend(
+                [
+                    "Writer {} Role".format(i + 1),
+                    "Writer {} Manuscript Share".format(i + 1),
+                ]
+            )
+            if not simple:
+                labels.extend(
+                    [
+                        "Writer {} PR Share".format(i + 1),
+                        "Writer {} MR Share".format(i + 1),
+                        "Writer {} SR Share".format(i + 1),
+                    ]
+                )
+            labels.append("Writer {} Controlled".format(i + 1))
+            if i < publisher_max:
+                labels.append("Writer {} SAAN".format(i + 1))
+            labels.append("Writer {} Account Number".format(i + 1))
+            if not simple and i < publisher_max:
+                labels.extend(
+                    [
+                        "Writer {} Publisher Name".format(i + 1),
+                        "Writer {} Publisher IPI".format(i + 1),
+                        "Writer {} Publisher PRO".format(i + 1),
+                        "Writer {} Publisher MRO".format(i + 1),
+                        "Writer {} Publisher SRO".format(i + 1),
+                        "Writer {} Publisher PR Share".format(i + 1),
+                        "Writer {} Publisher MR Share".format(i + 1),
+                        "Writer {} Publisher SR Share".format(i + 1),
+                    ]
+                )
+
+    @staticmethod
+    def _append_recording_labels(labels, maximum, simple):
+        for i in range(maximum):
+            if not simple:
+                labels.extend(
+                    [
+                        "Recording {} ID".format(i + 1),
+                        "Recording {} Recording Title".format(i + 1),
+                        "Recording {} Version Title".format(i + 1),
+                    ]
+                )
+            labels.extend(
+                [
+                    "Recording {} Release Date".format(i + 1),
+                    "Recording {} Duration".format(i + 1),
+                    "Recording {} ISRC".format(i + 1),
+                ]
+            )
+            if not simple:
+                labels.extend(
+                    [
+                        "Recording {} Artist Last".format(i + 1),
+                        "Recording {} Artist First".format(i + 1),
+                        "Recording {} Artist ISNI".format(i + 1),
+                        "Recording {} Record Label".format(i + 1),
+                    ]
+                )
+
     def get_rows_for_csv(self, works):
         """Return rows for the CSV file, including the header."""
 
@@ -1477,156 +1528,170 @@ class WorkAdmin(MusicPublisherAdmin):
             def write(self, value):
                 return value
 
-        PR = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
-        MR = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
-        SR = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
-
         pseudo_buffer = EchoWriter()
         labels = self.get_labels_for_csv(works)
         writer = DictWriter(pseudo_buffer, labels)
-        header = dict(zip(labels, labels))
-        yield writer.writerow(header)
-        # yield writer.writeheader()  # In Python 3.8
+        yield writer.writerow(dict(zip(labels, labels)))
         for work in works:
-            ows = work.get("original_works")
-            row = {
-                "Work ID": work["code"],
-                "Work Title": work["work_title"],
-                "ISWC": work.get("iswc", ""),
-                "Tags": ",".join(work.get("tags", [])),
-            }
-            if ows:
-                row["Original Title"] = ows[0]["work_title"]
-            origin = work.get("origin")
-            if origin:
-                row["Library"] = origin["library"]["name"]
-                row["CD Identifier"] = origin["cd_identifier"]
-            for i, alt in enumerate(work["other_titles"]):
-                row["Alt Title {}".format(i + 1)] = alt["title"]
-            for i, wiw in enumerate(work["writers"]):
-                w = wiw.get("writer") or {}
-                row["Writer {} Last".format(i + 1)] = w.get("last_name", "")
-                row["Writer {} First".format(i + 1)] = w.get("first_name", "")
-                row["Writer {} IPI".format(i + 1)] = w.get(
-                    "ipi_name_number", ""
-                )
-                role = wiw.get("writer_role", {})
-                if role:
-                    row["Writer {} Role".format(i + 1)] = "{} - {}".format(
-                        role["code"], role["name"]
-                    )
-                for aff in w.get("affiliations", []):
-                    code = aff["affiliation_type"]["code"]
-                    cmo = aff["organization"]
-                    row["Writer {} {}O".format(i + 1, code)] = (
-                        "{} - {}".format(cmo["code"], cmo["name"])
-                    )
-                ops = wiw.get("original_publishers")
+            yield self._get_csv_row(work, writer)
 
-                row["Writer {} Manuscript Share".format(i + 1)] = Decimal(
+    def _get_csv_row(self, work, writer):
+        PR = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
+        MR = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
+        SR = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
+        ows = work.get("original_works")
+        row = {
+            "Work ID": work["code"],
+            "Work Title": work["work_title"],
+            "ISWC": work.get("iswc", ""),
+            "Tags": ",".join(work.get("tags", [])),
+        }
+        if ows:
+            row["Original Title"] = ows[0]["work_title"]
+        origin = work.get("origin")
+        if origin:
+            row["Library"] = origin["library"]["name"]
+            row["CD Identifier"] = origin["cd_identifier"]
+        for i, alt in enumerate(work["other_titles"]):
+            row["Alt Title {}".format(i + 1)] = alt["title"]
+        self._add_csv_writers(row, work["writers"])
+        self._add_csv_recordings(row, work["recordings"])
+        self._add_csv_artists(row, work["performing_artists"])
+        self._add_csv_references(row, work["cross_references"])
+        return writer.writerow(row)
+
+    def _add_csv_writers(self, row, writers):
+        publisher_shares = {
+            "PR": settings.PUBLISHING_AGREEMENT_PUBLISHER_PR,
+            "MR": settings.PUBLISHING_AGREEMENT_PUBLISHER_MR,
+            "SR": settings.PUBLISHING_AGREEMENT_PUBLISHER_SR,
+        }
+        for i, wiw in enumerate(writers):
+            w = wiw.get("writer") or {}
+            row["Writer {} Last".format(i + 1)] = w.get("last_name", "")
+            row["Writer {} First".format(i + 1)] = w.get("first_name", "")
+            row["Writer {} IPI".format(i + 1)] = w.get("ipi_name_number", "")
+            role = wiw.get("writer_role", {})
+            if role:
+                row["Writer {} Role".format(i + 1)] = "{} - {}".format(
+                    role["code"], role["name"]
+                )
+            for aff in w.get("affiliations", []):
+                code = aff["affiliation_type"]["code"]
+                cmo = aff["organization"]
+                row["Writer {} {}O".format(i + 1, code)] = "{} - {}".format(
+                    cmo["code"], cmo["name"]
+                )
+            ops = wiw.get("original_publishers")
+
+            row["Writer {} Manuscript Share".format(i + 1)] = Decimal(
+                wiw.get("relative_share", "0")
+            ).quantize(Decimal("0.0001"))
+            if ops:
+                op = ops[0]
+                agreement = op.get("agreement")
+                saan = agreement.get("recipient_agreement_number", "")
+                row["Writer {} SAAN".format(i + 1)] = saan
+                agreement_type = agreement["agreement_type"]["code"]
+                if agreement_type == "OG":
+                    controlled = "General Agreement"
+                else:
+                    controlled = "Yes"
+                row["Writer {} Publisher Name".format(i + 1)] = op[
+                    "publisher"
+                ]["name"]
+                row["Writer {} Publisher IPI".format(i + 1)] = op["publisher"][
+                    "ipi_name_number"
+                ]
+                for aff in op["publisher"].get("affiliations", []):
+                    row[
+                        "Writer {} Publisher {}O".format(
+                            i + 1, aff["affiliation_type"]["code"]
+                        )
+                    ] = "{} - {}".format(
+                        aff["organization"]["code"],
+                        aff["organization"]["name"],
+                    )
+                row["Writer {} PR Share".format(i + 1)] = (
+                    Decimal(wiw.get("relative_share"))
+                    * (1 - publisher_shares["PR"])
+                ).quantize(Decimal("0.0001"))
+                row["Writer {} Publisher PR Share".format(i + 1)] = (
+                    Decimal(wiw.get("relative_share")) * publisher_shares["PR"]
+                ).quantize(Decimal("0.0001"))
+                row["Writer {} MR Share".format(i + 1)] = (
+                    Decimal(wiw.get("relative_share"))
+                    * (1 - publisher_shares["MR"])
+                ).quantize(Decimal("0.0001"))
+                row["Writer {} Publisher MR Share".format(i + 1)] = (
+                    Decimal(wiw.get("relative_share")) * publisher_shares["MR"]
+                ).quantize(Decimal("0.0001"))
+                row["Writer {} SR Share".format(i + 1)] = (
+                    Decimal(wiw.get("relative_share"))
+                    * (1 - publisher_shares["SR"])
+                ).quantize(Decimal("0.0001"))
+                row["Writer {} Publisher SR Share".format(i + 1)] = (
+                    Decimal(wiw.get("relative_share")) * publisher_shares["SR"]
+                ).quantize(Decimal("0.0001"))
+            else:
+                controlled = "No"
+                row["Writer {} PR Share".format(i + 1)] = Decimal(
                     wiw.get("relative_share", "0")
                 ).quantize(Decimal("0.0001"))
-                if ops:
-                    op = ops[0]
-                    agreement = op.get("agreement")
-                    saan = agreement.get("recipient_agreement_number", "")
-                    row["Writer {} SAAN".format(i + 1)] = saan
-                    agreement_type = agreement["agreement_type"]["code"]
-                    if agreement_type == "OG":
-                        controlled = "General Agreement"
-                    else:
-                        controlled = "Yes"
-                    row["Writer {} Publisher Name".format(i + 1)] = op[
-                        "publisher"
-                    ]["name"]
-                    row["Writer {} Publisher IPI".format(i + 1)] = op[
-                        "publisher"
-                    ]["ipi_name_number"]
-                    for aff in op["publisher"].get("affiliations", []):
-                        row[
-                            "Writer {} Publisher {}O".format(
-                                i + 1, aff["affiliation_type"]["code"]
-                            )
-                        ] = "{} - {}".format(
-                            aff["organization"]["code"],
-                            aff["organization"]["name"],
-                        )
-                    row["Writer {} PR Share".format(i + 1)] = (
-                        Decimal(wiw.get("relative_share")) * (1 - PR)
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} Publisher PR Share".format(i + 1)] = (
-                        Decimal(wiw.get("relative_share")) * PR
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} MR Share".format(i + 1)] = (
-                        Decimal(wiw.get("relative_share")) * (1 - MR)
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} Publisher MR Share".format(i + 1)] = (
-                        Decimal(wiw.get("relative_share")) * MR
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} SR Share".format(i + 1)] = (
-                        Decimal(wiw.get("relative_share")) * (1 - SR)
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} Publisher SR Share".format(i + 1)] = (
-                        Decimal(wiw.get("relative_share")) * SR
-                    ).quantize(Decimal("0.0001"))
-                else:
-                    controlled = "No"
-                    row["Writer {} PR Share".format(i + 1)] = Decimal(
-                        wiw.get("relative_share", "0")
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} MR Share".format(i + 1)] = Decimal(
-                        wiw.get("relative_share", "0")
-                    ).quantize(Decimal("0.0001"))
-                    row["Writer {} SR Share".format(i + 1)] = Decimal(
-                        wiw.get("relative_share", "0")
-                    ).quantize(Decimal("0.0001"))
-                row["Writer {} Controlled".format(i + 1)] = controlled
-            for i, rec in enumerate(work["recordings"]):
-                row["Recording {} ID".format(i + 1)] = rec["code"]
-                row["Recording {} Recording Title".format(i + 1)] = rec[
-                    "recording_title"
-                ]
-                row["Recording {} Version Title".format(i + 1)] = rec[
-                    "version_title"
-                ]
-                row["Recording {} Release Date".format(i + 1)] = rec[
-                    "release_date"
-                ]
-                row["Recording {} Duration".format(i + 1)] = rec["duration"]
-                row["Recording {} ISRC".format(i + 1)] = rec["isrc"]
-                row["Recording {} Record Label".format(i + 1)] = (
-                    rec["record_label"] or {}
-                ).get("name")
-                artist = rec.get("recording_artist") or {}
-                row["Recording {} Artist Last".format(i + 1)] = artist.get(
-                    "last_name", ""
-                )
-                row["Recording {} Artist Last".format(i + 1)] = artist.get(
-                    "last_name", ""
-                )
-                row["Recording {} Artist First".format(i + 1)] = artist.get(
-                    "first_name", ""
-                )
-                row["Recording {} Artist ISNI".format(i + 1)] = artist.get(
-                    "isni", ""
-                )
-            for i, aiw in enumerate(work["performing_artists"]):
-                artist = aiw.get("artist")
-                row["Artist {} Last".format(i + 1)] = artist.get(
-                    "last_name", ""
-                )
-                row["Artist {} First".format(i + 1)] = artist.get(
-                    "first_name", ""
-                )
-                row["Artist {} ISNI".format(i + 1)] = artist.get("isni", "")
-            for i, xrf in enumerate(work["cross_references"]):
-                code = xrf["organization"]["code"]
-                name = xrf["organization"]["name"]
-                row["Reference {} CMO".format(i + 1)] = "{} - {}".format(
-                    code, name
-                )
-                row["Reference {} ID".format(i + 1)] = xrf["identifier"]
-            yield writer.writerow(row)
+                row["Writer {} MR Share".format(i + 1)] = Decimal(
+                    wiw.get("relative_share", "0")
+                ).quantize(Decimal("0.0001"))
+                row["Writer {} SR Share".format(i + 1)] = Decimal(
+                    wiw.get("relative_share", "0")
+                ).quantize(Decimal("0.0001"))
+            row["Writer {} Controlled".format(i + 1)] = controlled
+
+    def _add_csv_recordings(self, row, recordings):
+        for i, rec in enumerate(recordings):
+            row["Recording {} ID".format(i + 1)] = rec["code"]
+            row["Recording {} Recording Title".format(i + 1)] = rec[
+                "recording_title"
+            ]
+            row["Recording {} Version Title".format(i + 1)] = rec[
+                "version_title"
+            ]
+            row["Recording {} Release Date".format(i + 1)] = rec[
+                "release_date"
+            ]
+            row["Recording {} Duration".format(i + 1)] = rec["duration"]
+            row["Recording {} ISRC".format(i + 1)] = rec["isrc"]
+            row["Recording {} Record Label".format(i + 1)] = (
+                rec["record_label"] or {}
+            ).get("name")
+            artist = rec.get("recording_artist") or {}
+            row["Recording {} Artist Last".format(i + 1)] = artist.get(
+                "last_name", ""
+            )
+            row["Recording {} Artist Last".format(i + 1)] = artist.get(
+                "last_name", ""
+            )
+            row["Recording {} Artist First".format(i + 1)] = artist.get(
+                "first_name", ""
+            )
+            row["Recording {} Artist ISNI".format(i + 1)] = artist.get(
+                "isni", ""
+            )
+
+    def _add_csv_artists(self, row, artists):
+        for i, aiw in enumerate(artists):
+            artist = aiw.get("artist")
+            row["Artist {} Last".format(i + 1)] = artist.get("last_name", "")
+            row["Artist {} First".format(i + 1)] = artist.get("first_name", "")
+            row["Artist {} ISNI".format(i + 1)] = artist.get("isni", "")
+
+    def _add_csv_references(self, row, references):
+        for i, xrf in enumerate(references):
+            code = xrf["organization"]["code"]
+            name = xrf["organization"]["name"]
+            row["Reference {} CMO".format(i + 1)] = "{} - {}".format(
+                code, name
+            )
+            row["Reference {} ID".format(i + 1)] = xrf["identifier"]
 
     # noinspection PyUnusedLocal
     def create_csv(self, request, qs):
@@ -2207,145 +2272,27 @@ class ACKImportAdmin(AdminWithReport):
             "admin:music_publisher_ackimport_change", args=(ack_import.id,)
         )
         ack_import_link = f'<a href="{ack_import_url}">{ack_import}</a>'
-        from django.contrib.admin.models import CHANGE, LogEntry
-
-        if import_iswcs:
-            validator = CWRFieldValidator("iswc")
+        validator = CWRFieldValidator("iswc") if import_iswcs else None
 
         unknown_work_ids = []
         existing_work_ids = []
         report = ""
-        if file_content[59:64] == "01.10":
-            pattern = self.RE_ACK_21
-        else:
-            pattern = self.RE_ACK_30
-        for x in re.findall(pattern, file_content):
-            tt, work_id, remote_work_id, dat, status, rest = x
-            iswc = self.validate_iswc(x, validator, import_iswcs)
-            # work ID is numeric with an optional string
-            work_id = work_id.strip()
-            remote_work_id = remote_work_id.strip()
-            dat = datetime.strptime(dat, "%Y%m%d").date()
-            work = Work.objects.filter(_work_id=work_id).first()
-            if not work:
-                unknown_work_ids.append(work_id)
-                continue
-            if import_iswcs and iswc:
-                if work.iswc:
-                    if work.iswc != iswc:
-                        report += (
-                            "A different ISWC exists for work "
-                            + "{}: {} (old) vs {} (new).<br/>\n".format(
-                                work, work.iswc, iswc
-                            )
-                            + "Old ISWC kept, please investigate.<br/>\n"
-                        )
-                        self.message_user(
-                            request,
-                            "Conflicting ISWCs found for work {}!".format(
-                                work
-                            ),
-                            level=messages.ERROR,
-                        )
-                else:
-                    duplicate = Work.objects.exclude(id=work.id)
-                    duplicate = duplicate.filter(iswc__iexact=iswc).first()
-                    if duplicate:
-                        report += (
-                            "One ISWC can not be used for two works: "
-                            + "{} {} {}.<br/>\n".format(iswc, duplicate, work)
-                            + "This usually happens if one work is entered "
-                            "twice. "
-                            + "ISWC not imported for {}.<br/>\n".format(work)
-                        )
-                        self.message_user(
-                            request,
-                            "Duplicate works found for ISWC {}!".format(iswc),
-                            level=messages.ERROR,
-                        )
-                    else:
-                        work.iswc = iswc
-                        work.last_change = now()
-                        s = f"ISWC imported from ACK file: {ack_import_link}."
-                        LogEntry.objects.log_action(
-                            request.user.id,
-                            admin.options.get_content_type_for_model(work).id,
-                            work.id,
-                            str(work),
-                            CHANGE,
-                            s,
-                        )
-                        work.save()
-            wa, c = WorkAcknowledgement.objects.get_or_create(
-                work_id=work.id,
-                remote_work_id=remote_work_id,
-                society_code=society_code,
-                date=dat,
-                status=status,
+        report, unknown_work_ids, existing_work_ids = (
+            self._process_ack_records(
+                request,
+                file_content,
+                ack_import_link,
+                society_code,
+                import_iswcs,
+                validator,
             )
-            if not c:
-                existing_work_ids.append(str(work_id))
-                continue
-            url = reverse("admin:music_publisher_work_change", args=(work.id,))
-            report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
-                url, work.work_id, work.title, wa.get_status_display()
-            )
+        )
         if file_content[59:64] == "01.10":
-            for work_id, iswc in re.findall(self.RE_ISW_21, file_content):
-                work_id = work_id.strip()
-                work = Work.objects.filter(_work_id=work_id).first()
-                if not work:
-                    unknown_work_ids.append(work_id)
-                    continue
-                if import_iswcs and iswc:
-                    if work.iswc:
-                        if work.iswc != iswc:
-                            report += (
-                                "A different ISWC exists for work "
-                                + "{}: {} (old) vs {} (new).<br/>\n".format(
-                                    work, work.iswc, iswc
-                                )
-                                + "Old ISWC kept, please "
-                                "investigate.<br/>\n"
-                            )
-                            self.message_user(
-                                request,
-                                "Conflicting ISWCs found for work {}!".format(
-                                    work
-                                ),
-                                level=messages.ERROR,
-                            )
-                    else:
-                        duplicate = Work.objects.exclude(id=work.id)
-                        duplicate = duplicate.filter(iswc__iexact=iswc).first()
-                        if duplicate:
-                            report += "One ISWC can not be used for two works: " + "{} {} {}.<br/>\n".format(
-                                iswc, duplicate, work
-                            ) + "This usually happens if one work is entered " "twice. " + "ISWC not imported for {}.<br/>\n".format(
-                                work
-                            )
-                            self.message_user(
-                                request,
-                                "Duplicate works found for ISWC {}!".format(
-                                    iswc
-                                ),
-                                level=messages.ERROR,
-                            )
-                        else:
-                            work.iswc = iswc
-                            work.last_change = now()
-                            s = f"ISWC imported from ISW file: {ack_import_link}."
-                            LogEntry.objects.log_action(
-                                request.user.id,
-                                admin.options.get_content_type_for_model(
-                                    work
-                                ).id,
-                                work.id,
-                                str(work),
-                                CHANGE,
-                                s,
-                            )
-                            work.save()
+            extra_report, extra_unknown = self._process_isw_records(
+                request, file_content, ack_import_link, import_iswcs
+            )
+            report += extra_report
+            unknown_work_ids.extend(extra_unknown)
         if unknown_work_ids:
             messages.add_message(
                 request,
@@ -2360,6 +2307,131 @@ class ACKImportAdmin(AdminWithReport):
                 "Affected work IDs: {}".format(", ".join(existing_work_ids)),
             )
         return report
+
+    def _process_ack_records(
+        self,
+        request,
+        content,
+        import_link,
+        society_code,
+        import_iswcs,
+        validator,
+    ):
+        pattern = (
+            self.RE_ACK_21 if content[59:64] == "01.10" else self.RE_ACK_30
+        )
+        report = ""
+        unknown = []
+        existing = []
+        for record in re.findall(pattern, content):
+            result = self._process_ack_record(
+                request,
+                record,
+                import_link,
+                society_code,
+                import_iswcs,
+                validator,
+            )
+            report += result[0]
+            unknown.extend(result[1])
+            existing.extend(result[2])
+        return report, unknown, existing
+
+    def _process_ack_record(
+        self,
+        request,
+        record,
+        import_link,
+        society_code,
+        import_iswcs,
+        validator,
+    ):
+        _, work_id, remote_id, date, status, _ = record
+        iswc = self.validate_iswc(record, validator, import_iswcs)
+        work_id = work_id.strip()
+        work = Work.objects.filter(_work_id=work_id).first()
+        if not work:
+            return "", [work_id], []
+        report = (
+            self._import_iswc(request, work, iswc, import_link, "ACK")
+            if import_iswcs and iswc
+            else ""
+        )
+        acknowledgement, created = WorkAcknowledgement.objects.get_or_create(
+            work_id=work.id,
+            remote_work_id=remote_id.strip(),
+            society_code=society_code,
+            date=datetime.strptime(date, "%Y%m%d").date(),
+            status=status,
+        )
+        if not created:
+            return report, [], [str(work_id)]
+        url = reverse("admin:music_publisher_work_change", args=(work.id,))
+        report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
+            url, work.work_id, work.title, acknowledgement.get_status_display()
+        )
+        return report, [], []
+
+    def _process_isw_records(
+        self, request, content, import_link, import_iswcs
+    ):
+        report = ""
+        unknown = []
+        for work_id, iswc in re.findall(self.RE_ISW_21, content):
+            work_id = work_id.strip()
+            work = Work.objects.filter(_work_id=work_id).first()
+            if not work:
+                unknown.append(work_id)
+            elif import_iswcs and iswc:
+                report += self._import_iswc(
+                    request, work, iswc, import_link, "ISW"
+                )
+        return report, unknown
+
+    def _import_iswc(self, request, work, iswc, ack_import_link, source):
+        from django.contrib.admin.models import CHANGE, LogEntry
+
+        if work.iswc:
+            if work.iswc == iswc:
+                return ""
+            self.message_user(
+                request,
+                "Conflicting ISWCs found for work {}!".format(work),
+                level=messages.ERROR,
+            )
+            return (
+                "A different ISWC exists for work {}: {} (old) vs {} (new).<br/>\n"
+                "Old ISWC kept, please investigate.<br/>\n"
+            ).format(work, work.iswc, iswc)
+        duplicate = (
+            Work.objects.exclude(id=work.id).filter(iswc__iexact=iswc).first()
+        )
+        if duplicate:
+            self.message_user(
+                request,
+                "Duplicate works found for ISWC {}!".format(iswc),
+                level=messages.ERROR,
+            )
+            return (
+                "One ISWC can not be used for two works: {} {} {}.<br/>\n"
+                "This usually happens if one work is entered twice. "
+                "ISWC not imported for {}.<br/>\n"
+            ).format(iswc, duplicate, work, work)
+        work.iswc = iswc
+        work.last_change = now()
+        text = "ISWC imported from {} file: {}.".format(
+            source, ack_import_link
+        )
+        LogEntry.objects.log_action(
+            request.user.id,
+            admin.options.get_content_type_for_model(work).id,
+            work.id,
+            str(work),
+            CHANGE,
+            text,
+        )
+        work.save()
+        return ""
 
     def save_model(self, request, obj, form, change):
         """Custom save_model, it ignores changes, validates the form for new
