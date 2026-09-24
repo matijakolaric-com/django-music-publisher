@@ -229,8 +229,7 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         for form in self.forms:
             form.add_error(
                 "capacity",
-                "At least one writer must be Composer or "
-                "Composer&Lyricist.",
+                "At least one writer must be Composer or Composer&Lyricist.",
             )
         raise ValidationError(
             "At least one writer must be Composer or Composer&Lyricist."

@@ -30,7 +30,6 @@ class Command(BaseCommand):
             return
 
         for cwr_export in cwr_exports:
-
             self.stdout.write(
                 "Generating CWR #{id} ({description})...".format(
                     id=cwr_export.id,

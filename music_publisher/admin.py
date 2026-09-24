@@ -1536,9 +1536,6 @@ class WorkAdmin(MusicPublisherAdmin):
             yield self._get_csv_row(work, writer)
 
     def _get_csv_row(self, work, writer):
-        PR = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
-        MR = settings.PUBLISHING_AGREEMENT_PUBLISHER_MR
-        SR = settings.PUBLISHING_AGREEMENT_PUBLISHER_SR
         ows = work.get("original_works")
         row = {
             "Work ID": work["code"],

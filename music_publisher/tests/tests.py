@@ -2071,10 +2071,13 @@ class GenerateCWRCommandTest(TestCase):
             export.year = "26"
             export.num_in_year = 1
 
-        with patch(
-            "music_publisher.management.commands.generatecwr.time.monotonic",
-            side_effect=[10.0, 12.5],
-        ), patch.object(CWRExport, "create_cwr", create_cwr):
+        with (
+            patch(
+                "music_publisher.management.commands.generatecwr.time.monotonic",
+                side_effect=[10.0, 12.5],
+            ),
+            patch.object(CWRExport, "create_cwr", create_cwr),
+        ):
             stdout, stderr = self.call_generatecwr()
 
         self.assertIn(
@@ -2101,10 +2104,13 @@ class GenerateCWRCommandTest(TestCase):
                 "error": "test error",
             }
 
-        with patch(
-            "music_publisher.management.commands.generatecwr.time.monotonic",
-            side_effect=[10.0, 11.25],
-        ), patch.object(CWRExport, "create_cwr", create_cwr):
+        with (
+            patch(
+                "music_publisher.management.commands.generatecwr.time.monotonic",
+                side_effect=[10.0, 11.25],
+            ),
+            patch.object(CWRExport, "create_cwr", create_cwr),
+        ):
             stdout, stderr = self.call_generatecwr()
 
         self.assertIn(
@@ -2128,10 +2134,13 @@ class GenerateCWRCommandTest(TestCase):
         def create_cwr(export, *args, **kwargs):
             export.options = {"stop": True}
 
-        with patch(
-            "music_publisher.management.commands.generatecwr.time.monotonic",
-            side_effect=[10.0, 10.5],
-        ), patch.object(CWRExport, "create_cwr", create_cwr):
+        with (
+            patch(
+                "music_publisher.management.commands.generatecwr.time.monotonic",
+                side_effect=[10.0, 10.5],
+            ),
+            patch.object(CWRExport, "create_cwr", create_cwr),
+        ):
             stdout, stderr = self.call_generatecwr()
 
         self.assertIn(
@@ -2155,10 +2164,13 @@ class GenerateCWRCommandTest(TestCase):
         def create_cwr(export, *args, **kwargs):
             export.options = {"error": "test failure"}
 
-        with patch(
-            "music_publisher.management.commands.generatecwr.time.monotonic",
-            side_effect=[10.0, 13.75],
-        ), patch.object(CWRExport, "create_cwr", create_cwr):
+        with (
+            patch(
+                "music_publisher.management.commands.generatecwr.time.monotonic",
+                side_effect=[10.0, 13.75],
+            ),
+            patch.object(CWRExport, "create_cwr", create_cwr),
+        ):
             stdout, stderr = self.call_generatecwr()
 
         self.assertIn(

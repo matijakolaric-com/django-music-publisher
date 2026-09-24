@@ -103,7 +103,8 @@ TEMPLATES_21 = {
         "{% load cwr_generators %}{% autoescape off %}"
         "OPU{{ transaction_sequence|rjust:8 }}"
         "{{ record_sequence|rjust:8 }}{{ sequence|rjust:2 }}"
-        + " " * 54
+        + " "
+        * 54
         + "YE 00000000000000000000              "
         "   {{ pr_share|default:0|cwrshare }}"
         "   {{ mr_share|default:0|cwrshare }}"
@@ -254,7 +255,8 @@ TEMPLATES_30 = {
         "HDRPB{{ code|ljust:4 }}"
         "{{ name|ljust:45 }}" + " " * 11 + '{{ creation_date|date:"Ymd" }}'
         '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
-        + " " * 15
+        + " "
+        * 15
         + "3.0000{{ settings.SOFTWARE|ljust:30 }}"
         "{{ settings.SOFTWARE_VERSION|ljust:30 }}"
         "{{ filename|ljust:27 }}\r\n{% endautoescape %}"
@@ -391,7 +393,8 @@ TEMPLATES_30 = {
         '{{ duration|rjust:6|default:"000000" }}'
         "{{ isrc|ljust:12 }}{{ recording_title|ljust:60 }}"
         "{{ version_title|ljust:60 }}{{ display_artist|ljust:60 }}"
-        + " " * 11
+        + " "
+        * 11
         + "{{ recording_artist.isni|ljust:16 }}{{ record_label.name|ljust:60 }}"
         "{{ isrc_validity|ljust:20 }}{{ code|ljust:14 }}\r\n"
         "{% endautoescape %}"
@@ -448,7 +451,8 @@ TEMPLATES_31.update(
             "HDRPB{{ code|ljust:4 }}"
             "{{ name|ljust:45 }}" + " " * 11 + '{{ creation_date|date:"Ymd" }}'
             '{{ creation_date|date:"His" }}{{ creation_date|date:"Ymd" }}'
-            + " " * 15
+            + " "
+            * 15
             + "3.1000{{ settings.SOFTWARE|ljust:30 }}"
             "{{ settings.SOFTWARE_VERSION|ljust:30 }}"
             "{{ filename|ljust:27 }}\r\n{% endautoescape %}"

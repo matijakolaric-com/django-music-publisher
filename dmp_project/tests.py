@@ -85,8 +85,11 @@ class DMPTestCase(TestCase):
                 ns.get("MIDDLEWARE", []),
             )
 
-        with mock.patch.dict(
-            os.environ, {"DEBUG": "1", "SECRET_KEY": "testsecretkey"}
-        ), mock.patch.dict("sys.modules", {"debug_toolbar": None}):
+        with (
+            mock.patch.dict(
+                os.environ, {"DEBUG": "1", "SECRET_KEY": "testsecretkey"}
+            ),
+            mock.patch.dict("sys.modules", {"debug_toolbar": None}),
+        ):
             ns = {"__file__": settings_path}
             exec(code, ns)
