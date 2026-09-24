@@ -1,10 +1,7 @@
 {% load i18n %}
-<details data-filter-title="{{ title }}" open>
-  <summary>
-    {% blocktranslate with filter_title=title %} {{ filter_title }} {% endblocktranslate %}
-  </summary>
-  <ul class="admin-filter-{{ title|cut:' ' }}">
-  {% if choices|slice:"3:" %}
+<h3>{% blocktrans with title as filter_title %}{{ filter_title }}{% endblocktrans %}</h3>
+<ul class="admin-filter-{{ title|cut:' ' }}">
+{% if choices|slice:"3:" %}
     <li>
         <label>
             <select class="form-control"
@@ -16,11 +13,10 @@
             </select>
         </label>
     </li>
-  {% else %}
+{% else %}
     {% for choice in choices %}
-      <li{% if choice.selected %} class="selected"{% endif %}>
-      <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
+            <li{% if choice.selected %} class="selected"{% endif %}>
+            <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
     {% endfor %}
-  {% endif %}
-  </ul>
-</details>
+{% endif %}
+</ul>

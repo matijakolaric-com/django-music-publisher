@@ -11,7 +11,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.deconstruct import deconstructible
 from .societies import SOCIETIES
-from decimal import Decimal
 
 TITLES_CHARS = re.escape(
     r"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`{}~£€"
@@ -213,7 +212,9 @@ def validate_publisher_settings():
             raise ImproperlyConfigured("PUBLISHER_IPI_BASE: " + str(e))
     if settings.PUBLISHER_IPI_NAME:
         try:
-            CWRFieldValidator("ipi_name")(settings.PUBLISHER_IPI_NAME)
+            CWRFieldValidator("ipi_name")(
+                settings.PUBLISHER_IPI_NAME.rjust(11, "0")
+            )
         except ValidationError as e:
             raise ImproperlyConfigured("PUBLISHER_IPI_NAME: " + str(e))
 

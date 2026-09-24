@@ -6,7 +6,7 @@ from django.db.models import Q
 
 
 class SecretPlaylistView(TemplateView):
-    template_name = "secret_playlist.html"
+    template_name = "music_publisher/secret_playlist.html"
 
     def get_context_data(self, secret, **kwargs):
         context = super().get_context_data(**kwargs)

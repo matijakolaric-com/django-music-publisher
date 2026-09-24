@@ -7,6 +7,7 @@ All views are here, except for :mod:`.royalty_calculation`.
 
 import re
 import zipfile
+from admin_auto_filters.filters import AutocompleteFilter
 from csv import DictWriter
 from datetime import datetime
 from decimal import Decimal
@@ -16,12 +17,14 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import mark_safe
 from django.utils.timezone import now
+
+from taggit_ui.filters import TagFilter
+from taggit_ui.actions import tag_manager
 
 from .forms import (
     ACKImportForm,
@@ -686,7 +689,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
     def secret_url(self, obj):
         if self.valid(obj):
             url = self.request.build_absolute_uri(obj.secret_url)
-            return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+            return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
         return ""
 
     secret_url.short_description = "Secret URL"
@@ -694,7 +697,7 @@ class PlaylistAdmin(MusicPublisherAdmin):
     def secret_api_url(self, obj):
         if self.valid(obj):
             url = self.request.build_absolute_uri(obj.secret_api_url)
-            return mark_safe(f'<a href="{ url }" target="_blank">{ url }</a>')
+            return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
         return ""
 
     secret_api_url.short_description = "Secret API URL"
@@ -1097,25 +1100,23 @@ class WorkAdmin(MusicPublisherAdmin):
         """Return the count of CWR exports with the link to the filtered
         changelist view for :class:`CWRExportAdmin`."""
 
-        count = obj.cwr_exports__count
+        count = obj.cwr_exports.count()
         url = reverse("admin:music_publisher_cwrexport_changelist")
         url += "?works__id__exact={}".format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     cwr_export_count.short_description = "CWRs"
-    cwr_export_count.admin_order_field = "cwr_exports__count"
 
     def recording_count(self, obj):
-        """Return the count of CWR exports with the link to the filtered
-        changelist view for :class:`CWRExportAdmin`."""
+        """Return the count of recordings with the link to the filtered
+        changelist view for :class:`RecordingAdmin`."""
 
-        count = obj.recordings__count
+        count = obj.recordings.count()
         url = reverse("admin:music_publisher_recording_changelist")
         url += "?work__id__exact={}".format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     recording_count.short_description = "Recordings"
-    recording_count.admin_order_field = "recordings__count"
 
     readonly_fields = ("writer_last_names", "work_id", "cwr_export_count")
     list_display = (
@@ -1134,9 +1135,42 @@ class WorkAdmin(MusicPublisherAdmin):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related("library_release__library")
         qs = qs.prefetch_related("writerinwork_set__writer")
-        qs = qs.annotate(models.Count("cwr_exports", distinct=True))
-        qs = qs.annotate(models.Count("recordings", distinct=True))
+        qs = qs.prefetch_related("tags")
         return qs
+
+    class ControlledListFilter(admin.SimpleListFilter):
+        """Custom list filter on controlled status."""
+
+        title = "% controlled"
+        parameter_name = "controlled"
+
+        def lookups(self, request, model_admin):
+            """Options for fully vs partially controlled works."""
+            return (
+                ("F", "Fully"),
+                ("P", "Partially"),
+            )
+
+        def queryset(self, request, queryset):
+            """Filter based on the presence of uncontrolled writers."""
+            if self.value() == "F":
+                return queryset.exclude(writerinwork__controlled=False)
+            elif self.value() == "P":
+                return queryset.filter(
+                    writerinwork__controlled=False
+                ).distinct()
+
+    class WriterFilter(AutocompleteFilter):
+        title = "Writer"
+        field_name = "writers"
+
+    class ArtistFilter(AutocompleteFilter):
+        title = "Artist"
+        field_name = "artists"
+
+    class LibraryReleaseFilter(AutocompleteFilter):
+        title = "Library Release"
+        field_name = "library_release"
 
     class InCWRListFilter(admin.SimpleListFilter):
         """Custom list filter if work is included in any of CWR files."""
@@ -1154,9 +1188,9 @@ class WorkAdmin(MusicPublisherAdmin):
         def queryset(self, request, queryset):
             """Filter if in any of CWR files."""
             if self.value() == "Y":
-                return queryset.exclude(cwr_exports__count=0)
+                return queryset.filter(cwr_exports__isnull=False).distinct()
             elif self.value() == "N":
-                return queryset.filter(cwr_exports__count=0)
+                return queryset.filter(cwr_exports__isnull=True)
 
     class ACKSocietyListFilter(admin.SimpleListFilter):
         """Custom list filter of societies from ACK files."""
@@ -1221,9 +1255,8 @@ class WorkAdmin(MusicPublisherAdmin):
             )
 
         def queryset(self, request, queryset):
-            """Filter on presence of :attr:`.iswc`."""
             if self.value() == "Y":
-                return queryset.exclude(iswc__isnull=True)
+                return queryset.filter(iswc__isnull=False)
             elif self.value() == "N":
                 return queryset.filter(iswc__isnull=True)
 
@@ -1243,20 +1276,23 @@ class WorkAdmin(MusicPublisherAdmin):
         def queryset(self, request, queryset):
             """Filter on presence of :class:`.models.Recording`."""
             if self.value() == "Y":
-                return queryset.exclude(recordings__count=0)
+                return queryset.filter(recordings__isnull=False).distinct()
             elif self.value() == "N":
-                return queryset.filter(recordings__count=0)
+                return queryset.filter(recordings__isnull=True)
 
     list_filter = (
+        TagFilter,
         HasISWCListFilter,
+        ControlledListFilter,
+        WriterFilter,
+        ArtistFilter,
         HasRecordingListFilter,
         ("library_release__library", admin.RelatedOnlyFieldListFilter),
-        ("library_release", admin.RelatedOnlyFieldListFilter),
-        ("writers", admin.RelatedOnlyFieldListFilter),
-        "last_change",
+        LibraryReleaseFilter,
         InCWRListFilter,
         ACKSocietyListFilter,
         ACKStatusListFilter,
+        "last_change",
     )
 
     search_fields = (
@@ -1287,6 +1323,10 @@ class WorkAdmin(MusicPublisherAdmin):
                     ("original_title", "version_type"),
                 )
             },
+        ),
+        (
+            "Tags",
+            {"fields": (("tags",),)},
         ),
         (
             "Library (Production music only)",
@@ -1353,6 +1393,7 @@ class WorkAdmin(MusicPublisherAdmin):
         labels = [
             "Work ID",
             "Work Title",
+            "Tags",
             "ISWC",
             "Original Title",
             "Library",
@@ -1452,6 +1493,7 @@ class WorkAdmin(MusicPublisherAdmin):
                 "Work ID": work["code"],
                 "Work Title": work["work_title"],
                 "ISWC": work.get("iswc", ""),
+                "Tags": ",".join(work.get("tags", [])),
             }
             if ows:
                 row["Original Title"] = ows[0]["work_title"]
@@ -1610,7 +1652,7 @@ class WorkAdmin(MusicPublisherAdmin):
 
     create_csv.short_description = "Export selected works (CSV)."
 
-    actions = (create_cwr, create_json, create_csv)
+    actions = (create_cwr, create_json, create_csv, tag_manager)
 
     def get_actions(self, request):
         """Custom action disabling the default ``delete_selected``."""
@@ -1699,7 +1741,20 @@ class RecordingAdmin(MusicPublisherAdmin):
             elif self.value() == "N":
                 return queryset.filter(audio_file="")
 
-    list_filter = (HasISRCListFilter, HasAudioFilter, "artist", "record_label")
+    class ArtistFilter(AutocompleteFilter):
+        title = "Artist"
+        field_name = "artist"
+
+    class RecordLabelFilter(AutocompleteFilter):
+        title = "Record Label"
+        field_name = "record_label"
+
+    list_filter = (
+        HasISRCListFilter,
+        HasAudioFilter,
+        ArtistFilter,
+        RecordLabelFilter,
+    )
 
     def lookup_allowed(self, lookup, value):
         allowed = super().lookup_allowed(lookup, value)
@@ -1859,7 +1914,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def view_link(self, obj):
         """Link to the CWR preview."""
-        if obj.created_on:
+        if obj.cwr:
             url = reverse(
                 "admin:music_publisher_cwrexport_change", args=(obj.id,)
             )
@@ -1869,13 +1924,24 @@ class CWRExportAdmin(admin.ModelAdmin):
             )
 
     def download_link(self, obj):
-        """Link for downloading CWR file."""
-        if obj.created_on:
-            url = reverse(
-                "admin:music_publisher_cwrexport_change", args=(obj.id,)
-            )
+        """Link for downloading or creating CWR file."""
+        url = reverse("admin:music_publisher_cwrexport_change", args=(obj.id,))
+        if obj.cwr:
             url += "?download=true"
             return mark_safe('<a href="{}">Download</a>'.format(url))
+        if obj.options.get("stop"):
+            if obj.options.get("error"):
+                return mark_safe(
+                    "<span title='{}'>ERROR</span>".format(
+                        obj.options.get("error")
+                    )
+                )
+            else:
+                return mark_safe("Generating CWR")
+        if getattr(settings, "OPTION_CWR_NO_GENERATE_LINK", False):
+            return "Pending"
+        url += "?create_cwr=true"
+        return mark_safe('<a href="{}">Generate CWR</a>'.format(url))
 
     def get_queryset(self, request):
         """Optimized query with count of works in the export."""
@@ -1966,14 +2032,25 @@ class CWRExportAdmin(admin.ModelAdmin):
         if work_ids:
             self.work_ids = work_ids
             request.method = "GET"
+        extra_context = extra_context or {}
+        extra_context.update(
+            {
+                "show_save": True,
+                "show_save_and_continue": False,
+                "show_save_and_add_another": False,
+                "show_save_as_new": False,
+            }
+        )
         return super().add_view(request, form_url, extra_context)
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
-        """Normal change view with two sub-views defined by GET parameters:
+        """Normal change view with sub-views defined by GET parameters:
 
         Parameters:
             preview: that returns the preview of CWR file,
-            download: that downloads the CWR file."""
+            download: that downloads the CWR file,
+            create_cwr: that creates the CWR file.
+        """
         try:
             obj = get_object_or_404(CWRExport, pk=object_id)
         except ValueError:
@@ -1987,7 +2064,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             cwr = self.get_preview(obj)
             return render(
                 request,
-                "raw_cwr.html",
+                "music_publisher/raw_cwr.html",
                 {
                     **self.admin_site.each_context(request),
                     "version": obj.version,
@@ -2011,6 +2088,11 @@ class CWRExportAdmin(admin.ModelAdmin):
                 )
             response["Content-Disposition"] = cd
             return response
+        elif "create_cwr" in request.GET:
+            obj.create_cwr()
+            self.log_change(request, obj, "CWR generated")
+            url = reverse("admin:music_publisher_cwrexport_changelist")
+            return HttpResponseRedirect(url)
 
         extra_context = {
             "show_save": False,
@@ -2033,7 +2115,11 @@ class CWRExportAdmin(admin.ModelAdmin):
         saved.
         """
         super().save_related(request, form, formsets, change)
-        form.instance.create_cwr()
+        created = form.instance.create_cwr_files()
+        if form.instance not in created:
+            for obj in created:
+                self.log_addition(request, obj, "Added as part of a batch.")
+            self.delete_model(request, form.instance)
 
 
 class AdminWithReport(admin.ModelAdmin):
@@ -2346,7 +2432,7 @@ class ACKImportAdmin(AdminWithReport):
             try:
                 return render(
                     request,
-                    "raw_cwr.html",
+                    "music_publisher/raw_cwr.html",
                     {
                         **self.admin_site.each_context(request),
                         "version": version,
@@ -2357,7 +2443,7 @@ class ACKImportAdmin(AdminWithReport):
             except Exception:  # Parsing user garbage, could be anything
                 return render(
                     request,
-                    "raw_cwr.html",
+                    "music_publisher/raw_cwr.html",
                     {
                         **self.admin_site.each_context(request),
                         "version": "",

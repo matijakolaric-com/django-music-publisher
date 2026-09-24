@@ -21,12 +21,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.duration import duration_string
 
+from io import StringIO
+from taggit.managers import TaggableManager
+
 from .base import (
     ArtistBase,
-    IPIBase,
     LabelBase,
     LibraryBase,
-    PersonBase,
     ReleaseBase,
     TitleBase,
     WriterBase,
@@ -530,7 +531,7 @@ class WorkManager(models.Manager):
         """
         return super().get_queryset().prefetch_related("writers")
 
-    def get_dict_items(self, qs):
+    def get_dict_items(self, full_qs):
         """
         Yield dictionary items for works from the queryset
 
@@ -541,19 +542,30 @@ class WorkManager(models.Manager):
             dict: dictionary with works
 
         """
-        qs = qs.prefetch_related("alternatetitle_set")
-        qs = qs.prefetch_related("writerinwork_set__writer")
-        qs = qs.prefetch_related("artistinwork_set__artist")
-        qs = qs.prefetch_related("library_release__library")
-        qs = qs.prefetch_related("recordings__record_label")
-        qs = qs.prefetch_related("recordings__artist")
-        qs = qs.prefetch_related("recordings__tracks__release__library")
-        qs = qs.prefetch_related("recordings__tracks__release__release_label")
-        qs = qs.prefetch_related("workacknowledgement_set")
 
-        for work in qs:
-            j = work.get_dict()
-            yield j
+        last_id = 0
+
+        while True:
+            qs = full_qs.filter(id__gt=last_id).order_by("id")[:100]
+            qs = qs.prefetch_related("alternatetitle_set")
+            qs = qs.prefetch_related("writerinwork_set__writer")
+            qs = qs.prefetch_related("artistinwork_set__artist")
+            qs = qs.prefetch_related("library_release__library")
+            qs = qs.prefetch_related("recordings__record_label")
+            qs = qs.prefetch_related("recordings__artist")
+            qs = qs.prefetch_related("recordings__tracks__release__library")
+            qs = qs.prefetch_related(
+                "recordings__tracks__release__release_label"
+            )
+            qs = qs.prefetch_related("workacknowledgement_set")
+            qs = qs.prefetch_related("tags")
+
+            if not qs:
+                break
+
+            for work in qs:
+                last_id = work.id
+                yield work.get_dict()
 
     def get_dict(self, qs):
         """
@@ -604,13 +616,24 @@ class Work(TitleBase):
 
     @staticmethod
     def persist_work_ids(qs):
-        qs = qs.prefetch_related("recordings")
-        for work in qs.filter(_work_id__isnull=True):
-            work.work_id = work.work_id
-            work.save()
-            for rec in work.recordings.all():
-                if rec._recording_id is None:
-                    rec.recording_id = rec.recording_id
+        work_ids = list(
+            qs.filter(_work_id__isnull=True)
+            .order_by("id")
+            .values_list("id", flat=True)
+        )
+        chunk_size = settings.OPTION_CWR_SYNC_WORK_LIMIT
+
+        for index in range(0, len(work_ids), chunk_size):
+            chunk = work_ids[index : index + chunk_size]
+            works = Work.objects.filter(id__in=chunk).order_by("id")
+            works = works.prefetch_related("recordings")
+
+            for work in works:
+                work.work_id = work.work_id
+                work.save()
+                for rec in work.recordings.all():
+                    if rec._recording_id is None:
+                        rec.recording_id = rec.recording_id
 
     _work_id = models.CharField(
         "Work ID",
@@ -654,6 +677,7 @@ class Work(TitleBase):
     )
 
     objects = WorkManager()
+    tags = TaggableManager(blank=True)
 
     @property
     def work_id(self):
@@ -786,6 +810,7 @@ class Work(TitleBase):
             "id": self.id,
             "code": self.work_id,
             "work_title": self.title,
+            "tags": [tag.name for tag in self.tags.all()],
             "last_change": self.last_change,
             "version_type": (
                 {
@@ -1032,9 +1057,9 @@ class WriterInWork(models.Model):
                 }
             )
         d = {}
+        if not self.capacity:
+            d["capacity"] = "Must be set for all writers."
         if self.controlled:
-            if not self.capacity:
-                d["capacity"] = "Must be set for a controlled writer."
             if not self.writer:
                 d["writer"] = "Must be set for a controlled writer."
             else:
@@ -1426,6 +1451,8 @@ class CWRExport(models.Model):
         CWR sequential number in a year
         works (django.db.models.ManyToManyField): included works
         description (django.db.models.CharField): internal note
+        options (django.db.models.JSONField): options for CWR \
+        async generation
 
     """
 
@@ -1460,6 +1487,8 @@ class CWRExport(models.Model):
     num_in_year = models.PositiveSmallIntegerField(default=0)
     works = models.ManyToManyField(Work, related_name="cwr_exports")
     description = models.CharField("Internal Note", blank=True, max_length=60)
+
+    options = models.JSONField(default=dict, editable=False, null=True)
 
     publisher_code = None
     agreement_pr = settings.PUBLISHING_AGREEMENT_PUBLISHER_PR
@@ -2038,29 +2067,114 @@ class CWRExport(models.Model):
             },
         )
 
-    def create_cwr(self, publisher_code=None):
-        """Create CWR and save."""
-        now = timezone.now()
-        if publisher_code is None:
-            publisher_code = settings.PUBLISHER_CODE
-        self.publisher_code = publisher_code
+    @staticmethod
+    def chunked(items, size):
+        """Yield chunks from ``items`` with at most ``size`` items."""
+        chunk = []
+        for item in items:
+            chunk.append(item)
+            if len(chunk) == size:
+                yield chunk
+                chunk = []
+        if chunk:
+            yield chunk
+
+    def should_create_synchronously(self):
+        """Return whether this export should be generated on save."""
+        return self.works.count() < settings.OPTION_CWR_SYNC_WORK_LIMIT
+
+    def create_cwr_files(self, publisher_code=None):
+        """Create one or more CWR files from this export request.
+
+        Large requests are split into multiple CWRExport objects, each with
+        at most ``OPTION_CWR_WORKS_PER_FILE`` works. If this export already
+        fits into one file, it is generated directly and returned as the only
+        item.
+
+        Args:
+            publisher_code (str): override publisher code for generation
+
+        Returns:
+            list[CWRExport]: generated CWR exports
+        """
+        work_ids = list(self.works.order_by("id").values_list("id", flat=True))
+        if len(work_ids) <= settings.OPTION_CWR_WORKS_PER_FILE:
+            self.create_cwr(publisher_code=publisher_code, generate=True)
+            return [self]
+
+        created = []
+        for number, chunk in enumerate(
+            self.chunked(work_ids, settings.OPTION_CWR_WORKS_PER_FILE),
+            start=1,
+        ):
+            cwr_export = type(self).objects.create(
+                nwr_rev=self.nwr_rev,
+                description=(
+                    "{} ({})".format(self.description, number)
+                    if self.description
+                    else ""
+                ),
+            )
+            cwr_export.works.add(*chunk)
+            cwr_export.create_cwr(
+                publisher_code=publisher_code, generate=False
+            )
+            created.append(cwr_export)
+        return created
+
+    def create_cwr(self, publisher_code=None, generate=True, force=False):
+        """Create CWR and save.
+
+        Args:
+            publisher_code (str): override publisher code for generation
+            generate (bool): if False, only create a pending export
+            force (bool): ignore the "stop" marker if generation is already
+                marked as running
+        """
         if self.cwr:
-            return
-        self.created_on = now
-        self.year = now.strftime("%y")
-        nr = type(self).objects.filter(year=self.year)
-        nr = nr.order_by("-num_in_year").first()
-        if nr:
-            self.num_in_year = nr.num_in_year + 1
-        else:
-            self.num_in_year = 1
-        qs = self.works.order_by(
-            "id",
-        )
-        works = Work.objects.get_dict(qs)["works"]
-        self.cwr = "".join(self.yield_lines(works))
-        self.save()
-        Work.persist_work_ids(self.works)
+            return  # because there is nothing to do
+
+        if self.options is None:
+            self.options = {}
+            self.save(update_fields=["options"])
+
+        if not generate:
+            return  # we can't define the name before generation
+
+        if self.options.get("stop") and not force:
+            return  # already being generated
+
+        self.options["stop"] = True
+        self.options.pop("error", None)
+        self.save(update_fields=["options"])
+
+        try:
+            now = timezone.now()
+            if publisher_code is None:
+                publisher_code = settings.PUBLISHER_CODE
+            self.publisher_code = publisher_code
+            self.created_on = now
+            self.year = now.strftime("%y")
+            nr = type(self).objects.filter(year=self.year)
+            nr = nr.order_by("-num_in_year").first()
+            if nr:
+                self.num_in_year = nr.num_in_year + 1
+            else:
+                self.num_in_year = 1
+            works = self.works.order_by("id")
+            works = Work.objects.get_dict_items(works)
+            buffer = StringIO()
+            for line in self.yield_lines(works):
+                buffer.write(line)
+            self.cwr = buffer.getvalue()
+            self.options.pop("stop", None)
+            self.options.pop("error", None)
+            self.save()
+            Work.persist_work_ids(self.works)
+        except Exception as e:
+            self.options["error"] = str(e)
+            self.save(update_fields=["options"])
+            raise
 
 
 class WorkAcknowledgement(models.Model):

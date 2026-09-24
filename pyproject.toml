@@ -1,0 +1,32 @@
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+exclude = [
+    "music_publisher/migrations",
+    "dmp_project/settings.py",
+    ".git",
+    "venv",
+    ".venv",
+    "docs",
+    "dist",
+    "build",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+]
+ignore = [
+    "E501", # line length violations (handled by ruff format)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"dmp_project/settings.py" = ["F401"]
+"music_publisher/tests/__init__.py" = ["F401", "F403"]
+"music_publisher/tests/tests.py" = ["W291"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

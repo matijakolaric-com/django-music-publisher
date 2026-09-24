@@ -116,6 +116,30 @@ music\_publisher.royalty_calculation
     :show-inheritance:
 
 
+music\_publisher.api
+--------------------------
+
+.. automodule:: music_publisher.api
+    :members:
+    :show-inheritance:
+
+
+music\_publisher.views
+----------------------------
+
+.. automodule:: music_publisher.views
+    :members:
+    :show-inheritance:
+
+
+music\_publisher.urls
+---------------------------
+
+.. automodule:: music_publisher.urls
+    :members:
+    :show-inheritance:
+
+
 music\_publisher.tests
 -----------------------------
 

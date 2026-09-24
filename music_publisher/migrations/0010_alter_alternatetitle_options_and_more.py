@@ -17,10 +17,12 @@ class Migration(migrations.Migration):
                 "verbose_name": "Alternate Title",
             },
         ),
-        migrations.RenameIndex(
+        migrations.AddIndex(
             model_name="workacknowledgement",
-            new_name="music_publi_society_ebcad0_idx",
-            old_fields=("society_code", "remote_work_id"),
+            index=models.Index(
+                fields=["society_code", "remote_work_id"],
+                name="music_publi_society_ebcad0_idx",
+            ),
         ),
         migrations.AlterUniqueTogether(
             name="alternatetitle",

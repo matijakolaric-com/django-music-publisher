@@ -15,16 +15,18 @@ Python standard library).
 More precise tests would be better.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 import json
+from unittest.mock import patch
 
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.auth.models import User
 from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.management import call_command
 from django.template import Context
 from django.test import (
     override_settings,
@@ -36,7 +38,6 @@ from django.urls import reverse
 from django.contrib.messages import get_messages
 
 import music_publisher.models
-from music_publisher.admin import CWRExportAdmin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (
     AlternateTitle,
@@ -200,7 +201,7 @@ class DataImportTest(TestCase):
                     "saan": "B",
                 },
             }
-            writers = list(di.get_writers(d))
+            list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception),
             'Two different general agreement numbers for: "X Y (*)".',
@@ -222,7 +223,7 @@ class DataImportTest(TestCase):
                     "pro": "52",
                 },
             }
-            writers = list(di.get_writers(d))
+            list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception), 'Writer exists with different PRO: "X Y (*)".'
         )
@@ -243,7 +244,7 @@ class DataImportTest(TestCase):
                     "pro": "52",
                 },
             }
-            writers = list(di.get_writers(d))
+            list(di.get_writers(d))
         self.assertEqual(
             str(ve.exception),
             (
@@ -277,6 +278,8 @@ class DataImportTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_PR=Decimal("0.333333"),
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal("0.5"),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
+    OPTION_CWR_SYNC_WORK_LIMIT=101,
+    OPTION_CWR_WORKS_PER_FILE=100,
 )
 class AdminTest(TestCase):
     """Functional tests on the interface, and several related unit tests.
@@ -528,6 +531,22 @@ class AdminTest(TestCase):
         ).save()
 
     @classmethod
+    def create_10000_works(cls):
+        for i in range(settings.OPTION_CWR_WORKS_PER_FILE):
+            work = Work.objects.create(
+                title="One of 10000 works",
+                library_release=cls.library_release,
+            )
+            work.save()
+            WriterInWork.objects.create(
+                work=work,
+                writer=cls.generally_controlled_writer,
+                capacity="C ",
+                relative_share=Decimal("100"),
+                controlled=True,
+            ).save()
+
+    @classmethod
     def setUpClass(cls):
         """Class setup.
 
@@ -565,10 +584,14 @@ class AdminTest(TestCase):
         )
         cls.release = Release.objects.create(release_title="ALBUM")
         cls.library_release = Release.objects.create(
-            release_title="LIBRELEASE", library_id=1, cd_identifier="XZY"
+            release_title="LIBRELEASE",
+            library_id=1,
+            cd_identifier="XZY",
+            description="Publicly visible Library release",
         )
         cls.commercial_release = Release.objects.create(
-            release_title="COMRELEASE"
+            release_title="COMRELEASE",
+            description="Publicly visible commercial release",
         )
         cls.playlist = Release.objects.create(
             release_title="PLAYLIST", cd_identifier="PL1"
@@ -582,6 +605,7 @@ class AdminTest(TestCase):
         cls.create_cwr2_export()
         cls.create_cwr3_export()
         cls.create_work_acknowledgements()
+        cls.create_10000_works()
 
     def test_strings(self):
         """Test __str__ methods for created objects."""
@@ -766,7 +790,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_cwr_nwr(self):
-        """Test that CWR export works."""
+        """Test that small CWR export is generated synchronously."""
         self.client.force_login(self.staffuser)
         response = self.client.post(
             reverse("admin:music_publisher_cwrexport_add"),
@@ -780,9 +804,168 @@ class AdminTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        cwr = CWRExport.objects.first().cwr
+        cwr = CWRExport.objects.latest("id").cwr
         self.assertIn("NWR0000000000000000THE MODIFIED WORK", cwr)
         self.assertIn("THE MODIFIED WORK BEHIND THE MODIFIED WORK", cwr)
+
+    def test_large_cwr_is_not_generated_synchronously(self):
+        """CWR exports with 5,000 or more works are saved without CWR text."""
+        self.client.force_login(self.staffuser)
+        work_ids = list(
+            Work.objects.order_by("id").values_list("id", flat=True)
+        )
+
+        with patch.object(CWRExport.works, "__get__") as works_mock:
+            manager = works_mock.return_value
+            manager.count.return_value = len(work_ids)
+            manager.order_by.return_value = Work.objects.filter(
+                id__in=work_ids
+            )
+
+            response = self.client.post(
+                reverse("admin:music_publisher_cwrexport_add"),
+                data={
+                    "nwr_rev": "NWR",
+                    "works": work_ids,
+                },
+            )
+
+        self.assertEqual(response.status_code, 302)
+        cwr_export = CWRExport.objects.latest("id")
+        self.assertFalse(cwr_export.cwr)
+        self.assertIsNone(cwr_export.created_on)
+
+    def test_pending_cwr_export_shows_create_cwr_link(self):
+        """Pending CWR exports show Create CWR instead of Download."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Generate CWR", response.content)
+        self.assertNotIn(
+            (
+                reverse(
+                    "admin:music_publisher_cwrexport_change",
+                    args=(cwr_export.id,),
+                )
+                + "?download=true"
+            ).encode(),
+            response.content,
+        )
+
+    @override_settings(OPTION_CWR_NO_GENERATE_LINK=True)
+    def test_cwr_export_no_generate_link(self):
+        """When OPTION_CWR_NO_GENERATE_LINK is True, show Pending instead of Generate CWR."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR No Link", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Pending", response.content)
+        self.assertNotIn(b"Generate CWR", response.content)
+
+    def test_cwr_export_stop_with_error(self):
+        """When stop and error are set in options, display ERROR with title."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Failed CWR",
+            nwr_rev="NWR",
+            options={"stop": True, "error": "Export processing error"},
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"ERROR", response.content)
+        self.assertIn(b"Export processing error", response.content)
+
+    def test_cwr_export_stop_without_error(self):
+        """When stop is set in options without error, display Generating CWR."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Generating CWR",
+            nwr_rev="NWR",
+            options={"stop": True},
+        )
+        cwr_export.works.add(self.original_work)
+
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist"),
+            follow=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Generating CWR", response.content)
+
+    def test_create_cwr_link_generates_pending_export(self):
+        """Create CWR link generates CWR for a pending export."""
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work, self.modified_work)
+
+        url = reverse(
+            "admin:music_publisher_cwrexport_change", args=(cwr_export.id,)
+        )
+        response = self.client.get(url + "?create_cwr=true", follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        cwr_export.refresh_from_db()
+        self.assertTrue(cwr_export.cwr)
+        self.assertIsNotNone(cwr_export.created_on)
+
+    def test_large_cwr_is_split_into_multiple_exports(self):
+        """Large CWR requests are split into files of up to 10,000 works."""
+        cwr_export = CWRExport.objects.create(
+            description="Large CWR",
+            nwr_rev="NWR",
+        )
+        for work in Work.objects.all():
+            cwr_export.works.add(work)
+        created = cwr_export.create_cwr_files()
+
+        self.assertEqual(len(created), 2)
+        self.assertEqual(
+            created[0].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
+        self.assertLessEqual(
+            created[-1].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
+
+    def test_large_cwr_split_keeps_single_file_for_10000_works(self):
+        """Exactly 10,000 works still produce one CWR file."""
+        cwr_export = CWRExport.objects.create(
+            description="Large CWR",
+            nwr_rev="NWR",
+        )
+        for work in Work.objects.all()[0 : settings.OPTION_CWR_WORKS_PER_FILE]:
+            cwr_export.works.add(work)
+        created = cwr_export.create_cwr_files()
+
+        self.assertEqual(len(created), 1)
+        self.assertEqual(
+            created[0].works.count(), settings.OPTION_CWR_WORKS_PER_FILE
+        )
 
     def test_csv(self):
         """Test that CSV export works."""
@@ -939,7 +1122,7 @@ class AdminTest(TestCase):
             b"Must be set for a generally controlled writer.", response.content
         )
 
-    def test_generally_controlled_missing_capacity(self):
+    def test_missing_capacity(self):
         """Test that if `controlled` flag is set, the `capacity` must be set
         as well."""
         self.client.force_login(self.staffuser)
@@ -947,12 +1130,9 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         data = get_data_from_response(response)
         data["writerinwork_set-0-capacity"] = ""
-        data["writerinwork_set-0-capacity"] = ""
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b"Must be set for a controlled writer.", response.content
-        )
+        self.assertIn(b"Must be set for all writers.", response.content)
 
     def test_controlled_but_no_writer(self):
         """Test that a line without a writer can not have `controlled` set."""
@@ -1000,6 +1180,61 @@ class AdminTest(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         self.assertGreater(Work.objects.filter(pk=1).first().last_change, lc)
+
+    def test_writer_in_work_formset_delete_and_empty(self):
+        """Test WriterInWorkFormSet with DELETE and empty cleaned_data forms."""
+        from django.forms import inlineformset_factory
+        from music_publisher.forms import WriterInWorkFormSet
+
+        factory_fields = [
+            "work",
+            "writer",
+            "capacity",
+            "relative_share",
+            "controlled",
+            "saan",
+        ]
+        factory = inlineformset_factory(
+            Work,
+            WriterInWork,
+            formset=WriterInWorkFormSet,
+            fields=factory_fields,
+            extra=3,
+        )
+        formset = factory(instance=self.original_work)
+
+        form0 = formset.forms[0]
+        form0._errors = {}
+        form0.is_bound = True
+        form0.cleaned_data = {
+            "writer": self.generally_controlled_writer,
+            "work": self.original_work,
+            "capacity": "CA",
+            "relative_share": Decimal("100.00"),
+            "controlled": True,
+            "saan": None,
+        }
+
+        form1 = formset.forms[1]
+        form1._errors = {}
+        form1.is_bound = True
+        form1.cleaned_data = {
+            "writer": self.other_writer,
+            "work": self.original_work,
+            "capacity": "CA",
+            "relative_share": Decimal("0.00"),
+            "controlled": False,
+            "saan": None,
+            "DELETE": True,
+        }
+
+        form2 = formset.forms[2]
+        form2._errors = {}
+        form2.is_bound = True
+        form2.cleaned_data = {}
+
+        formset.forms = [form0, form1, form2]
+        formset.clean()
 
     def test_not_controlled_extra_saan(self):
         """SAAN can not be set if a writer is not controlled."""
@@ -1055,7 +1290,7 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Not allowed in original works.", response.content)
 
-    def test_missing_capacity(self):
+    def test_extended_capacity(self):
         """At least one of the additional capacieties must be set for
         modifications."""
         self.client.force_login(self.staffuser)
@@ -1101,22 +1336,6 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             b"Sum of manuscript shares must be 100%.", response.content
-        )
-
-    def test_wrong_capacity_in_copublishing_modification(self):
-        """Test the situation where one writer appears in two rows,
-        once as controlled, once as not with different capacities."""
-        self.client.force_login(self.staffuser)
-        url = reverse("admin:music_publisher_work_change", args=(1,))
-        response = self.client.get(url, follow=False)
-        data = get_data_from_response(response)
-        data["writerinwork_set-1-writer"] = self.controllable_writer.id
-        data["writerinwork_set-0-writer"] = self.controllable_writer.id
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b"Must be same as in controlled line for this writer.",
-            response.content,
         )
 
     def test_altitle_sufix_too_long(self):
@@ -1185,7 +1404,7 @@ class AdminTest(TestCase):
             ackimport = music_publisher.models.ACKImport.objects.first()
             self.assertIsNotNone(ackimport)
 
-            """And repeat the previous step, as duplicates are processed 
+            """And repeat the previous step, as duplicates are processed
             differently."""
             mock.seek(0)
             mockfile = InMemoryUploadedFile(
@@ -1343,6 +1562,15 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             url = base_url + "?ack_status=RA&has_iswc=N&has_rec=N"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?writers=1&artists=1&library_release=1"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?controlled=F"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
+            url = base_url + "?controlled=P"
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
 
@@ -1690,6 +1918,9 @@ class AdminTest(TestCase):
         url = base_url + "?has_audio_file=N"
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+        url = base_url + "?artist=1&record_label=1"
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_search(self):
         """Test Work search."""
@@ -1754,8 +1985,8 @@ class AdminTest(TestCase):
             BackupViewSet,
             ArtistViewSet,
             ReleaseViewSet,
+            PlaylistViewSet,
         )
-        from rest_framework.reverse import reverse as api_reverse
 
         factory = APIRequestFactory()
         url = reverse("api-root")
@@ -1767,6 +1998,7 @@ class AdminTest(TestCase):
         self.assertIn("releases", d)
         self.assertEqual(len(d["releases"]), 4)
         self.assertEqual(response.status_code, 200)
+        self.assertIn("no-cache", response["Cache-Control"])
 
         response = ArtistViewSet.as_view({"get": "list"})(request)
         response.render()
@@ -1775,6 +2007,170 @@ class AdminTest(TestCase):
         response = ReleaseViewSet.as_view({"get": "list"})(request)
         response.render()
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Publicly visible commercial release", response.content)
+
+        response = ReleaseViewSet.as_view({"get": "retrieve"})(
+            request, pk=self.commercial_release.pk
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Publicly visible commercial release", response.content)
+
+        self.artist.description = "Artist with description"
+        self.artist.save()
+        response = ReleaseViewSet.as_view({"get": "retrieve"})(
+            request, pk=self.commercial_release.pk
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+
+        self.playlist.description = "Visible API artist"
+        self.playlist.save()
+        response = PlaylistViewSet.as_view({"get": "retrieve"})(
+            request, cd_identifier=self.playlist.cd_identifier
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Visible API artist", response.content)
+
+        response = PlaylistViewSet.as_view({"get": "retrieve"})(
+            request, cd_identifier="NONEXISTENT"
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+@override_settings(
+    OPTION_CWR_SYNC_WORK_LIMIT=101,
+    OPTION_CWR_WORKS_PER_FILE=100,
+)
+class GenerateCWRCommandTest(TestCase):
+    """Tests for the generatecwr management command."""
+
+    def call_generatecwr(self):
+        stdout = StringIO()
+        stderr = StringIO()
+        call_command("generatecwr", stdout=stdout, stderr=stderr)
+        return stdout.getvalue(), stderr.getvalue()
+
+    def test_no_pending_cwr_exports(self):
+        """Command reports when there are no pending CWR exports."""
+        stdout, stderr = self.call_generatecwr()
+
+        self.assertIn("No pending CWR exports.", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_success_message_includes_generation_duration(self):
+        """Successful generation message includes elapsed CWR generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.cwr = "CWR"
+            export.year = "26"
+            export.num_in_year = 1
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 12.5],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "Generated CWR export #{}: ".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn("(2.50s)", stdout)
+        self.assertEqual(stderr, "")
+
+    def test_stopped_with_error_message_includes_generation_duration(self):
+        """Stopped generation with an error includes elapsed generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.options = {
+                "stop": True,
+                "error": "test error",
+            }
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 11.25],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "CWR generation #{} stopped: test error (1.25s)".format(
+                cwr_export.id
+            ),
+            stderr,
+        )
+
+    def test_running_message_includes_generation_duration(self):
+        """Already-running generation message includes elapsed generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.options = {"stop": True}
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 10.5],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "Another CWR generation running for #{}. (0.50s)".format(
+                cwr_export.id
+            ),
+            stderr,
+        )
+
+    def test_failed_message_includes_generation_duration(self):
+        """Failed generation message includes elapsed CWR generation time."""
+        cwr_export = CWRExport.objects.create(
+            description="Pending CWR",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            export.options = {"error": "test failure"}
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.time.monotonic",
+            side_effect=[10.0, 13.75],
+        ), patch.object(CWRExport, "create_cwr", create_cwr):
+            stdout, stderr = self.call_generatecwr()
+
+        self.assertIn(
+            "Generating CWR #{} (Pending CWR)...".format(cwr_export.id),
+            stdout,
+        )
+        self.assertIn(
+            "Failed CWR generation #{}: test failure (3.75s)".format(
+                cwr_export.id
+            ),
+            stderr,
+        )
 
 
 class CWRTemplatesTest(SimpleTestCase):
@@ -1971,6 +2367,8 @@ class ValidatorsTest(TestCase):
     PUBLISHING_AGREEMENT_PUBLISHER_MR=Decimal("0.5"),
     PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("0.75"),
     OPTION_FORCE_CASE="smart",
+    OPTION_CWR_SYNC_WORK_LIMIT=101,
+    OPTION_CWR_WORKS_PER_FILE=100,
 )
 class ModelsSimpleTest(TransactionTestCase):
     """These tests are modifying objects directly."""
@@ -2219,8 +2617,8 @@ class ModelsSimpleTest(TransactionTestCase):
             version_title="Co-suffix",
             version_title_suffix=True,
         )
-        rec.clean_fields()
-        rec.clean()
+        rec2.clean_fields()
+        rec2.clean()
 
         music_publisher.models.WorkAcknowledgement.objects.create(
             work=work, society_code="10", date=datetime.now(), status="RA"
@@ -2332,6 +2730,44 @@ class ModelsSimpleTest(TransactionTestCase):
             cwr.filename, f"CW{current_year}0006DMP_0000_V3-1-0.SUB"
         )
 
+        from unittest.mock import patch
+
+        cwr_test = music_publisher.models.CWRExport.objects.create(
+            nwr_rev="NW2"
+        )
+        cwr_test.works.add(work)
+
+        self.assertTrue(cwr_test.should_create_synchronously())
+
+        cwr_test.options = None
+        cwr_test.create_cwr(generate=False)
+        self.assertEqual(cwr_test.options, {})
+
+        cwr_test.options = {"stop": True}
+        cwr_test.create_cwr(generate=True, force=False)
+        self.assertTrue(cwr_test.options.get("stop"))
+
+        cwr_test.options = {}
+        with patch.object(
+            cwr_test,
+            "yield_lines",
+            side_effect=RuntimeError("Simulated CWR failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                cwr_test.create_cwr(generate=True, force=True)
+            self.assertIn(
+                "Simulated CWR failure", cwr_test.options.get("error", "")
+            )
+
+        # test CWR generation with recording duration
+        rec.duration = timedelta(minutes=3, seconds=30)
+        rec.save()
+        cwr_with_dur = music_publisher.models.CWRExport(nwr_rev="NW2")
+        cwr_with_dur.save()
+        cwr_with_dur.works.add(work)
+        cwr_with_dur.create_cwr()
+        self.assertTrue(cwr_with_dur.cwr)
+
 
 class OtherFunctionalTest(SimpleTestCase):
     """These tests are testing things not tested otherwise."""
@@ -2412,6 +2848,13 @@ class OtherFunctionalTest(SimpleTestCase):
         self.assertIsInstance(ser, ListSerializer)
         ser = ws.get_serializer()
         self.assertIsInstance(ser, ModelSerializer)
+
+    def test_ack_import_form_empty(self):
+        """Test ACKImportForm.clean() when no file is uploaded."""
+        from music_publisher.forms import ACKImportForm
+
+        form = ACKImportForm(data={})
+        self.assertFalse(form.is_valid())
 
 
 ACK_CONTENT_21 = """HDRSO000000021BMI                                          01.102018060715153220180607

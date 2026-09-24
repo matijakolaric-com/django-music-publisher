@@ -2,13 +2,12 @@
 Django settings for dmp_project project.
 """
 
-import csv
 import os
 import dj_database_url
 from decimal import Decimal
 
 SOFTWARE = "DJANGO MUSIC PUBLISHER"
-SOFTWARE_VERSION = "26.4 HOLIDAY SPECIAL"
+SOFTWARE_VERSION = "26.9 MICHAELMAS"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -28,8 +27,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "admin_auto_filters",
     "django_cleanup",
     "rest_framework",
+    "taggit",
+    "taggit_api",
+    "taggit_ui",
 ]
 
 MIDDLEWARE = [
@@ -159,6 +162,16 @@ PUBLISHING_AGREEMENT_PUBLISHER_SR = Decimal(
 # Anything else makes no changes to names and titles
 OPTION_FORCE_CASE = os.getenv("OPTION_FORCE_CASE")
 
+# CWR generation options
+# Exports below this number of works are generated immediately on save.
+OPTION_CWR_SYNC_WORK_LIMIT = int(
+    os.getenv("OPTION_CWR_SYNC_WORK_LIMIT", "1000")
+)
+
+# Larger CWR requests are split into files with at most this many works.
+OPTION_CWR_WORKS_PER_FILE = int(os.getenv("OPTION_CWR_WORKS_PER_FILE", "1000"))
+
+# Classes to be used with TAGGIT and TAGGIT settings
 
 # REMOTE FILES
 # The default is Digital Ocean Spaces, but any S3 should work with AWS
@@ -209,3 +222,16 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ]
 }
+
+TAGGIT_STRIP_UNICODE_WHEN_SLUGIFYING = True
+TAGGIT_CASE_INSENSITIVE = True
+
+if DEBUG:
+    try:
+        import debug_toolbar
+
+        INSTALLED_APPS.append("debug_toolbar")
+        MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+        INTERNAL_IPS = os.getenv("INTERNAL_IPS", "127.0.0.1").split(",")
+    except ImportError:
+        pass
