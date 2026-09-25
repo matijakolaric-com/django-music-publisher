@@ -28,6 +28,7 @@ Version 26.9 - Michaelmas
     :target: https://www.djangoproject.com/
     :alt: Django 5.2
 .. image:: https://img.shields.io/pypi/pyversions/django-music-publisher
+    :target: https://www.python.org/
     :alt: PyPI Python Version
 .. image:: https://img.shields.io/github/license/matijakolaric-com/django-music-publisher.svg?logo=github
     :target: https://github.com/matijakolaric-com/django-music-publisher/blob/master/LICENSE
