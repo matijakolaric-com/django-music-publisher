@@ -230,4 +230,9 @@ larger installations and day-to-day administration.
 Future open-source features
 ===========================
 
-Nothing is planned for the foreseeable future. Bugfix and security releases will be coming out when required.
+The next release is planned to refactor CWR generation so it reads works and
+their related Django model instances directly, without using the intermediate
+``get_dict_items()`` serialization path. The existing ``get_dict()`` methods
+will remain available for CSV exports and other serialization features.
+
+Bugfix and security releases will be coming out when required.
