@@ -29,7 +29,7 @@ spec:
           value: ${default-db.DATABASE_URL}
           scope: RUN_TIME
         - key: ALLOWED_HOSTS
-          value: ${APP_DOMAIN}
+          value: *
           scope: RUN_TIME
         - key: CSRF_TRUSTED_ORIGINS
           value: ${APP_URL}
