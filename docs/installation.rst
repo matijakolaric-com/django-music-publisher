@@ -61,12 +61,10 @@ variables from the deployment template as they are:
 
 * ``DATABASE_URL`` is connected automatically to the ``default-db`` database.
   Its value is supplied by DigitalOcean and should not be replaced.
-* ``ALLOWED_HOSTS`` is set to ``${APP_DOMAIN}``, which allows the application
-  to respond to its DigitalOcean application domain. Leave this value as it
-  is.
-* ``CSRF_TRUSTED_ORIGINS`` is set to ``${APP_URL}``, which allows secure form
-  submissions from the DigitalOcean application URL. Leave this value as it
-  is.
+* ``ALLOWED_HOSTS`` is set to ``*``, which means everything listed in 
+  ``Networking -> Domain``. Leave this value as it is.
+* ``CSRF_TRUSTED_ORIGINS`` is set to ``${APP_URL}``, the most secure value. 
+  Leave this value as it is.
 
 For all remaining environment variables, use the explanations in `settings`_.
 
