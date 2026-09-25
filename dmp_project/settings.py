@@ -17,8 +17,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", None)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", False)
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "*").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 INSTALLED_APPS = [
     "music_publisher.apps.MusicPublisherConfig",

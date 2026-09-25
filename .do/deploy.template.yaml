@@ -20,6 +20,12 @@ spec:
         - key: DATABASE_URL
           value: ${default-db.DATABASE_URL}
           scope: RUN_TIME
+        - key: ALLOWED_HOSTS
+          value: ${APP_DOMAIN}
+          scope: RUN_TIME
+        - key: CSRF_TRUSTED_ORIGINS
+          value: ${APP_URL}
+          scope: RUN_TIME
         - key: SECRET_KEY
           type: SECRET
           scope: RUN_AND_BUILD_TIME
