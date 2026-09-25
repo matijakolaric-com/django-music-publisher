@@ -201,6 +201,8 @@ Experimental features (involving file system) may require additional work.
 Good luck!
 
 
+.. _settings:
+
 Settings
 +++++++++++++++++++++++++++++++++++++++++++++
 
