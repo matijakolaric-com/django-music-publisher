@@ -17,18 +17,9 @@ spec:
         - key: DATABASE_URL
           value: ${default-db.DATABASE_URL}
           scope: RUN_TIME
-        - key: S3_REGION
-          type: GENERAL
-          scope: RUN_TIME
-        - key: S3_BUCKET
-          type: GENERAL
-          scope: RUN_TIME
-        - key: S3_ID
+        - key: SECRET_KEY
           type: SECRET
-          scope: RUN_TIME
-        - key: S3_SECRET
-          type: SECRET
-          scope: RUN_TIME
+          scope: RUN_AND_BUILD_TIME
         - key: PUBLISHER
           type: GENERAL
           scope: RUN_TIME
@@ -44,9 +35,3 @@ spec:
         - key: PUBLISHER_SOCIETY_MR
           type: GENERAL
           scope: RUN_TIME
-        - key: PUBLISHER_SOCIETY_SR
-          type: GENERAL
-          scope: RUN_TIME
-        - key: SECRET_KEY
-          type: SECRET
-          scope: RUN_AND_BUILD_TIME
