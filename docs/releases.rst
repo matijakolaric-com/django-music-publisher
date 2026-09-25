@@ -206,16 +206,28 @@ All dependencies were bumped to the latest stable versions.
 26.9 Michaelmas
 -------------------------------
 
-This release updates Django Music Publisher to the latest modern Django framework, dependencies, and environment standards:
+This release updates Django Music Publisher to Django 5.2 and modern
+Python and package versions. It also brings several improvements for
+larger installations and day-to-day administration.
 
-* Upgraded dependency stack and updated Python/Django compatibility.
-* Added Django Debug Toolbar integration and refined test coverage.
-* Streamlined CI workflows and deployment configurations.
-* Refined documentation structure and references for Read the Docs.
+* **Large CWR exports** can now be split into smaller files. Exports that
+  exceed the configured synchronous limit can be generated later with the
+  ``generatecwr`` management command.
+* CWR export status handling was improved, including clearer pending,
+  generating, stopped, and failed states. The option to hide the manual
+  generation link is now supported for deployments that rely on background
+  processing.
+* The backup API now streams its JSON response and work serialization is
+  processed in batches, reducing memory usage for large databases.
+* Works now support tags. Tags can be managed and filtered in the admin,
+  imported from CSV, and included in work dictionaries, JSON backups, and
+  CSV exports.
+* Admin search and filtering were improved with autocomplete filters and
+  tag-aware actions. Additional views and workflows received test coverage,
+  including file-backed configurations and administrative pages.
 
 
 Future open-source features
 ===========================
 
 Nothing is planned for the foreseeable future. Bugfix and security releases will be coming out when required.
-

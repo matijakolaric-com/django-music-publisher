@@ -171,6 +171,11 @@ OPTION_CWR_SYNC_WORK_LIMIT = int(
 # Larger CWR requests are split into files with at most this many works.
 OPTION_CWR_WORKS_PER_FILE = int(os.getenv("OPTION_CWR_WORKS_PER_FILE", "1000"))
 
+# Hide the web link for manually starting pending CWR generation.
+OPTION_CWR_NO_GENERATE_LINK = os.getenv(
+    "OPTION_CWR_NO_GENERATE_LINK", False
+)
+
 # Classes to be used with TAGGIT and TAGGIT settings
 
 # REMOTE FILES

@@ -73,14 +73,21 @@ For everything else, basic programming and/or system administration skills are r
 
 Start with `Deploying Django <https://docs.djangoproject.com/en/3.0/howto/deployment/>`_ documentation.
 
-If you plan to use Django-Music-Publisher as one of the apps in your 
-Django project, there is nothing special about it::
+If you plan to use Django-Music-Publisher as one of the apps in an
+existing Django project, install it from PyPI::
 
-    pip install --upgrade django_music_publisher
+    pip install --upgrade django-music-publisher
 
-Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``. Almost everything goes
-through the Django Admin. The only exception is royalty calculation, which has to be added to
-``urls.py``
+Add ``music_publisher.apps.MusicPublisherConfig`` to ``INSTALLED_APPS``.
+Run the usual Django migration and static-file commands from the directory
+containing your project's ``manage.py``::
+
+    python manage.py migrate
+    python manage.py collectstatic
+    python manage.py createsuperuser
+
+Almost everything goes through the Django Admin. The only exception is
+royalty calculation, which has to be added to ``urls.py``:
 
 .. code:: python
 
@@ -110,6 +117,23 @@ to generate one, but do change it somewhat after pasting for complete security. 
 
 .. image:: /images/installation_do_2.png
    :width: 100%
+
+Database
+-----------------------------------
+
+DMP uses SQLite by default and stores the database in ``db.sqlite3`` in the
+project directory. This is convenient for local installations and small
+single-user installations.
+
+For production installations, PostgreSQL is recommended. Set
+``DATABASE_URL`` to the connection URL supplied by your database provider,
+for example::
+
+    DATABASE_URL=postgres://username:password@host:5432/database
+
+Run migrations after setting up or changing the database::
+
+    python manage.py migrate
 
 Publisher-related settings
 -----------------------------------
@@ -141,8 +165,19 @@ Enter ``1.0`` for 100%, ``0.5`` for 50%, ``0.3333`` for 33.33%, etc.
 S3 storage
 ------------------------------------
 
-For Digital Ocean Spaces, you need to set up only four config (environment) variables. AWS and other S3 providers will
-also work.
+DMP can store uploaded images and audio files either on the local file
+system or in an S3-compatible object-storage service. File storage is
+optional; it is only needed when using file uploads.
+
+For local storage, set ``OPTION_FILES`` to ``1``. Files are stored in
+``MEDIA_ROOT`` and are served under ``MEDIA_URL``. For example::
+
+    OPTION_FILES=1
+    MEDIA_ROOT=/var/lib/dmp/media
+    MEDIA_URL=/media/
+
+For DigitalOcean Spaces, AWS S3, or another S3-compatible provider, set
+these four variables:
 
 .. image:: /images/installation_do_f1.png
    :width: 100%
@@ -158,6 +193,16 @@ also work.
   ``S3_SECRET`` (alias for ``AWS_SECRET_ACCESS_KEY``), you get them when you generate 
   your *Spaces* API key.
 
+When all four S3 settings are present, DMP enables S3 storage automatically.
+Set ``OPTION_FILES=1`` explicitly when you want to make this choice clear.
+The AWS-style variable names may be used instead of the ``S3_*`` aliases:
+
+* ``AWS_ACCESS_KEY_ID`` - access key for the storage service
+* ``AWS_SECRET_ACCESS_KEY`` - secret access key for the storage service
+* ``AWS_STORAGE_BUCKET_NAME`` - bucket or Space name
+* ``AWS_S3_REGION_NAME`` - region identifier
+* ``AWS_S3_ENDPOINT_URL`` - endpoint for non-AWS S3-compatible services
+
 If you want to use AWS or some other S3 provider, the full list of settings is 
 available 
 `here <https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_.
@@ -170,8 +215,69 @@ Other options
   converting nearly all strings to UPPER CASE or Title Case or just UPPERCASE fields 
   to Title Case, respectively. If unset, everything is left as entered.
 
-* ``OPTION_FILES`` - enables support for file uploads (audio files and images), using 
-  local file storage (PC & VPS)
+* ``OPTION_CWR_SYNC_WORK_LIMIT`` - maximum number of works for an export that
+  is generated immediately while the export is created. Larger exports are
+  saved as pending exports. The default is ``1000``.
+
+* ``OPTION_CWR_WORKS_PER_FILE`` - maximum number of works in each generated
+  CWR file when a large export is split into multiple files. The default is
+  ``1000``.
+
+* ``OPTION_CWR_NO_GENERATE_LINK`` - hides the link used to start pending CWR
+  generation in the web interface. The default is ``False``, so the link is
+  shown. Set it to ``1`` when pending exports should only be started with the
+  ``generatecwr`` management command.
+
+Background CWR generation
+------------------------------------
+
+Large exports are saved as pending exports when they exceed
+``OPTION_CWR_SYNC_WORK_LIMIT``.
+
+Pending exports can be processed manually through the web interface or by
+running the ``generatecwr`` management command from the directory containing
+``manage.py``::
+
+    python manage.py generatecwr
+
+The web-interface option for generating pending CWR files can be disabled by
+setting ``OPTION_CWR_NO_GENERATE_LINK=1``. This is useful when pending
+exports should only be started with the management command.
+
+The command can be run periodically by cron, a systemd timer, or a scheduled
+job provided by the hosting platform. For example, a cron entry that checks
+for pending exports every five minutes might be::
+
+    */5 * * * * cd /var/www/dmp && /var/www/dmp/.venv/bin/python manage.py generatecwr >> /var/log/dmp-generatecwr.log 2>&1
+
+The five fields in ``*/5 * * * *`` mean that cron starts the command at
+minute 0, 5, 10, 15, and so on, of every hour, every day. In other words,
+cron checks for pending work every five minutes; it does not keep the command
+running continuously. Each invocation processes the oldest pending export
+that it can start and then exits.
+
+Use the paths appropriate for the installation. Choose the interval according
+to how quickly pending exports should be processed and how long generation
+takes. A five-minute interval is a reasonable default. Use a shorter interval
+for frequent smaller exports, or a longer interval if exports are large and
+generation uses substantial resources. The command records when another
+generation is already in progress, so overlapping invocations do not start a
+second generation, but only one scheduler should normally be configured for
+an installation.
+
+If an export fails, the reason is saved with that export and it will not be
+tried again automatically. After reading the error and making sure that the
+problem has been fixed, ask the person who administers the installation to
+retry it with::
+
+    python manage.py generatecwr --force
+
+The ``--force`` option means “try failed exports again”. It should only be
+used after confirming that no other export is currently being generated.
+Running it while another generation is in progress can create unnecessary
+work or duplicate files. This command should only be run manually.
+
+There is no way to force a failed CWR generation through the web interface.
 
 Collective management organisations
 ++++++++++++++++++++++++++++++++++++++++++++++++
@@ -184,4 +290,3 @@ Following list contains official CWR codes for CMOs, to be entered in ``PUBLISHE
    :file: societies.csv
    :widths: 10, 50, 40
    :header-rows: 0
-
