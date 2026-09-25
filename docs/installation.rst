@@ -11,8 +11,23 @@ Python 3 (https://python.org). It can be installed to a PC, but installing it in
 
 Digital Ocean is the recommended provider.
 
+All three providers described below deploy DMP as a web application backed by
+PostgreSQL. No background worker or scheduled CWR job is required. Exports
+below the configured limit are generated automatically; larger exports are
+started manually through the web interface or with ``generatecwr``. After the
+first successful deployment, create a Django superuser and use the
+environment variables described in `settings`_.
+
 Digital Ocean
 ----------------------
+
+**Provider and data jurisdiction:** DigitalOcean is a US company. You choose
+the server region when creating the application; European regions include
+Frankfurt, Amsterdam, and London, while DigitalOcean also operates regions
+in the US and other countries. Hosting the application in Europe does not
+remove the provider from US jurisdiction. The US CLOUD Act and other US laws
+may therefore apply to data held by DigitalOcean, even when the selected
+servers are in Europe.
 
 Minimal monthly cost is $5 for the application, $7 for the database, so $12 in total.
 Optional $5 for file storage is only required for experimental features.
@@ -49,11 +64,11 @@ Once you have registered, click on the next button to start the installation wiz
 
 2.4 Review and click on "create resources".
 
-3. Installation takes several minutes. Once it is done, click on the ``console`` tab and enter: 
+3. Installation takes several minutes. Once it is done, click on the
+``console`` tab and enter:
 
 .. code-block:: bash
          
-    python manage.py migrate
     python manage.py createsuperuser
 
 Then enter your user name and password (twice). You can leave e-mail empty, it is not used.
@@ -65,6 +80,89 @@ with:
     
     python manage.py changepassword
 
+Clever Cloud
+----------------------
+
+**Provider and data jurisdiction:** Clever Cloud is a French provider.
+Its infrastructure is hosted across several regions in Europe and
+internationally, using its own infrastructure and selected infrastructure
+partners. Select the available European region in the Clever Cloud console
+when creating the application. Clever Cloud states that its infrastructure
+is designed to operate without dependence on extraterritorial laws. The US
+CLOUD Act does not apply to Clever Cloud merely because the application is
+hosted in Europe; however, the actual hosting region and any infrastructure
+partner should still be checked for sensitive or regulated data.
+
+Minimal cost depends on the selected application size and PostgreSQL add-on.
+
+1. Create a Python application and a PostgreSQL add-on in the
+`Clever Cloud Console <https://console.clever-cloud.com/>`_, then connect the
+application to this Git repository. Deployments are started by pushing to
+the configured branch.
+
+2. Set the application environment variables. In addition to the values
+listed in `settings`_, set:
+
+   * ``CC_RUN_COMMAND``:
+     ``waitress-serve --listen=0.0.0.0:9000 dmp_project.wsgi:application``
+   * ``CC_PYTHON_MANAGE_TASKS``: ``migrate,collectstatic --noinput``
+
+3. Connect the PostgreSQL add-on to the application so that
+``DATABASE_URL`` is available. Optional S3-compatible file storage uses the
+variables described in `S3 storage`_.
+
+4. Review the application settings and deploy. Clever Cloud runs the
+migrations and collects static files during the build. If either command
+fails, the deployment fails.
+
+5. Open a one-off console after the first successful deployment and enter:
+
+.. code-block:: bash
+
+    python manage.py createsuperuser
+
+Scalingo
+----------------------
+
+**Provider and data jurisdiction:** Scalingo is a French provider. Its
+standard regions and databases are hosted exclusively in France, including
+the ``osc-fr1`` and ``osc-secnum-fr1`` regions, on 3DS Outscale
+infrastructure. The US CLOUD Act does not directly apply to Scalingo as a
+French provider, and selecting a French region avoids using a US hosting
+region. Scalingo's contractual terms and any third-party services used with
+the application should nevertheless be checked for the data being stored.
+
+Minimal cost depends on the selected application size and PostgreSQL add-on.
+
+1. Create a Python application and a PostgreSQL add-on in the
+`Scalingo Dashboard <https://dashboard.scalingo.com/>`_, then connect the
+application to this Git repository. Alternatively, create the application
+and add its Git remote::
+
+    scalingo create dmp
+    git remote add scalingo git@ssh.osc-fr1.scalingo.com:dmp.git
+
+2. Set the application environment variables. Scalingo supplies
+``DATABASE_URL`` from the PostgreSQL add-on. Add the values listed in
+`settings`_, including ``SECRET_KEY`` and the publisher and society
+settings.
+
+3. Deploy the configured branch::
+
+    git push scalingo master
+
+   Scalingo detects ``requirements.txt`` and starts the ``web`` process from
+   ``Procfile``. The ``postdeploy`` process runs the database migrations
+   after the new web process starts successfully.
+
+4. Open a one-off console after the first successful deployment and enter:
+
+.. code-block:: bash
+
+    scalingo --app dmp run python manage.py createsuperuser
+
+Use the application name and region shown by Scalingo. The example uses the
+French ``osc-fr1`` region.
 
 Custom installation
 +++++++++++++++++++++++++++++++++++++++++++
@@ -138,7 +236,7 @@ Run migrations after setting up or changing the database::
 Publisher-related settings
 -----------------------------------
 
-* ``PUBLISHER_NAME`` - Name of the publisher using Django-Music-Publisher, **required**
+* ``PUBLISHER`` - Name of the publisher using Django-Music-Publisher, **required**
 * ``PUBLISHER_IPI_NAME`` - Publisher's IPI *Name* Number, **required**
 * ``PUBLISHER_CODE`` - Publisher's CWR Delivery code, defaults to ``000``, which is not accepted by CMOs, but may be accepted by (sub-)publishers.
 * ``PUBLISHER_SOCIETY_PR`` - Publisher's performance collecting society (PRO) numeric code, required. See `Collective management organisations`_.

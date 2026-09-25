@@ -29,7 +29,7 @@ spec:
         - key: S3_SECRET
           type: SECRET
           scope: RUN_TIME
-        - key: PUBLISHER_NAME
+        - key: PUBLISHER
           type: GENERAL
           scope: RUN_AND_BUILD_TIME
         - key: PUBLISHER_CODE
