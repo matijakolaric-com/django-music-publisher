@@ -5,7 +5,6 @@ spec:
       engine: PG
   services:
     - name: web
-      instance_count: 1
       environment_slug: python
       git:
         branch: master
@@ -13,6 +12,10 @@ spec:
       build_command: python manage.py collectstatic --noinput
       run_command: waitress-serve --port=$PORT dmp_project.wsgi:application
       http_port: 8080
+      health_check:
+        http_path: /
+      instance_count: 1
+      instance_size_slug: apps-s-1vcpu-0.5gb
       envs:
         - key: DATABASE_URL
           value: ${default-db.DATABASE_URL}
