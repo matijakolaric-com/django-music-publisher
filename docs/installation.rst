@@ -9,8 +9,6 @@ Installation to a cloud
 DMP (Django-Music-Publisher) is based on Django Web Framework (https://djangoproject.org), and requires
 Python 3 (https://python.org). It can be installed to a PC, but installing it into a cloud is highly recommended.
 
-Digital Ocean is the recommended provider.
-
 All three providers described below deploy DMP as a web application backed by
 PostgreSQL. No background worker or scheduled CWR job is required. Exports
 below the configured limit are generated automatically; larger exports are
@@ -58,7 +56,19 @@ Once you have registered, click on the next button to start the installation wiz
    :width: 100%
 
 
-2.2 Edit ``web`` environment variables. See `settings`_ for details.
+2.2 Review the ``web`` environment variables. Leave the first three
+variables from the deployment template as they are:
+
+* ``DATABASE_URL`` is connected automatically to the ``default-db`` database.
+  Its value is supplied by DigitalOcean and should not be replaced.
+* ``ALLOWED_HOSTS`` is set to ``${APP_DOMAIN}``, which allows the application
+  to respond to its DigitalOcean application domain. Leave this value as it
+  is.
+* ``CSRF_TRUSTED_ORIGINS`` is set to ``${APP_URL}``, which allows secure form
+  submissions from the DigitalOcean application URL. Leave this value as it
+  is.
+
+For all remaining environment variables, use the explanations in `settings`_.
 
 2.3 Select region closest to you.
 
@@ -235,6 +245,18 @@ for example::
 Run migrations after setting up or changing the database::
 
     python manage.py migrate
+
+Security and trusted web addresses
+-----------------------------------
+
+These settings protect the application from requests sent to an unexpected
+host or from an untrusted web address:
+
+* ``ALLOWED_HOSTS`` - the host names that may be used to access the
+  application. Enter host names without ``http://`` or ``https://``. 
+* ``CSRF_TRUSTED_ORIGINS`` - the complete web addresses that are trusted to
+  submit forms to the application. Include the scheme, such as
+  ``https://example.com``.
 
 Publisher-related settings
 -----------------------------------
