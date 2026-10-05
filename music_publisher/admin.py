@@ -1568,6 +1568,15 @@ class WorkAdmin(MusicPublisherAdmin):
             row["Writer {} Last".format(i + 1)] = w.get("last_name", "")
             row["Writer {} First".format(i + 1)] = w.get("first_name", "")
             row["Writer {} IPI".format(i + 1)] = w.get("ipi_name_number", "")
+            # Account Number has been in the header since it was added to
+            # get_labels_for_csv, but nothing ever wrote it, so the column came
+            # out blank on every row and was indistinguishable from a writer
+            # who genuinely has no account number. The value is already in the
+            # dict - Writer.get_dict() has carried account_number all along -
+            # so this is a read, not a new query.
+            row["Writer {} Account Number".format(i + 1)] = w.get(
+                "account_number"
+            ) or ""
             role = wiw.get("writer_role", {})
             if role:
                 row["Writer {} Role".format(i + 1)] = "{} - {}".format(
@@ -1717,10 +1726,17 @@ class WorkAdmin(MusicPublisherAdmin):
     actions = (create_cwr, create_json, create_csv, tag_manager)
 
     def get_actions(self, request):
-        """Custom action disabling the default ``delete_selected``."""
+        """Disable ``delete_selected`` and every export without a code.
+
+        Each export action calls persist_work_ids(), which now refuses to run
+        without PUBLISHER_CODE - so hiding them is not what makes this safe,
+        it only saves the user a traceback. Keeping them visible would invite
+        clicking something that cannot work.
+        """
         actions = super().get_actions(request)
         if not settings.PUBLISHER_CODE:
-            del actions["create_cwr"]
+            for name in ("create_cwr", "create_json", "create_csv"):
+                actions.pop(name, None)
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions

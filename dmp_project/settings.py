@@ -137,8 +137,11 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # The name of the publisher. Use no comma in the name!
 PUBLISHER_NAME = os.getenv("PUBLISHER", "DMP - FREE MUSIC CATALOGUE SOFTWARE")
 
-# CWR Delivery code, issued by collecting societies
-PUBLISHER_CODE = os.getenv("PUBLISHER_CODE", "000")
+# CWR Delivery code, issued by collecting societies.
+# No default: work IDs are built from this code and cannot be changed once
+# assigned, so an unset code must be visible rather than silently substituted
+# with a placeholder that would be baked into every Work ID.
+PUBLISHER_CODE = os.getenv("PUBLISHER_CODE")
 
 # IPI Name # is required, issued by collecting societies
 PUBLISHER_IPI_NAME = os.getenv("PUBLISHER_IPI_NAME", "")

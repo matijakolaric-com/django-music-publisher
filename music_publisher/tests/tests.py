@@ -21,15 +21,18 @@ from io import StringIO
 import json
 from unittest.mock import patch
 
+from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.auth.models import User
 from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.template import Context
 from django.test import (
     override_settings,
+    RequestFactory,
     SimpleTestCase,
     TestCase,
     TransactionTestCase,
@@ -1978,6 +1981,45 @@ class AdminTest(TestCase):
         )
         response = self.client.post(url, data, follow=False)
         self.assertEqual(response.status_code, 302)
+
+    @override_settings(PUBLISHER_CODE=None)
+    def test_work_ids_require_publisher_code(self):
+        """Work and recording IDs are permanent, so assigning them without a
+        publisher code must be refused."""
+        with self.assertRaises(exceptions.ImproperlyConfigured):
+            Work.persist_work_ids(Work.objects.all())
+
+        cwr_export = CWRExport.objects.create(
+            description="No publisher code", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work)
+        with self.assertRaises(exceptions.ImproperlyConfigured):
+            cwr_export.create_cwr()
+
+    @override_settings(PUBLISHER_CODE=None)
+    def test_generatecwr_command_requires_publisher_code(self):
+        """The command reports a missing code instead of raising."""
+        cwr_export = CWRExport.objects.create(
+            description="No publisher code", nwr_rev="NWR"
+        )
+        cwr_export.works.add(self.original_work)
+        with self.assertRaises(CommandError):
+            call_command("generatecwr")
+
+    @override_settings(PUBLISHER_CODE=None)
+    def test_work_export_actions_hidden_without_publisher_code(self):
+        """Exports assign work IDs, so they are not offered without a code."""
+        work_admin = admin.site._registry[Work]
+        url = reverse("admin:music_publisher_work_changelist")
+        request = RequestFactory().get(url)
+        request.user = self.staffuser
+        actions = work_admin.get_actions(request)
+        self.assertNotIn("create_cwr", actions)
+        self.assertNotIn("create_json", actions)
+        self.assertNotIn("create_csv", actions)
+        self.assertNotIn("delete_selected", actions)
+        # tag_manager's callable is registered under its own __name__
+        self.assertIn("set_or_remove_tags", actions)
 
     def test_endpoints(self):
         from rest_framework.test import APIRequestFactory, force_authenticate

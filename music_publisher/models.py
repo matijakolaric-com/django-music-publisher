@@ -11,7 +11,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import pre_save
@@ -616,6 +616,22 @@ class Work(TitleBase):
 
     @staticmethod
     def persist_work_ids(qs):
+        # A work ID is built from PUBLISHER_CODE and the row's id, and once
+        # assigned it cannot be changed - the work_id and recording_id setters
+        # both raise NotImplementedError if the column is already set. So
+        # assigning them with no code permanently pins the id to a bare
+        # zero-padded number ("000123"), and setting PUBLISHER_CODE afterwards
+        # does not repair it: existing rows keep the old value while new rows
+        # get the code, leaving one unique column holding two naming schemes.
+        #
+        # Refuse rather than assign. The export is worth re-running once a
+        # code is configured; the ids are not recoverable without SQL.
+        if not settings.PUBLISHER_CODE:
+            raise ImproperlyConfigured(
+                "PUBLISHER_CODE must be set before work IDs can be assigned. "
+                "Work IDs and recording IDs cannot be changed once assigned."
+            )
+
         work_ids = list(
             qs.filter(_work_id__isnull=True)
             .order_by("id")
@@ -2141,6 +2157,31 @@ class CWRExport(models.Model):
             created.append(cwr_export)
         return created
 
+    @staticmethod
+    def resolve_publisher_code(publisher_code=None):
+        """Return the publisher code to generate under.
+
+        Args:
+            publisher_code (str): override publisher code for generation
+
+        Returns:
+            str: the override if given, otherwise PUBLISHER_CODE
+
+        Raises:
+            ImproperlyConfigured: if neither is set. Checked before the stop
+                marker is written, so a refused call leaves the export
+                untouched rather than looking like a failed run. The override
+                counts, because it is a supported way to generate under a code
+                the deployment does not carry.
+        """
+        if publisher_code is None:
+            publisher_code = settings.PUBLISHER_CODE
+        if not publisher_code:
+            raise ImproperlyConfigured(
+                "A publisher code is required to generate CWR."
+            )
+        return publisher_code
+
     def create_cwr(self, publisher_code=None, generate=True, force=False):
         """Create CWR and save.
 
@@ -2152,6 +2193,8 @@ class CWRExport(models.Model):
         """
         if self.cwr:
             return  # because there is nothing to do
+
+        publisher_code = self.resolve_publisher_code(publisher_code)
 
         if self.options is None:
             self.options = {}
@@ -2169,8 +2212,6 @@ class CWRExport(models.Model):
 
         try:
             now = timezone.now()
-            if publisher_code is None:
-                publisher_code = settings.PUBLISHER_CODE
             self.publisher_code = publisher_code
             self.created_on = now
             self.year = now.strftime("%y")
@@ -2180,6 +2221,15 @@ class CWRExport(models.Model):
                 self.num_in_year = nr.num_in_year + 1
             else:
                 self.num_in_year = 1
+            # Before generating, not after. Persisting here means a failure
+            # to assign ids aborts before self.cwr is set, so the export is
+            # retryable - create_cwr opens with "if self.cwr: return", and
+            # with the ids pinned afterwards a failure left the file stored
+            # and the ids missing, which that guard then refused to redo.
+            # Ids that survive a later failure are harmless: they are
+            # deterministic from the row id, and the export is worth
+            # re-running with the ids already in place.
+            Work.persist_work_ids(self.works)
             works = self.works.order_by("id")
             works = Work.objects.get_dict_items(works)
             buffer = StringIO()
@@ -2189,7 +2239,6 @@ class CWRExport(models.Model):
             self.options.pop("stop", None)
             self.options.pop("error", None)
             self.save()
-            Work.persist_work_ids(self.works)
         except Exception as e:
             self.options["error"] = str(e)
             self.save(update_fields=["options"])

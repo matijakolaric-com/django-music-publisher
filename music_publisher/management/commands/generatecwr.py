@@ -1,6 +1,7 @@
 import time
 
-from django.core.management.base import BaseCommand
+from django.core.exceptions import ImproperlyConfigured
+from django.core.management.base import BaseCommand, CommandError
 
 from music_publisher.models import CWRExport
 
@@ -38,7 +39,14 @@ class Command(BaseCommand):
             )
 
             started_at = time.monotonic()
-            cwr_export.create_cwr(generate=True, force=options["force"])
+            try:
+                cwr_export.create_cwr(
+                    generate=True, force=options["force"]
+                )
+            except ImproperlyConfigured as e:
+                # A missing publisher code affects every pending export, so
+                # report it once rather than repeating it per export.
+                raise CommandError(str(e)) from e
             duration = time.monotonic() - started_at
 
             if cwr_export.cwr:
