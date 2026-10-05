@@ -41,6 +41,7 @@ from django.urls import reverse
 from django.contrib.messages import get_messages
 
 import music_publisher.models
+from music_publisher import admin as music_publisher_admin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (
     AlternateTitle,
@@ -1570,6 +1571,9 @@ class AdminTest(TestCase):
             url = base_url + "?writers=1&artists=1&library_release=1"
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
+            url = base_url + "?library_release__library=1&writers_have_ipi=Y"
+            response = self.client.get(url, follow=False)
+            self.assertEqual(response.status_code, 200)
             url = base_url + "?controlled=F"
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
@@ -1924,6 +1928,127 @@ class AdminTest(TestCase):
         url = base_url + "?artist=1&record_label=1"
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
+
+    def test_work_list_filters(self):
+        """Test the work changelist filters that were reworked.
+
+        The library filter is now an autocomplete, and the writers' IPI filter
+        is new. Both are checked for what they return, not only that the
+        changelist renders.
+        """
+
+        self.client.force_login(self.audituser)
+
+        """A work with a writer that has no IPI name number."""
+        no_ipi_work = Work.objects.create(title="Work without writers' IPI")
+        WriterInWork.objects.create(
+            work=no_ipi_work,
+            writer=self.writer_no_first_name,
+            capacity="C ",
+            relative_share=Decimal("100"),
+            controlled=False,
+        )
+        """A work without any writers at all, counted as having all writers'
+        IPI name numbers set."""
+        no_writers_work = Work.objects.create(title="Work without writers")
+
+        base_url = reverse("admin:music_publisher_work_changelist")
+
+        """The library filter is an autocomplete, so the widget must be in the
+        changelist, pointing at the library of a library release."""
+        response = self.client.get(base_url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "id-library_release__library-dal-filter")
+        self.assertContains(response, "data-field-name=\"library\"")
+
+        """And the autocomplete it points at must offer the libraries."""
+        url = (
+            reverse("admin:autocomplete")
+            + "?app_label=music_publisher&model_name=release"
+            + "&field_name=library&term=LIBRARY"
+        )
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            json.loads(response.content)["results"],
+            [{"id": str(self.library.id), "text": "LIBRARY"}],
+        )
+
+        """Filtering by library returns the works of the library releases
+        using it. The queryset is compared, not the paginated result list."""
+        url = base_url + "?library_release__library={}".format(self.library.id)
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerySetEqual(
+            response.context["cl"].queryset,
+            Work.objects.filter(library_release=self.library_release),
+            transform=lambda work: work,
+        )
+
+        """Filtering by writers' IPI: a work with a writer without IPI name
+        number is only in the 'No' list."""
+        url = base_url + "?writers_have_ipi=N"
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerySetEqual(
+            response.context["cl"].queryset,
+            [no_ipi_work],
+            transform=lambda work: work,
+        )
+
+        """A work whose writers all have IPI, and a work without writers, are
+        in the 'Yes' list, the one with the writer lacking IPI is not. The
+        modified work has a writer in work without a writer assigned, which
+        does not count as a writer without IPI."""
+        url = base_url + "?writers_have_ipi=Y"
+        response = self.client.get(url, follow=False)
+        self.assertEqual(response.status_code, 200)
+        ids = set(
+            response.context["cl"].queryset.values_list("id", flat=True)
+        )
+        self.assertIn(self.original_work.id, ids)
+        self.assertIn(self.modified_work.id, ids)
+        self.assertIn(no_writers_work.id, ids)
+        self.assertNotIn(no_ipi_work.id, ids)
+
+    def test_work_list_filter_order(self):
+        """The work changelist filters are ordered by subject, the entity
+        filters before the presence filters, as in the reference project."""
+
+        self.assertEqual(
+            [
+                filter.title
+                if not isinstance(filter, str)
+                else "last_change"
+                for filter in music_publisher_admin.WorkAdmin.list_filter
+            ],
+            [
+                "Tags",
+                "Writer",
+                "Artist",
+                "Library",
+                "Library Release",
+                "% controlled",
+                "All writers have IPI",
+                "Has ISWC",
+                "Has Recordings",
+                "In CWR",
+                "Acknowledgement society",
+                "Acknowledgement status",
+                "last_change",
+            ],
+        )
+
+    def test_library_work_count_link(self):
+        """The library changelist links to the works of that library, using
+        the parameter name of the autocomplete library filter."""
+
+        self.client.force_login(self.staffuser)
+        url = reverse("admin:music_publisher_library_changelist")
+        response = self.client.get(url, follow=False)
+        self.assertContains(
+            response, "?library_release__library={}".format(self.library.id)
+        )
 
     def test_search(self):
         """Test Work search."""

@@ -429,7 +429,7 @@ class LibraryAdmin(MusicPublisherAdmin):
         count = obj.work__count
 
         url = reverse("admin:music_publisher_work_changelist")
-        url += "?library_release__library__id__exact={}".format(obj.id)
+        url += "?library_release__library={}".format(obj.id)
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     work_count.short_description = "Works"
@@ -1172,6 +1172,20 @@ class WorkAdmin(MusicPublisherAdmin):
         title = "Library Release"
         field_name = "library_release"
 
+    class LibraryFilter(AutocompleteFilter):
+        """An autocomplete over libraries, used for the work filter.
+
+        The library is reached through the library release, so the widget is
+        built on :attr:`.models.LibraryRelease.library` rather than on a field
+        of :class:`.models.Work`. The value is submitted as the library id.
+        """
+
+        title = "Library"
+        field_name = "library"
+        parameter_name = "library_release__library"
+        rel_model = LibraryRelease
+        use_pk_exact = False
+
     class InCWRListFilter(admin.SimpleListFilter):
         """Custom list filter if work is included in any of CWR files."""
 
@@ -1260,6 +1274,38 @@ class WorkAdmin(MusicPublisherAdmin):
             elif self.value() == "N":
                 return queryset.filter(iswc__isnull=True)
 
+    class AllWritersHaveIPINameListFilter(admin.SimpleListFilter):
+        """Custom list filter, if all writers have IPI name number set."""
+
+        title = "All writers have IPI"
+        parameter_name = "writers_have_ipi"
+
+        def lookups(self, request, model_admin):
+            """Simple Yes/No filter"""
+            return (
+                ("Y", "Yes"),
+                ("N", "No"),
+            )
+
+        def queryset(self, request, queryset):
+            """Filter on presence of IPI name numbers of all writers.
+
+            Writers in work entries without a writer assigned are not
+            writers, and works without any writers are considered to have all
+            writers' IPI name numbers set.
+            """
+            missing = Work.objects.filter(
+                models.Q(writerinwork__writer__isnull=False)
+                & (
+                    models.Q(writerinwork__writer__ipi_name__isnull=True)
+                    | models.Q(writerinwork__writer__ipi_name="")
+                )
+            )
+            if self.value() == "Y":
+                return queryset.exclude(id__in=missing)
+            elif self.value() == "N":
+                return queryset.filter(id__in=missing)
+
     class HasRecordingListFilter(admin.SimpleListFilter):
         """Custom list filter on the presence of recordings."""
 
@@ -1282,13 +1328,14 @@ class WorkAdmin(MusicPublisherAdmin):
 
     list_filter = (
         TagFilter,
-        HasISWCListFilter,
-        ControlledListFilter,
         WriterFilter,
         ArtistFilter,
-        HasRecordingListFilter,
-        ("library_release__library", admin.RelatedOnlyFieldListFilter),
+        LibraryFilter,
         LibraryReleaseFilter,
+        ControlledListFilter,
+        AllWritersHaveIPINameListFilter,
+        HasISWCListFilter,
+        HasRecordingListFilter,
         InCWRListFilter,
         ACKSocietyListFilter,
         ACKStatusListFilter,
