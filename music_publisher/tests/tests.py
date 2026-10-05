@@ -42,6 +42,7 @@ from django.contrib.messages import get_messages
 
 import music_publisher.models
 from music_publisher import admin as music_publisher_admin
+from music_publisher.admin import CWRExportAdmin, RecordingAdmin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (
     AlternateTitle,
@@ -628,6 +629,290 @@ class AdminTest(TestCase):
             str(self.modified_work.artistinwork_set.first()), "JOHN DOE"
         )
         self.assertEqual(self.generally_controlled_writer.last_name, "SMITH")
+
+    def test_library_release_without_library(self):
+        """A work pointing at a release that has no library must still export.
+
+        The admin form and the data import both require a library, but the
+        column is nullable and all four release classes share one table, so
+        such a row can still be reached from the database.
+        """
+
+        release = Release.objects.create(
+            release_title="No library", cd_identifier="NOLIB"
+        )
+        work = Work.objects.create(
+            title="Work without library release",
+            library_release=release,
+        )
+        work.refresh_from_db()
+        origin = work.get_dict()["origin"]
+        self.assertEqual(origin["cd_identifier"], "NOLIB")
+        self.assertIsNone(origin["library"])
+
+    def test_cwr_export_of_work_without_controlled_writer(self):
+        """Exporting a work that has no controlled writer must fail clearly.
+
+        The admin form and the data import both require one, so this needs a
+        row written directly. The export must refuse it with a message that
+        names the work, not an IndexError from deep inside the export.
+        """
+
+        work = Work.objects.create(title="Nobody controlled")
+        WriterInWork.objects.create(
+            work=work,
+            capacity="C ",
+            relative_share=Decimal("100"),
+            controlled=False,
+        )
+        export = CWRExport.objects.create(
+            description="Test", nwr_rev="NWR", options={}
+        )
+        export.works.add(work)
+        with self.assertRaises(ValueError) as context:
+            export.create_cwr()
+        self.assertIn("no controlled writer", str(context.exception))
+        export.refresh_from_db()
+        self.assertIn("no controlled writer", export.options["error"])
+
+    def test_cwr_export_of_work_without_controlled_writer_assigned(self):
+        """A controlled writer in work with no writer must fail clearly.
+
+        The admin form and the data import both require a writer there, so
+        this needs a row written directly. There is no writer to attribute
+        the share to and no writer record for the file, so the export must
+        refuse it rather than write totals that do not add up.
+        """
+
+        work = Work.objects.create(title="Unassigned controlled")
+        WriterInWork.objects.create(
+            work=work,
+            writer=None,
+            capacity="C ",
+            relative_share=Decimal("100"),
+            controlled=True,
+        )
+        export = CWRExport.objects.create(
+            description="Test", nwr_rev="NWR", options={}
+        )
+        export.works.add(work)
+        with self.assertRaises(ValueError) as context:
+            export.create_cwr()
+        self.assertIn("no writer assigned", str(context.exception))
+        export.refresh_from_db()
+        self.assertIn("no writer assigned", export.options["error"])
+
+    def test_cwr_export_of_work_without_writer_role(self):
+        """A writer in work with no role must not break the CWR templates.
+
+        The templates pad the role to two characters, so the export has to
+        write an empty string. None would be written out as the text "None"
+        and corrupt the record.
+        """
+
+        work = Work.objects.create(title="Roleless")
+        WriterInWork.objects.create(
+            work=work,
+            writer=self.generally_controlled_writer,
+            relative_share=Decimal("100"),
+            controlled=True,
+            capacity="",
+        )
+        for revision in ("NWR", "WRK", "ISR"):
+            with self.subTest(revision=revision):
+                export = CWRExport.objects.create(
+                    description="Test", nwr_rev=revision, options={}
+                )
+                export.works.add(work)
+                export.create_cwr()
+                self.assertNotIn("NONE", export.cwr)
+                self.assertNotIn("None", export.cwr)
+
+    def test_admin_links_escape_titles(self):
+        """Titles and names are user data, so links must escape them.
+
+        A work, artist or label holding markup would otherwise run script in
+        the browser of everyone who opens the recordings changelist.
+        """
+
+        work = Work.objects.create(title='<script>alert("work")</script>')
+        artist = Artist.objects.create(last_name="<script>alert('a')</script>")
+        label = Label.objects.create(name="<script>alert('l')</script>")
+        recording = Recording.objects.create(
+            work=work, artist=artist, record_label=label, isrc="JM-00-00-00009"
+        )
+        for method in ("work_link", "artist_link", "label_link"):
+            with self.subTest(method=method):
+                html = getattr(RecordingAdmin, method)(None, recording)
+                # OPTION_FORCE_CASE uppercases these on save, hence lower()
+                self.assertNotIn("<script>", html.lower())
+                self.assertIn("&lt;script&gt;", html.lower())
+
+    def test_cwr_error_message_is_escaped(self):
+        """A generation error is shown in a tooltip, so it must be escaped."""
+
+        export = CWRExport.objects.create(
+            description="Test",
+            nwr_rev="NWR",
+            options={"stop": True, "error": "it's <broken>"},
+        )
+        html = CWRExportAdmin.download_link(None, export)
+        self.assertIn("it&#x27;s &lt;broken&gt;", html)
+
+    def test_label_counts_match_the_lists_they_link_to(self):
+        """A label's release counts must equal the lists they link to.
+
+        All four release classes share one table, so cd_identifier alone
+        does not make a library release: a playlist has one and no library.
+        Counting by cd_identifier counted playlists as library releases,
+        which then did not appear in the linked changelist at all.
+        """
+
+        self.client.force_login(self.staffuser)
+        label = Label.objects.create(name="COUNTED")
+        Release.objects.create(
+            release_title="Playlist",
+            cd_identifier="COUNTED-PL",
+            release_label=label,
+        )
+        Release.objects.create(
+            release_title="Commercial", release_label=label
+        )
+        Release.objects.create(
+            release_title="Library",
+            cd_identifier="COUNTED-CD",
+            release_label=label,
+            library=self.library,
+        )
+
+        response = self.client.get(
+            reverse("admin:music_publisher_label_changelist"), follow=False
+        )
+        counted = list(response.context["cl"].result_list)[0]
+        self.assertEqual(counted.libraryrelease__count, 1)
+        self.assertEqual(counted.commercialrelease__count, 1)
+
+        for view, param, expected in (
+            ("libraryrelease", "release_label__id__exact", 1),
+            ("commercialrelease", "release_label__id__exact", 1),
+        ):
+            with self.subTest(view=view):
+                url = reverse(
+                    "admin:music_publisher_{}_changelist".format(view)
+                )
+                response = self.client.get(
+                    "{}?{}={}".format(url, param, label.id), follow=False
+                )
+                self.assertEqual(
+                    response.context["cl"].queryset.count(), expected
+                )
+
+    def test_data_import_report_escapes_titles(self):
+        """The import report is HTML, so work titles in it must be escaped.
+
+        The report is stored on the import and rendered as HTML on its change
+        page, so an unescaped title would be script for whoever opens it.
+        """
+
+        self.client.force_login(self.superuser)
+        with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
+            content = csvfile.read().replace(
+                "Simple Original", '<script>alert("title")</script>'
+            )
+        mock = InMemoryUploadedFile(
+            StringIO(content), "dataimport_file", "dataimport.csv", "text",
+            0, None,
+        )
+        url = reverse("admin:music_publisher_dataimport_add")
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({"data_file": mock, "ignore_unknown_columns": 1})
+        response = self.client.post(url, data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        report = music_publisher.models.DataImport.objects.first().report
+        self.assertNotIn("<script>", report)
+        self.assertIn("&lt;script&gt;", report)
+
+    def test_string_of_unsaved_work(self):
+        """A work that has no row yet must still be printable.
+
+        The writers are a many to many relation, so they cannot be read
+        before the work is saved. Django reports that with an error message
+        built from repr(instance), so a __str__ that reads the relation would
+        call itself again, and the printable object would raise
+        RecursionError instead of ValueError.
+        """
+
+        work = Work(title="Unsaved Work")
+        self.assertEqual(str(work), ": UNSAVED WORK ()")
+        self.assertIn("UNSAVED WORK", repr(work))
+        # The premature access still raises, and its message is readable.
+        with self.assertRaises(ValueError) as context:
+            work.writers.all()
+        self.assertIn("UNSAVED WORK", str(context.exception))
+
+    def test_admin_changelist_sorting(self):
+        """Sorting by any column of any changelist must work.
+
+        Django's system checks validate that the names in list_display
+        exist, but never what is inside admin_order_field, so a stale name
+        reaches order_by() and turns the page into a server error. Every
+        registered admin is swept here, since the same mistake in one
+        admin is invisible from the others.
+
+        Both URL shapes are requested: "1" is the link on an unsorted page,
+        and "1.-1" is what the header links become once a sort is in place,
+        which is the form that has to work too.
+        """
+
+        self.client.force_login(self.superuser)
+        for model, model_admin in admin.site._registry.items():
+            url = reverse(
+                "admin:{}_{}_changelist".format(
+                    model._meta.app_label, model._meta.model_name
+                )
+            )
+            for index, column in enumerate(model_admin.list_display):
+                for order in ("%d", "%d.-1"):
+                    order = order % index
+                    response = self.client.get(
+                        "{}?o={}".format(url, order), follow=False
+                    )
+                    self.assertEqual(
+                        response.status_code,
+                        200,
+                        "Sorting {} by column {} ({}) with ?o={} "
+                        "failed".format(
+                            model._meta.verbose_name,
+                            index,
+                            column,
+                            order,
+                        ),
+                    )
+
+    def test_admin_count_columns_are_sortable(self):
+        """The count columns must stay sortable.
+
+        Dropping admin_order_field would also stop the server errors it
+        causes, by making the column quietly unsortable, so each header must
+        still carry a sort link and that link must work. This needs a row,
+        because an empty changelist renders no column headers at all.
+        """
+
+        self.client.force_login(self.staffuser)
+        Release.objects.create(
+            release_title="SORTABLE",
+            library=self.library,
+            cd_identifier="SORT1",
+        )
+        url = reverse("admin:music_publisher_library_changelist")
+        headers = self.client.get(url, follow=False)
+        for link in ("?o=1.0", "?o=2.0"):
+            with self.subTest(link=link):
+                # a sortable column links to its ordering
+                self.assertContains(headers, link)
+                response = self.client.get(url + link, follow=False)
+                self.assertEqual(response.status_code, 200)
 
     def test_unknown_user(self):
         """Several fast test to make sure that an unregistered user is blind."""
@@ -2038,6 +2323,51 @@ class AdminTest(TestCase):
                 "last_change",
             ],
         )
+
+    def test_library_release_counts_match_the_list(self):
+        """A library's release count must equal the list it links to.
+
+        A library release has both a cd_identifier and a library, so a
+        release carrying only one of them is not one. The count asks the
+        manager rather than counting every release of the library, which
+        would drift if a class is ever added for one of the other three
+        combinations of those two columns.
+        """
+
+        self.client.force_login(self.staffuser)
+        # the fixture already has one library release for this library
+        existing = self.library_release_count()
+        Release.objects.create(
+            release_title="Both set",
+            cd_identifier="BOTH-CD",
+            library=self.library,
+        )
+        # these two have only one of the two columns set, so neither is a
+        # library release, whichever one it is that is missing
+        Release.objects.create(
+            release_title="Library only", library=self.library
+        )
+        Release.objects.create(
+            release_title="Identifier only", cd_identifier="ID-ONLY"
+        )
+
+        url = reverse("admin:music_publisher_library_changelist")
+        response = self.client.get(url, follow=False)
+        counted = list(response.context["cl"].result_list)[0]
+        self.assertEqual(counted.release__count, existing + 1)
+
+        url = reverse("admin:music_publisher_libraryrelease_changelist")
+        response = self.client.get(
+            "{}?library__id__exact={}".format(url, self.library.id),
+            follow=False,
+        )
+        self.assertEqual(
+            response.context["cl"].queryset.count(), existing + 1
+        )
+
+    def library_release_count(self):
+        """Return how many library releases the test library has."""
+        return LibraryRelease.objects.filter(library=self.library).count()
 
     def test_library_work_count_link(self):
         """The library changelist links to the works of that library, using

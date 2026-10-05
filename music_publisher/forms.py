@@ -14,6 +14,7 @@ from django.forms import (
 )
 from django.forms.models import BaseInlineFormSet
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join, mark_safe
 
 from .models import ACKImport, Work
 
@@ -282,17 +283,19 @@ class DataImportForm(ModelForm):
                     url = reverse(
                         "admin:music_publisher_work_change", args=(work.id,)
                     )
-                    report += '<a href="{}">{}</a> {}<br/>\n'.format(
-                        url, work.work_id, work.title
+                    report += format_html(
+                        '<a href="{}">{}</a> {}<br/>\n',
+                        url,
+                        work.work_id,
+                        work.title,
                     )
                 if importer.unknown_keys:
                     if cd.get("ignore_unknown_columns"):
                         report += "<br>\nUNKNOWN COLUMN NAMES:<br>\n"
-                        report += "<br>\n".join(
-                            [
-                                f"- {key}"
-                                for key in sorted(importer.unknown_keys)
-                            ]
+                        report += format_html_join(
+                            mark_safe("<br>\n"),
+                            "- {}",
+                            ((key,) for key in sorted(importer.unknown_keys)),
                         )
                     else:
                         raise ValidationError(

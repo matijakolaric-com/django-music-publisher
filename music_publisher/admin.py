@@ -20,7 +20,7 @@ from django.db import models
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils.html import mark_safe
+from django.utils.html import format_html, mark_safe
 from django.utils.timezone import now
 
 from taggit_ui.filters import TagFilter
@@ -320,20 +320,31 @@ class LabelAdmin(MusicPublisherAdmin):
     ordering = ("name", "-id")
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view."""
+        """Optimized queryset for changelist view.
+
+        The counts ask the proxy managers which releases count, rather than
+        repeating their conditions here. All four release classes share one
+        table, so cd_identifier alone does not identify a library release: a
+        playlist has one and no library, and would be counted here but never
+        appear in the library releases changelist these counts link to.
+        """
         qs = super().get_queryset(request)
         qs = qs.annotate(
             libraryrelease__count=models.Count(
                 "release",
                 distinct=True,
-                filter=models.Q(release__cd_identifier__isnull=False),
+                filter=models.Q(
+                    release__in=LibraryRelease.objects.values("pk")
+                ),
             )
         )
         qs = qs.annotate(
             commercialrelease__count=models.Count(
                 "release",
                 distinct=True,
-                filter=models.Q(release__cd_identifier__isnull=True),
+                filter=models.Q(
+                    release__in=CommercialRelease.objects.values("pk")
+                ),
             )
         )
         qs = qs.annotate(models.Count("recording", distinct=True))
@@ -399,13 +410,27 @@ class LibraryAdmin(MusicPublisherAdmin):
     fields = ("name",)
 
     def get_queryset(self, request):
-        """Optimized queryset for changelist view."""
+        """Optimized queryset for changelist view.
+
+        A library release is a release with both a cd_identifier and a
+        library, which is what LibraryReleaseManager filters on. Counting
+        every release of the library would be the same number today, but only
+        because every release reached through a library has both. Asking the
+        manager keeps that true if a class is ever added for one of the
+        other combinations.
+        """
         qs = super().get_queryset(request)
         qs = qs.annotate(
             work__count=models.Count("release__works", distinct=True)
         )
         qs = qs.annotate(
-            release__count=models.Count("release__id", distinct=True)
+            release__count=models.Count(
+                "release",
+                distinct=True,
+                filter=models.Q(
+                    release__in=LibraryRelease.objects.values("pk")
+                ),
+            )
         )
         return qs
 
@@ -420,7 +445,7 @@ class LibraryAdmin(MusicPublisherAdmin):
         return mark_safe('<a href="{}">{}</a>'.format(url, count))
 
     libraryrelease_count.short_description = "Library releases"
-    libraryrelease_count.admin_order_field = "libraryrelease__count"
+    libraryrelease_count.admin_order_field = "release__count"
 
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
@@ -1068,11 +1093,15 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     def writer_last_names(self, obj):
-        """This is a standard way how writers are shown in other apps."""
+        """This is a standard way how writers are shown in other apps.
+
+        Not sortable: the writers are a many to many relation, so ordering by
+        one of their fields adds a join that repeats the work once per
+        writer, so the changelist would show the same work several times.
+        """
         return obj.writer_last_names()
 
     writer_last_names.short_description = "Writers' last names"
-    writer_last_names.admin_order_field = "writers__last_name"
 
     def percentage_controlled(self, obj):
         """Controlled percentage
@@ -1355,9 +1384,22 @@ class WorkAdmin(MusicPublisherAdmin):
     )
 
     def get_search_results(self, request, queryset, search_term):
-        """Deal with the situation term is work ID."""
-        if search_term.isnumeric():
-            search_term = search_term.lstrip("0")
+        """Search for a work ID as well as for the text fields.
+
+        A work ID is a publisher code plus the row number, and it is written
+        and imported in more than one shape: "MK000002", "X123", or plain
+        "2". The number is the row id, so a numeric term is matched against
+        it exactly rather than prefix matched, and a term carrying a code is
+        matched against the stored ID. The term is never reduced to an empty
+        string, because an empty term matches every work.
+        """
+        term = search_term.strip()
+        if term.isdigit():
+            # "0001" and "1" are the same work, "000" is not a work id.
+            return queryset.filter(id=int(term.lstrip("0") or "0")), False
+        match = re.match(r"^([A-Za-z]+)0*(\d+)$", term)
+        if match:
+            return queryset.filter(_work_id__iexact=term), False
         return super().get_search_results(request, queryset, search_term)
 
     fieldsets = (
@@ -1977,8 +2019,7 @@ class RecordingAdmin(MusicPublisherAdmin):
     def work_link(self, obj):
         """Link to the work the recording is based on."""
         url = reverse("admin:music_publisher_work_change", args=[obj.work.id])
-        link = '<a href="{}">{}</a>'.format(url, obj.work)
-        return mark_safe(link)
+        return format_html('<a href="{}">{}</a>', url, obj.work)
 
     work_link.short_description = "Work"
     work_link.admin_order_field = "work__id"
@@ -1990,8 +2031,7 @@ class RecordingAdmin(MusicPublisherAdmin):
         url = reverse(
             "admin:music_publisher_artist_change", args=[obj.artist.id]
         )
-        link = '<a href="{}">{}</a>'.format(url, obj.artist)
-        return mark_safe(link)
+        return format_html('<a href="{}">{}</a>', url, obj.artist)
 
     artist_link.short_description = "Recording Artist"
     artist_link.admin_order_field = "artist"
@@ -2003,8 +2043,7 @@ class RecordingAdmin(MusicPublisherAdmin):
         url = reverse(
             "admin:music_publisher_label_change", args=[obj.record_label.id]
         )
-        link = '<a href="{}">{}</a>'.format(url, obj.record_label)
-        return mark_safe(link)
+        return format_html('<a href="{}">{}</a>', url, obj.record_label)
 
     label_link.short_description = "Record Label"
     label_link.admin_order_field = "record_label"
@@ -2056,10 +2095,9 @@ class CWRExportAdmin(admin.ModelAdmin):
             return mark_safe('<a href="{}">Download</a>'.format(url))
         if obj.options.get("stop"):
             if obj.options.get("error"):
-                return mark_safe(
-                    "<span title='{}'>ERROR</span>".format(
-                        obj.options.get("error")
-                    )
+                return format_html(
+                    "<span title='{}'>ERROR</span>",
+                    obj.options.get("error"),
                 )
             else:
                 return mark_safe("Generating CWR")
@@ -2427,8 +2465,12 @@ class ACKImportAdmin(AdminWithReport):
         if not created:
             return report, [], [str(work_id)]
         url = reverse("admin:music_publisher_work_change", args=(work.id,))
-        report += '<a href="{}">{}</a> {} &mdash; {}<br/>\n'.format(
-            url, work.work_id, work.title, acknowledgement.get_status_display()
+        report += format_html(
+            '<a href="{}">{}</a> {} &mdash; {}<br/>\n',
+            url,
+            work.work_id,
+            work.title,
+            acknowledgement.get_status_display(),
         )
         return report, [], []
 

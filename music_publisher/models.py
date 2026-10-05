@@ -45,6 +45,26 @@ from .validators import CWRFieldValidator
 WORLD_DICT = {"tis-a": "2WL", "tis-n": "2136", "name": "World"}
 
 
+class WriterInWorkDict(dict):
+    """A :meth:`.WriterInWork.get_dict` record with CWR export helpers.
+
+    A plain dict, so it serializes and compares as one, but it can answer
+    the questions the CWR export asks about a writer in work without every
+    caller repeating the same defensive lookups.
+    """
+
+    def get_role_code(self):
+        """Return this writer's role code, empty if there is no role.
+
+        The role is required by :meth:`.WriterInWork.clean`, so it is only
+        missing in a row written without it. The CWR templates pad this
+        field to two characters, so an empty string is what they need: None
+        would be written out as the text "None" and corrupt the record.
+        """
+        role = self.get("writer_role")
+        return role["code"] if role else ""
+
+
 class Artist(ArtistBase):
     """Performing artist."""
 
@@ -232,6 +252,40 @@ class Release(ReleaseBase):
         return d
 
 
+class ReleaseClassification:
+    """The conditions that tell the release classes apart.
+
+    :class:`.Release`, :class:`.LibraryRelease`, :class:`.CommercialRelease`
+    and :class:`.Playlist` are all one table, so a row is told apart by two
+    nullable columns, cd_identifier and library. Three of the four
+    combinations have a class:
+
+    ====================  =============  ====================
+    cd_identifier          library         class
+    ====================  =============  ====================
+    set                    set             LibraryRelease
+    null                   null            CommercialRelease
+    set                    null            Playlist
+    null                   set            *no class*
+    ====================  =============  ====================
+
+    The last row is reachable in the database and matches no manager, so it
+    appears in none of the release changelists. Counts that are not taken
+    from a manager have to state the same conditions, or they will disagree
+    with the lists they link to.
+    """
+
+    LIBRARY_RELEASE = models.Q(
+        cd_identifier__isnull=False, library__isnull=False
+    )
+    COMMERCIAL_RELEASE = models.Q(
+        cd_identifier__isnull=True, library__isnull=True
+    )
+    PLAYLIST = models.Q(
+        cd_identifier__isnull=False, library__isnull=True
+    )
+
+
 class LibraryReleaseManager(models.Manager):
     """Manager for a proxy class :class:`.models.LibraryRelease`"""
 
@@ -242,10 +296,8 @@ class LibraryReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.LibraryRelease`
         """
-        return (
-            super()
-            .get_queryset()
-            .filter(cd_identifier__isnull=False, library__isnull=False)
+        return super().get_queryset().filter(
+            ReleaseClassification.LIBRARY_RELEASE
         )
 
     def get_dict(self, qs):
@@ -300,7 +352,10 @@ class LibraryRelease(Release):
         return {
             "origin_type": {"code": "LIB", "name": "Library Work"},
             "cd_identifier": self.cd_identifier,
-            "library": self.library.get_dict(),
+            # The admin form and the data import both require a library, but
+            # the column is nullable and all four release classes share one
+            # table, so a work can point at a row that has no library.
+            "library": self.library.get_dict() if self.library else None,
         }
 
 
@@ -314,10 +369,8 @@ class CommercialReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return (
-            super()
-            .get_queryset()
-            .filter(cd_identifier__isnull=True, library__isnull=True)
+        return super().get_queryset().filter(
+            ReleaseClassification.COMMERCIAL_RELEASE
         )
 
     def get_dict(self, qs):
@@ -359,10 +412,8 @@ class PlaylistManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return (
-            super()
-            .get_queryset()
-            .filter(cd_identifier__isnull=False, library__isnull=True)
+        return super().get_queryset().filter(
+            ReleaseClassification.PLAYLIST
         )
 
     def get_dict(self, qs):
@@ -650,6 +701,7 @@ class Work(TitleBase):
                 for rec in work.recordings.all():
                     if rec._recording_id is None:
                         rec.recording_id = rec.recording_id
+                        rec.save()
 
     _work_id = models.CharField(
         "Work ID",
@@ -737,6 +789,12 @@ class Work(TitleBase):
         return super().clean_fields(*args, **kwargs)
 
     def writer_last_names(self):
+        if self.pk is None:
+            # No row yet, so the writers cannot be queried. Returning nothing
+            # keeps __str__ usable on an unsaved instance: Django builds the
+            # error message for a premature m2m access with repr(instance),
+            # so touching self.writers here would recurse through __str__.
+            return ""
         writers = sorted(set(self.writers.all()), key=lambda w: w.last_name)
         return " / ".join(w.last_name.upper() for w in writers)
 
@@ -1028,7 +1086,10 @@ class WriterInWork(models.Model):
     )
     controlled = models.BooleanField(default=False)
     relative_share = models.DecimalField(
-        "Manuscript share", max_digits=5, decimal_places=2
+        "Manuscript share",
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
     )
     capacity = models.CharField(
         "Role", max_length=2, blank=True, choices=ROLES
@@ -1151,6 +1212,7 @@ class WriterInWork(models.Model):
         Returns:
             dict: JSON-serializable data structure
         """
+
         writer = self.writer.get_dict() if self.writer else None
         relative_share = str(self.relative_share / 100)
         role = (
@@ -1174,13 +1236,13 @@ class WriterInWork(models.Model):
             ]
         else:
             ops = []
-        j = {
-            "writer": writer,
-            "controlled": self.controlled,
-            "relative_share": relative_share,
-            "writer_role": role,
-            "original_publishers": ops,
-        }
+        j = WriterInWorkDict(
+            writer=writer,
+            controlled=self.controlled,
+            relative_share=relative_share,
+            writer_role=role,
+            original_publishers=ops,
+        )
         return j
 
 
@@ -1656,15 +1718,12 @@ class CWRExport(models.Model):
                 w = wiw["writer"]
                 if not w:
                     continue  # goes to OWR
-                tup = (w["code"], wiw["writer_role"]["code"])
+                role = wiw.get_role_code()
+                tup = (w["code"], role)
                 if tup in reported:
                     continue
                 reported.add(tup)
-                w.update(
-                    {
-                        "writer_role": wiw["writer_role"]["code"],
-                    }
-                )
+                w.update({"writer_role": role})
                 yield self.get_transaction_record("WRI", w)
 
             self.transaction_count += 1
@@ -1790,8 +1849,20 @@ class CWRExport(models.Model):
         copublished_writer_ids = set()  # used for co-publishing
         controlled_shares = defaultdict(Decimal)
         for wiw in work["writers"]:
-            if wiw["controlled"]:
-                controlled_writer_ids.add(wiw["writer"]["code"])
+            if not wiw["controlled"]:
+                continue
+            # A controlled writer in work must have a writer, which
+            # WriterInWork.clean enforces, so the admin form and the data
+            # import both guarantee it. A row that says otherwise has no
+            # writer to attribute the share to and no writer record to put in
+            # the file, so refuse it rather than emit totals that do not add
+            # up.
+            if wiw["writer"] is None:
+                raise ValueError(
+                    "Work {} has a controlled writer in work with no "
+                    "writer assigned.".format(work.get("code"))
+                )
+            controlled_writer_ids.add(wiw["writer"]["code"])
         for wiw in work["writers"]:
             writer = wiw["writer"]
             share = Decimal(wiw["relative_share"])
@@ -1833,7 +1904,7 @@ class CWRExport(models.Model):
             sr_share = share * (1 - self.agreement_sr)
             w.update(
                 {
-                    "writer_role": wiw["writer_role"]["code"],
+                    "writer_role": wiw.get_role_code(),
                     "share": share,
                     "pr_share": pr_share,
                     "mr_share": mr_share,
@@ -1893,11 +1964,7 @@ class CWRExport(models.Model):
             share = Decimal(wiw["relative_share"])
             w.update(
                 {
-                    "writer_role": (
-                        wiw["writer_role"]["code"]
-                        if wiw["writer_role"]
-                        else None
-                    ),
+                    "writer_role": wiw.get_role_code(),
                     "share": share,
                     "pr_share": share,
                     "mr_share": share,
@@ -1933,7 +2000,25 @@ class CWRExport(models.Model):
             controlled_writer_ids,
             copublished_writer_ids,
         ) = self.calculate_publisher_shares(work)
-        publisher = work["writers"][0]["original_publishers"][0]["publisher"]
+        # A controlled writer is required by WriterInWorkFormSet and so by
+        # the admin form and the data import, but a work that reached the
+        # database another way can have none, and then there is no original
+        # publisher to report. Refuse rather than write a partial file: the
+        # error is shown on the export, and the export is worth re-running
+        # once the work is fixed.
+        publisher = next(
+            (
+                original_publisher["publisher"]
+                for wiw in work["writers"]
+                for original_publisher in wiw["original_publishers"]
+            ),
+            None,
+        )
+        if publisher is None:
+            raise ValueError(
+                "Work {} has no controlled writer, so it has no original "
+                "publisher to register.".format(work.get("code"))
+            )
         yield from self.yield_publisher_lines(
             publisher, controlled_relative_share
         )
