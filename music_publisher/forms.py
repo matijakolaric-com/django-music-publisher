@@ -16,7 +16,9 @@ from django.forms.models import BaseInlineFormSet
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join, mark_safe
 
-from .models import ACKImport, Work
+from .models import ACKImport, DataImport, Work
+
+MAX_IMPORT_FILENAME_LENGTH = DataImport._meta.get_field("filename").max_length
 
 
 class LibraryReleaseForm(ModelForm):
@@ -256,7 +258,21 @@ class DataImportForm(ModelForm):
         model = ACKImport
         fields = ("data_file",)
 
-    data_file = FileField()
+    data_file = FileField(
+        max_length=MAX_IMPORT_FILENAME_LENGTH,
+        help_text=(
+            "CSV file. The file name must not exceed {} characters.".format(
+                MAX_IMPORT_FILENAME_LENGTH
+            )
+        ),
+        error_messages={
+            "max_length": (
+                "The file name is too long: %(length)d characters, "
+                "the maximum is %(max)d. "
+                "Please rename the file and try again."
+            )
+        },
+    )
     ignore_unknown_columns = BooleanField(required=False, initial=False)
 
     def clean(self):
@@ -275,6 +291,9 @@ class DataImportForm(ModelForm):
 
         cd = self.cleaned_data
         f = cd.get("data_file")
+        if f is None:
+            # The file field already failed, do not import anything.
+            return cd
         report = ""
         with transaction.atomic():
             try:

@@ -807,6 +807,46 @@ class AdminTest(TestCase):
                     response.context["cl"].queryset.count(), expected
                 )
 
+    def test_data_import_long_filename(self):
+        """A file name longer than the model's filename column must be
+        rejected before the import runs.
+
+        The name is written to ``DataImport.filename``, a 60 character
+        column, and the import is committed before the file name is saved,
+        so an unvalidated name either fails at the database or leaves the
+        imported works in place with no log entry to show for them."""
+
+        self.client.force_login(self.superuser)
+        with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
+            content = csvfile.read()
+        max_length = music_publisher.models.DataImport._meta.get_field(
+            "filename"
+        ).max_length
+        mock = InMemoryUploadedFile(
+            StringIO(content), "dataimport_file",
+            "d" * (max_length + 1) + ".csv", "text", 0, None,
+        )
+        url = reverse("admin:music_publisher_dataimport_add")
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.update({"data_file": mock, "ignore_unknown_columns": 1})
+        works_before = Work.objects.count()
+        response = self.client.post(url, data, follow=False)
+        # The add page is redisplayed with an error, no redirect ...
+        self.assertEqual(response.status_code, 200)
+        form = response.context_data["adminform"].form
+        self.assertFalse(form.is_valid())
+        # ... on the file field only, and no junk error beside it ...
+        self.assertEqual(
+            list(form.errors), ["data_file"], "unexpected extra errors"
+        )
+        self.assertIn(
+            "too long", form.errors["data_file"][0], "no readable message"
+        )
+        # ... nothing was imported and nothing was logged.
+        self.assertEqual(Work.objects.count(), works_before)
+        self.assertFalse(music_publisher.models.DataImport.objects.exists())
+
     def test_data_import_report_escapes_titles(self):
         """The import report is HTML, so work titles in it must be escaped.
 
