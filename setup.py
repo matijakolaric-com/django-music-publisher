@@ -36,7 +36,7 @@ setuptools.setup(
         "djangorestframework==3.18.1",
         "music-metadata-territories==24.12",
         "Markdown==3.10.3",
-        "Pillow==12.3.0",
+        "Pillow==13.0.0",
         "psycopg2-binary==2.9.13",
         "waitress==3.0.2",
         "whitenoise==6.12.0",
