@@ -2130,20 +2130,32 @@ class CWRExport(models.Model):
         for xrf in work["cross_references"]:
             yield self.get_transaction_record("XRF", xrf)
 
-    def get_header(self):
-        """Construct CWR HDR record."""
+    def get_header(
+        self,
+        publisher_code=None,
+        publisher_name=None,
+        publisher_ipi_name=None,
+    ):
+        """Construct CWR HDR record, optionally overriding the sender."""
         return self.get_record(
             "HDR",
             {
                 "creation_date": datetime.now(),
                 "filename": self.filename,
-                "ipi_name_number": settings.PUBLISHER_IPI_NAME,
-                "name": settings.PUBLISHER_NAME,
-                "code": settings.PUBLISHER_CODE,
+                "ipi_name_number": publisher_ipi_name
+                or settings.PUBLISHER_IPI_NAME,
+                "name": publisher_name or settings.PUBLISHER_NAME,
+                "code": publisher_code or settings.PUBLISHER_CODE,
             },
         )
 
-    def yield_lines(self, works):
+    def yield_lines(
+        self,
+        works,
+        publisher_code=None,
+        publisher_name=None,
+        publisher_ipi_name=None,
+    ):
         """Yield CWR transaction records (rows/lines) for works
 
         Args:
@@ -2155,7 +2167,9 @@ class CWRExport(models.Model):
 
         self.record_count = self.record_sequence = self.transaction_count = 0
 
-        yield self.get_header()
+        yield self.get_header(
+            publisher_code, publisher_name, publisher_ipi_name
+        )
 
         if self.nwr_rev == "NW2":
             yield self.get_record("GRH", {"transaction_type": "NWR"})
@@ -2267,7 +2281,14 @@ class CWRExport(models.Model):
             )
         return publisher_code
 
-    def create_cwr(self, publisher_code=None, generate=True, force=False):
+    def create_cwr(
+        self,
+        publisher_code=None,
+        generate=True,
+        force=False,
+        publisher_name=None,
+        publisher_ipi_name=None,
+    ):
         """Create CWR and save.
 
         Args:
@@ -2275,6 +2296,8 @@ class CWRExport(models.Model):
             generate (bool): if False, only create a pending export
             force (bool): ignore the "stop" marker if generation is already
                 marked as running
+            publisher_name (str): override publisher name in the CWR header
+            publisher_ipi_name (str): override IPI name in the CWR header
         """
         if self.cwr:
             return  # because there is nothing to do
@@ -2318,7 +2341,12 @@ class CWRExport(models.Model):
             works = self.works.order_by("id")
             works = Work.objects.get_dict_items(works)
             buffer = StringIO()
-            for line in self.yield_lines(works):
+            for line in self.yield_lines(
+                works,
+                publisher_code,
+                publisher_name,
+                publisher_ipi_name,
+            ):
                 buffer.write(line)
             self.cwr = buffer.getvalue()
             self.options.pop("stop", None)

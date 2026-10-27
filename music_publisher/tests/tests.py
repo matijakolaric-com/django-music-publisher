@@ -38,6 +38,7 @@ from django.test import (
     TransactionTestCase,
 )
 from django.urls import reverse
+from django.utils.timezone import now
 from django.contrib.messages import get_messages
 
 import music_publisher.models
@@ -2579,14 +2580,15 @@ class AdminTest(TestCase):
 @override_settings(
     OPTION_CWR_SYNC_WORK_LIMIT=101,
     OPTION_CWR_WORKS_PER_FILE=100,
+    PUBLISHER_CODE="TEST",
 )
 class GenerateCWRCommandTest(TestCase):
     """Tests for the generatecwr management command."""
 
-    def call_generatecwr(self):
+    def call_generatecwr(self, *args):
         stdout = StringIO()
         stderr = StringIO()
-        call_command("generatecwr", stdout=stdout, stderr=stderr)
+        call_command("generatecwr", *args, stdout=stdout, stderr=stderr)
         return stdout.getvalue(), stderr.getvalue()
 
     def test_no_pending_cwr_exports(self):
@@ -2627,6 +2629,31 @@ class GenerateCWRCommandTest(TestCase):
         )
         self.assertIn("(2.50s)", stdout)
         self.assertEqual(stderr, "")
+
+    def test_description_only_updates_the_export_that_generates(self):
+        stopped_export = CWRExport.objects.create(
+            description="Keep stopped description",
+            nwr_rev="NWR",
+        )
+        generated_export = CWRExport.objects.create(
+            description="Keep pending description",
+            nwr_rev="NWR",
+        )
+
+        def create_cwr(export, *args, **kwargs):
+            if export.pk == stopped_export.pk:
+                export.options = {"stop": True}
+                return
+            export.cwr = "CWR"
+            export.save(update_fields=["cwr"])
+
+        with patch.object(CWRExport, "create_cwr", create_cwr):
+            self.call_generatecwr("--description", "Updated description")
+
+        stopped_export.refresh_from_db()
+        generated_export.refresh_from_db()
+        self.assertEqual(stopped_export.description, "Keep stopped description")
+        self.assertEqual(generated_export.description, "Updated description")
 
     def test_stopped_with_error_message_includes_generation_duration(self):
         """Stopped generation with an error includes elapsed generation time."""
@@ -2720,6 +2747,250 @@ class GenerateCWRCommandTest(TestCase):
             ),
             stderr,
         )
+
+
+    def test_sender_options_are_passed_to_generation(self):
+        from types import SimpleNamespace
+
+        cwr_export = CWRExport.objects.create(nwr_rev="NWR")
+        sender = SimpleNamespace(
+            name="Custom Sender", ipi_name="00012345678"
+        )
+
+        def create_cwr(export, **kwargs):
+            self.assertEqual(kwargs["publisher_code"], "CUSTOM")
+            self.assertEqual(kwargs["publisher_name"], sender.name)
+            self.assertEqual(kwargs["publisher_ipi_name"], sender.ipi_name)
+            export.cwr = "generated CWR"
+            export.save(update_fields=["cwr"])
+
+        with (
+            patch(
+                "music_publisher.management.commands.generatecwr.Command.get_publisher",
+                return_value=sender,
+            ),
+            patch.object(CWRExport, "create_cwr", create_cwr),
+        ):
+            stdout, stderr = self.call_generatecwr(
+                "--code", "CUSTOM", "--ipi_name", sender.ipi_name
+            )
+
+        self.assertIn("Generated CWR export #{}".format(cwr_export.pk), stdout)
+        self.assertEqual(stderr, "")
+
+    def test_regenerate_clears_generated_data_and_preserves_description(self):
+        work = Work.objects.create(title="Regenerated work")
+        cwr_export = CWRExport.objects.create(
+            description="Keep this description",
+            nwr_rev="REV",
+            cwr="old CWR",
+            created_on=now(),
+            year="25",
+            num_in_year=9,
+            options={"error": "old error"},
+        )
+        cwr_export.works.add(work)
+
+        def create_cwr(export, **kwargs):
+            self.assertEqual(export.cwr, "")
+            self.assertIsNone(export.created_on)
+            self.assertEqual(export.year, "")
+            self.assertEqual(export.num_in_year, 0)
+            self.assertEqual(export.description, "Keep this description")
+            self.assertEqual(export.options, {})
+            self.assertEqual(kwargs["publisher_code"], "CUSTOM")
+            export.cwr = "fresh CWR"
+            export.save(update_fields=["cwr"])
+
+        with patch.object(CWRExport, "create_cwr", create_cwr):
+            self.call_generatecwr(
+                "--regenerate", str(cwr_export.pk), "--code", "CUSTOM"
+            )
+
+        cwr_export.refresh_from_db()
+        self.assertEqual(cwr_export.cwr, "fresh CWR")
+        self.assertEqual(cwr_export.description, "Keep this description")
+        self.assertEqual(list(cwr_export.works.all()), [work])
+
+    def test_regenerate_updates_description_when_supplied(self):
+        cwr_export = CWRExport.objects.create(
+            description="Old description", nwr_rev="NWR", cwr="old CWR"
+        )
+
+        def create_cwr(export, **kwargs):
+            self.assertEqual(export.description, "Updated description")
+            export.cwr = "fresh CWR"
+            export.save(update_fields=["cwr"])
+
+        with patch.object(CWRExport, "create_cwr", create_cwr):
+            self.call_generatecwr(
+                "--regenerate", str(cwr_export.pk),
+                "--description", "Updated description",
+            )
+
+        cwr_export.refresh_from_db()
+        self.assertEqual(cwr_export.description, "Updated description")
+
+    def test_regenerate_requires_force_for_stopped_export(self):
+        cwr_export = CWRExport.objects.create(
+            nwr_rev="NWR",
+            cwr="old CWR",
+            options={"stop": True, "error": "prevented by user"},
+        )
+
+        with self.assertRaisesRegex(CommandError, "use --force"):
+            self.call_generatecwr("--regenerate", str(cwr_export.pk))
+
+        cwr_export.refresh_from_db()
+        self.assertEqual(cwr_export.cwr, "old CWR")
+        self.assertEqual(cwr_export.options["error"], "prevented by user")
+
+    def test_duplicate_copies_type_and_works_with_fresh_state(self):
+        work = Work.objects.create(title="Duplicated work")
+        source = CWRExport.objects.create(
+            description="Source description",
+            nwr_rev="RE2",
+            cwr="source CWR",
+            created_on=now(),
+            year="25",
+            num_in_year=9,
+            options={"stop": True, "error": "old error"},
+        )
+        source.works.add(work)
+        generated = []
+
+        def create_cwr(export, **kwargs):
+            generated.append(export)
+            self.assertNotEqual(export.pk, source.pk)
+            self.assertEqual(export.nwr_rev, "RE2")
+            self.assertEqual(export.description, "")
+            self.assertEqual(export.cwr, "")
+            self.assertIsNone(export.created_on)
+            self.assertEqual(export.year, "")
+            self.assertEqual(export.num_in_year, 0)
+            self.assertEqual(export.options, {})
+            self.assertEqual(list(export.works.all()), [work])
+            export.cwr = "duplicate CWR"
+            export.save(update_fields=["cwr"])
+
+        with patch.object(CWRExport, "create_cwr", create_cwr):
+            self.call_generatecwr("--duplicate", str(source.pk))
+
+        self.assertEqual(len(generated), 1)
+        duplicate = CWRExport.objects.get(pk=generated[0].pk)
+        self.assertEqual(duplicate.description, "")
+        self.assertEqual(duplicate.cwr, "duplicate CWR")
+        self.assertEqual(source.cwr, "source CWR")
+
+    def test_duplicate_uses_description_when_supplied(self):
+        source = CWRExport.objects.create(
+            description="Source description", nwr_rev="NWR"
+        )
+        generated = []
+
+        def create_cwr(export, **kwargs):
+            generated.append(export)
+            self.assertEqual(export.description, "New description")
+            export.cwr = "duplicate CWR"
+            export.save(update_fields=["cwr"])
+
+        with patch.object(CWRExport, "create_cwr", create_cwr):
+            self.call_generatecwr(
+                "--duplicate", str(source.pk),
+                "--description", "New description",
+            )
+
+        self.assertEqual(len(generated), 1)
+
+    def test_unknown_publisher_ipi_name_is_an_error(self):
+        class DoesNotExist(Exception):
+            pass
+
+        class PublisherManager:
+            def get(self, **kwargs):
+                self.query = kwargs
+                raise DoesNotExist
+
+        PublisherModel = type(
+            "PublisherModel",
+            (),
+            {
+                "objects": PublisherManager(),
+                "DoesNotExist": DoesNotExist,
+                "MultipleObjectsReturned": type(
+                    "MultipleObjectsReturned", (Exception,), {}
+                ),
+            },
+        )
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.apps.get_model",
+            return_value=PublisherModel,
+        ):
+            with self.assertRaisesRegex(CommandError, "No publisher found"):
+                self.call_generatecwr("--ipi_name", "00012345678")
+
+
+@override_settings(PUBLISHER_CODE="TEST")
+class CWRHeaderOverrideTest(TestCase):
+    def test_create_cwr_passes_sender_values_to_header_generation(self):
+        cwr_export = CWRExport.objects.create(nwr_rev="NWR")
+        calls = []
+
+        def yield_lines(works, publisher_code, publisher_name, publisher_ipi_name):
+            calls.append((publisher_code, publisher_name, publisher_ipi_name))
+            yield cwr_export.get_header(
+                publisher_code, publisher_name, publisher_ipi_name
+            )
+
+        header = {}
+        get_record = cwr_export.get_record
+
+        def capture_header(record_type, record):
+            if record_type == "HDR":
+                header.update(record)
+            return get_record(record_type, record)
+
+        with (
+            patch.object(cwr_export, "get_record", side_effect=capture_header),
+            patch.object(cwr_export, "yield_lines", side_effect=yield_lines),
+        ):
+            cwr_export.create_cwr(
+                publisher_code="CUSTOM",
+                publisher_name="Custom Sender",
+                publisher_ipi_name="00012345678",
+            )
+
+        self.assertEqual(
+            calls, [("CUSTOM", "Custom Sender", "00012345678")]
+        )
+        self.assertEqual(header["name"], "Custom Sender")
+        self.assertEqual(header["ipi_name_number"], "00012345678")
+        self.assertEqual(header["code"], "CUSTOM")
+        self.assertIn("CUSTOM", cwr_export.filename)
+
+    def test_create_cwr_passes_sender_values_when_generation_fails(self):
+        cwr_export = CWRExport.objects.create(nwr_rev="NWR")
+        calls = []
+
+        def fail_generation(works, publisher_code, publisher_name, publisher_ipi_name):
+            calls.append((publisher_code, publisher_name, publisher_ipi_name))
+            raise RuntimeError("generation failed")
+
+        with patch.object(
+            cwr_export, "yield_lines", side_effect=fail_generation
+        ):
+            with self.assertRaisesRegex(RuntimeError, "generation failed"):
+                cwr_export.create_cwr(
+                    publisher_code="CUSTOM",
+                    publisher_name="Custom Sender",
+                    publisher_ipi_name="00012345678",
+                )
+
+        self.assertEqual(
+            calls, [("CUSTOM", "Custom Sender", "00012345678")]
+        )
+        self.assertEqual(cwr_export.options["error"], "generation failed")
 
 
 class CWRTemplatesTest(SimpleTestCase):
