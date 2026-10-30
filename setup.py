@@ -33,7 +33,7 @@ setuptools.setup(
         "django-admin-taggit-ui==1.3",
         "django-cleanup==9.0.0",
         "django-storages==1.14.6",
-        "djangorestframework==3.18.1",
+        "djangorestframework==3.18.2",
         "music-metadata-territories==24.12",
         "Markdown==3.10.3",
         "Pillow==12.3.0",
