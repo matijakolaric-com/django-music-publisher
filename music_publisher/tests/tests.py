@@ -757,8 +757,29 @@ class AdminTest(TestCase):
             nwr_rev="NWR",
             options={"stop": True, "error": "it's <broken>"},
         )
+        export.has_cwr = False
         html = CWRExportAdmin.download_link(None, export)
         self.assertIn("it&#x27;s &lt;broken&gt;", html)
+
+    def test_cwr_changelist_links_do_not_load_cwr(self):
+        """CWR presence is annotated, so rendering links doesn't fetch CWR."""
+        export = CWRExport.objects.create(
+            description="Generated CWR",
+            nwr_rev="NWR",
+            cwr="CWR contents",
+        )
+        request = RequestFactory().get(
+            reverse("admin:music_publisher_cwrexport_changelist")
+        )
+        request.user = self.staffuser
+        model_admin = CWRExportAdmin(CWRExport, admin.site)
+        export = model_admin.get_queryset(request).get(pk=export.pk)
+
+        self.assertTrue(export.has_cwr)
+        self.assertIn("cwr", export.get_deferred_fields())
+        self.assertIn("View CWR", model_admin.view_link(export))
+        self.assertIn("Download", model_admin.download_link(export))
+        self.assertIn("cwr", export.get_deferred_fields())
 
     def test_label_counts_match_the_lists_they_link_to(self):
         """A label's release counts must equal the lists they link to.

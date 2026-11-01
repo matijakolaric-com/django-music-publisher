@@ -2078,7 +2078,7 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def view_link(self, obj):
         """Link to the CWR preview."""
-        if obj.cwr:
+        if obj.has_cwr:
             url = reverse(
                 "admin:music_publisher_cwrexport_change", args=(obj.id,)
             )
@@ -2090,7 +2090,7 @@ class CWRExportAdmin(admin.ModelAdmin):
     def download_link(self, obj):
         """Link for downloading or creating CWR file."""
         url = reverse("admin:music_publisher_cwrexport_change", args=(obj.id,))
-        if obj.cwr:
+        if obj.has_cwr:
             url += "?download=true"
             return mark_safe('<a href="{}">Download</a>'.format(url))
         if obj.options.get("stop"):
@@ -2110,6 +2110,13 @@ class CWRExportAdmin(admin.ModelAdmin):
         """Optimized query with count of works in the export."""
         qs = super().get_queryset(request)
         qs = qs.annotate(models.Count("works", distinct=True))
+        qs = qs.annotate(
+            has_cwr=models.Case(
+                models.When(cwr="", then=models.Value(False)),
+                default=models.Value(True),
+                output_field=models.BooleanField(),
+            )
+        )
         return qs
 
     def date(self, obj):
