@@ -1,7 +1,7 @@
 Django-Music-Publisher - Free music publishing software
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Version 26.9 - Michaelmas
+Version 26.9.1 - Michaelmas
 
 .. image:: https://img.shields.io/github/actions/workflow/status/matijakolaric-com/django-music-publisher/build.yml?branch=master
     :target: https://github.com/matijakolaric-com/django-music-publisher/actions/workflows/build.yml
