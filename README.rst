@@ -18,7 +18,7 @@ Version 26.9.1 - Michaelmas
 .. image:: https://img.shields.io/badge/linting-ruff-D7FF64?logo=ruff
     :target: https://github.com/astral-sh/ruff
     :alt: Ruff
-.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg?logo=pypi
+.. image:: https://img.shields.io/pypi/v/django-music-publisher.svg?logo=pypi&label=PyPI
     :target: https://pypi.org/project/django-music-publisher/
     :alt: PYPI
 .. image:: https://img.shields.io/pypi/wheel/django-music-publisher?logo=pypi
