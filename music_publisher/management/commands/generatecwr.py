@@ -63,82 +63,118 @@ class Command(BaseCommand):
         explicit_export = (
             options["regenerate"] is not None or options["duplicate"] is not None
         )
+        self.generate_exports(
+            cwr_exports, options, publisher, publisher_code, explicit_export
+        )
+
+    def generate_exports(
+        self, cwr_exports, options, publisher, publisher_code, explicit_export
+    ):
         for cwr_export in cwr_exports:
-            if explicit_export and options["description"] is not None:
-                cwr_export.description = options["description"]
-                cwr_export.save(update_fields=["description"])
-
-            description = (
-                options["description"]
-                if options["description"] is not None
-                else cwr_export.description
-            )
-            self.stdout.write(
-                "Generating CWR #{id} ({description})...".format(
-                    id=cwr_export.id,
-                    description=description or "no description",
-                )
-            )
-
-            started_at = time.monotonic()
-            try:
-                cwr_export.create_cwr(
-                    publisher_code=publisher_code,
-                    generate=True,
-                    force=options["force"],
-                    publisher_name=publisher.name if publisher else None,
-                    publisher_ipi_name=publisher.ipi_name if publisher else None,
-                )
-            except ImproperlyConfigured as exc:
-                raise CommandError(str(exc)) from exc
-            duration = time.monotonic() - started_at
-
-            if cwr_export.cwr:
-                if not explicit_export and options["description"] is not None:
-                    cwr_export.description = options["description"]
-                    cwr_export.save(update_fields=["description"])
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        "Generated CWR export #{id}: {filename} ({duration:.2f}s)".format(
-                            id=cwr_export.id,
-                            filename=cwr_export.filename,
-                            duration=duration,
-                        )
-                    )
-                )
+            if self.generate_export(
+                cwr_export, options, publisher, publisher_code, explicit_export
+            ):
                 return
 
-            options_state = cwr_export.options or {}
-            if options_state.get("stop"):
-                if options_state.get("error"):
-                    self.stderr.write(
-                        self.style.WARNING(
-                            "CWR generation #{id} stopped: {error} ({duration:.2f}s)".format(
-                                id=cwr_export.id,
-                                error=options_state["error"],
-                                duration=duration,
-                            )
-                        )
-                    )
-                else:
-                    self.stderr.write(
-                        self.style.SUCCESS(
-                            "Another CWR generation running for #{id}. ({duration:.2f}s)".format(
-                                id=cwr_export.id,
-                                duration=duration,
-                            )
-                        )
-                    )
-            else:
-                self.stderr.write(
-                    self.style.SUCCESS(
-                        "Failed CWR generation #{id}: {error} ({duration:.2f}s)".format(
-                            id=cwr_export.id,
-                            error=options_state.get("error", "unknown error"),
-                            duration=duration,
-                        )
+    def generate_export(
+        self, cwr_export, options, publisher, publisher_code, explicit_export
+    ):
+        description = self.prepare_export_description(
+            cwr_export, options, explicit_export
+        )
+        self.stdout.write(
+            "Generating CWR #{id} ({description})...".format(
+                id=cwr_export.id,
+                description=description or "no description",
+            )
+        )
+
+        duration = self.create_export(
+            cwr_export, options, publisher, publisher_code
+        )
+        if not cwr_export.cwr:
+            self.report_generation_failure(cwr_export, duration)
+            return False
+
+        self.report_generation_success(
+            cwr_export, duration, options, explicit_export
+        )
+        return True
+
+    @staticmethod
+    def prepare_export_description(cwr_export, options, explicit_export):
+        if explicit_export and options["description"] is not None:
+            cwr_export.description = options["description"]
+            cwr_export.save(update_fields=["description"])
+
+        return (
+            options["description"]
+            if options["description"] is not None
+            else cwr_export.description
+        )
+
+    @staticmethod
+    def create_export(cwr_export, options, publisher, publisher_code):
+        started_at = time.monotonic()
+        try:
+            cwr_export.create_cwr(
+                publisher_code=publisher_code,
+                generate=True,
+                force=options["force"],
+                publisher_name=publisher.name if publisher else None,
+                publisher_ipi_name=publisher.ipi_name if publisher else None,
+            )
+        except ImproperlyConfigured as exc:
+            raise CommandError(str(exc)) from exc
+        return time.monotonic() - started_at
+
+    def report_generation_success(
+        self, cwr_export, duration, options, explicit_export
+    ):
+        if not explicit_export and options["description"] is not None:
+            cwr_export.description = options["description"]
+            cwr_export.save(update_fields=["description"])
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Generated CWR export #{id}: {filename} ({duration:.2f}s)".format(
+                    id=cwr_export.id,
+                    filename=cwr_export.filename,
+                    duration=duration,
+                )
+            )
+        )
+
+    def report_generation_failure(self, cwr_export, duration):
+        options_state = cwr_export.options or {}
+        if options_state.get("stop") and options_state.get("error"):
+            self.stderr.write(
+                self.style.WARNING(
+                    "CWR generation #{id} stopped: {error} ({duration:.2f}s)".format(
+                        id=cwr_export.id,
+                        error=options_state["error"],
+                        duration=duration,
                     )
                 )
+            )
+        elif options_state.get("stop"):
+            self.stderr.write(
+                self.style.SUCCESS(
+                    "Another CWR generation running for #{id}. ({duration:.2f}s)".format(
+                        id=cwr_export.id,
+                        duration=duration,
+                    )
+                )
+            )
+        else:
+            self.stderr.write(
+                self.style.SUCCESS(
+                    "Failed CWR generation #{id}: {error} ({duration:.2f}s)".format(
+                        id=cwr_export.id,
+                        error=options_state.get("error", "unknown error"),
+                        duration=duration,
+                    )
+                )
+            )
 
     @staticmethod
     def resolve_publisher_code(publisher_code):
