@@ -34,7 +34,7 @@ setuptools.setup(
         "django-cleanup==9.0.0",
         "django-storages==1.14.6",
         "djangorestframework==3.18.3",
-        "music-metadata-territories==24.12",
+        "music-metadata-territories==26.10",
         "Markdown==3.11.2",
         "Pillow==13.0.0",
         "psycopg2-binary==2.9.13",
