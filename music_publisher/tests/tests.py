@@ -2499,8 +2499,13 @@ class AdminTest(TestCase):
             description="No publisher code", nwr_rev="NWR"
         )
         cwr_export.works.add(self.original_work)
+        stdout = StringIO()
         with self.assertRaises(CommandError):
-            call_command("generatecwr")
+            call_command("generatecwr", stdout=stdout)
+        self.assertIn(
+            "Generating CWR #{} (No publisher code)...".format(cwr_export.pk),
+            stdout.getvalue(),
+        )
 
     @override_settings(PUBLISHER_CODE=None)
     def test_work_export_actions_hidden_without_publisher_code(self):
@@ -2929,6 +2934,67 @@ class GenerateCWRCommandTest(TestCase):
         ):
             with self.assertRaisesRegex(CommandError, "No publisher found"):
                 self.call_generatecwr("--ipi_name", "00012345678")
+
+    def test_publisher_lookup_requires_that_green_thing(self):
+        with patch(
+            "music_publisher.management.commands.generatecwr.apps.get_model",
+            side_effect=LookupError,
+        ):
+            with self.assertRaisesRegex(
+                CommandError, "requires the That Green Thing app"
+            ):
+                self.call_generatecwr("--ipi_name", "00012345678")
+
+    def test_duplicate_publisher_ipi_name_is_an_error(self):
+        class MultipleObjectsReturned(Exception):
+            pass
+
+        class PublisherManager:
+            def get(self, **kwargs):
+                raise MultipleObjectsReturned
+
+        PublisherModel = type(
+            "PublisherModel",
+            (),
+            {
+                "objects": PublisherManager(),
+                "DoesNotExist": type("DoesNotExist", (Exception,), {}),
+                "MultipleObjectsReturned": MultipleObjectsReturned,
+            },
+        )
+
+        with patch(
+            "music_publisher.management.commands.generatecwr.apps.get_model",
+            return_value=PublisherModel,
+        ):
+            with self.assertRaisesRegex(CommandError, "Multiple publishers found"):
+                self.call_generatecwr("--ipi_name", "00012345678")
+
+    def test_missing_export_id_is_an_error(self):
+        with self.assertRaisesRegex(CommandError, "No CWR export found"):
+            self.call_generatecwr("--regenerate", "999999")
+
+    def test_publisher_code_configuration_error_is_a_command_error(self):
+        with patch.object(
+            CWRExport,
+            "resolve_publisher_code",
+            side_effect=exceptions.ImproperlyConfigured("publisher code missing"),
+        ):
+            with self.assertRaisesRegex(CommandError, "publisher code missing"):
+                self.call_generatecwr("--regenerate", "1")
+
+    def test_generation_configuration_error_is_a_command_error(self):
+        CWRExport.objects.create(nwr_rev="NWR")
+
+        with patch.object(
+            CWRExport,
+            "create_cwr",
+            side_effect=exceptions.ImproperlyConfigured("generation misconfigured"),
+        ):
+            with self.assertRaisesRegex(
+                CommandError, "generation misconfigured"
+            ):
+                self.call_generatecwr()
 
 
 @override_settings(PUBLISHER_CODE="TEST")
