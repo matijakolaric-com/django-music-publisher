@@ -3613,6 +3613,41 @@ class EvaluateSuggestionsCommandTest(TestCase):
         self.assertIn("ACK sender", output)
         self.assertIn("XRF organisation", output)
 
+    def test_ack_xrf_scan_reports_progress(self):
+        date = datetime(2026, 1, 1).date()
+        ACKImport.objects.bulk_create(
+            [
+                ACKImport(
+                    filename="ack-{}.V22".format(index),
+                    society_code="052",
+                    society_name="PRS for Music",
+                    date=date,
+                    report="",
+                    cwr=(
+                        "XRF0000000000000001ISW00000000000001WY\n"
+                        if index == 0
+                        else ""
+                    ),
+                )
+                for index in range(2500)
+            ]
+        )
+        stdout = StringIO()
+        stderr = StringIO()
+
+        call_command(
+            "evaluate_suggestions",
+            "--ack-xrf",
+            stdout=stdout,
+            stderr=stderr,
+        )
+
+        self.assertIn("Scanned 100/2500 ACK imports", stderr.getvalue())
+        self.assertIn(
+            "Scanned 2500/2500 ACK imports; found 1 XRF records.",
+            stderr.getvalue(),
+        )
+
 
 @override_settings(PUBLISHER_CODE="TEST")
 class CWRHeaderOverrideTest(TestCase):
