@@ -2565,10 +2565,13 @@ class ACKImportAdmin(AdminWithReport):
                 "Conflicting ISWCs found for work {}!".format(work),
                 level=messages.ERROR,
             )
-            return (
+            return format_html(
                 "A different ISWC exists for work {}: {} (old) vs {} (new).<br/>\n"
-                "Old ISWC kept, please investigate.<br/>\n"
-            ).format(work, work.iswc, iswc)
+                "Old ISWC kept, please investigate.<br/>\n",
+                work,
+                work.iswc,
+                iswc,
+            )
         duplicate = (
             Work.objects.exclude(id=work.id).filter(iswc__iexact=iswc).first()
         )
@@ -2578,11 +2581,15 @@ class ACKImportAdmin(AdminWithReport):
                 "Duplicate works found for ISWC {}!".format(iswc),
                 level=messages.ERROR,
             )
-            return (
+            return format_html(
                 "One ISWC can not be used for two works: {} {} {}.<br/>\n"
                 "This usually happens if one work is entered twice. "
-                "ISWC not imported for {}.<br/>\n"
-            ).format(iswc, duplicate, work, work)
+                "ISWC not imported for {}.<br/>\n",
+                iswc,
+                duplicate,
+                work,
+                work,
+            )
         work.iswc = iswc
         work.last_change = now()
         text = "ISWC imported from {} file: {}.".format(

@@ -1081,6 +1081,49 @@ class AdminTest(TestCase):
         self.client.force_login(change_user)
         self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
 
+    def test_iswc_import_report_escapes_work_titles(self):
+        malicious_title = "<img src=x onerror=alert(1)>"
+        work = Work.objects.get(pk=self.original_work.pk)
+        work.title = malicious_title
+        work.save()
+        ack_admin = admin.site._registry[ACKImport]
+        request = RequestFactory().get("/")
+        request.user = self.staffuser
+
+        with patch.object(ack_admin, "message_user"):
+            conflict_report = ack_admin._import_iswc(
+                request,
+                work,
+                "T2222222222",
+                "ack.txt",
+                "ISW",
+            )
+        conflict_output = str(
+            ack_admin.print_report(ACKImport(report=conflict_report))
+        )
+        self.assertIn("&lt;IMG SRC=X ONERROR=ALERT(1)&gt;", conflict_output)
+        self.assertNotIn("<IMG SRC=X", conflict_output)
+
+        work.iswc = None
+        work.save()
+        duplicate = Work.objects.create(
+            title=malicious_title,
+            iswc="T3333333333",
+        )
+        with patch.object(ack_admin, "message_user"):
+            duplicate_report = ack_admin._import_iswc(
+                request,
+                work,
+                duplicate.iswc,
+                "ack.txt",
+                "ISW",
+            )
+        duplicate_output = str(
+            ack_admin.print_report(ACKImport(report=duplicate_report))
+        )
+        self.assertIn("&lt;IMG SRC=X ONERROR=ALERT(1)&gt;", duplicate_output)
+        self.assertNotIn("<IMG SRC=X", duplicate_output)
+
     @override_settings(OPTION_FILES=False)
     def test_super_user_with_files(self):
         """Testing index for superuser covers all the cases."""
