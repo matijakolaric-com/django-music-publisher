@@ -13,7 +13,6 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.forms import inlineformset_factory
 from django.utils.text import slugify
 
 from .societies import SOCIETIES
@@ -29,7 +28,7 @@ from .models import (
     Recording,
     WorkAcknowledgement,
 )
-from .forms import WriterInWorkFormSet
+from .forms import validate_writer_records
 from django.utils.timezone import now
 
 
@@ -381,6 +380,8 @@ class DataImporter(object):
         self._save_artists(work, artists)
         wiws = self._save_writers(work, row_dict["writers"], writers)
         self._validate_writers(work, wiws)
+        for wiw in wiws:
+            wiw.save()
         self._save_related_records(work, row_dict)
         yield work
 
@@ -448,41 +449,19 @@ class DataImporter(object):
             )
             wiw.clean_fields()
             wiw.clean()
-            wiw.save()
             wiws.append(wiw)
         return wiws
 
     def _validate_writers(self, work, wiws):
-        factory_fields = [
-            "work",
-            "writer",
-            "capacity",
-            "relative_share",
-            "controlled",
-            "saan",
+        validation_errors = validate_writer_records(work, wiws)
+        messages = [
+            message
+            for field_errors in validation_errors["form_errors"].values()
+            for _, message in field_errors
         ]
-        factory = inlineformset_factory(
-            Work,
-            WriterInWork,
-            formset=WriterInWorkFormSet,
-            fields=factory_fields,
-            extra=len(wiws),
-        )
-        formset = factory()
-        for i, form in enumerate(formset.forms):
-            wiw = wiws[i]
-            data = {
-                "writer": wiw.writer_id,
-                "work": wiw.work_id,
-                "capacity": wiw.capacity,
-                "relative_share": wiw.relative_share,
-                "controlled": wiw.controlled,
-                "saan": wiw.saan,
-            }
-            form.initial = form.cleaned_data = data
-            form.full_clean()
-            form.is_bound = True
-        formset.clean()
+        messages.extend(validation_errors["non_form_errors"])
+        if messages:
+            raise ValidationError(list(dict.fromkeys(messages)))
 
     def _save_related_records(self, work, row_dict):
         for alt_title in row_dict["alt_titles"]:

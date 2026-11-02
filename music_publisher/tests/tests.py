@@ -153,6 +153,35 @@ class DataImportTest(TestCase):
         controllable.refresh_from_db()
         self.assertFalse(controllable._can_be_controlled)
 
+    def test_import_writer_rules_are_validated(self):
+        work = Work.objects.create(title="Invalid writer roles")
+        writer = Writer.objects.create(
+            last_name="Role",
+            ipi_name="199",
+            pr_society="10",
+        )
+        di = data_import.DataImporter([], user=None)
+        invalid_original = WriterInWork(
+            work=work,
+            writer=writer,
+            relative_share=100,
+            capacity="AR",
+            controlled=True,
+        )
+        with self.assertRaises(exceptions.ValidationError):
+            di._validate_writers(work, [invalid_original])
+
+        work.original_title = "Original title"
+        invalid_modification = WriterInWork(
+            work=work,
+            writer=writer,
+            relative_share=100,
+            capacity="C ",
+            controlled=True,
+        )
+        with self.assertRaises(exceptions.ValidationError):
+            di._validate_writers(work, [invalid_modification])
+
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             di = data_import.DataImporter(csvfile)

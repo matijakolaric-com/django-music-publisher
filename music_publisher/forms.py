@@ -157,8 +157,6 @@ class ACKImportForm(ModelForm):
 class WriterInWorkFormSet(BaseInlineFormSet):
     """Formset for :class:`WriterInWorkInline`."""
 
-    orig_cap = ["C ", "A ", "CA"]
-
     def clean(self):
         """Performs these checks:
             at least one writer must be controlled,
@@ -173,78 +171,106 @@ class WriterInWorkFormSet(BaseInlineFormSet):
         Raises:
             ValidationError
         """
-        is_modification = self.instance.is_modification()
         super().clean()
         for form in self.forms:
             if not form.is_valid():
                 return
-        total, controlled, has_composer, needs_extended_capacity = (
-            self._collect_writer_checks(is_modification)
+        validation_errors = validate_writer_records(
+            self.instance,
+            [
+                None
+                if not form.cleaned_data or form.cleaned_data.get("DELETE")
+                else form.cleaned_data
+                for form in self.forms
+            ],
         )
-        if needs_extended_capacity:
-            self.check_extended_capacity()
-        if not controlled:
-            self.check_controlled()
-        if not has_composer:
-            self.check_has_composer()
-        self.check_total(total)
+        for form_index, field_errors in validation_errors["form_errors"].items():
+            for field, message in field_errors:
+                self.forms[form_index].add_error(field, message)
+        if validation_errors["non_form_errors"]:
+            raise ValidationError(validation_errors["non_form_errors"])
 
-    def _collect_writer_checks(self, is_modification):
-        total = 0
-        controlled = False
-        has_composer = False
-        needs_extended_capacity = is_modification
-        for form in self.forms:
-            if not form.cleaned_data or form.cleaned_data.get("DELETE"):
-                continue
-            data = form.cleaned_data
-            total += data.get("relative_share", 0)
-            controlled |= data.get("controlled", False)
-            has_composer |= data["capacity"] in ("C ", "CA")
-            if data.get("capacity") not in self.orig_cap:
-                if is_modification:
-                    needs_extended_capacity = False
-                else:
-                    form.add_error(
-                        "capacity", "Not allowed in original works."
-                    )
-        return total, controlled, has_composer, needs_extended_capacity
 
-    def check_extended_capacity(self):
-        for form in self.forms:
-            form.add_error(
-                "capacity",
-                "At least one must be Arranger, Adaptor or Translator.",
-            )
-        raise ValidationError(
+def validate_writer_records(work, writer_records):
+    """Return cross-writer validation errors for a work and its writers."""
+    errors = {"form_errors": {}, "non_form_errors": []}
+    active_records = [
+        (index, record)
+        for index, record in enumerate(writer_records)
+        if record is not None
+    ]
+    indexes = [index for index, _ in active_records]
+    _validate_writer_capacities(work, active_records, indexes, errors)
+    _validate_controlled_writers(active_records, indexes, errors)
+    _validate_composer_exists(active_records, indexes, errors)
+    _validate_writer_shares(active_records, indexes, errors)
+    return errors
+
+
+def _validate_writer_capacities(work, active_records, indexes, errors):
+    capacities = [
+        writer_record_value(record, "capacity")
+        for _, record in active_records
+    ]
+    if not work.is_modification():
+        for (index, _), capacity in zip(active_records, capacities):
+            if capacity not in ("C ", "A ", "CA"):
+                errors["form_errors"].setdefault(index, []).append(
+                    ("capacity", "Not allowed in original works.")
+                )
+    elif all(capacity in ("C ", "A ", "CA") for capacity in capacities):
+        _add_writer_form_errors(
+            errors,
+            indexes,
+            "capacity",
+            "At least one must be Arranger, Adaptor or Translator.",
+        )
+        errors["non_form_errors"].append(
             "In a modified work, "
             "at least one writer must be Arranger, Adaptor or Translator."
         )
 
-    def check_controlled(self):
-        for form in self.forms:
-            form.add_error(
-                "controlled", "At least one writer must be controlled."
-            )
-        raise ValidationError("At least one writer must be controlled.")
 
-    def check_has_composer(self):
-        for form in self.forms:
-            form.add_error(
-                "capacity",
-                "At least one writer must be Composer or Composer&Lyricist.",
-            )
-        raise ValidationError(
-            "At least one writer must be Composer or Composer&Lyricist."
-        )
+def _validate_controlled_writers(active_records, indexes, errors):
+    if not any(
+        writer_record_value(record, "controlled", False)
+        for _, record in active_records
+    ):
+        message = "At least one writer must be controlled."
+        _add_writer_form_errors(errors, indexes, "controlled", message)
+        errors["non_form_errors"].append(message)
 
-    def check_total(self, total):
-        if not (Decimal(99.98) <= total <= Decimal(100.02)):
-            for form in self.forms:
-                form.add_error(
-                    "relative_share", "Sum of manuscript shares must be 100%."
-                )
-            raise ValidationError("Sum of manuscript shares must be 100%.")
+
+def _validate_composer_exists(active_records, indexes, errors):
+    if not any(
+        writer_record_value(record, "capacity") in ("C ", "CA")
+        for _, record in active_records
+    ):
+        message = "At least one writer must be Composer or Composer&Lyricist."
+        _add_writer_form_errors(errors, indexes, "capacity", message)
+        errors["non_form_errors"].append(message)
+
+
+def _validate_writer_shares(active_records, indexes, errors):
+    total = sum(
+        writer_record_value(record, "relative_share") or 0
+        for _, record in active_records
+    )
+    if not (Decimal(99.98) <= total <= Decimal(100.02)):
+        message = "Sum of manuscript shares must be 100%."
+        _add_writer_form_errors(errors, indexes, "relative_share", message)
+        errors["non_form_errors"].append(message)
+
+
+def writer_record_value(record, field, default=None):
+    if isinstance(record, dict):
+        return record.get(field, default)
+    return getattr(record, field, default)
+
+
+def _add_writer_form_errors(errors, indexes, field, message):
+    for index in indexes:
+        errors["form_errors"].setdefault(index, []).append((field, message))
 
 
 class DataImportForm(ModelForm):
