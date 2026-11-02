@@ -10,7 +10,7 @@ SELECTs are optimised and performed in one batch.
 import csv
 import os
 from collections import defaultdict
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from io import TextIOWrapper
 from tempfile import NamedTemporaryFile
 
@@ -71,6 +71,7 @@ class RoyaltyCalculationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.file = None
+        self.fields["work_id_source"].initial = settings.PUBLISHER_CODE
 
     ALGOS = [
         ("share", "Split by calculated share."),
@@ -89,7 +90,7 @@ class RoyaltyCalculationForm(forms.Form):
     )
     work_id_source = forms.ChoiceField(
         choices=get_id_sources,
-        initial=settings.PUBLISHER_CODE,
+        initial=None,
         label="Work ID Source",
         help_text="You or CWR acknowledgement source.",
     )
@@ -123,22 +124,21 @@ class RoyaltyCalculationForm(forms.Form):
         """Append additional choices to various fields, prior to the actual
         validation.
         """
-        self.file = TextIOWrapper(self.files.get("in_file"))
-        try:
-            csv_reader = csv.DictReader(self.file)
-            for i, field in enumerate(csv_reader.fieldnames):
-                self.fields["work_id_column"].choices.append((str(i), field))
-                self.fields["right_type_column"].choices = list(
-                    self.fields["right_type_column"].choices
-                )
-                self.fields["right_type_column"].choices.append(
-                    (str(i), field)
-                )
-                self.fields["amount_column"].choices.append((str(i), field))
-            valid = super().is_valid()
-        except Exception:  # to match user stupidity
-            return False
-        return valid
+        uploaded_file = self.files.get("in_file")
+        if uploaded_file is None:
+            return super().is_valid()
+
+        self.file = TextIOWrapper(uploaded_file)
+        csv_reader = csv.DictReader(self.file)
+        for i, field in enumerate(csv_reader.fieldnames or []):
+            self.fields["work_id_column"].choices.append((str(i), field))
+            self.fields["right_type_column"].choices = list(
+                self.fields["right_type_column"].choices
+            )
+            self.fields["right_type_column"].choices.append((str(i), field))
+            self.fields["amount_column"].choices.append((str(i), field))
+        self.file.seek(0)
+        return super().is_valid()
 
 
 class RoyaltyCalculation(object):
@@ -311,13 +311,27 @@ class RoyaltyCalculation(object):
 
     def process_row(self, row):
         """Process one incoming row, yield multiple output rows."""
-        work, share_split, amount = self._prepare_row(row)
-        if not work:
-            row.append("")
-            row.append("ERROR: Work not found")
+        work, share_split, amount, error, right_label = self._prepare_row(row)
+        if self.algo == "share":
+            row.append(right_label or "")
+        if error:
+            row.extend(["", error])
+            yield row
+            return
+        if work is None:
+            row.extend(["", "ERROR: Work not found"])
             yield row
             return
         controlled = sum([line["relative_share"] for line in work]) / 100
+        if controlled == 0:
+            row.extend(
+                [
+                    "{0:.4f}".format(controlled),
+                    "ERROR: No controlled share to distribute royalties",
+                ]
+            )
+            yield row
+            return
         row.append("{0:.4f}".format(controlled))
         for line in work:
             output = self._writer_output(
@@ -331,24 +345,45 @@ class RoyaltyCalculation(object):
     def _prepare_row(self, row):
         try:
             given_id = row[self.wc]
-            if self.work_id_source in ["ISWC", "ISRC"]:
-                given_id = given_id.replace(".", "").replace("-", "")
-            work = self.works.get(given_id)
-            right = (self.right or row[self.rc][0]).lower()
-            share_split = {
-                "p": settings.PUBLISHING_AGREEMENT_PUBLISHER_PR,
-                "m": settings.PUBLISHING_AGREEMENT_PUBLISHER_MR,
-                "s": settings.PUBLISHING_AGREEMENT_PUBLISHER_SR,
-            }[right]
-            if self.algo == "share":
-                row.append({"p": "Perf.", "m": "Mech.", "s": "Sync"}[right])
-            try:
-                amount = Decimal(row[self.ac])
-            except TypeError:
-                amount = None
-            return work, share_split, amount
         except IndexError:
-            return None, None, None
+            return None, None, None, "ERROR: Work ID missing", None
+        if self.work_id_source in ["ISWC", "ISRC"]:
+            given_id = given_id.replace(".", "").replace("-", "")
+        if self.right:
+            right = self.right.lower()
+        else:
+            try:
+                right = row[self.rc].strip().lower()
+            except IndexError:
+                return None, None, None, "ERROR: Invalid right type", None
+        share_splits = {
+            "p": settings.PUBLISHING_AGREEMENT_PUBLISHER_PR,
+            "m": settings.PUBLISHING_AGREEMENT_PUBLISHER_MR,
+            "s": settings.PUBLISHING_AGREEMENT_PUBLISHER_SR,
+        }
+        right_labels = {"p": "Perf.", "m": "Mech.", "s": "Sync"}
+        if right not in share_splits:
+            return None, None, None, "ERROR: Invalid right type", None
+        try:
+            amount = Decimal(row[self.ac])
+            if not amount.is_finite():
+                raise InvalidOperation
+        except (IndexError, InvalidOperation, TypeError, ValueError):
+            return (
+                None,
+                None,
+                None,
+                "ERROR: Invalid amount",
+                right_labels[right],
+            )
+        work = self.works.get(given_id)
+        return (
+            work,
+            share_splits[right],
+            amount,
+            None,
+            right_labels[right],
+        )
 
     def _writer_output(self, row, line, controlled, share_split, amount):
         writer = self.writers[line.get("writer_id")]
@@ -422,17 +457,28 @@ class RoyaltyCalculation(object):
         csv_reader = csv.reader(self.file)
 
         f = NamedTemporaryFile(mode="w+", delete=False, encoding="utf8")
-        csv_writer = csv.writer(f)
-        csv_writer.writerow(self.fieldnames)
-        for row in csv_reader:
-            for out_row in self.process_row(row):
-                csv_writer.writerow(out_row)
-
-        f.filename = self.filename
+        output_path = f.name
+        completed = False
         try:
-            return f.name
-        finally:
+            csv_writer = csv.writer(f)
+            csv_writer.writerow(self.fieldnames)
+            for row in csv_reader:
+                for out_row in self.process_row(row):
+                    csv_writer.writerow(out_row)
+            f.filename = self.filename
             f.close()
+            completed = True
+            return output_path
+        finally:
+            try:
+                if not f.closed:
+                    f.close()
+            finally:
+                if not completed:
+                    try:
+                        os.remove(output_path)
+                    except FileNotFoundError:
+                        pass
 
 
 class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
@@ -464,7 +510,11 @@ class RoyaltyCalculationView(PermissionRequiredMixin, FormView):
         """This is where the magic happens."""
         rc = RoyaltyCalculation(form)
         path = rc.out_file_path
-        f = open(path, "rb")
+        try:
+            f = open(path, "rb")
+        except OSError:
+            os.remove(path)
+            raise
         try:
             return FileResponse(f, filename=rc.filename, as_attachment=False)
         finally:

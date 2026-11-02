@@ -19,6 +19,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 import json
+import os
+import tempfile
 from unittest.mock import patch
 
 from django.contrib import admin
@@ -46,6 +48,11 @@ import music_publisher.models
 from music_publisher import admin as music_publisher_admin
 from music_publisher.admin import CWRExportAdmin, RecordingAdmin
 from music_publisher import cwr_templates, data_import, validators
+from music_publisher.royalty_calculation import (
+    RoyaltyCalculation,
+    RoyaltyCalculationForm,
+    RoyaltyCalculationView,
+)
 from music_publisher.models import (
     ACKImport,
     AlternateTitle,
@@ -2201,6 +2208,182 @@ class AdminTest(TestCase):
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
             data = get_data_from_response(response)
+
+    def test_royalty_form_requires_uploaded_file(self):
+        self.client.force_login(self.superuser)
+        url = reverse("royalty_calculation")
+        response = self.client.get(url)
+        data = get_data_from_response(response)
+        data.pop("in_file", None)
+
+        response = self.client.post(url, data, follow=False)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This field is required.")
+
+    @override_settings(PUBLISHER_CODE="CURRENT")
+    def test_royalty_form_uses_current_publisher_code_as_default(self):
+        form = RoyaltyCalculationForm()
+
+        self.assertEqual(form.fields["work_id_source"].initial, "CURRENT")
+
+    def test_royalty_rows_report_invalid_amount_and_right_type(self):
+        calculation = RoyaltyCalculation.__new__(RoyaltyCalculation)
+        calculation.algo = "share"
+        calculation.right = None
+        calculation.rc = 1
+        calculation.wc = 0
+        calculation.ac = 2
+        calculation.work_id_source = settings.PUBLISHER_CODE
+        calculation.works = {"MK000001": [{"relative_share": Decimal("100")}]}
+
+        invalid_right = list(calculation.process_row(["MK000001", "Z", "10"]))[
+            0
+        ]
+        self.assertEqual(invalid_right[-1], "ERROR: Invalid right type")
+        self.assertNotEqual(invalid_right[-1], "ERROR: Work not found")
+        missing_right = list(
+            calculation.process_row(["MK000001"])
+        )[0]
+        self.assertEqual(missing_right[-1], "ERROR: Invalid right type")
+        empty_right = list(
+            calculation.process_row(["MK000001", "", "10"])
+        )[0]
+        self.assertEqual(empty_right[-1], "ERROR: Invalid right type")
+        missing_work_id = list(calculation.process_row([]))[0]
+        self.assertEqual(missing_work_id[-1], "ERROR: Work ID missing")
+
+        calculation.right = "p"
+        for invalid_value in ("not-a-number", "", "NaN"):
+            with self.subTest(amount=invalid_value):
+                invalid_amount = list(
+                    calculation.process_row(
+                        ["MK000001", "ignored", invalid_value]
+                    )
+                )[0]
+                self.assertEqual(
+                    invalid_amount[-1], "ERROR: Invalid amount"
+                )
+                self.assertEqual(invalid_amount[-3], "Perf.")
+
+    def test_royalty_rows_report_zero_controlled_share(self):
+        calculation = RoyaltyCalculation.__new__(RoyaltyCalculation)
+        calculation.algo = "fee"
+        calculation.right = "p"
+        calculation.rc = None
+        calculation.wc = 0
+        calculation.ac = 1
+        calculation.work_id_source = settings.PUBLISHER_CODE
+        calculation.works = {"MK000001": [{"relative_share": Decimal("0")}]}
+
+        output = list(calculation.process_row(["MK000001", "10"]))[0]
+
+        self.assertEqual(output[-2], "0.0000")
+        self.assertEqual(
+            output[-1], "ERROR: No controlled share to distribute royalties"
+        )
+
+    def test_royalty_output_temp_file_is_removed_on_processing_error(self):
+        calculation = RoyaltyCalculation.__new__(RoyaltyCalculation)
+        calculation.file = StringIO("work,amount\nMK000001,10\n")
+        calculation.algo = "fee"
+        calculation.in_file = InMemoryUploadedFile(
+            StringIO(""),
+            "in_file",
+            "statement.csv",
+            "text",
+            0,
+            None,
+        )
+        temp_paths = []
+        original_named_temporary_file = tempfile.NamedTemporaryFile
+
+        def create_temporary_file(*args, **kwargs):
+            kwargs["dir"] = temp_directory
+            temp_file = original_named_temporary_file(*args, **kwargs)
+            temp_paths.append(temp_file.name)
+            return temp_file
+
+        with tempfile.TemporaryDirectory() as temp_directory:
+            with patch(
+                "music_publisher.royalty_calculation.NamedTemporaryFile",
+                side_effect=create_temporary_file,
+            ):
+                with (
+                    patch.object(calculation, "get_works_and_writers"),
+                    patch.object(
+                        calculation,
+                        "process_row",
+                        side_effect=RuntimeError("bad row"),
+                    ),
+                ):
+                    with self.assertRaisesRegex(RuntimeError, "bad row"):
+                        calculation.out_file_path
+
+            self.assertEqual(len(temp_paths), 1)
+            self.assertFalse(os.path.exists(temp_paths[0]))
+
+    def test_royalty_output_cleanup_tolerates_missing_temp_file(self):
+        calculation = RoyaltyCalculation.__new__(RoyaltyCalculation)
+        calculation.file = StringIO("work,amount\nMK000001,10\n")
+        calculation.algo = "fee"
+        calculation.in_file = InMemoryUploadedFile(
+            StringIO(""),
+            "in_file",
+            "statement.csv",
+            "text",
+            0,
+            None,
+        )
+        temp_paths = []
+        original_named_temporary_file = tempfile.NamedTemporaryFile
+
+        def create_temporary_file(*args, **kwargs):
+            kwargs["dir"] = temp_directory
+            temp_file = original_named_temporary_file(*args, **kwargs)
+            temp_paths.append(temp_file.name)
+            return temp_file
+
+        def remove_temp_file_then_fail(row):
+            os.remove(temp_paths[0])
+            raise RuntimeError("processing failed")
+
+        with tempfile.TemporaryDirectory() as temp_directory:
+            with patch(
+                "music_publisher.royalty_calculation.NamedTemporaryFile",
+                side_effect=create_temporary_file,
+            ):
+                with (
+                    patch.object(calculation, "get_works_and_writers"),
+                    patch.object(
+                        calculation,
+                        "process_row",
+                        side_effect=remove_temp_file_then_fail,
+                    ),
+                ):
+                    with self.assertRaisesRegex(
+                        RuntimeError, "processing failed"
+                    ):
+                        calculation.out_file_path
+
+            self.assertEqual(len(temp_paths), 1)
+            self.assertFalse(os.path.exists(temp_paths[0]))
+
+    def test_royalty_output_temp_file_removed_when_open_fails(self):
+        output_path = "royalty-output.csv"
+        with (
+            patch(
+                "music_publisher.royalty_calculation.RoyaltyCalculation"
+            ) as royalty_calculation,
+            patch("builtins.open", side_effect=OSError("cannot open")),
+            patch("music_publisher.royalty_calculation.os.remove") as remove,
+        ):
+            royalty_calculation.return_value.out_file_path = output_path
+
+            with self.assertRaisesRegex(OSError, "cannot open"):
+                RoyaltyCalculationView().form_valid(None)
+
+        remove.assert_called_once_with(output_path)
 
     @override_settings(PUBLISHING_AGREEMENT_PUBLISHER_SR=Decimal("1.0"))
     def test_data_import_and_royalty_calculations(self):
