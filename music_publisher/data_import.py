@@ -390,7 +390,7 @@ class DataImporter(object):
 
     def process_row(self, row):
         """Process one row from the incoming data."""
-        if not any(value.strip() for value in row.values()):
+        if not any(value and value.strip() for value in row.values()):
             return
         row_dict = self.unflatten(row)
         writers = self.get_writers(row_dict["writers"])

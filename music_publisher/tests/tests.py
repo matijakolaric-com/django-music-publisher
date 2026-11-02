@@ -201,6 +201,17 @@ class DataImportTest(TestCase):
         with self.assertRaises(exceptions.ValidationError):
             di.get_library_release("Test Library", "Commercial")
 
+    def test_import_skips_short_blank_rows_with_none_values(self):
+        di = data_import.DataImporter([], user=None)
+        self.assertEqual(
+            list(
+                di.process_row(
+                    {"work_title": "", "writer_1_last": None}
+                )
+            ),
+            [],
+        )
+
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             di = data_import.DataImporter(csvfile)
