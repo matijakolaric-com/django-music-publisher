@@ -24,13 +24,14 @@ from unittest.mock import patch
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IS_POPUP_VAR
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core import exceptions
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.template import Context
 from django.test import (
+    Client,
     override_settings,
     RequestFactory,
     SimpleTestCase,
@@ -46,6 +47,7 @@ from music_publisher import admin as music_publisher_admin
 from music_publisher.admin import CWRExportAdmin, RecordingAdmin
 from music_publisher import cwr_templates, data_import, validators
 from music_publisher.models import (
+    ACKImport,
     AlternateTitle,
     Artist,
     CommercialRelease,
@@ -1004,6 +1006,81 @@ class AdminTest(TestCase):
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
 
+    def test_cwr_preview_and_download_require_read_permission(self):
+        export = CWRExport.objects.create(
+            nwr_rev="NWR", cwr="generated CWR"
+        )
+        url = reverse(
+            "admin:music_publisher_cwrexport_change", args=(export.pk,)
+        )
+        user = self.create_admin_user("cwr-no-permission")
+        self.client.force_login(user)
+
+        self.assertEqual(self.client.get(url + "?preview=true").status_code, 403)
+        self.assertEqual(self.client.get(url + "?download=true").status_code, 403)
+
+        user.user_permissions.add(
+            Permission.objects.get(
+                codename="view_cwrexport",
+                content_type__app_label="music_publisher",
+            )
+        )
+        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
+        self.assertEqual(self.client.get(url + "?download=true").status_code, 200)
+
+        change_user = self.create_admin_user(
+            "cwr-change-only", ("change_cwrexport",)
+        )
+        self.client.force_login(change_user)
+        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
+        self.assertEqual(self.client.get(url + "?download=true").status_code, 200)
+
+    def test_cwr_changelist_requires_view_or_change_permission(self):
+        user = self.create_admin_user(
+            "cwr-delete-only", ("delete_cwrexport",)
+        )
+        self.client.force_login(user)
+        url = reverse("admin:music_publisher_cwrexport_changelist")
+        self.assertEqual(self.client.get(url).status_code, 403)
+
+        user = self.create_admin_user(
+            "cwr-change-list", ("change_cwrexport",)
+        )
+        self.client.force_login(user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="form-0-description"')
+
+    def test_ack_preview_requires_read_permission(self):
+        ack = ACKImport.objects.create(
+            filename="ack.txt",
+            society_code="123",
+            society_name="Society",
+            date=now().date(),
+            report="",
+            cwr="ACK contents",
+        )
+        url = reverse(
+            "admin:music_publisher_ackimport_change", args=(ack.pk,)
+        )
+        user = self.create_admin_user("ack-no-permission")
+        self.client.force_login(user)
+        self.assertEqual(self.client.get(url + "?preview=true").status_code, 403)
+
+        user.user_permissions.add(
+            Permission.objects.get(
+                codename="view_ackimport",
+                content_type__app_label="music_publisher",
+            )
+        )
+        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
+
+        change_user = self.create_admin_user(
+            "ack-change-only", ("change_ackimport",)
+        )
+        self.client.force_login(change_user)
+        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
+
     @override_settings(OPTION_FILES=False)
     def test_super_user_with_files(self):
         """Testing index for superuser covers all the cases."""
@@ -1187,7 +1264,7 @@ class AdminTest(TestCase):
         self.assertIsNone(cwr_export.created_on)
 
     def test_pending_cwr_export_shows_create_cwr_link(self):
-        """Pending CWR exports show Create CWR instead of Download."""
+        """Pending exports show a link-styled, CSRF-protected POST button."""
         self.client.force_login(self.staffuser)
         cwr_export = CWRExport.objects.create(
             description="Pending CWR", nwr_rev="NWR"
@@ -1201,6 +1278,10 @@ class AdminTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Generate CWR", response.content)
+        self.assertIn(b'method="post"', response.content)
+        self.assertIn(b'name="csrfmiddlewaretoken"', response.content)
+        self.assertIn(b'class="cwr-generate-button"', response.content)
+        self.assertIn(b"music_publisher/admin.css", response.content)
         self.assertNotIn(
             (
                 reverse(
@@ -1211,6 +1292,20 @@ class AdminTest(TestCase):
             ).encode(),
             response.content,
         )
+
+    def test_view_only_cwr_user_does_not_get_generation_button(self):
+        self.create_admin_user(
+            "cwr-view-list", ("view_cwrexport",)
+        )
+        self.client.force_login(
+            User.objects.get(username="cwr-view-list")
+        )
+        response = self.client.get(
+            reverse("admin:music_publisher_cwrexport_changelist")
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b"cwr-generate-button", response.content)
 
     @override_settings(OPTION_CWR_NO_GENERATE_LINK=True)
     def test_cwr_export_no_generate_link(self):
@@ -1267,8 +1362,8 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Generating CWR", response.content)
 
-    def test_create_cwr_link_generates_pending_export(self):
-        """Create CWR link generates CWR for a pending export."""
+    def test_create_cwr_button_generates_pending_export(self):
+        """POSTing the inline button generates a pending export."""
         self.client.force_login(self.staffuser)
         cwr_export = CWRExport.objects.create(
             description="Pending CWR", nwr_rev="NWR"
@@ -1280,10 +1375,84 @@ class AdminTest(TestCase):
         )
         response = self.client.get(url + "?create_cwr=true", follow=False)
 
+        self.assertEqual(response.status_code, 405)
+        cwr_export.refresh_from_db()
+        self.assertFalse(cwr_export.cwr)
+        self.assertIsNone(cwr_export.created_on)
+
+        response = self.client.post(
+            url,
+            {"create_cwr": "1"},
+            follow=False,
+        )
+
         self.assertEqual(response.status_code, 302)
         cwr_export.refresh_from_db()
         self.assertTrue(cwr_export.cwr)
         self.assertIsNotNone(cwr_export.created_on)
+
+    def test_cwr_generation_requires_change_permission(self):
+        export = CWRExport.objects.create(nwr_rev="NWR")
+        export.works.add(self.original_work)
+        url = reverse(
+            "admin:music_publisher_cwrexport_change", args=(export.pk,)
+        )
+        user = self.create_admin_user(
+            "cwr-view-only", ("view_cwrexport",)
+        )
+        self.client.force_login(user)
+
+        self.assertEqual(
+            self.client.post(url, {"create_cwr": "1"}).status_code, 403
+        )
+        export.refresh_from_db()
+        self.assertFalse(export.cwr)
+        self.assertIsNone(export.created_on)
+
+    def test_work_cwr_action_requires_add_export_permission(self):
+        user = self.create_admin_user(
+            "work-without-cwr-add", ("change_work",)
+        )
+        work_admin = admin.site._registry[Work]
+        request = RequestFactory().get(
+            reverse("admin:music_publisher_work_changelist")
+        )
+        request.user = user
+
+        self.assertNotIn("create_cwr", work_admin.get_actions(request))
+        with self.assertRaises(exceptions.PermissionDenied):
+            work_admin.create_cwr(request, Work.objects.none())
+
+    def test_cwr_generation_post_requires_csrf(self):
+        export = CWRExport.objects.create(nwr_rev="NWR")
+        export.works.add(self.original_work)
+        user = self.create_admin_user(
+            "cwr-change", ("change_cwrexport",)
+        )
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(user)
+        url = reverse(
+            "admin:music_publisher_cwrexport_change", args=(export.pk,)
+        )
+
+        response = client.post(url, {"create_cwr": "1"})
+        self.assertEqual(response.status_code, 403)
+        export.refresh_from_db()
+        self.assertFalse(export.cwr)
+
+        changelist = reverse("admin:music_publisher_cwrexport_changelist")
+        response = client.get(changelist)
+        self.assertContains(response, b'name="csrfmiddlewaretoken"')
+        csrf_token = client.cookies["csrftoken"].value
+        response = client.post(
+            url,
+            {"create_cwr": "1"},
+            HTTP_X_CSRFTOKEN=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        export.refresh_from_db()
+        self.assertTrue(export.cwr)
 
     def test_large_cwr_is_split_into_multiple_exports(self):
         """Large CWR requests are split into files of up to 10,000 works."""
@@ -2430,6 +2599,19 @@ class AdminTest(TestCase):
     def library_release_count(self):
         """Return how many library releases the test library has."""
         return LibraryRelease.objects.filter(library=self.library).count()
+
+    def create_admin_user(self, username, permissions=()):
+        """Create a staff user with only the requested model permissions."""
+        user = User.objects.create_user(
+            username=username, password="password", is_staff=True
+        )
+        for codename in permissions:
+            permission = Permission.objects.get(
+                codename=codename,
+                content_type__app_label="music_publisher",
+            )
+            user.user_permissions.add(permission)
+        return user
 
     def test_library_work_count_link(self):
         """The library changelist links to the works of that library, using

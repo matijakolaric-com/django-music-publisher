@@ -15,9 +15,15 @@ from decimal import Decimal
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import (
+    HttpResponse,
+    HttpResponseNotAllowed,
+    HttpResponseRedirect,
+    JsonResponse,
+)
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import format_html, mark_safe
@@ -1447,6 +1453,8 @@ class WorkAdmin(MusicPublisherAdmin):
         """Batch action that redirects to the add view for
         :class:`CWRExportAdmin` with selected works.
         """
+        if not request.user.has_perm("music_publisher.add_cwrexport"):
+            raise PermissionDenied
         url = reverse("admin:music_publisher_cwrexport_add")
         work_ids = qs.values_list("id", flat=True)
         view = CWRExportAdmin(CWRExport, admin.site).add_view(
@@ -1826,6 +1834,8 @@ class WorkAdmin(MusicPublisherAdmin):
         if not settings.PUBLISHER_CODE:
             for name in ("create_cwr", "create_json", "create_csv"):
                 actions.pop(name, None)
+        if not request.user.has_perm("music_publisher.add_cwrexport"):
+            actions.pop("create_cwr", None)
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
@@ -2056,6 +2066,9 @@ class CWRExportAdmin(admin.ModelAdmin):
     actions = None
     ordering = ("-id",)
 
+    class Media:
+        css = {"all": ("music_publisher/admin.css",)}
+
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
@@ -2087,7 +2100,7 @@ class CWRExportAdmin(admin.ModelAdmin):
                 '<a href="{}" target="_blank">View CWR</a>'.format(url)
             )
 
-    def download_link(self, obj):
+    def download_link(self, obj, request=None):
         """Link for downloading or creating CWR file."""
         url = reverse("admin:music_publisher_cwrexport_change", args=(obj.id,))
         if obj.has_cwr:
@@ -2103,8 +2116,29 @@ class CWRExportAdmin(admin.ModelAdmin):
                 return mark_safe("Generating CWR")
         if getattr(settings, "OPTION_CWR_NO_GENERATE_LINK", False):
             return "Pending"
-        url += "?create_cwr=true"
-        return mark_safe('<a href="{}">Generate CWR</a>'.format(url))
+        if request is None or not self.has_change_permission(request):
+            return "Pending"
+        return format_html(
+            '<form method="post" action="{}" class="cwr-generate-form">'
+            '<input type="hidden" name="csrfmiddlewaretoken" value="{}">'
+            '<input type="hidden" name="create_cwr" value="1">'
+            '<button type="submit" class="cwr-generate-button">'
+            "Generate CWR</button></form>",
+            url,
+            get_token(request),
+        )
+
+    def get_list_display(self, request):
+        list_display = list(super().get_list_display(request))
+        if "download_link" in list_display:
+
+            def download_link(obj):
+                return self.download_link(obj, request)
+
+            download_link.__name__ = "download_link"
+            download_link.short_description = "Download"
+            list_display[list_display.index("download_link")] = download_link
+        return list_display
 
     def get_queryset(self, request):
         """Optimized query with count of works in the export."""
@@ -2185,7 +2219,13 @@ class CWRExportAdmin(admin.ModelAdmin):
             return False
         if obj:
             return False
-        return super().has_delete_permission(request, obj)
+        return super().has_change_permission(request, obj)
+
+    def has_view_or_change_permission(self, request, obj=None):
+        """Allow either view or change permission to read export contents."""
+        return self.has_view_permission(
+            request, obj
+        ) or request.user.has_perm("music_publisher.change_cwrexport")
 
     def get_form(self, request, obj=None, **kwargs):
         """Set initial values for work IDs."""
@@ -2213,23 +2253,23 @@ class CWRExportAdmin(admin.ModelAdmin):
         )
         return super().add_view(request, form_url, extra_context)
 
-    def change_view(self, request, object_id, form_url="", extra_context=None):
-        """Normal change view with sub-views defined by GET parameters:
+    def handle_cwr_generation(self, request, obj):
+        if "create_cwr" in request.GET:
+            return HttpResponseNotAllowed(["POST"])
+        if request.method != "POST" or "create_cwr" not in request.POST:
+            return None
+        if not self.has_change_permission(request):
+            raise PermissionDenied
+        obj.create_cwr()
+        self.log_change(request, obj, "CWR generated")
+        url = reverse("admin:music_publisher_cwrexport_changelist")
+        return HttpResponseRedirect(url)
 
-        Parameters:
-            preview: that returns the preview of CWR file,
-            download: that downloads the CWR file,
-            create_cwr: that creates the CWR file.
-        """
-        try:
-            obj = get_object_or_404(CWRExport, pk=object_id)
-        except ValueError:
-            return super().change_view(
-                request,
-                object_id,
-                form_url=form_url,
-                extra_context=extra_context,
-            )
+    def handle_cwr_preview_or_download(self, request, obj):
+        if "preview" not in request.GET and "download" not in request.GET:
+            return None
+        if not self.has_view_or_change_permission(request, obj):
+            raise PermissionDenied
         if "preview" in request.GET:
             cwr = self.get_preview(obj)
             return render(
@@ -2242,28 +2282,45 @@ class CWRExportAdmin(admin.ModelAdmin):
                     "title": obj.filename,
                 },
             )
-        elif "download" in request.GET:
-            response = HttpResponse(content_type="application/zip")
-            zip_file = zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)
-            zip_file.writestr(obj.filename, obj.cwr.encode().decode("latin1"))
-            if obj.version in ["30", "31"]:
-                cd = 'attachment; filename="{}.zip"'.format(
-                    obj.filename.replace(".", "_")
+        response = HttpResponse(content_type="application/zip")
+        zip_file = zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)
+        zip_file.writestr(obj.filename, obj.cwr.encode().decode("latin1"))
+        if obj.version in ["30", "31"]:
+            cd = 'attachment; filename="{}.zip"'.format(
+                obj.filename.replace(".", "_")
+            )
+        else:
+            cd = 'attachment; filename="{}"'.format(
+                obj.filename.replace(".V21", ".zip").replace(
+                    ".V22", ".zip"
                 )
-            else:
-                cd = 'attachment; filename="{}"'.format(
-                    obj.filename.replace(".V21", ".zip").replace(
-                        ".V22", ".zip"
-                    )
-                )
-            response["Content-Disposition"] = cd
-            return response
-        elif "create_cwr" in request.GET:
-            obj.create_cwr()
-            self.log_change(request, obj, "CWR generated")
-            url = reverse("admin:music_publisher_cwrexport_changelist")
-            return HttpResponseRedirect(url)
+            )
+        response["Content-Disposition"] = cd
+        return response
 
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        """Normal change view with sub-views defined by GET parameters:
+
+        Parameters:
+            preview: that returns the preview of CWR file,
+            download: that downloads the CWR file,
+            POST create_cwr: that creates the CWR file.
+        """
+        try:
+            obj = get_object_or_404(CWRExport, pk=object_id)
+        except ValueError:
+            return super().change_view(
+                request,
+                object_id,
+                form_url=form_url,
+                extra_context=extra_context,
+            )
+        response = self.handle_cwr_generation(request, obj)
+        if response:
+            return response
+        response = self.handle_cwr_preview_or_download(request, obj)
+        if response:
+            return response
         extra_context = {
             "show_save": False,
         }
@@ -2575,6 +2632,12 @@ class ACKImportAdmin(AdminWithReport):
         """Deleting this would make no sense, since the data is processed."""
         return False
 
+    def has_view_or_change_permission(self, request, obj=None):
+        """Allow view or change permission to read imported ACK contents."""
+        return self.has_view_permission(
+            request, obj
+        ) or request.user.has_perm("music_publisher.change_ackimport")
+
     def get_preview(self, obj):
         """Get CWR preview.
 
@@ -2605,6 +2668,8 @@ class ACKImportAdmin(AdminWithReport):
                 extra_context=extra_context,
             )
         if "preview" in request.GET:
+            if not self.has_view_or_change_permission(request, obj):
+                raise PermissionDenied
             cwr = self.get_preview(obj)
             if cwr[59:64] == "01.10":
                 version = "21"
