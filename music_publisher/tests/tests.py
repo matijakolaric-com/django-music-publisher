@@ -212,6 +212,17 @@ class DataImportTest(TestCase):
             [],
         )
 
+    def test_import_keys_accept_lowercase(self):
+        di = data_import.DataImporter([], user=None)
+        self.assertEqual(
+            di.process_writer_value("role", ["writer", "1", "role"], "ca"),
+            ("CA", False),
+        )
+        self.assertEqual(
+            di.get_clean_key("ca", WriterInWork.ROLES, "writer role"),
+            "CA",
+        )
+
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             di = data_import.DataImporter(csvfile)

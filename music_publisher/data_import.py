@@ -117,7 +117,7 @@ class DataImporter(object):
     @staticmethod
     def get_clean_key(value, tup, name):
         """Try to match either key or value from a user input mess."""
-        key_match = re.match(r"^([0-9]+|[A-Z]+)", value)
+        key_match = re.match(r"^([0-9]+|[A-Z]+)", value.upper())
         if not key_match:
             raise ValueError('Bad value: "{}" for "{}".'.format(value, name))
         key = key_match.group(0)
