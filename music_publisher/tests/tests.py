@@ -182,6 +182,25 @@ class DataImportTest(TestCase):
         with self.assertRaises(exceptions.ValidationError):
             di._validate_writers(work, [invalid_modification])
 
+    def test_import_library_release_validation_and_conflicts(self):
+        di = data_import.DataImporter([], user=None)
+        library_release = di.get_library_release("Test Library", "CD-01")
+        self.assertEqual(
+            di.get_library_release("Test Library", "CD-01").pk,
+            library_release.pk,
+        )
+        with self.assertRaises(exceptions.ValidationError):
+            di.get_library_release("Another Library", "CD-01")
+        self.assertFalse(Library.objects.filter(name="Another Library").exists())
+
+        with self.assertRaises(exceptions.ValidationError):
+            di.get_library_release("Invalid Library", "X" * 16)
+        self.assertFalse(Library.objects.filter(name="Invalid Library").exists())
+
+        Release.objects.create(cd_identifier="Commercial")
+        with self.assertRaises(exceptions.ValidationError):
+            di.get_library_release("Test Library", "Commercial")
+
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             di = data_import.DataImporter(csvfile)

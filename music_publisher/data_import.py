@@ -25,6 +25,7 @@ from .models import (
     AlternateTitle,
     Library,
     LibraryRelease,
+    Release,
     Recording,
     WorkAcknowledgement,
 )
@@ -348,24 +349,43 @@ class DataImporter(object):
         """Yield LibraryRelease objects, create if needed."""
         lookup_library = Library(name=library_name)
         lookup_library.clean_fields()
+        lookup_library.clean()
+
+        lookup_library_release = LibraryRelease(cd_identifier=cd_identifier)
+        lookup_library_release.clean_fields()
+        lookup_library_release.clean()
+
         library = Library.objects.filter(
             name__iexact=lookup_library.name
         ).first()
+        library_release = Release.objects.filter(
+            cd_identifier__iexact=lookup_library_release.cd_identifier
+        ).first()
+        if library_release:
+            if library and library_release.library_id == library.id:
+                return library_release
+            raise ValidationError(
+                'CD identifier "{}" is already assigned to another release.'.format(
+                    cd_identifier
+                )
+            )
+
         if not library:
             library = lookup_library
             library.save()
             self.log(library, "Added during import.")
-        lookup_library_release = LibraryRelease(
-            library_id=library.id, cd_identifier=cd_identifier
-        )
-        library_release = LibraryRelease.objects.filter(
-            library_id=lookup_library_release.library_id,
-            cd_identifier__iexact=lookup_library_release.cd_identifier,
-        ).first()
-        if not library_release:
-            library_release = lookup_library_release
-            library_release.save()
-            self.log(library_release, "Added during import.")
+
+        lookup_library_release.library = library
+        try:
+            lookup_library_release.save()
+        except IntegrityError:
+            raise ValidationError(
+                'CD identifier "{}" is already assigned to another release.'.format(
+                    cd_identifier
+                )
+            )
+        library_release = lookup_library_release
+        self.log(library_release, "Added during import.")
         return library_release
 
     def process_row(self, row):
