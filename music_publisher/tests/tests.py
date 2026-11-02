@@ -130,6 +130,29 @@ class DataImportTest(TestCase):
     def test_case_change(self):
         self.assertEqual(self.obj.last_name, "ARTIST ONE")
 
+    def test_writer_control_state_is_derived_when_saved(self):
+        controllable = Writer.objects.create(
+            last_name="Controllable",
+            ipi_name="199",
+            pr_society="10",
+        )
+        self.assertTrue(controllable._can_be_controlled)
+
+        placeholder = Writer.objects.create(
+            last_name="Placeholder",
+            ipi_name="00000000000",
+            pr_society="99",
+        )
+        self.assertIsNone(placeholder.ipi_name)
+        self.assertIsNone(placeholder.pr_society)
+        self.assertFalse(placeholder._can_be_controlled)
+
+        controllable.ipi_name = None
+        controllable.pr_society = None
+        controllable.save(update_fields=["ipi_name", "pr_society"])
+        controllable.refresh_from_db()
+        self.assertFalse(controllable._can_be_controlled)
+
     def test_data_import(self):
         with open(TEST_DATA_IMPORT_FILENAME) as csvfile:
             di = data_import.DataImporter(csvfile)

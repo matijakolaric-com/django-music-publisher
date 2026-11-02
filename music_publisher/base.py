@@ -250,11 +250,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
     def clean(self):
         """Clean the data and validate."""
 
-        self._can_be_controlled = bool(self.ipi_name) & bool(self.pr_society)
-        if self.ipi_name == "00000000000":
-            self.ipi_name = None
-        if self.pr_society == "99":
-            self.pr_society = None
+        self._normalize_control_data()
 
         d = {}
         if not self.generally_controlled:
@@ -270,6 +266,31 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
                 )
         if d:
             raise django.core.exceptions.ValidationError(d)
+
+    def _normalize_control_data(self):
+        if self.ipi_name == "00000000000":
+            self.ipi_name = None
+        if self.pr_society == "99":
+            self.pr_society = None
+        self._can_be_controlled = bool(self.ipi_name and self.pr_society)
+
+    def save(self, *args, **kwargs):
+        original_values = {
+            field: getattr(self, field)
+            for field in ("ipi_name", "pr_society")
+        }
+        self._normalize_control_data()
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            update_fields = set(update_fields)
+            update_fields.add("_can_be_controlled")
+            update_fields.update(
+                field
+                for field, value in original_values.items()
+                if getattr(self, field) != value
+            )
+            kwargs["update_fields"] = update_fields
+        return super().save(*args, **kwargs)
 
     def clean_fields(self, *args, **kwargs):
         """
