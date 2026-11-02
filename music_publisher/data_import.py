@@ -353,7 +353,6 @@ class DataImporter(object):
 
         lookup_library_release = LibraryRelease(cd_identifier=cd_identifier)
         lookup_library_release.clean_fields()
-        lookup_library_release.clean()
 
         library = Library.objects.filter(
             name__iexact=lookup_library.name
@@ -376,6 +375,7 @@ class DataImporter(object):
             self.log(library, "Added during import.")
 
         lookup_library_release.library = library
+        lookup_library_release.clean()
         try:
             lookup_library_release.save()
         except IntegrityError:
