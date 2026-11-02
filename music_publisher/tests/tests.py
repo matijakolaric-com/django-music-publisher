@@ -17,11 +17,12 @@ More precise tests would be better.
 
 from datetime import datetime, timedelta
 from decimal import Decimal
-from io import StringIO
+from io import BytesIO, StringIO
 import json
 import os
 import tempfile
 from unittest.mock import patch
+import zipfile
 
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
@@ -1325,6 +1326,28 @@ class AdminTest(TestCase):
             )
             response = self.client.get(url, follow=False)
             self.assertEqual(response.status_code, 200)
+
+    def test_cwr_download_preserves_non_ascii(self):
+        self.client.force_login(self.staffuser)
+        cwr_export = CWRExport.objects.first()
+        cwr_export.cwr = "NWR0000000000000001Tést\r\n"
+        cwr_export.save()
+        url = (
+            reverse(
+                "admin:music_publisher_cwrexport_change",
+                args=(cwr_export.id,),
+            )
+            + "?download=true"
+        )
+
+        response = self.client.get(url, follow=False)
+
+        self.assertEqual(response.status_code, 200)
+        with zipfile.ZipFile(BytesIO(response.content)) as downloaded:
+            self.assertEqual(
+                downloaded.read(cwr_export.filename),
+                cwr_export.cwr.encode("utf-8"),
+            )
 
     def test_json(self):
         """Test that JSON export works."""
@@ -3809,6 +3832,37 @@ class ModelsSimpleTest(TransactionTestCase):
         self.assertEqual(
             music_publisher.models.CommercialRelease.objects.count(), 1
         )
+
+    def test_release_proxy_field_combinations(self):
+        library = Library.objects.create(name="Release Validation Library")
+
+        valid_library_release = LibraryRelease(
+            library=library, cd_identifier="LIB001"
+        )
+        valid_library_release.full_clean()
+
+        with self.assertRaises(exceptions.ValidationError) as error:
+            LibraryRelease(library=library).full_clean()
+        self.assertIn("cd_identifier", error.exception.message_dict)
+
+        with self.assertRaises(exceptions.ValidationError) as error:
+            LibraryRelease(cd_identifier="LIB002").full_clean()
+        self.assertIn("library", error.exception.message_dict)
+
+        CommercialRelease().full_clean()
+        with self.assertRaises(exceptions.ValidationError) as error:
+            CommercialRelease(library=library).full_clean()
+        self.assertIn("library", error.exception.message_dict)
+        with self.assertRaises(exceptions.ValidationError) as error:
+            CommercialRelease(cd_identifier="COM001").full_clean()
+        self.assertIn("cd_identifier", error.exception.message_dict)
+
+        playlist = music_publisher.models.Playlist()
+        playlist.full_clean()
+        self.assertTrue(playlist.cd_identifier)
+        with self.assertRaises(exceptions.ValidationError) as error:
+            music_publisher.models.Playlist(library=library).full_clean()
+        self.assertIn("library", error.exception.message_dict)
 
     def test_playlist(self):
         from music_publisher.models import Playlist

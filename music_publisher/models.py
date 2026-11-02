@@ -330,16 +330,26 @@ class LibraryRelease(Release):
 
     def clean(self):
         """Make sure that release title is required if one of the other \
-        "non-library" fields is present.
+        "non-library" fields is present, and that library identifiers exist.
 
         Raises:
             ValidationError: If not compliant.
         """
+        super().clean()
+        errors = {}
+        if self.library_id is None:
+            errors["library"] = "A library is required for a library release."
+        if not self.cd_identifier:
+            errors["cd_identifier"] = (
+                "A CD identifier is required for a library release."
+            )
         title_required = self.ean or self.release_date or self.release_label
         if title_required and not self.release_title:
-            raise ValidationError(
-                {"release_title": "Required if other release data is set."}
+            errors["release_title"] = (
+                "Required if other release data is set."
             )
+        if errors:
+            raise ValidationError(errors)
 
     def get_origin_dict(self):
         """Get the object in an internal dictionary format.
@@ -401,6 +411,20 @@ class CommercialRelease(Release):
 
     objects = CommercialReleaseManager()
 
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.library_id is not None:
+            errors["library"] = (
+                "A commercial release cannot have a library."
+            )
+        if self.cd_identifier:
+            errors["cd_identifier"] = (
+                "A commercial release cannot have a CD identifier."
+            )
+        if errors:
+            raise ValidationError(errors)
+
 
 class PlaylistManager(models.Manager):
     """Manager for a proxy class :class:`.models.Playlist`"""
@@ -451,7 +475,16 @@ class Playlist(Release):
         if self.cd_identifier is None:
             self.cd_identifier = base64.urlsafe_b64encode(uuid.uuid4().bytes)
             self.cd_identifier = self.cd_identifier.decode().rstrip("=")[:15]
-        return super().clean(*args, **kwargs)
+        super().clean(*args, **kwargs)
+        errors = {}
+        if self.library_id is not None:
+            errors["library"] = "A playlist cannot have a library."
+        if not self.cd_identifier:
+            errors["cd_identifier"] = (
+                "A CD identifier is required for a playlist."
+            )
+        if errors:
+            raise ValidationError(errors)
 
     @property
     def secret_url(self):

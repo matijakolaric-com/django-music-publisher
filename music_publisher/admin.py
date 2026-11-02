@@ -2284,7 +2284,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             )
         response = HttpResponse(content_type="application/zip")
         zip_file = zipfile.ZipFile(response, "w", zipfile.ZIP_DEFLATED)
-        zip_file.writestr(obj.filename, obj.cwr.encode().decode("latin1"))
+        zip_file.writestr(obj.filename, obj.cwr)
         if obj.version in ["30", "31"]:
             cd = 'attachment; filename="{}.zip"'.format(
                 obj.filename.replace(".", "_")
