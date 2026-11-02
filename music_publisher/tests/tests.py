@@ -3542,6 +3542,78 @@ class GenerateCWRCommandTest(TestCase):
                 self.call_generatecwr()
 
 
+class EvaluateSuggestionsCommandTest(TestCase):
+    def invoke_command(self, *args):
+        stdout = StringIO()
+        call_command(
+            "evaluate_suggestions",
+            *args,
+            stdout=stdout,
+        )
+        return stdout.getvalue()
+
+    def test_no_check_displays_help(self):
+        output = self.invoke_command()
+        self.assertIn("usage: manage.py evaluate_suggestions", output)
+        self.assertIn("--ack-xrf", output)
+
+    def test_ack_xrf_summary_groups_acknowledgement_records(self):
+        ACKImport.objects.create(
+            filename="ack-one.V21",
+            society_code="052",
+            society_name="PRS for Music",
+            date=datetime(2026, 1, 1).date(),
+            report="",
+            cwr=(
+                "XRF0000000000000001ISW00000000000001WY\n"
+                "XRF0000000000000002ISW00000000000002WY\n"
+                "XRF0000000000000003ISR00000000000003RY\n"
+            ),
+        )
+        ACKImport.objects.create(
+            filename="ack-two.V21",
+            society_code="052",
+            society_name="PRS for Music",
+            date=datetime(2026, 1, 2).date(),
+            report="",
+            cwr="XRF0000000000000004ISW00000000000004WY\n",
+        )
+
+        output = self.invoke_command("--ack-xrf")
+
+        self.assertIn("ACK sender", output)
+        self.assertIn("052 - PRS for Music", output)
+        self.assertIn("ISW - ISWC", output)
+        self.assertIn("ISR - ISRC", output)
+        self.assertIn("ISW - ISWC       | W               | Y", output)
+        self.assertIn("ISR - ISRC       | R               | Y", output)
+        self.assertIn("| 3     |", output)
+        self.assertIn("| 1     |", output)
+
+    def test_ack_xrf_csv_output(self):
+        ACKImport.objects.create(
+            filename="ack-one.V21",
+            society_code="052",
+            society_name="PRS for Music",
+            date=datetime(2026, 1, 1).date(),
+            report="",
+            cwr="XRF0000000000000001ISW00000000000001WY\n",
+        )
+
+        output = self.invoke_command("--ack-xrf", "--output", "csv")
+
+        self.assertIn(
+            "ACK sender,XRF organisation,Identifier type,Validity,Count",
+            output,
+        )
+        self.assertIn("052 - PRS for Music,ISW - ISWC,W,Y,1", output)
+
+    def test_all_runs_implemented_checks(self):
+        output = self.invoke_command("--all")
+        self.assertIn("ACK sender", output)
+        self.assertIn("XRF organisation", output)
+
+
 @override_settings(PUBLISHER_CODE="TEST")
 class CWRHeaderOverrideTest(TestCase):
     def test_create_cwr_passes_sender_values_to_header_generation(self):
