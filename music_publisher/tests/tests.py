@@ -3608,6 +3608,21 @@ class EvaluateSuggestionsCommandTest(TestCase):
         )
         self.assertIn("052 - PRS for Music,ISW - ISWC,W,Y,1", output)
 
+    def test_ack_xrf_organisation_lookup_strips_leading_zero(self):
+        xrf = "XRF" + "0" * 16 + "010" + "0" * 14 + "WY\n"
+        ACKImport.objects.create(
+            filename="ack-one.V22",
+            society_code="052",
+            society_name="PRS for Music",
+            date=datetime(2026, 1, 1).date(),
+            report="",
+            cwr=xrf,
+        )
+
+        output = self.invoke_command("--ack-xrf")
+
+        self.assertIn("010 - ASCAP (UNITED STATES)", output)
+
     def test_all_runs_implemented_checks(self):
         output = self.invoke_command("--all")
         self.assertIn("ACK sender", output)

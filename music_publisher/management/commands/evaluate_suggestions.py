@@ -111,7 +111,9 @@ class Command(BaseCommand):
                 "ISR": "ISRC",
             }.get(
                 organisation_code,
-                SOCIETY_DICT.get(organisation_code, "Unknown"),
+                SOCIETY_DICT.get(
+                    organisation_code.lstrip("0"), "Unknown"
+                ),
             )
             organisation = "{} - {}".format(
                 organisation_code, organisation_name
