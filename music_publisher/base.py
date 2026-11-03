@@ -268,11 +268,27 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
             raise django.core.exceptions.ValidationError(d)
 
     def _normalize_control_data(self):
+        """Normalize explicit placeholders while retaining their control signal.
+
+        A writer without these identifiers may still be entered as controllable
+        when the person entering the data explicitly supplies both placeholders.
+        This gives data entry a deliberate exception path instead of silently
+        treating missing details as complete, since missing affiliations can
+        prevent royalties from reaching the writer and everyone sharing the work.
+        """
+        # IMPORTANT: THESE PLACEHOLDERS ARE AN INTENTIONAL, EXPLICIT EXCEPTION,
+        # NOT A DEFECTIVE VALUE TO DISCARD BEFORE CHECKING CONTROL ELIGIBILITY.
+        # WRITERS SHOULD HAVE A REAL IPI NAME AND PR AFFILIATION WHEN AVAILABLE.
+        # WHEN THEY ARE NOT AVAILABLE, REQUIRING THE DATA-ENTRY PERSON TO ENTER
+        # BOTH PLACEHOLDERS MAKES THAT EXCEPTION A DELIBERATE CHOICE, NOT AN
+        # ACCIDENTAL OMISSION. WITHOUT THIS PATH, WORKS MAY LOSE ROYALTIES FOR
+        # THE WRITER, CO-AUTHORS, PUBLISHERS, AND OTHER RIGHTSHOLDERS.
+        # CALCULATE THE CONTROL SIGNAL BEFORE NORMALIZING THE PLACEHOLDERS AWAY.
+        self._can_be_controlled = bool(self.ipi_name) & bool(self.pr_society)
         if self.ipi_name == "00000000000":
             self.ipi_name = None
         if self.pr_society == "99":
             self.pr_society = None
-        self._can_be_controlled = bool(self.ipi_name and self.pr_society)
 
     def save(self, *args, **kwargs):
         original_values = {

@@ -139,20 +139,27 @@ class DataImportTest(TestCase):
         )
         self.assertTrue(controllable._can_be_controlled)
 
-        placeholder = Writer.objects.create(
-            last_name="Placeholder",
-            ipi_name="00000000000",
-            pr_society="99",
-        )
-        self.assertIsNone(placeholder.ipi_name)
-        self.assertIsNone(placeholder.pr_society)
-        self.assertFalse(placeholder._can_be_controlled)
-
         controllable.ipi_name = None
         controllable.pr_society = None
         controllable.save(update_fields=["ipi_name", "pr_society"])
         controllable.refresh_from_db()
         self.assertFalse(controllable._can_be_controlled)
+
+    def test_explicit_placeholder_pair_keeps_writer_controllable(self):
+        """An explicit missing-data exception must survive normalization."""
+        # Entering both sentinels deliberately flags a missing IPI/affiliation,
+        # so the writer's work can still be treated as controllable.
+        placeholder = Writer.objects.create(
+            last_name="Placeholder",
+            ipi_name="00000000000",
+            pr_society="99",
+        )
+
+        self.assertIsNone(placeholder.ipi_name)
+        self.assertIsNone(placeholder.pr_society)
+        self.assertTrue(placeholder._can_be_controlled)
+        placeholder.refresh_from_db()
+        self.assertTrue(placeholder._can_be_controlled)
 
     def test_import_writer_rules_are_validated(self):
         work = Work.objects.create(title="Invalid writer roles")
