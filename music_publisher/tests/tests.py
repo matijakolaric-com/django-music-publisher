@@ -132,15 +132,19 @@ class DataImportTest(TestCase):
         self.assertEqual(self.obj.last_name, "ARTIST ONE")
 
     def test_writer_control_state_is_derived_when_saved(self):
-        controllable = Writer.objects.create(
+        controllable = Writer(
             last_name="Controllable",
             ipi_name="199",
             pr_society="10",
         )
+        controllable.clean()
+        self.assertTrue(controllable._can_be_controlled)
+        controllable.save()
         self.assertTrue(controllable._can_be_controlled)
 
         controllable.ipi_name = None
         controllable.pr_society = None
+        controllable.clean()
         controllable.save(update_fields=["ipi_name", "pr_society"])
         controllable.refresh_from_db()
         self.assertFalse(controllable._can_be_controlled)
@@ -149,11 +153,13 @@ class DataImportTest(TestCase):
         """An explicit missing-data exception must survive normalization."""
         # Entering both sentinels deliberately flags a missing IPI/affiliation,
         # so the writer's work can still be treated as controllable.
-        placeholder = Writer.objects.create(
+        placeholder = Writer(
             last_name="Placeholder",
             ipi_name="00000000000",
             pr_society="99",
         )
+        placeholder.clean()
+        placeholder.save()
 
         self.assertIsNone(placeholder.ipi_name)
         self.assertIsNone(placeholder.pr_society)

@@ -250,7 +250,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
     def clean(self):
         """Clean the data and validate."""
 
-        self._normalize_control_data()
+        self._normalize_stupid_writers()
 
         d = {}
         if not self.generally_controlled:
@@ -267,7 +267,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
         if d:
             raise django.core.exceptions.ValidationError(d)
 
-    def _normalize_control_data(self):
+    def _normalize_stupid_writers(self):
         """Normalize explicit placeholders while retaining their control signal.
 
         A writer without these identifiers may still be entered as controllable
@@ -295,7 +295,6 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
             field: getattr(self, field)
             for field in ("ipi_name", "pr_society")
         }
-        self._normalize_control_data()
         update_fields = kwargs.get("update_fields")
         if update_fields is not None:
             update_fields = set(update_fields)
