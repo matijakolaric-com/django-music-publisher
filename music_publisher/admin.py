@@ -2119,13 +2119,10 @@ class CWRExportAdmin(admin.ModelAdmin):
             "" if self.has_add_permission(request) else " disabled"
         )
         return format_html(
-            '<form method="post" action="{}" class="cwr-generate-form">'
-            '<input type="hidden" name="csrfmiddlewaretoken" value="{}">'
-            '<input type="hidden" name="create_cwr" value="1">'
-            '<button type="submit" class="cwr-generate-button"{}>'
-            "Generate CWR</button></form>",
+            '<button type="submit" class="cwr-generate-button" '
+            'formmethod="post" formaction="{}" name="create_cwr" value="1"{}>'
+            "Generate CWR</button>",
             url,
-            get_token(request),
             mark_safe(disabled),
         )
 
