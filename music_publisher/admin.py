@@ -2279,7 +2279,7 @@ class CWRExportAdmin(admin.ModelAdmin):
                 {
                     **self.admin_site.each_context(request),
                     "version": obj.version,
-                    "lines": cwr.split("\r\n"),
+                    "lines": cwr.split("\n"),
                     "title": obj.filename,
                 },
             )
