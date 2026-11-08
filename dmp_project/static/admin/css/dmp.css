@@ -151,3 +151,26 @@ html[data-theme="light"], :root {
 .cwr div.ACK.NA,
 .cwr div.ACK.WA {background-color: #fcc}
 .cwr div.MSG {background-color: #fcc}
+
+.cwr-generate-form {
+    display: inline;
+    margin: 0;
+}
+
+.cwr-generate-form .cwr-generate-button {
+    background: none;
+    border: 0;
+    color: var(--link-fg, #447e9b);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+}
+
+.cwr-generate-form .cwr-generate-button:hover {
+    text-decoration: underline;
+}
+
+.cwr-generate-form .cwr-generate-button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}

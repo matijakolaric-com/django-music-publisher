@@ -1460,7 +1460,8 @@ class AdminTest(TestCase):
         self.assertIn(b'method="post"', response.content)
         self.assertIn(b'name="csrfmiddlewaretoken"', response.content)
         self.assertIn(b'class="cwr-generate-button"', response.content)
-        self.assertIn(b"music_publisher/admin.css", response.content)
+        self.assertIn(b"admin/css/dmp.css", response.content)
+        self.assertNotIn(b"music_publisher/admin.css", response.content)
         self.assertNotIn(
             (
                 reverse(
@@ -1472,19 +1473,35 @@ class AdminTest(TestCase):
             response.content,
         )
 
-    def test_view_only_cwr_user_does_not_get_generation_button(self):
-        self.create_admin_user(
-            "cwr-view-list", ("view_cwrexport",)
+    def test_cwr_generation_button_disabled_without_add_permission(self):
+        """Users without add permission see a disabled Generate CWR button."""
+        CWRExport.objects.create(nwr_rev="NWR").works.add(self.original_work)
+        changelist = reverse("admin:music_publisher_cwrexport_changelist")
+
+        for username, permissions in (
+            ("cwr-view-list", ("view_cwrexport",)),
+            ("cwr-change-list", ("change_cwrexport",)),
+        ):
+            user = self.create_admin_user(username, permissions)
+            self.client.force_login(user)
+            response = self.client.get(changelist)
+
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(
+                response, 'class="cwr-generate-button" disabled'
+            )
+
+        user = self.create_admin_user(
+            "cwr-add-list", ("add_cwrexport", "view_cwrexport")
         )
-        self.client.force_login(
-            User.objects.get(username="cwr-view-list")
-        )
-        response = self.client.get(
-            reverse("admin:music_publisher_cwrexport_changelist")
-        )
+        self.client.force_login(user)
+        response = self.client.get(changelist)
 
         self.assertEqual(response.status_code, 200)
-        self.assertNotIn(b"cwr-generate-button", response.content)
+        self.assertContains(response, 'class="cwr-generate-button">')
+        self.assertNotContains(
+            response, 'class="cwr-generate-button" disabled'
+        )
 
     @override_settings(OPTION_CWR_NO_GENERATE_LINK=True)
     def test_cwr_export_no_generate_link(self):
@@ -1588,6 +1605,27 @@ class AdminTest(TestCase):
         self.assertFalse(export.cwr)
         self.assertIsNone(export.created_on)
 
+    def test_cwr_generation_requires_add_permission(self):
+        """Generating CWR requires add permission, not change permission.
+
+        Before this was checked against the change permission, users who
+        could add exports but not change them got a 403.
+        """
+        export = CWRExport.objects.create(nwr_rev="NWR")
+        export.works.add(self.original_work)
+        user = self.create_admin_user("cwr-add-only", ("add_cwrexport",))
+        self.client.force_login(user)
+        url = reverse(
+            "admin:music_publisher_cwrexport_change", args=(export.pk,)
+        )
+
+        response = self.client.post(url, {"create_cwr": "1"})
+
+        self.assertEqual(response.status_code, 302)
+        export.refresh_from_db()
+        self.assertTrue(export.cwr)
+        self.assertIsNotNone(export.created_on)
+
     def test_work_cwr_action_requires_add_export_permission(self):
         user = self.create_admin_user(
             "work-without-cwr-add", ("change_work",)
@@ -1606,7 +1644,7 @@ class AdminTest(TestCase):
         export = CWRExport.objects.create(nwr_rev="NWR")
         export.works.add(self.original_work)
         user = self.create_admin_user(
-            "cwr-change", ("change_cwrexport",)
+            "cwr-add", ("add_cwrexport", "view_cwrexport")
         )
         client = Client(enforce_csrf_checks=True)
         client.force_login(user)

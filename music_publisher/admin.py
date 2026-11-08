@@ -2066,9 +2066,6 @@ class CWRExportAdmin(admin.ModelAdmin):
     actions = None
     ordering = ("-id",)
 
-    class Media:
-        css = {"all": ("music_publisher/admin.css",)}
-
     def work_count(self, obj):
         """Return the work count from the database field, or count them.
         (dealing with legacy)"""
@@ -2116,16 +2113,20 @@ class CWRExportAdmin(admin.ModelAdmin):
                 return mark_safe("Generating CWR")
         if getattr(settings, "OPTION_CWR_NO_GENERATE_LINK", False):
             return "Pending"
-        if request is None or not self.has_change_permission(request):
+        if request is None:
             return "Pending"
+        disabled = (
+            "" if self.has_add_permission(request) else " disabled"
+        )
         return format_html(
             '<form method="post" action="{}" class="cwr-generate-form">'
             '<input type="hidden" name="csrfmiddlewaretoken" value="{}">'
             '<input type="hidden" name="create_cwr" value="1">'
-            '<button type="submit" class="cwr-generate-button">'
+            '<button type="submit" class="cwr-generate-button"{}>'
             "Generate CWR</button></form>",
             url,
             get_token(request),
+            mark_safe(disabled),
         )
 
     def get_list_display(self, request):
@@ -2258,7 +2259,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             return HttpResponseNotAllowed(["POST"])
         if request.method != "POST" or "create_cwr" not in request.POST:
             return None
-        if not self.has_change_permission(request):
+        if not self.has_add_permission(request):
             raise PermissionDenied
         obj.create_cwr()
         self.log_change(request, obj, "CWR generated")
