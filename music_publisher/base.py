@@ -292,8 +292,7 @@ class IPIWithGeneralAgreementBase(IPIBase, SocietyAffiliationBase):
 
     def save(self, *args, **kwargs):
         original_values = {
-            field: getattr(self, field)
-            for field in ("ipi_name", "pr_society")
+            field: getattr(self, field) for field in ("ipi_name", "pr_society")
         }
         update_fields = kwargs.get("update_fields")
         if update_fields is not None:

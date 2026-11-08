@@ -89,9 +89,7 @@ class Command(BaseCommand):
                 counts, society_code, society_name, cwr
             )
             scanned += 1
-            if progress_callback and (
-                scanned == total or scanned % 100 == 0
-            ):
+            if progress_callback and (scanned == total or scanned % 100 == 0):
                 progress_callback(scanned, xrf_records, total)
 
         return [(*key, count) for key, count in sorted(counts.items())]
@@ -111,9 +109,7 @@ class Command(BaseCommand):
                 "ISR": "ISRC",
             }.get(
                 organisation_code,
-                SOCIETY_DICT.get(
-                    organisation_code.lstrip("0"), "Unknown"
-                ),
+                SOCIETY_DICT.get(organisation_code.lstrip("0"), "Unknown"),
             )
             organisation = "{} - {}".format(
                 organisation_code, organisation_name

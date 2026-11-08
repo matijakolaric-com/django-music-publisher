@@ -52,7 +52,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         publisher = self.get_publisher(options["ipi_name"])
         publisher_code = options["code"]
-        if options["regenerate"] is not None or options["duplicate"] is not None:
+        if (
+            options["regenerate"] is not None
+            or options["duplicate"] is not None
+        ):
             publisher_code = self.resolve_publisher_code(publisher_code)
 
         cwr_exports = self.get_exports(options)
@@ -61,7 +64,8 @@ class Command(BaseCommand):
             return
 
         explicit_export = (
-            options["regenerate"] is not None or options["duplicate"] is not None
+            options["regenerate"] is not None
+            or options["duplicate"] is not None
         )
         self.generate_exports(
             cwr_exports, options, publisher, publisher_code, explicit_export
@@ -237,7 +241,9 @@ class Command(BaseCommand):
             return publisher_model.objects.get(ipi_name=ipi_name)
         except publisher_model.DoesNotExist as exc:
             raise CommandError(
-                "No publisher found with IPI name number {!r}.".format(ipi_name)
+                "No publisher found with IPI name number {!r}.".format(
+                    ipi_name
+                )
             ) from exc
         except publisher_model.MultipleObjectsReturned as exc:
             raise CommandError(

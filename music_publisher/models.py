@@ -281,9 +281,7 @@ class ReleaseClassification:
     COMMERCIAL_RELEASE = models.Q(
         cd_identifier__isnull=True, library__isnull=True
     )
-    PLAYLIST = models.Q(
-        cd_identifier__isnull=False, library__isnull=True
-    )
+    PLAYLIST = models.Q(cd_identifier__isnull=False, library__isnull=True)
 
 
 class LibraryReleaseManager(models.Manager):
@@ -296,8 +294,10 @@ class LibraryReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.LibraryRelease`
         """
-        return super().get_queryset().filter(
-            ReleaseClassification.LIBRARY_RELEASE
+        return (
+            super()
+            .get_queryset()
+            .filter(ReleaseClassification.LIBRARY_RELEASE)
         )
 
     def get_dict(self, qs):
@@ -345,9 +345,7 @@ class LibraryRelease(Release):
             )
         title_required = self.ean or self.release_date or self.release_label
         if title_required and not self.release_title:
-            errors["release_title"] = (
-                "Required if other release data is set."
-            )
+            errors["release_title"] = "Required if other release data is set."
         if errors:
             raise ValidationError(errors)
 
@@ -379,8 +377,10 @@ class CommercialReleaseManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return super().get_queryset().filter(
-            ReleaseClassification.COMMERCIAL_RELEASE
+        return (
+            super()
+            .get_queryset()
+            .filter(ReleaseClassification.COMMERCIAL_RELEASE)
         )
 
     def get_dict(self, qs):
@@ -415,9 +415,7 @@ class CommercialRelease(Release):
         super().clean()
         errors = {}
         if self.library_id is not None:
-            errors["library"] = (
-                "A commercial release cannot have a library."
-            )
+            errors["library"] = "A commercial release cannot have a library."
         if self.cd_identifier:
             errors["cd_identifier"] = (
                 "A commercial release cannot have a CD identifier."
@@ -436,9 +434,7 @@ class PlaylistManager(models.Manager):
             django.db.models.query.QuerySet: Queryset with instances of \
             :class:`.models.CommercialRelease`
         """
-        return super().get_queryset().filter(
-            ReleaseClassification.PLAYLIST
-        )
+        return super().get_queryset().filter(ReleaseClassification.PLAYLIST)
 
     def get_dict(self, qs):
         """Get the object in an internal dictionary format

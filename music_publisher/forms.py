@@ -184,7 +184,9 @@ class WriterInWorkFormSet(BaseInlineFormSet):
                 for form in self.forms
             ],
         )
-        for form_index, field_errors in validation_errors["form_errors"].items():
+        for form_index, field_errors in validation_errors[
+            "form_errors"
+        ].items():
             for field, message in field_errors:
                 self.forms[form_index].add_error(field, message)
         if validation_errors["non_form_errors"]:
@@ -209,8 +211,7 @@ def validate_writer_records(work, writer_records):
 
 def _validate_writer_capacities(work, active_records, indexes, errors):
     capacities = [
-        writer_record_value(record, "capacity")
-        for _, record in active_records
+        writer_record_value(record, "capacity") for _, record in active_records
     ]
     if not work.is_modification():
         for (index, _), capacity in zip(active_records, capacities):

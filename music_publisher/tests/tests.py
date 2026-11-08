@@ -205,11 +205,15 @@ class DataImportTest(TestCase):
         )
         with self.assertRaises(exceptions.ValidationError):
             di.get_library_release("Another Library", "CD-01")
-        self.assertFalse(Library.objects.filter(name="Another Library").exists())
+        self.assertFalse(
+            Library.objects.filter(name="Another Library").exists()
+        )
 
         with self.assertRaises(exceptions.ValidationError):
             di.get_library_release("Invalid Library", "X" * 16)
-        self.assertFalse(Library.objects.filter(name="Invalid Library").exists())
+        self.assertFalse(
+            Library.objects.filter(name="Invalid Library").exists()
+        )
 
         Release.objects.create(cd_identifier="Commercial")
         with self.assertRaises(exceptions.ValidationError):
@@ -218,11 +222,7 @@ class DataImportTest(TestCase):
     def test_import_skips_short_blank_rows_with_none_values(self):
         di = data_import.DataImporter([], user=None)
         self.assertEqual(
-            list(
-                di.process_row(
-                    {"work_title": "", "writer_1_last": None}
-                )
-            ),
+            list(di.process_row({"work_title": "", "writer_1_last": None})),
             [],
         )
 
@@ -913,9 +913,7 @@ class AdminTest(TestCase):
             cd_identifier="COUNTED-PL",
             release_label=label,
         )
-        Release.objects.create(
-            release_title="Commercial", release_label=label
-        )
+        Release.objects.create(release_title="Commercial", release_label=label)
         Release.objects.create(
             release_title="Library",
             cd_identifier="COUNTED-CD",
@@ -961,8 +959,12 @@ class AdminTest(TestCase):
             "filename"
         ).max_length
         mock = InMemoryUploadedFile(
-            StringIO(content), "dataimport_file",
-            "d" * (max_length + 1) + ".csv", "text", 0, None,
+            StringIO(content),
+            "dataimport_file",
+            "d" * (max_length + 1) + ".csv",
+            "text",
+            0,
+            None,
         )
         url = reverse("admin:music_publisher_dataimport_add")
         response = self.client.get(url)
@@ -998,8 +1000,12 @@ class AdminTest(TestCase):
                 "Simple Original", '<script>alert("title")</script>'
             )
         mock = InMemoryUploadedFile(
-            StringIO(content), "dataimport_file", "dataimport.csv", "text",
-            0, None,
+            StringIO(content),
+            "dataimport_file",
+            "dataimport.csv",
+            "text",
+            0,
+            None,
         )
         url = reverse("admin:music_publisher_dataimport_add")
         response = self.client.get(url)
@@ -1121,17 +1127,19 @@ class AdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_cwr_preview_and_download_require_read_permission(self):
-        export = CWRExport.objects.create(
-            nwr_rev="NWR", cwr="generated CWR"
-        )
+        export = CWRExport.objects.create(nwr_rev="NWR", cwr="generated CWR")
         url = reverse(
             "admin:music_publisher_cwrexport_change", args=(export.pk,)
         )
         user = self.create_admin_user("cwr-no-permission")
         self.client.force_login(user)
 
-        self.assertEqual(self.client.get(url + "?preview=true").status_code, 403)
-        self.assertEqual(self.client.get(url + "?download=true").status_code, 403)
+        self.assertEqual(
+            self.client.get(url + "?preview=true").status_code, 403
+        )
+        self.assertEqual(
+            self.client.get(url + "?download=true").status_code, 403
+        )
 
         user.user_permissions.add(
             Permission.objects.get(
@@ -1139,27 +1147,31 @@ class AdminTest(TestCase):
                 content_type__app_label="music_publisher",
             )
         )
-        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
-        self.assertEqual(self.client.get(url + "?download=true").status_code, 200)
+        self.assertEqual(
+            self.client.get(url + "?preview=true").status_code, 200
+        )
+        self.assertEqual(
+            self.client.get(url + "?download=true").status_code, 200
+        )
 
         change_user = self.create_admin_user(
             "cwr-change-only", ("change_cwrexport",)
         )
         self.client.force_login(change_user)
-        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
-        self.assertEqual(self.client.get(url + "?download=true").status_code, 200)
+        self.assertEqual(
+            self.client.get(url + "?preview=true").status_code, 200
+        )
+        self.assertEqual(
+            self.client.get(url + "?download=true").status_code, 200
+        )
 
     def test_cwr_changelist_requires_view_or_change_permission(self):
-        user = self.create_admin_user(
-            "cwr-delete-only", ("delete_cwrexport",)
-        )
+        user = self.create_admin_user("cwr-delete-only", ("delete_cwrexport",))
         self.client.force_login(user)
         url = reverse("admin:music_publisher_cwrexport_changelist")
         self.assertEqual(self.client.get(url).status_code, 403)
 
-        user = self.create_admin_user(
-            "cwr-change-list", ("change_cwrexport",)
-        )
+        user = self.create_admin_user("cwr-change-list", ("change_cwrexport",))
         self.client.force_login(user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -1174,12 +1186,12 @@ class AdminTest(TestCase):
             report="",
             cwr="ACK contents",
         )
-        url = reverse(
-            "admin:music_publisher_ackimport_change", args=(ack.pk,)
-        )
+        url = reverse("admin:music_publisher_ackimport_change", args=(ack.pk,))
         user = self.create_admin_user("ack-no-permission")
         self.client.force_login(user)
-        self.assertEqual(self.client.get(url + "?preview=true").status_code, 403)
+        self.assertEqual(
+            self.client.get(url + "?preview=true").status_code, 403
+        )
 
         user.user_permissions.add(
             Permission.objects.get(
@@ -1187,13 +1199,17 @@ class AdminTest(TestCase):
                 content_type__app_label="music_publisher",
             )
         )
-        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
+        self.assertEqual(
+            self.client.get(url + "?preview=true").status_code, 200
+        )
 
         change_user = self.create_admin_user(
             "ack-change-only", ("change_ackimport",)
         )
         self.client.force_login(change_user)
-        self.assertEqual(self.client.get(url + "?preview=true").status_code, 200)
+        self.assertEqual(
+            self.client.get(url + "?preview=true").status_code, 200
+        )
 
     def test_iswc_import_report_escapes_work_titles(self):
         malicious_title = "<img src=x onerror=alert(1)>"
@@ -1488,7 +1504,8 @@ class AdminTest(TestCase):
 
             self.assertEqual(response.status_code, 200)
             self.assertContains(
-                response, 'class="cwr-generate-button" disabled'
+                response,
+                'name="create_cwr" value="1" disabled>Generate CWR</button>',
             )
 
         user = self.create_admin_user(
@@ -1498,9 +1515,9 @@ class AdminTest(TestCase):
         response = self.client.get(changelist)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'class="cwr-generate-button">')
-        self.assertNotContains(
-            response, 'class="cwr-generate-button" disabled'
+        self.assertContains(
+            response,
+            'name="create_cwr" value="1">Generate CWR</button>',
         )
 
     @override_settings(OPTION_CWR_NO_GENERATE_LINK=True)
@@ -1593,9 +1610,7 @@ class AdminTest(TestCase):
         url = reverse(
             "admin:music_publisher_cwrexport_change", args=(export.pk,)
         )
-        user = self.create_admin_user(
-            "cwr-view-only", ("view_cwrexport",)
-        )
+        user = self.create_admin_user("cwr-view-only", ("view_cwrexport",))
         self.client.force_login(user)
 
         self.assertEqual(
@@ -1627,9 +1642,7 @@ class AdminTest(TestCase):
         self.assertIsNotNone(export.created_on)
 
     def test_work_cwr_action_requires_add_export_permission(self):
-        user = self.create_admin_user(
-            "work-without-cwr-add", ("change_work",)
-        )
+        user = self.create_admin_user("work-without-cwr-add", ("change_work",))
         work_admin = admin.site._registry[Work]
         request = RequestFactory().get(
             reverse("admin:music_publisher_work_changelist")
@@ -2409,13 +2422,9 @@ class AdminTest(TestCase):
         ]
         self.assertEqual(invalid_right[-1], "ERROR: Invalid right type")
         self.assertNotEqual(invalid_right[-1], "ERROR: Work not found")
-        missing_right = list(
-            calculation.process_row(["MK000001"])
-        )[0]
+        missing_right = list(calculation.process_row(["MK000001"]))[0]
         self.assertEqual(missing_right[-1], "ERROR: Invalid right type")
-        empty_right = list(
-            calculation.process_row(["MK000001", "", "10"])
-        )[0]
+        empty_right = list(calculation.process_row(["MK000001", "", "10"]))[0]
         self.assertEqual(empty_right[-1], "ERROR: Invalid right type")
         missing_work_id = list(calculation.process_row([]))[0]
         self.assertEqual(missing_work_id[-1], "ERROR: Work ID missing")
@@ -2428,9 +2437,7 @@ class AdminTest(TestCase):
                         ["MK000001", "ignored", invalid_value]
                     )
                 )[0]
-                self.assertEqual(
-                    invalid_amount[-1], "ERROR: Invalid amount"
-                )
+                self.assertEqual(invalid_amount[-1], "ERROR: Invalid amount")
                 self.assertEqual(invalid_amount[-3], "Perf.")
 
     def test_royalty_rows_report_zero_controlled_share(self):
@@ -2868,7 +2875,7 @@ class AdminTest(TestCase):
         response = self.client.get(base_url, follow=False)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "id-library_release__library-dal-filter")
-        self.assertContains(response, "data-field-name=\"library\"")
+        self.assertContains(response, 'data-field-name="library"')
 
         """And the autocomplete it points at must offer the libraries."""
         url = (
@@ -2912,9 +2919,7 @@ class AdminTest(TestCase):
         url = base_url + "?writers_have_ipi=Y"
         response = self.client.get(url, follow=False)
         self.assertEqual(response.status_code, 200)
-        ids = set(
-            response.context["cl"].queryset.values_list("id", flat=True)
-        )
+        ids = set(response.context["cl"].queryset.values_list("id", flat=True))
         self.assertIn(self.original_work.id, ids)
         self.assertIn(self.modified_work.id, ids)
         self.assertIn(no_writers_work.id, ids)
@@ -2926,9 +2931,7 @@ class AdminTest(TestCase):
 
         self.assertEqual(
             [
-                filter.title
-                if not isinstance(filter, str)
-                else "last_change"
+                filter.title if not isinstance(filter, str) else "last_change"
                 for filter in music_publisher_admin.WorkAdmin.list_filter
             ],
             [
@@ -2985,9 +2988,7 @@ class AdminTest(TestCase):
             "{}?library__id__exact={}".format(url, self.library.id),
             follow=False,
         )
-        self.assertEqual(
-            response.context["cl"].queryset.count(), existing + 1
-        )
+        self.assertEqual(response.context["cl"].queryset.count(), existing + 1)
 
     def library_release_count(self):
         """Return how many library releases the test library has."""
@@ -3253,7 +3254,9 @@ class GenerateCWRCommandTest(TestCase):
 
         stopped_export.refresh_from_db()
         generated_export.refresh_from_db()
-        self.assertEqual(stopped_export.description, "Keep stopped description")
+        self.assertEqual(
+            stopped_export.description, "Keep stopped description"
+        )
         self.assertEqual(generated_export.description, "Updated description")
 
     def test_stopped_with_error_message_includes_generation_duration(self):
@@ -3349,14 +3352,11 @@ class GenerateCWRCommandTest(TestCase):
             stderr,
         )
 
-
     def test_sender_options_are_passed_to_generation(self):
         from types import SimpleNamespace
 
         cwr_export = CWRExport.objects.create(nwr_rev="NWR")
-        sender = SimpleNamespace(
-            name="Custom Sender", ipi_name="00012345678"
-        )
+        sender = SimpleNamespace(name="Custom Sender", ipi_name="00012345678")
 
         def create_cwr(export, **kwargs):
             self.assertEqual(kwargs["publisher_code"], "CUSTOM")
@@ -3425,8 +3425,10 @@ class GenerateCWRCommandTest(TestCase):
 
         with patch.object(CWRExport, "create_cwr", create_cwr):
             self.call_generatecwr(
-                "--regenerate", str(cwr_export.pk),
-                "--description", "Updated description",
+                "--regenerate",
+                str(cwr_export.pk),
+                "--description",
+                "Updated description",
             )
 
         cwr_export.refresh_from_db()
@@ -3497,8 +3499,10 @@ class GenerateCWRCommandTest(TestCase):
 
         with patch.object(CWRExport, "create_cwr", create_cwr):
             self.call_generatecwr(
-                "--duplicate", str(source.pk),
-                "--description", "New description",
+                "--duplicate",
+                str(source.pk),
+                "--description",
+                "New description",
             )
 
         self.assertEqual(len(generated), 1)
@@ -3563,7 +3567,9 @@ class GenerateCWRCommandTest(TestCase):
             "music_publisher.management.commands.generatecwr.apps.get_model",
             return_value=PublisherModel,
         ):
-            with self.assertRaisesRegex(CommandError, "Multiple publishers found"):
+            with self.assertRaisesRegex(
+                CommandError, "Multiple publishers found"
+            ):
                 self.call_generatecwr("--ipi_name", "00012345678")
 
     def test_missing_export_id_is_an_error(self):
@@ -3574,9 +3580,13 @@ class GenerateCWRCommandTest(TestCase):
         with patch.object(
             CWRExport,
             "resolve_publisher_code",
-            side_effect=exceptions.ImproperlyConfigured("publisher code missing"),
+            side_effect=exceptions.ImproperlyConfigured(
+                "publisher code missing"
+            ),
         ):
-            with self.assertRaisesRegex(CommandError, "publisher code missing"):
+            with self.assertRaisesRegex(
+                CommandError, "publisher code missing"
+            ):
                 self.call_generatecwr("--regenerate", "1")
 
     def test_generation_configuration_error_is_a_command_error(self):
@@ -3585,7 +3595,9 @@ class GenerateCWRCommandTest(TestCase):
         with patch.object(
             CWRExport,
             "create_cwr",
-            side_effect=exceptions.ImproperlyConfigured("generation misconfigured"),
+            side_effect=exceptions.ImproperlyConfigured(
+                "generation misconfigured"
+            ),
         ):
             with self.assertRaisesRegex(
                 CommandError, "generation misconfigured"
@@ -3721,7 +3733,9 @@ class CWRHeaderOverrideTest(TestCase):
         cwr_export = CWRExport.objects.create(nwr_rev="NWR")
         calls = []
 
-        def yield_lines(works, publisher_code, publisher_name, publisher_ipi_name):
+        def yield_lines(
+            works, publisher_code, publisher_name, publisher_ipi_name
+        ):
             calls.append((publisher_code, publisher_name, publisher_ipi_name))
             yield cwr_export.get_header(
                 publisher_code, publisher_name, publisher_ipi_name
@@ -3745,9 +3759,7 @@ class CWRHeaderOverrideTest(TestCase):
                 publisher_ipi_name="00012345678",
             )
 
-        self.assertEqual(
-            calls, [("CUSTOM", "Custom Sender", "00012345678")]
-        )
+        self.assertEqual(calls, [("CUSTOM", "Custom Sender", "00012345678")])
         self.assertEqual(header["name"], "Custom Sender")
         self.assertEqual(header["ipi_name_number"], "00012345678")
         self.assertEqual(header["code"], "CUSTOM")
@@ -3757,7 +3769,9 @@ class CWRHeaderOverrideTest(TestCase):
         cwr_export = CWRExport.objects.create(nwr_rev="NWR")
         calls = []
 
-        def fail_generation(works, publisher_code, publisher_name, publisher_ipi_name):
+        def fail_generation(
+            works, publisher_code, publisher_name, publisher_ipi_name
+        ):
             calls.append((publisher_code, publisher_name, publisher_ipi_name))
             raise RuntimeError("generation failed")
 
@@ -3771,9 +3785,7 @@ class CWRHeaderOverrideTest(TestCase):
                     publisher_ipi_name="00012345678",
                 )
 
-        self.assertEqual(
-            calls, [("CUSTOM", "Custom Sender", "00012345678")]
-        )
+        self.assertEqual(calls, [("CUSTOM", "Custom Sender", "00012345678")])
         self.assertEqual(cwr_export.options["error"], "generation failed")
 
 

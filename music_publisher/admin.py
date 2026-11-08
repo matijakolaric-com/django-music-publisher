@@ -23,7 +23,6 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import format_html, mark_safe
@@ -1671,9 +1670,9 @@ class WorkAdmin(MusicPublisherAdmin):
             # who genuinely has no account number. The value is already in the
             # dict - Writer.get_dict() has carried account_number all along -
             # so this is a read, not a new query.
-            row["Writer {} Account Number".format(i + 1)] = w.get(
-                "account_number"
-            ) or ""
+            row["Writer {} Account Number".format(i + 1)] = (
+                w.get("account_number") or ""
+            )
             role = wiw.get("writer_role", {})
             if role:
                 row["Writer {} Role".format(i + 1)] = "{} - {}".format(
@@ -2115,9 +2114,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             return "Pending"
         if request is None:
             return "Pending"
-        disabled = (
-            "" if self.has_add_permission(request) else " disabled"
-        )
+        disabled = "" if self.has_add_permission(request) else " disabled"
         return format_html(
             '<button type="submit" class="cwr-generate-button" '
             'formmethod="post" formaction="{}" name="create_cwr" value="1"{}>'
@@ -2221,9 +2218,9 @@ class CWRExportAdmin(admin.ModelAdmin):
 
     def has_view_or_change_permission(self, request, obj=None):
         """Allow either view or change permission to read export contents."""
-        return self.has_view_permission(
-            request, obj
-        ) or request.user.has_perm("music_publisher.change_cwrexport")
+        return self.has_view_permission(request, obj) or request.user.has_perm(
+            "music_publisher.change_cwrexport"
+        )
 
     def get_form(self, request, obj=None, **kwargs):
         """Set initial values for work IDs."""
@@ -2289,9 +2286,7 @@ class CWRExportAdmin(admin.ModelAdmin):
             )
         else:
             cd = 'attachment; filename="{}"'.format(
-                obj.filename.replace(".V21", ".zip").replace(
-                    ".V22", ".zip"
-                )
+                obj.filename.replace(".V21", ".zip").replace(".V22", ".zip")
             )
         response["Content-Disposition"] = cd
         return response
@@ -2639,9 +2634,9 @@ class ACKImportAdmin(AdminWithReport):
 
     def has_view_or_change_permission(self, request, obj=None):
         """Allow view or change permission to read imported ACK contents."""
-        return self.has_view_permission(
-            request, obj
-        ) or request.user.has_perm("music_publisher.change_ackimport")
+        return self.has_view_permission(request, obj) or request.user.has_perm(
+            "music_publisher.change_ackimport"
+        )
 
     def get_preview(self, obj):
         """Get CWR preview.
